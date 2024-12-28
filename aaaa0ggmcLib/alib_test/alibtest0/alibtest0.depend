@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1735409637 source:/run/media/aaaa0ggmc/DATA/CC/LinuxRW/UL/aaaa0ggmcLib/alib_test/alibtest0/main.cpp
+	<iostream>
+	<fstream>
+	<vector>
+	<alib-g3/autil.h>
+
+1735408674 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UL/CDep/headers/alib-g3/autil.h
+	<string>
+	<vector>
+	<fstream>
+	<windows.h>
+	<unistd.h>
+

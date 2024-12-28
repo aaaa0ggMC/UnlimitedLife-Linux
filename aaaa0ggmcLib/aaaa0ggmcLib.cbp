@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="aaaa0ggmcLib" />
+		<Option pch_mode="2" />
+		<Option compiler="clang" />
+		<Option virtualFolders="gen3/;gen3/src/;gen3/alib-g3/" />
+		<Build>
+			<Target title="gen3-debug">
+				<Option output="../CBuild/aaaa0ggmcLib" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="clang" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="gen3-release">
+				<Option output="../CBuild/aaaa0ggmcLib" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="3" />
+				<Option compiler="clang" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-fPIC" />
+			<Add option="-Wall" />
+			<Add option="-std=c++20" />
+			<Add option="-fexceptions" />
+			<Add directory="../CDep/headers" />
+		</Compiler>
+		<Unit filename="../CDep/headers/alib-g3/aclock.h">
+			<Option virtualFolder="gen3/alib-g3/" />
+		</Unit>
+		<Unit filename="../CDep/headers/alib-g3/adata.h">
+			<Option virtualFolder="gen3/alib-g3/" />
+		</Unit>
+		<Unit filename="../CDep/headers/alib-g3/aio.h">
+			<Option virtualFolder="gen3/alib-g3/" />
+		</Unit>
+		<Unit filename="../CDep/headers/alib-g3/alogger.h">
+			<Option virtualFolder="gen3/alib-g3/" />
+		</Unit>
+		<Unit filename="../CDep/headers/alib-g3/astring.h">
+			<Option virtualFolder="gen3/alib-g3/" />
+		</Unit>
+		<Unit filename="../CDep/headers/alib-g3/atranslator.h">
+			<Option virtualFolder="gen3/alib-g3/" />
+		</Unit>
+		<Unit filename="../CDep/headers/alib-g3/autil.h">
+			<Option virtualFolder="gen3/alib-g3/" />
+		</Unit>
+		<Unit filename="src/aclock.cpp">
+			<Option virtualFolder="gen3/src/" />
+		</Unit>
+		<Unit filename="src/adata.cpp">
+			<Option virtualFolder="gen3/src/" />
+		</Unit>
+		<Unit filename="src/aio.cpp">
+			<Option virtualFolder="gen3/src/" />
+		</Unit>
+		<Unit filename="src/alogger.cpp">
+			<Option virtualFolder="gen3/src/" />
+		</Unit>
+		<Unit filename="src/astring.cpp">
+			<Option virtualFolder="gen3/src/" />
+		</Unit>
+		<Unit filename="src/atranslator.cpp">
+			<Option virtualFolder="gen3/src/" />
+		</Unit>
+		<Unit filename="src/autil.cpp">
+			<Option virtualFolder="gen3/src/" />
+		</Unit>
+		<Extensions>
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

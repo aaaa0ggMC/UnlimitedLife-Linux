@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="UnlimitedLife">
+		<Project filename="../UnlimitedLife/UnlimitedLife.cbp" />
+		<Project filename="../aaaa0ggmcLib/aaaa0ggmcLib.cbp" />
+		<Project filename="../AGE/AGE.cbp" />
+		<Project filename="../MineForge/MineForge.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>
