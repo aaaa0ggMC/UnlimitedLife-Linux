@@ -20,87 +20,78 @@
 #include <dirent.h>
 using namespace alib::ng;
 
-int Util::io_printColor(dstring message,int color) {
-    #ifdef _WIN32
-    static CONSOLE_SCREEN_BUFFER_INFO info;
-    [[maybe_unused]] static BOOL v = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE),&info);
+#include <iostream>
+#include <string>
 
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),(WORD)color);
-    int rt = printf("%s",message.c_str());
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),info.wAttributes);
+int Util::io_printColor(dstring message, int color) {
+#ifdef _WIN32
+    // Windows 保持不变
+    static CONSOLE_SCREEN_BUFFER_INFO info;
+    [[maybe_unused]] static BOOL v = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
+
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (WORD)color);
+    int rt = printf("%s", message.c_str());
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), info.wAttributes); // 恢复默认颜色
     return rt;
-    #else
-    //低性能实现
-    //background
-    if(color & APCB_BLACK){
-        printf("\e[40m");
-    }else if(color & APCB_RED){
-        printf("\e[41m");
-    }else if(color & APCB_GREEN){
-        printf("\e[42m");
-    }else if(color & APCB_YELLOW){
-        printf("\e[43m");
-    }else if(color & APCB_BLUE){
-        printf("\e[44m");
-    }else if(color & APCB_MAGENTA){
-        printf("\e[45m");
-    }else if(color & APCB_CYAN){
-        printf("\e[46m");
-    }else if(color & APCB_GRAY){
-        printf("\e[47m");
-    }else if(color & APCB_LIGHT_RED){
-        printf("\e[101m");
-    }else if(color & APCB_LIGHT_GREEN){
-        printf("\e[102m");
-    }else if(color & APCB_LIGHT_YELLOW){
-        printf("\e[103m");
-    }else if(color & APCB_LIGHT_BLUE){
-        printf("\e[104m");
-    }else if(color & APCB_LIGHT_MAGENTA){
-        printf("\e[105m");
-    }else if(color & APCB_LIGHT_CYAN){
-        printf("\e[106m");
-    }else if(color & APCB_BRIGHT_WHITE){
-        printf("\e[107m");
-    }
-    //foreground
-    if(color & APCF_BLACK){
-        printf("\e[30m");
-    }else if(color & APCF_RED){
-        printf("\e[31m");
-    }else if(color & APCF_GREEN){
-        printf("\e[32m");
-    }else if(color & APCF_YELLOW){
-        printf("\e[33m");
-    }else if(color & APCF_BLUE){
-        printf("\e[34m");
-    }else if(color & APCF_MAGENTA){
-        printf("\e[35m");
-    }else if(color & APCF_CYAN){
-        printf("\e[36m");
-    }else if(color & APCF_GRAY){
-        printf("\e[37m");
-    }else if(color & APCF_LIGHT_RED){
-        printf("\e[91m");
-    }else if(color & APCF_LIGHT_GREEN){
-        printf("\e[92m");
-    }else if(color & APCF_LIGHT_YELLOW){
-        printf("\e[93m");
-    }else if(color & APCF_LIGHT_BLUE){
-        printf("\e[94m");
-    }else if(color & APCF_LIGHT_MAGENTA){
-        printf("\e[95m");
-    }else if(color & APCF_LIGHT_CYAN){
-        printf("\e[96m");
-    }else if(color & APCF_BRIGHT_WHITE){
-        printf("\e[97m");
-    }
-    int rt = printf("%s",message.c_str());
+#else
+    // Linux 映射逻辑
+
+    // 映射前景色（0~15）
+    static const char* ansi_fg_map[] = {
+        "\e[30m", // APCF_BLACK
+        "\e[34m", // APCF_BLUE
+        "\e[32m", // APCF_GREEN
+        "\e[36m", // APCF_CYAN
+        "\e[31m", // APCF_RED
+        "\e[35m", // APCF_MAGENTA
+        "\e[33m", // APCF_YELLOW
+        "\e[37m", // APCF_WHITE
+        "\e[90m", // APCF_GRAY
+        "\e[94m", // APCF_LIGHT_BLUE
+        "\e[92m", // APCF_LIGHT_GREEN
+        "\e[96m", // APCF_LIGHT_CYAN
+        "\e[91m", // APCF_LIGHT_RED
+        "\e[95m", // APCF_LIGHT_MAGENTA
+        "\e[93m", // APCF_LIGHT_YELLOW
+        "\e[97m", // APCF_BRIGHT_WHITE
+    };
+
+    // 映射背景色（0~15）
+    static const char* ansi_bg_map[] = {
+        "\e[40m", // APCB_BLACK
+        "\e[44m", // APCB_BLUE
+        "\e[42m", // APCB_GREEN
+        "\e[46m", // APCB_CYAN
+        "\e[41m", // APCB_RED
+        "\e[45m", // APCB_MAGENTA
+        "\e[43m", // APCB_YELLOW
+        "\e[47m", // APCB_WHITE
+        "\e[100m", // APCB_GRAY
+        "\e[104m", // APCB_LIGHT_BLUE
+        "\e[102m", // APCB_LIGHT_GREEN
+        "\e[106m", // APCB_LIGHT_CYAN
+        "\e[101m", // APCB_LIGHT_RED
+        "\e[105m", // APCB_LIGHT_MAGENTA
+        "\e[103m", // APCB_LIGHT_YELLOW
+        "\e[107m", // APCB_BRIGHT_WHITE
+    };
+
+    // 分离前景和背景色
+    int fg_color = color & 0x0F;        // 前景色 (低 4 位)
+    int bg_color = (color & 0xF0) >> 4; // 背景色 (高 4 位)
+
+    // 打印颜色转义序列
+    printf("%s", ansi_bg_map[bg_color]); // 背景色
+    printf("%s", ansi_fg_map[fg_color]); // 前景色
+
+    // 打印消息
+    int rt = printf("%s", message.c_str());
+
+    // 重置颜色
     printf("\e[0m");
     return rt;
-    #endif // _WIN32
+#endif
 }
-
 std::string Util::ot_getTime() {
     time_t rawtime;
     struct tm *ptminfo;
@@ -271,7 +262,7 @@ int Util::io_writeAll(dstring fth,dstring s) {
     if(!of.is_open())return ALIB_ERROR;
     of.write(s.c_str(),s.length());
     of.close();
-    return ALIB_SUCCESS;
+    return s.length();
 }
 
 int Util::io_readAll(std::ifstream & reader,string & ss) {
@@ -290,7 +281,7 @@ int Util::io_readAll(std::ifstream & reader,string & ss) {
 
     delete [] buf;
 
-    return ALIB_SUCCESS;
+    return size-1;
 }
 
 int Util::io_readAll(dstring fpath,std::string & ss) {
@@ -310,7 +301,7 @@ int Util::io_readAll(dstring fpath,std::string & ss) {
 
     delete [] buf;
 
-    return ALIB_SUCCESS;
+    return size;
 }
 
 std::string Util::str_trim_rt(std::string & str) {

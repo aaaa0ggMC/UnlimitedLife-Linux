@@ -20,18 +20,10 @@ static inline double timeGetTimeEx(){
     timespec time;
     if(!inited){
         inited = true;
-        #ifdef __linux__
-        clock_gettime(CLOCK_BOOTTIME,&very_start);
-        #elif _WIN32
         clock_gettime(CLOCK_REALTIME,&very_start);
-        #endif // _WIN32
     }
-        #ifdef __linux__
-        clock_gettime(CLOCK_BOOTTIME,&time);
-        #elif _WIN32
-        clock_gettime(CLOCK_REALTIME,&time);
-        #endif // _WIN32
-    return (time.tv_sec-very_start.tv_sec)*1000 + _d(time.tv_nsec - very_start.tv_nsec) / 1000.0;
+    clock_gettime(CLOCK_REALTIME,&time);
+    return  _d(time.tv_nsec - very_start.tv_nsec) / 1000000;
 }
 
 

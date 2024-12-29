@@ -34,43 +34,41 @@
 #endif // BUILD_DLL
 
 #endif
-
-// 前景颜色宏定义
-#define APCF_BLACK 0
-#define APCF_BLUE 1
-#define APCF_GREEN 2
-#define APCF_CYAN 3
-#define APCF_RED 4
-#define APCF_MAGENTA 5
-#define APCF_YELLOW 6
-#define APCF_WHITE 7
-#define APCF_GRAY 8
-#define APCF_LIGHT_BLUE 9
-#define APCF_LIGHT_GREEN 10
-#define APCF_LIGHT_CYAN 11
-#define APCF_LIGHT_RED 12
+// 前景颜色宏定义 (Windows 专用)
+#define APCF_BLACK        0
+#define APCF_BLUE         1
+#define APCF_GREEN        2
+#define APCF_CYAN         3
+#define APCF_RED          4
+#define APCF_MAGENTA      5
+#define APCF_YELLOW       6
+#define APCF_WHITE        7
+#define APCF_GRAY         8
+#define APCF_LIGHT_BLUE   9
+#define APCF_LIGHT_GREEN  10
+#define APCF_LIGHT_CYAN   11
+#define APCF_LIGHT_RED    12
 #define APCF_LIGHT_MAGENTA 13
 #define APCF_LIGHT_YELLOW 14
 #define APCF_BRIGHT_WHITE 15
 
 // 背景颜色宏定义
-#define APCB_BLACK (0 << 4)
-#define APCB_BLUE (1 << 4)
-#define APCB_GREEN (2 << 4)
-#define APCB_CYAN (3 << 4)
-#define APCB_RED (4 << 4)
-#define APCB_MAGENTA (5 << 4)
-#define APCB_YELLOW (6 << 4)
-#define APCB_WHITE (7 << 4)
-#define APCB_GRAY (8 << 4)
-#define APCB_LIGHT_BLUE (9 << 4)
-#define APCB_LIGHT_GREEN (10 << 4)
-#define APCB_LIGHT_CYAN (11 << 4)
-#define APCB_LIGHT_RED (12 << 4)
+#define APCB_BLACK        (0 << 4)
+#define APCB_BLUE         (1 << 4)
+#define APCB_GREEN        (2 << 4)
+#define APCB_CYAN         (3 << 4)
+#define APCB_RED          (4 << 4)
+#define APCB_MAGENTA      (5 << 4)
+#define APCB_YELLOW       (6 << 4)
+#define APCB_WHITE        (7 << 4)
+#define APCB_GRAY         (8 << 4)
+#define APCB_LIGHT_BLUE   (9 << 4)
+#define APCB_LIGHT_GREEN  (10 << 4)
+#define APCB_LIGHT_CYAN   (11 << 4)
+#define APCB_LIGHT_RED    (12 << 4)
 #define APCB_LIGHT_MAGENTA (13 << 4)
 #define APCB_LIGHT_YELLOW (14 << 4)
 #define APCB_BRIGHT_WHITE (15 << 4)
-
 
 namespace alib {
 namespace ng {

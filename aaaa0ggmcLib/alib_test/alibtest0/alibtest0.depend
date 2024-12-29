@@ -12,3 +12,35 @@
 	<windows.h>
 	<unistd.h>
 
+1735453346 source:/run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/aaaa0ggmcLib/alib_test/alibtest0/main.cpp
+	<iostream>
+	<fstream>
+	<vector>
+	<alib-g3/autil.h>
+	<alib-g3/alogger.h>
+	<string.h>
+	<glm/glm.hpp>
+	<thread>
+	<chrono>
+
+1735450441 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers/alib-g3/autil.h
+	<string>
+	<vector>
+	<fstream>
+	<windows.h>
+	<unistd.h>
+
+1735391885 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers/alib-g3/alogger.h
+	<memory>
+	<string>
+	<fstream>
+	<alib-g3/aclock.h>
+	<alib-g3/autil.h>
+	<pthread.h>
+	<glm/glm.hpp>
+	<glm/ext/quaternion_common.hpp>
+
+1735391532 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers/alib-g3/aclock.h
+	<time.h>
+	<alib-g3/autil.h>
+

@@ -59,8 +59,8 @@ Logger::Logger(bool otc,bool v,int lg){
     InitializeCriticalSection(&cs);
     #elif __linux__
     pthread_mutexattr_init(&mutex_attr);
-    pthread_mutexattr_settype(&mutex_attr,PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&cs,&mutex_attr);
+    //pthread_mutexattr_settype(&mutex_attr,PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&cs,NULL);
     #endif // __linux__
 }
 
@@ -99,6 +99,7 @@ CriticalLock::CriticalLock(LOCK & c){
     #ifdef _WIN32
     EnterCriticalSection(cs);
     #elif __linux__
+    //cout << "Locked" << endl;
     pthread_mutex_lock(cs);
     #endif // _WIN32
 }
@@ -120,6 +121,8 @@ void Logger::log(int level,dstring msg,dstring head){
         restOut.reserve(LOG_RESERVE_SIZE);
         return 0;
     }();
+
+    CriticalLock lock(cs);
 
     if(level & LOG_OFF || !(showlg & level))return;
     IData ist = genType(level);
@@ -166,7 +169,6 @@ void Logger::log(int level,dstring msg,dstring head){
         buffer += "\n";
     }
     if(output2c){
-        CriticalLock lock(cs);
         cout << timeHeader;
         if(mode & LOG_SHOW_TYPE)Util::io_printColor(ist.str,ist.color);
         cout << restOut;
