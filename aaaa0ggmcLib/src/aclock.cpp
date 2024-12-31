@@ -23,7 +23,7 @@ static inline double timeGetTimeEx(){
         clock_gettime(CLOCK_REALTIME,&very_start);
     }
     clock_gettime(CLOCK_REALTIME,&time);
-    return  _d(time.tv_nsec - very_start.tv_nsec) / 1000000;
+    return  (time.tv_sec - very_start.tv_sec) * 1000 + _d(time.tv_nsec - very_start.tv_nsec) / 1000000;
 }
 
 

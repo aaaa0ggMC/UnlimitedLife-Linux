@@ -1,0 +1,20 @@
+# depslib dependency file v1.0
+1735387718 source:/run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/AGE/main.cpp
+
+1735662725 source:/run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/AGE/Window.cpp
+
+1735666365 source:/run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/AGE/Application.cpp
+	<AGE/Application.h>
+
+1735665265 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers//AGE/Application.h
+	<unordered_map>
+	<string>
+	<optional>
+	"Window.h"
+
+1735666324 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers//AGE/Window.h
+	<GL/glew.h>
+	<GLFW/glfw3.h>
+	<string>
+	<optional>
+

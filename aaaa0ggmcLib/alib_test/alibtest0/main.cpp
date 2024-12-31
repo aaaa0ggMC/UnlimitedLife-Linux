@@ -19,7 +19,10 @@ int main(int argc,const char * argv[])
     if(argc < 2){
         cout << "util      Test autil.h" << endl;
         cout << "logger    Test alogger.h" << endl;
-        return 0;
+        char buf[256] = {0};
+        scanf("%s",buf);
+        const char * args[] = {"",buf};
+        return main(2,args);
     }
     if(!strcmp("util",argv[1])){
         test_autil();

@@ -2,32 +2,27 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="AGE" />
+		<Option title="agetest" />
 		<Option pch_mode="2" />
 		<Option compiler="clang" />
-		<Option virtualFolders="main/;AGE/" />
+		<Option virtualFolders="main/" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../CBuild/AGE" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../CBuild/agetest_debug" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
-				<Option type="3" />
+				<Option type="1" />
 				<Option compiler="clang" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
-					<Add option="-fPIC" />
 					<Add option="-Wall" />
 					<Add option="-g" />
 					<Add option="-std=c++20" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="../CBuild/AGE" prefix_auto="1" extension_auto="1" />
+				<Option output="../../../CBuild/agetest_release" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Release/" />
-				<Option type="3" />
+				<Option type="1" />
 				<Option compiler="clang" />
-				<Option createDefFile="1" />
-				<Option createStaticLib="1" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -40,28 +35,19 @@
 			<Add option="-Wall" />
 			<Add option="-std=c++20" />
 			<Add option="-fexceptions" />
-			<Add directory="../CDep/headers/" />
+			<Add directory="../../../CDep/headers" />
 		</Compiler>
 		<Linker>
+			<Add option="-Wl,-rpath=." />
+			<Add library="AGE" />
 			<Add library="aaaa0ggmcLib" />
 			<Add library="glfw" />
 			<Add library="GLEW" />
-			<Add directory="../CBuild" />
+			<Add directory="../../../CBuild" />
 		</Linker>
-		<Unit filename="../CDep/headers/AGE/Application.h">
-			<Option virtualFolder="AGE/" />
-		</Unit>
-		<Unit filename="../CDep/headers/AGE/Window.h">
-			<Option virtualFolder="AGE/" />
-		</Unit>
-		<Unit filename="Application.cpp">
+		<Unit filename="main.cpp">
 			<Option virtualFolder="main/" />
 		</Unit>
-		<Unit filename="Window.cpp">
-			<Option virtualFolder="main/" />
-		</Unit>
-		<Extensions>
-			<lib_finder disable_auto="1" />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>
