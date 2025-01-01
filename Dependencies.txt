@@ -18,6 +18,7 @@
     aaaa0ggmcLib
     glfw
     GLEW
+    foonathan_memory
 
 [AGE_tests]
 [[agetest]]

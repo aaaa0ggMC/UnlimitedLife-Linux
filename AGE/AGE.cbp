@@ -51,10 +51,16 @@
 		<Unit filename="../CDep/headers/AGE/Application.h">
 			<Option virtualFolder="AGE/" />
 		</Unit>
+		<Unit filename="../CDep/headers/AGE/ResourceManager.h">
+			<Option virtualFolder="AGE/" />
+		</Unit>
 		<Unit filename="../CDep/headers/AGE/Window.h">
 			<Option virtualFolder="AGE/" />
 		</Unit>
 		<Unit filename="Application.cpp">
+			<Option virtualFolder="main/" />
+		</Unit>
+		<Unit filename="ResourceManager.cpp">
 			<Option virtualFolder="main/" />
 		</Unit>
 		<Unit filename="Window.cpp">

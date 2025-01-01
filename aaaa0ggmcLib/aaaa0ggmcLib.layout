@@ -2,24 +2,14 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="gen3-release" />
-	<File name="src/atranslator.cpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="6020" topLine="160" />
-		</Cursor>
-	</File>
-	<File name="src/autil.cpp" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2675" topLine="155" />
-		</Cursor>
-	</File>
-	<File name="../CDep/headers/alib-g3/alogger.h" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2181" topLine="75" />
-		</Cursor>
-	</File>
-	<File name="../CDep/headers/alib-g3/aclock.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="../CDep/headers/alib-g3/aclock.h" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="442" topLine="4" />
+		</Cursor>
+	</File>
+	<File name="src/aclock.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="489" topLine="9" />
 		</Cursor>
 	</File>
 	<File name="src/astring.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -27,24 +17,19 @@
 			<Cursor1 position="227" topLine="1" />
 		</Cursor>
 	</File>
+	<File name="../CDep/headers/alib-g3/autil.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="667" topLine="26" />
+		</Cursor>
+	</File>
 	<File name="src/adata.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="198" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="../CDep/headers/alib-g3/adata.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="../CDep/headers/alib-g3/alogger.h" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="680" topLine="9" />
-		</Cursor>
-	</File>
-	<File name="../CDep/headers/alib-g3/atranslator.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1820" topLine="63" />
-		</Cursor>
-	</File>
-	<File name="../CDep/headers/alib-g3/autil.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="667" topLine="26" />
+			<Cursor1 position="2181" topLine="75" />
 		</Cursor>
 	</File>
 	<File name="src/alogger.cpp" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -52,9 +37,24 @@
 			<Cursor1 position="11471" topLine="417" />
 		</Cursor>
 	</File>
-	<File name="src/aclock.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/atranslator.cpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="489" topLine="9" />
+			<Cursor1 position="6020" topLine="160" />
+		</Cursor>
+	</File>
+	<File name="src/autil.cpp" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2675" topLine="20" />
+		</Cursor>
+	</File>
+	<File name="../CDep/headers/alib-g3/atranslator.h" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1820" topLine="63" />
+		</Cursor>
+	</File>
+	<File name="../CDep/headers/alib-g3/adata.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="680" topLine="9" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>
