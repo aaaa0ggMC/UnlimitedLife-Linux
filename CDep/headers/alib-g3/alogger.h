@@ -116,7 +116,6 @@ namespace g3{
     void DLL_EXPORT endlog(LogEnd);
     typedef void (*EndLogFn)(LogEnd);
 
-
     class DLL_EXPORT LogFactory{
     private:
         std::string head;
@@ -140,9 +139,8 @@ namespace g3{
 
         LogFactory& operator()(int logType = LOG_INFO,int content_color = -1);
 
-        ///Multithread is not supported below!!!!
+        ///Multithread is supported below. : )
         LogFactory& operator<<(dstring data);
-
         LogFactory& operator<<(int data);
         LogFactory& operator<<(float data);
         LogFactory& operator<<(double data);
@@ -150,6 +148,39 @@ namespace g3{
         LogFactory& operator<<(unsigned int data);
         LogFactory& operator<<(unsigned long data);
         LogFactory& operator<<(char data);
+
+        ///For more support,use templates
+        inline template<Cont,T,ToStringFn = std::to_string> LogFactory& operator<<(const Cont<T>& data){
+            cachedStr += "{";
+            for(const T & ele : data){
+                cachedStr += ToStringFn(ele);
+                cachedStr += ",";
+            }
+            cachedStr += "}";
+            return *this;
+        }
+
+        inline template<Cont,K,T,ToStringFnK = std::to_string,ToStringFnV = std::to_string> LogFactory& operator<<(const Cont<K,T>& data){
+            cachedStr += "{";
+            for(const auto& [key,value] : data){
+                cachedStr += ToStrngFnK(ele);
+                cachedStr += ":";
+                cachedStr += ToStringFnV(ele);
+                cachedStr += ",";
+            }
+            cachedStr += "}";
+            return *this;
+        }
+
+        inline template<Cont,T,ToStringFn = std::to_string> LogFactory& operator<<(const Cont<T>& data){
+            cachedStr += "{";
+            for(const T & ele : data){
+                cachedStr += ToStringFn(ele);
+                cachedStr += ",";
+            }
+            cachedStr += "}";
+            return *this;
+        }
 
         ///end the log
         LogFactory& operator<<(EndLogFn fn);

@@ -52,7 +52,9 @@
 		<Unit filename="../CDep/headers/alib-g3/alogger.h">
 			<Option virtualFolder="gen3/alib-g3/" />
 		</Unit>
-		<Unit filename="../CDep/headers/alib-g3/aparser.h" />
+		<Unit filename="../CDep/headers/alib-g3/aparser.h">
+			<Option virtualFolder="gen3/alib-g3/" />
+		</Unit>
 		<Unit filename="../CDep/headers/alib-g3/astring.h">
 			<Option virtualFolder="gen3/alib-g3/" />
 		</Unit>
