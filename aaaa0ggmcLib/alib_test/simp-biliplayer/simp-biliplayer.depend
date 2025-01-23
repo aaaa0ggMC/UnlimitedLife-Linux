@@ -1,0 +1,45 @@
+# depslib dependency file v1.0
+1736822395 source:/run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/aaaa0ggmcLib/alib_test/simp-biliplayer/main.cpp
+	<iostream>
+	<stdlib.h>
+	<alib-g3/adata.h>
+	<alib-g3/alogger.h>
+	<alib-g3/aparser.h>
+	<fstream>
+	<unordered_map>
+	<time.h>
+	<string.h>
+	<algorithm>
+
+1734843357 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers/alib-g3/adata.h
+	<string>
+	<unordered_map>
+	<optional>
+	<stdarg.h>
+	<alib-g3/autil.h>
+
+1735450441 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers/alib-g3/autil.h
+	<string>
+	<vector>
+	<fstream>
+	<windows.h>
+	<unistd.h>
+
+1735391885 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers/alib-g3/alogger.h
+	<memory>
+	<string>
+	<fstream>
+	<alib-g3/aclock.h>
+	<alib-g3/autil.h>
+	<pthread.h>
+	<glm/glm.hpp>
+	<glm/ext/quaternion_common.hpp>
+
+1735391532 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers/alib-g3/aclock.h
+	<time.h>
+	<alib-g3/autil.h>
+
+1726403499 /run/media/aaaa0ggmc/DATA/CC/LinuxRW/UnlimitedLife-Linux/CDep/headers/alib-g3/aparser.h
+	<string>
+	<vector>
+

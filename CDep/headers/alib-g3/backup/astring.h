@@ -4,7 +4,7 @@
 #include <alib-g3/autil.h>
 
 namespace alib{
-namespace g3{
+namespace ng{
     using dwstring = const std::wstring&;
 
     struct mstring{

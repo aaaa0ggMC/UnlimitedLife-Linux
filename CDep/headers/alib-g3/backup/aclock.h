@@ -9,26 +9,22 @@ extern "C"
 #endif
 ///这么写是因为Codeblocks识别不了alib::ng
 namespace alib{
-namespace g3{
+namespace ng{
     /** \brief time
      *  all : millisec time since launched
      *  offset : millisec time since last recorded "bookmark"
      */
-    struct DLL_EXPORT ClockTimeInfo{
+    struct DLL_EXPORT TMST0{
         double all;
         double offset;
     };
 
     class DLL_EXPORT Clock{
     public:
-        enum ClockState{
-            Running,
-            Paused,
-            Stopped
-        };
 
         /** \brief constructor
         * \param start the clock right now?
+        * \param use nano second if support
         */
         Clock(bool start = true);
         /** \brief start the clock
@@ -39,12 +35,12 @@ namespace g3{
         * does nothing if already stopped
         * \return recorded time
         */
-        ClockTimeInfo stop();
+        TMST0 stop();
         /** \brief pause the clock
         * ...
         * \return recorded time
         */
-        ClockTimeInfo pause();
+        TMST0 pause();
         /** \brief resume the clock
         */
         void resume();
@@ -52,10 +48,15 @@ namespace g3{
         *
         * = stop() + start()
         */
+
         void reset();
 
-        /** \brief get current state*/
-        ClockState getState();
+        /** \brief get current stats
+        *
+        * \return is stopped
+        */
+
+        bool isStop();
 
         /** \brief get milliseconds since started
         *
@@ -65,7 +66,7 @@ namespace g3{
         /** \brief get offset*/
         double getOffset();
         /** \brief composed info:alltime + offset*/
-        ClockTimeInfo now();
+        TMST0 now();
 
         /** \brief clear offset */
         void clearOffset();
@@ -73,7 +74,8 @@ namespace g3{
         double m_pauseGained;
         double m_StartTime;
         double m_PreTime;
-        ClockState state;
+        bool m_start;
+        bool m_paused;
     };
 
     struct DLL_EXPORT Trigger{
@@ -90,26 +92,24 @@ namespace g3{
         void setClock(Clock & clock);
         /**< you can also set the duration manually :) */
         double duration;
-        double recordedTime;
+        double rec;
     private:
         Clock * m_clock;
     };
 
 
-    ///RateLimiter Not just for limiting fps
-    struct DLL_EXPORT RateLimiter {
+    ///Run persecond
+    struct DLL_EXPORT RPSRestrict{
         Clock clk;
         float desire;
         Trigger trig;
 
-        RateLimiter(float wantFps);
+        RPSRestrict(float wantRps);
 
-       /** \brief Wait until enough time has passed to achieve the desired rate
-         * Sleeps or blocks execution to maintain a steady rate (e.g., frames per second).
-         */
         void wait();
 
-        void reset(float wantFps);
+        void reset(float wantRps);
+
     };
 }
 }

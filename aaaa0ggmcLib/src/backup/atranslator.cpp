@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-using namespace alib::g3;
+using namespace alib::ng;
 
 Translator* Translator::instance;
 

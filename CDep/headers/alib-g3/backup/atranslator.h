@@ -34,7 +34,7 @@ extern "C"
 #define ALIB_DEF_ACCESS "Access"
 
 namespace alib{
-namespace g3{
+namespace ng{
 
 
     ///文字多语言支持,目前支持json与toml文件的读取

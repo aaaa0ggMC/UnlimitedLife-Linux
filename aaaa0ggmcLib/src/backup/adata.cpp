@@ -7,7 +7,7 @@
 #include <toml.hpp>
 #include <iostream>
 
-using namespace alib::g3;
+using namespace alib::ng;
 using namespace std;
 
 const string Analyser::empty_ret = "";
@@ -181,7 +181,7 @@ int GDoc::read_parseFileJSON(dstring fp){
 int GDoc::read_parseFileTOML(dstring fp){
     string data = "";
     Util::io_readAll(fp,data);
-    return read_parseStringTOML(Util::str_trim_rt(data));
+    return read_parseStringTOML(Util::str_trim<true>(data));
 }
 
 int GDoc::read_parseStringTOML(dstring data){

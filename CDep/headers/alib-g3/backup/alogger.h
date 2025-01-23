@@ -41,7 +41,7 @@
 #define LOG_SH_FULL  (LOG_SH_BASIC | LOG_SHOW_THID | LOG_SHOW_PROC)
 
 namespace alib{
-namespace g3{
+namespace ng{
 
     struct DLL_EXPORT IData{
         const char * str;

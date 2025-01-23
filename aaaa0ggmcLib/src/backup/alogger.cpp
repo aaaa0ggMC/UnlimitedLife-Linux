@@ -10,7 +10,7 @@
 
 #define LOG_RESERVE_SIZE 512
 
-using namespace alib::g3;
+using namespace alib::ng;
 
 Logger * Logger::instance;
 
@@ -439,7 +439,7 @@ LogFactory& LogFactory::operator<<(glm::mat4 data){
     return *this;
 }
 
-void alib::g3::endlog(LogEnd){}
+void alib::ng::endlog(LogEnd){}
 
 LogFactory& LogFactory::operator<<(EndLogFn fn){
     if(i){

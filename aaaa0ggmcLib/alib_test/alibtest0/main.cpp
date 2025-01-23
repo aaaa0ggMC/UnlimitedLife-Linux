@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
 #include <alib-g3/alogger.h>
 #include <string.h>
@@ -9,25 +10,36 @@
 #include <chrono>
 
 using namespace std;
-using namespace alib::ng;
+using namespace alib::g3;
 
 void test_autil();
 void test_alogger();
+void test_aclock();
 
 int main(int argc,const char * argv[])
 {
     if(argc < 2){
-        cout << "util      Test autil.h" << endl;
-        cout << "logger    Test alogger.h" << endl;
         char buf[256] = {0};
-        scanf("%s",buf);
         const char * args[] = {"",buf};
-        return main(2,args);
+        while(true){
+            cout << "----------------------------------------" << endl;
+            cout << "util      Test autil.h" << endl;
+            cout << "logger    Test alogger.h" << endl;
+            cout << "clock    Test aclock.h" << endl;
+            cout << "q / Q    Quit" << endl;
+            memset(buf,256,sizeof(char));
+            scanf("%s",buf);
+            cout << "****************************************" << endl;
+            if(!strncasecmp("q",buf,1))return 0;
+            main(2,args);
+        }
     }
     if(!strcmp("util",argv[1])){
         test_autil();
     }else if(!strcmp("logger",argv[1])){
         test_alogger();
+    }else if(!strcmp("clock",argv[1])){
+        test_aclock();
     }
     return 0;
 }
@@ -262,22 +274,80 @@ void test_autil(){
     cout << Util::str_unescape("testunescape\\nhhhh") << endl;
 
     cout << "\e[93;100m  Sys Phase\e[0m" << endl;
-    cout << "\e[100m    sys_GetCPUId\e[0m" << endl;
-    cout << Util::sys_GetCPUId() << endl;
+    cout << "\e[100m    sys_etCPUId\e[0m" << endl;
+    cout << Util::sys_getCPUId() << endl;
 
     cout << "\e[100m    sys_getGlobalMemoryUsage\e[0m" << endl;
-    GlMem mem = Util::sys_getGlobalMemoryUsage();
-    cout << "All Page Memory:" << mem.page_all << endl;
-    cout << "Used Page Memory:" << mem.page_used << endl;
-    cout << "All Phy Memory:" << mem.phy_all << endl;
-    cout << "Used Phy Memory:" << mem.phy_used << endl;
+    GlobalMemUsage mem = Util::sys_getGlobalMemoryUsage();
+    cout << "All Page Memory:" << mem.pageTotal << endl;
+    cout << "Used Page Memory:" << mem.pageUsed << endl;
+    cout << "All Phy Memory:" << mem.physicalTotal << endl;
+    cout << "Used Phy Memory:" << mem.physicalUsed << endl;
     cout << "Phy Memory Percent:" << mem.percent << endl;
-    cout << "All Virt Memory:" << mem.vir_all << endl;
-    cout << "Used Virt Memory:" << mem.vir_used << endl;
+    cout << "All Virt Memory:" << mem.virtualTotal << endl;
+    cout << "Used Virt Memory:" << mem.virtualUsed << endl;
 
 
     cout << "\e[100m    sys_getProgramMemoryUsage\e[0m" << endl;
-    MemTp mtp =  Util::sys_getProgramMemoryUsage();
-    cout << "Memory Usage:" << mtp.mem << endl;
-    cout << "VMemory Usage:" << mtp.vmem << endl;
+    ProgramMemUsage mtp =  Util::sys_getProgramMemoryUsage();
+    cout << "Memory Usage:" << mtp.memory << endl;
+    cout << "VMemory Usage:" << mtp.virtualMemory << endl;
+}
+
+void test_aclock(){
+    Clock clk(false);
+    cout << "\e[100mBasicUsage:\e[0m" << endl;
+    clk.start();
+    cout << "Sleep2S:" << endl;
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::cout << "All " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    cout << "Clear offset:" << endl;
+    clk.clearOffset();
+    std::cout << "All " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    auto st = clk.stop();
+    cout << "Stop clock";
+    std::cout << "All " << st.all << " | Offset " << st.offset << endl;
+    clk.start();
+    cout << "Restart clock & Sleep 150ms then clearOffset" << endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    std::cout << "All " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    clk.clearOffset();
+
+    cout << "\e[100mPause&Resume: print sleep 150ms,print pause & sleep for 150ms & print,resume print & sleep for 150ms & print\e[0m" << endl;
+    std::cout << "All " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    std::cout << "All " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    clk.pause();
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    std::cout << "All " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    clk.resume();
+    std::cout << "All " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(150));
+    std::cout << "All " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+
+    clk.reset();
+    cout << "Reset clock" << endl;
+    cout << "\e[100mTrigger 1000ms:\e[0m" << endl;
+    ///Trigger
+    Trigger trig(clk,1000);
+    std::cout << "StartAll " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    while(!trig.test()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    std::cout << "EndAll " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+
+    ///RateLimiter
+    cout << "\e[100mRateLimiter: 60.5fps\e[0m" << endl;
+    RateLimiter rl(60.5);
+    unsigned int counter = 0;
+    clk.clearOffset();
+    std::cout << "StartAll " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    while(true){
+        rl.wait();
+        counter++;
+        if(counter >= 6000)break;
+    }
+    double fps = counter / clk.getOffset();
+    std::cout << "EndAll " << clk.getAllTime() << " | Offset " << clk.getOffset() << endl;
+    cout << "Fps:" << fps << endl;
 }

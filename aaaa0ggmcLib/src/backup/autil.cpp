@@ -18,7 +18,7 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <dirent.h>
-using namespace alib::g3;
+using namespace alib::ng;
 
 #include <iostream>
 #include <string>
@@ -108,7 +108,7 @@ std::string Util::ot_getTime() {
     return rt;
 }
 
-std::string Util::sys_getCPUId(){
+std::string Util::sys_GetCPUId(){
     #ifdef _WIN32
     long lRet;
     HKEY hKey;
@@ -147,7 +147,6 @@ std::string Util::sys_getCPUId(){
 
 void Util::io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth,dstring appender) {
     #ifdef _WIN32
-    ///TODO:Windows is not the latest one
     //文件句柄 注意：我发现有些文章代码此处是long类型，实测运行中会报错访问异常
     intptr_t hFile = 0;
     //文件信息
@@ -175,7 +174,7 @@ void Util::io_traverseFiles(dstring path, std::vector<std::string>& files,int tr
     while((entry = readdir(dir)) != NULL){
         if(!strncmp(".",entry->d_name,1))continue;
         else if(!strncmp("..",entry->d_name,2))continue;
-        if(traverseDepth != 0 && entry->d_type == DT_DIR){
+        if(traverseDepth > 0 && entry->d_type == DT_DIR){
             std::string newpath = path;
             std::string appenderpp = appender;
             if(newpath[newpath.size() - 1] != '/'){
@@ -286,18 +285,23 @@ int Util::io_readAll(std::ifstream & reader,string & ss) {
 }
 
 int Util::io_readAll(dstring fpath,std::string & ss) {
-    FILE * file = fopen(fpath.c_str(),"r");
-    if(!file)return -1;
-    long fsize = io_fileSize(fpath);
-    if(fsize > 0){
-        std::vector<char> buf;
-        buf.resize(fsize / sizeof(char) +  1);
-        buf[fsize / sizeof(char)] = '\0';
-        fread(buf.data(),sizeof(char),fsize / sizeof(char),file);
-        ss.append(buf.begin(),buf.end());
-    }
-    fclose(file);
-    return (int)fsize;
+    unsigned long size = io_fileSize(fpath);
+
+    std::ifstream reader(fpath);
+    if(!reader.good())return ALIB_ERROR;
+
+    char * buf = new char[size+1];
+    memset(buf,0,sizeof(char) * (size+1));
+
+    reader.read(buf,size);
+    buf[size] = 0;
+    reader.close();
+
+    ss.append(buf);
+
+    delete [] buf;
+
+    return size;
 }
 
 std::string Util::str_trim_rt(std::string & str) {
@@ -332,7 +336,7 @@ void Util::str_split(dstring line,const char sep,std::vector<std::string> & vct)
     for(int i = 0; i < (int)size; i++) {
         if(str[i] == sep) {
             string st = line.substr(start,end);
-            str_trim_nrt(st);
+            str_trim(st);
             vct.push_back(st);
             start = i + 1;
             end = 0;
@@ -341,7 +345,7 @@ void Util::str_split(dstring line,const char sep,std::vector<std::string> & vct)
     }
     if(end > 0) {
         string st = line.substr(start,end);
-        str_trim_nrt(st);
+        str_trim(st);
         vct.push_back(st);
     }
 }
@@ -432,7 +436,7 @@ std::string Util::ot_formatDuration(int secs) {
     return ret;
 }
 
-ProgramMemUsage Util::sys_getProgramMemoryUsage() {
+MemTp Util::sys_getProgramMemoryUsage() {
     #ifdef _WIN32
     mem_bytes mem = 0, vmem = 0;
     PROCESS_MEMORY_COUNTERS pmc;
@@ -494,24 +498,24 @@ ProgramMemUsage Util::sys_getProgramMemoryUsage() {
     #endif
 }
 
-GlobalMemUsage Util::sys_getGlobalMemoryUsage() {
+GlMem Util::sys_getGlobalMemoryUsage() {
     #ifdef _WIN32
     MEMORYSTATUSEX statex;
-    GlobalMemUsage ret = {0};
+    GlMem ret = {0};
     statex.dwLength = sizeof(statex);
     GlobalMemoryStatusEx(&statex);
 
-    ret.physicalTotal = statex.ullTotalPhys;
-    ret.physicalUsed = ret.phy_all - statex.ullAvailPhys;
-    ret.virtualTotal = statex.ullTotalVirtual;
-    ret.virtualUsed = ret.vir_all - statex.ullAvailVirtual;
-    ret.pageTotal = statex.ullTotalPageFile;
-    ret.pageUsed = statex.ullTotalPageFile - statex.ullAvailPageFile;
+    ret.phy_all = statex.ullTotalPhys;
+    ret.phy_used = ret.phy_all - statex.ullAvailPhys;
+    ret.vir_all = statex.ullTotalVirtual;
+    ret.vir_used = ret.vir_all - statex.ullAvailVirtual;
+    ret.page_all = statex.ullTotalPageFile;
+    ret.page_used = statex.ullTotalPageFile - statex.ullAvailPageFile;
     ret.percent = statex.dwMemoryLoad;
 
     return ret;
     #else
-    GlobalMemUsage ret = {0};
+    GlMem ret = {0};
 
     // 打开 /proc/meminfo 文件
     std::ifstream meminfo("/proc/meminfo");
@@ -554,26 +558,26 @@ GlobalMemUsage Util::sys_getGlobalMemoryUsage() {
     meminfo.close();
 
     // 计算物理内存
-    ret.physicalTotal = memTotal * 1024; // 转换为字节
-    ret.physicalUsed = (memTotal - memFree - buffers - cached) * 1024;
+    ret.phy_all = memTotal * 1024; // 转换为字节
+    ret.phy_used = (memTotal - memFree - buffers - cached) * 1024;
 
     // 计算虚拟内存（Linux 没有直接的虚拟内存字段，这里可以选择设置为 0）
-    ret.virtualTotal = 0;
-    ret.virtualUsed = 0;
+    ret.vir_all = 0;
+    ret.vir_used = 0;
 
     // 计算交换空间
-    ret.pageTotal = swapTotal * 1024;
-    ret.pageUsed = (swapTotal - swapFree) * 1024;
+    ret.page_all = swapTotal * 1024;
+    ret.page_used = (swapTotal - swapFree) * 1024;
 
     // 计算内存使用百分比
-    ret.percent = (double)ret.physicalUsed / ret.physicalTotal * 100.0;
+    ret.percent = (double)ret.phy_used / ret.phy_all * 100.0;
 
     return ret;
     #endif
 }
 
 CPUInfo::CPUInfo() {
-    this->CpuID = Util::sys_getCPUId();
+    this->CpuID = Util::sys_GetCPUId();
 }
 
 std::string Util::str_toUpper(dstring in){
