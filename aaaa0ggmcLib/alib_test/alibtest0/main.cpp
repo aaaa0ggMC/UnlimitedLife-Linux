@@ -57,6 +57,8 @@ void test_alogger(){
     cout << "[Stage]Set output file test_data/logger_ouput" << endl;
     logger.setOutputFile("test_data/logger_output");
     lg.info("AfterTest");
+    lg.info("MultiOpen:Should arise error");
+    logger.setOutputFile("test_data/logger_output");
 
     cout << "Content color red" << endl;
     lg.setContentColor(APCF_RED);
@@ -96,23 +98,44 @@ void test_alogger(){
     }
 
     cout << "DisableOutput" << endl;
-    logger.toggleConsoleOutput(false);
+    logger.setOutputToConsole(false);
     lg << "HelloWorld!" << endlog;
-    logger.toggleConsoleOutput(true);
+    logger.setOutputToConsole(true);
 
-    cout << "Multithread Output Test" << endl;
-    std::thread th([&]{
+    cout << "Multithread Output Test:16 threads" << endl;
+    auto fn = [&](int id){
         for(unsigned int i = 0;i < 16;++i){
-            lg.info(string("HelloWorld!Th") + to_string(i));
+            lg.info(string("HelloWorld!Th") + std::to_string(id) + " " + to_string(i));
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
-    });
+    };
+    std::vector<std::thread> ths;
+    for(unsigned int idx = 0;idx < 16;++idx){
+        ths.emplace_back(fn,idx);
+    }
     for(unsigned int i = 0;i < 17;++i){
         lg.info(string("HelloWorld!Main") + to_string(i));
         std::this_thread::sleep_for(std::chrono::milliseconds(8));
     }
-    th.join();
+    for(unsigned int idx = 0;idx < 16;++idx){
+        if(ths[idx].joinable())ths[idx].join();
+    }
 
+    cout << "Test split files,close & reopen logger..." << endl;
+    logger.close();
+    logger.setSplitFiles(true);
+    logger.setSingleFileMaxSize(128);
+    cout << "Split:true MaxFileSize:32 file0: test_data/multi/logs.log" << endl;
+    logger.setOutputFile("test_data/multi/logs.log");
+
+    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    lg.info("TestTestTestTestTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
+    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    lg.info("TestTestTestTestTestTestTestTestTestTest");
+    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    lg.info("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
+    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    lg.info("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
 }
 
 void test_autil(){

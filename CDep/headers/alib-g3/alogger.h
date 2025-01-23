@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <fstream>
+#include <optional>
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
 #ifdef __linux__
@@ -29,7 +30,6 @@
 #define LOG_FULL (LOG_TRACE | LOG_DEBUG | LOG_INFO | LOG_WARN | LOG_ERROR | LOG_CRITI)
 #define LOG_RELE (LOG_INFO | LOG_ERROR | LOG_CRITI)
 
-
 #define LOG_SHOW_TIME 0x00000001
 #define LOG_SHOW_TYPE 0x00000010
 #define LOG_SHOW_ELAP 0x00000100
@@ -43,7 +43,7 @@
 namespace alib{
 namespace g3{
 
-    struct DLL_EXPORT IData{
+    struct DLL_EXPORT LogHeader{
         const char * str;
         int color;
     };
@@ -59,10 +59,15 @@ namespace g3{
         friend class LogFactory;
         bool output2c;
         bool m_inited;
+        bool splitFiles;
+        unsigned long singleLogMaxBytes;
+        unsigned int splitIndex;
+        unsigned long currentFileBytes;
         int mode;
         int showlg;
         std::ofstream ofs;
         std::string buffer;
+        std::string logFile;
         Clock clk;
         LOCK cs;
         #ifdef __linux__
@@ -70,30 +75,40 @@ namespace g3{
         #endif // __linux__
         static Logger * instance;
     public:
-
         int neon_color;
 
         Logger(bool outputToConsole = true,bool setInstanceIfNULL = true,int logVisibilities = LOG_FULL);
         ~Logger();
-        void log(int level,dstring content,dstring head);
 
+        void log(int level,dstring content,dstring head);
         void flush();
         void close();
 
         bool setOutputFile(dstring path);
-
-        void toggleConsoleOutput(bool outputToConsole);
-        void setMode(int mode);
+        void setOutputToConsole(bool outputToConsole);
+        void setShowExtra(int show);
         void setLogVisibilities(int visibleLogs);
+        ///Minium: one message
+        void setSplitFiles(bool v);
+        ///Only truly works when split files is on,min 1
+        void setSingleFileMaxSize(unsigned long maxBytes);
 
+        ///Return: has relevant log file to write in
         bool getLoggerStatus();
-        int getMode();
+        int getShowExtra();
         int getLogVisibilities();
+        bool getSplitFiles();
+        unsigned long getSingleFileMaxSize();
+        std::string getCurrentLogFile();
+
+        void trySwapLogFile();
+
+        static std::string generateFilePath(const std::string & origin,int index);
 
         std::string makeMsg(int level,dstring data,dstring head,bool ends = true);
-        static IData genType(int level);
-        static void set(Logger*);
-        static Logger* get();
+        static LogHeader generateHeader(int level);
+        static void setStaticLogger(Logger*);
+        static std::optional<Logger*> getStaticLogger();
     };
 
 
@@ -105,16 +120,13 @@ namespace g3{
     class DLL_EXPORT LogFactory{
     private:
         std::string head;
-        std::string cachedStr;
+        static thread_local std::string cachedStr;
         Logger* i;
-    public:
         int defLogType;
+    public:
         LogFactory(dstring head,Logger& lg);
-        //use static
-        LogFactory(dstring head);
 
         void log(int level,dstring msg);
-
         void info(dstring msg);
         void error(dstring msg);
         void critical(dstring msg);
