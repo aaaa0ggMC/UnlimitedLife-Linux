@@ -8,6 +8,9 @@
 #include <glm/glm.hpp>
 #include <thread>
 #include <chrono>
+#include <map>
+#include <unordered_map>
+#include <tuple>
 
 using namespace std;
 using namespace alib::g3;
@@ -136,6 +139,59 @@ void test_alogger(){
     lg.info("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
     cout << "Now writes " << logger.getCurrentLogFile() << endl;
     lg.info("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
+
+    logger.close();
+    logger.setOutputFile("test_data/template_logger_output");
+    cout << "Not show container name" << endl;
+    cout << "\e[100mTesting templates\e[0m" << endl;
+    {
+        cout << "vector<int>" << endl;
+        vector<int> vec = {1,2,3,4,5,6};
+        lg << vec << endlog;
+    }
+    {
+        cout << "vector<string>" << endl;
+        vector<string> vec = {"123","hhh","cnm","111"};
+        lg << vec << endlog;
+    }
+    {
+        cout << "vector<char*>" << endl;
+        vector<const char *> vec = {"123","hhh","cn","111"};
+        lg << vec << endlog;
+    }
+    {
+        cout << "vector<char>" << endl;
+        vector<char> vec = {'1','2','3','4'};
+        lg << vec << endlog;
+    }
+    {
+        cout << "vector<vector<double>>" << endl;
+        vector<vector<double>> vec = {{1.23},{1.444,2.34354,2.43534},{3.45453},{1.53,2.454,4.543},{5.543},{6.54343}};
+        lg << vec << endlog;
+    }
+    {
+        cout << "map<string,int>" << endl;
+        map<string,int> vec = {{"cn",1},{"wd",2}};
+        lg << vec << endlog;
+    }
+    {
+        cout << "map<string,vector<string>>" << endl;
+        map<string,vector<string>> vec = {{"cn",{"123","234"}},{"cm",{"wd","11"}}};
+        lg << vec << endlog;
+    }
+    {
+        cout << "unordered_map<string,vector<string>>" << endl;
+        unordered_map<string,vector<string>> vec = {{"cn",{"123","234"}},{"cm",{"wd","11"}}};
+        lg << vec << endlog;
+    }
+    cout << "Show container name:demangled" << endl;
+    lg.setShowContainerName(true);
+    {
+        cout << "tuple<string,int,double,map<string,string>>" << endl;
+        tuple<string,int,double,map<string,string>> vec = std::make_tuple(std::string("123"),1,2.0123,
+                map<string,string>({{"123","456"},{"kkk","jjj"}}));
+        lg << vec << endlog;
+    }
 }
 
 void test_autil(){

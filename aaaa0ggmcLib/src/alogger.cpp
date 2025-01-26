@@ -274,8 +274,10 @@ void Logger::trySwapLogFile(){
 }
 
 std::string Logger::generateFilePath(const std::string& in,int index){
-    std::string ext = in.substr(in.find_last_of('.'));/// 1234.ext --> ext=".ext"
-    std::string pre = in.substr(0,in.find_last_of('.'));///pre = "1234"
+    auto result = in.find_last_of('.');
+    unsigned int pos = (result == std::string::npos)?in.length():(unsigned int)(result);
+    std::string ext = in.substr(pos);/// 1234.ext --> ext=".ext"
+    std::string pre = in.substr(0,pos);///pre = "1234"
     return pre + " - " + std::to_string(index) + ext;
 }
 
@@ -314,9 +316,14 @@ LogFactory::LogFactory(dstring a,Logger & c){
     i = &c;
     cachedStr = "";
     cachedStr.reserve(LOG_RESERVE_SIZE);
+    showContainerName = false;
 }
 
 void LogFactory::log(int l,dstring m){i->log(l,m,head);}
+
+void LogFactory::setShowContainerName(bool v){
+    showContainerName = v;
+}
 
 LogFactory& LogFactory::operator()(int logLevel,int nc){
     defLogType = logLevel;
@@ -357,7 +364,7 @@ LogFactory& LogFactory::operator<<(unsigned long data){
 }
 
 LogFactory& LogFactory::operator<<(char data){
-    cachedStr += to_string(data);
+    cachedStr += data;
     return *this;
 }
 

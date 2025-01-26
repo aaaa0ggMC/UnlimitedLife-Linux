@@ -7,6 +7,11 @@
 #include <optional>
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
+
+#ifndef ALIB_DISABLE_TEMPLATES
+#include <cxxabi.h>
+#endif // ALIB_DISABLE_TEMPLATES
+
 #ifdef __linux__
 #include <pthread.h>
 #define LOCK pthread_mutex_t
@@ -42,6 +47,17 @@
 
 namespace alib{
 namespace g3{
+
+    #ifndef ALIB_DISABLE_TEMPLATES
+    namespace ext_toString{
+        inline std::string toString(const char* v){
+            return v;
+        }
+        template<class T> std::string toString(const T& v){
+            return std::to_string(v);
+        }
+    }
+    #endif // ALIB_DISABLE_TEMPLATES
 
     struct DLL_EXPORT LogHeader{
         const char * str;
@@ -119,10 +135,12 @@ namespace g3{
     class DLL_EXPORT LogFactory{
     private:
         std::string head;
-        static thread_local std::string cachedStr;
         Logger* i;
         int defLogType;
+        bool showContainerName;
     public:
+        static thread_local std::string cachedStr;
+
         LogFactory(dstring head,Logger& lg);
 
         void log(int level,dstring msg);
@@ -137,6 +155,8 @@ namespace g3{
         void setContentColor(int color);
         int getContentColor();
 
+        void setShowContainerName(bool v);
+
         LogFactory& operator()(int logType = LOG_INFO,int content_color = -1);
 
         ///Multithread is supported below. : )
@@ -148,39 +168,6 @@ namespace g3{
         LogFactory& operator<<(unsigned int data);
         LogFactory& operator<<(unsigned long data);
         LogFactory& operator<<(char data);
-
-        ///For more support,use templates
-        inline template<Cont,T,ToStringFn = std::to_string> LogFactory& operator<<(const Cont<T>& data){
-            cachedStr += "{";
-            for(const T & ele : data){
-                cachedStr += ToStringFn(ele);
-                cachedStr += ",";
-            }
-            cachedStr += "}";
-            return *this;
-        }
-
-        inline template<Cont,K,T,ToStringFnK = std::to_string,ToStringFnV = std::to_string> LogFactory& operator<<(const Cont<K,T>& data){
-            cachedStr += "{";
-            for(const auto& [key,value] : data){
-                cachedStr += ToStrngFnK(ele);
-                cachedStr += ":";
-                cachedStr += ToStringFnV(ele);
-                cachedStr += ",";
-            }
-            cachedStr += "}";
-            return *this;
-        }
-
-        inline template<Cont,T,ToStringFn = std::to_string> LogFactory& operator<<(const Cont<T>& data){
-            cachedStr += "{";
-            for(const T & ele : data){
-                cachedStr += ToStringFn(ele);
-                cachedStr += ",";
-            }
-            cachedStr += "}";
-            return *this;
-        }
 
         ///end the log
         LogFactory& operator<<(EndLogFn fn);
@@ -196,6 +183,134 @@ namespace g3{
         LogFactory& operator<<(glm::quat data);
         #endif // ALIB_DISABLE_GLM_EXTENSIONS
 
+
+        #ifndef ALIB_DISABLE_TEMPLATES
+        ///For more support,use templates
+        template<class T> std::string demangleTypeName(const char * mangledName){
+            int status;
+            std::unique_ptr<char,void(*)(void*)> result(
+                abi::__cxa_demangle(mangledName,nullptr,nullptr,&status),
+                std::free
+            );
+            return (status==0)?result.get():mangledName;
+        }
+
+
+        #define VALUE_FIX(TESTV) \
+                {/*有没有const修饰一样---似乎又不行了*/\
+                    if(typeid(TESTV) == typeid(std::string) || typeid(TESTV) == typeid(char *) || typeid(TESTV) == typeid(const char *)){\
+                        cachedStr += "\"";\
+                    }else if(typeid(TESTV) == typeid(char)){\
+                        cachedStr += "\'";\
+                    }\
+                }
+
+        //std::vector<Type,Allocator>
+        template<template<class T,class Allocator> class Cont,class T,class A>
+            LogFactory& operator<<(const Cont<T,A> & cont){
+            if(showContainerName)cachedStr += demangleTypeName<decltype(cont)>(typeid(decltype(cont)).name());
+            auto endloc = &(*(--cont.end()));
+            cachedStr += "[";
+            bool old = showContainerName;
+            showContainerName = false;
+            for(const auto & v : cont){
+                VALUE_FIX(T)
+                operator<<(v);
+                VALUE_FIX(T)
+                if(&v != endloc)cachedStr += ",";
+            }
+            cachedStr += "]";
+            showContainerName = old;
+            return *this;
+        }
+
+        //std::map<Key,Value,Allocator>
+        template<template<class K,class V,class Allocator> class Cont,class K,class V,class A>
+            LogFactory& operator<<(const Cont<K,V,A> & cont){
+            if(showContainerName)cachedStr += demangleTypeName<decltype(cont)>(typeid(decltype(cont)).name());
+            auto endloc = &((--cont.end())->second);
+            cachedStr += "{";
+            bool old = showContainerName;
+            showContainerName = false;
+            for(const auto & [k,v] : cont){
+                VALUE_FIX(K)
+                operator<<(k);
+                VALUE_FIX(K)
+                cachedStr += ":";
+                VALUE_FIX(V)
+                operator<<(v);
+                VALUE_FIX(V)
+                if(&v != endloc)cachedStr += ",";
+            }
+            cachedStr += "}";
+            showContainerName = old;
+            return *this;
+        }
+
+        ///std::unordered_map
+        template<template<class Key,class Value,class Hash,class Predicate,class Allocator> class Cont,class K,class V,class H,class P,class A>
+            LogFactory& operator<<(const Cont<K,V,H,P,A>& cont){
+            if(showContainerName)cachedStr += demangleTypeName<decltype(cont)>(typeid(decltype(cont)).name());
+            cachedStr += "{";
+            bool old = showContainerName;
+            showContainerName = false;
+            for(const auto & [k,v] : cont){
+                VALUE_FIX(K)
+                operator<<(k);
+                VALUE_FIX(K)
+                cachedStr += ":";
+                VALUE_FIX(V)
+                operator<<(v);
+                VALUE_FIX(V)
+                cachedStr += ",";
+            }
+            cachedStr.erase(--cachedStr.end());
+            cachedStr += "}";
+            showContainerName = old;
+            return *this;
+        }
+
+        ///std::tuple
+        template<class Tuple,size_t N> struct tuple_show{
+            static void show(const Tuple&t,LogFactory&lg){
+                tuple_show<Tuple,N - 1>::show(t,lg);
+                std::string & cachedStr = lg.cachedStr;
+                cachedStr += ",";
+                const auto& vl = std::get<N -1>(t);
+                VALUE_FIX(decltype(vl));
+                lg.operator<<(vl);
+                VALUE_FIX(decltype(vl));
+            }
+        };
+        template<class Tuple> struct tuple_show <Tuple,1>{
+            static void show(const Tuple&t,LogFactory&lg){
+                std::string & cachedStr = lg.cachedStr;
+                const auto& vl = std::get<0>(t);
+                VALUE_FIX(decltype(vl));
+                lg.operator<<(vl);
+                VALUE_FIX(decltype(vl));
+            }
+        };
+
+        template<template<typename... Elements> class Cont,typename... Eles>
+            LogFactory& operator<<(const Cont<Eles...> & t){
+            if(showContainerName)cachedStr += demangleTypeName<decltype(t)>(typeid(decltype(t)).name());
+            bool old = showContainerName;
+            showContainerName = false;
+            cachedStr += "[";
+            tuple_show<decltype(t),sizeof...(Eles)>::show(t,*this);
+            cachedStr += "]";
+            showContainerName = old;
+            return *this;
+        }
+
+        ///The last one to match
+        template<class T>
+            LogFactory& operator<<(const T& t){
+            cachedStr += alib::g3::ext_toString::toString(t);
+            return *this;
+        }
+        #endif // ALIB_DISABLE_TEMPLATES
     };
 }
 }
