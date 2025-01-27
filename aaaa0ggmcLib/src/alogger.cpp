@@ -15,76 +15,49 @@ using namespace alib::g3;
 Logger * Logger::instance;
 thread_local std::string LogFactory::cachedStr = "";
 
-bool Logger::setOutputFile(dstring path){
-    CriticalLock lock(cs);
-    if(m_inited){
-        log(LOG_ERROR,"You have already opened a log file!","ALib::Logger");
-        return false;
-    }
-    if(splitFiles)ofs.open(generateFilePath(path,0),ios::out | ios::trunc);
-    else ofs.open(path,ios::out | ios::trunc);
-    m_inited = ofs.good();
-    if(!m_inited){
-        log(LOG_ERROR,"Cannot open the log file!","ALib::Logger");
-        return false;
-    }
-    logFile = path;
-    if(buffer.compare("")){
-        ofs << buffer;
-        currentFileBytes += buffer.size();
-        buffer = "";
-        trySwapLogFile();
-    }
-    return m_inited;
-}
 void Logger::flush(){
-    if(output2c)std::cout.flush();
-    if(!m_inited)return;
-    ofs.flush();
-}
-void Logger::close(){
-    if(!m_inited){
-        log(LOG_ERROR,"You havnt inited ALib::Logger with setOutputFile!","ALib::Logger");
-        return;
+    for(auto & [_,target] : targets){
+        target->flush();
     }
-    this->flush();
-    ofs.close();
-    m_inited = false;
+}
+
+void Logger::closeLogFilter(const std::string& name){
+    auto result = filters.find(name);
+    if(result != filters.end()){
+        filters.erase(result);
+    }
+}
+
+void Logger::closeLogOutputTarget(const std::string& name){
+    auto result = targets.find(name);
+    if(result != targets.end()){
+        targets.erase(result);
+    }
 }
 
 Logger::~Logger(){
-    ///Close
-    if(output2c)std::cout.flush();
-    if(m_inited)this->close();
+    flush();
     #ifdef _WIN32
-    DeleteCriticalSection(&cs);
+    DeleteCriticalSection(&lock);
     #elif __linux__
-    pthread_mutex_destroy(&cs);
+    pthread_mutex_destroy(&lock);
     pthread_mutexattr_destroy(&mutex_attr);
     #endif // __linux__
 }
 
-Logger::Logger(bool otc,bool v,int lg){
-    m_inited = false;
+Logger::Logger(int extra,bool v){
     if(v && (instance == NULL)){
         instance = this;
     }
-    output2c = otc;
-    mode = LOG_SH_BASIC;
-    buffer = "";
-    neon_color = -1;
-    setLogVisibilities(lg);
-    splitFiles = false;
-    singleLogMaxBytes = 1024 * 1024;
-    currentFileBytes = 0;
-    splitIndex = 0;
+    showExtra = extra;
+
     #ifdef _WIN32
-    InitializeCriticalSection(&cs);
+    InitializeCriticalSection(&lock);
     #elif __linux__
     pthread_mutexattr_init(&mutex_attr);
     pthread_mutexattr_settype(&mutex_attr,PTHREAD_MUTEX_RECURSIVE);
 
-    pthread_mutex_init(&cs,&mutex_attr);
+    pthread_mutex_init(&lock,&mutex_attr);
     #endif // __linux__
 }
 
@@ -97,27 +70,7 @@ void Logger::setStaticLogger(Logger* l){
     instance = l;
 }
 
-void Logger::setOutputToConsole(bool value){
-    this->output2c = value;
-}
-
-bool Logger::getLoggerStatus(){
-    return m_inited;
-}
-
-LogHeader Logger::generateHeader(int l){
-    if(l&LOG_INFO)return {"[INFO]",0x0E};
-    else if(l&LOG_CRITI)return {"[CRITICAL]",0x4f};
-    else if(l&LOG_WARN)return {"[WARN]",0x09};
-    else if(l&LOG_DEBUG)return {"[DEBUG]",0x0f};
-    else if(l&LOG_ERROR)return {"[ERROR]",0xf4};
-    else if(l&LOG_TRACE)return {"[TRACE]",0x0f};
-    else return {"",0};
-}
-
-int Logger::getShowExtra(){return mode;}
-
-int Logger::getLogVisibilities(){return showlg;}
+int Logger::getShowExtra(){return showExtra;}
 
 CriticalLock::CriticalLock(LOCK & c){
     cs = &c;
@@ -146,73 +99,101 @@ void Logger::log(int level,dstring msg,dstring head){
         restOut.reserve(LOG_RESERVE_SIZE);
         return 0;
     }();
-    if(level & LOG_OFF || !(showlg & level))return;
-    LogHeader ist = generateHeader(level);
+    bool keepMessage = true;
 
+    for(auto & [_,ft] : filters){
+        if(ft->enabled)keepMessage &= ft->pre_filter(level,msg);
+    }
+    if(!keepMessage)return;
+
+    std::string msg_copy = msg;
     timeHeader.clear();
     restOut.clear();
 
-    if(mode & LOG_SHOW_TIME){
-        timeHeader.append("[");
-        timeHeader.append(Util::ot_getTime());
-        timeHeader.append("]");
+    makeExtraContent(timeHeader,restOut,head,"",showExtra,false);
+    ///Filter
+    for(auto &[_,ft] : filters){
+        if(ft->enabled)keepMessage &= ft->filter(level,msg_copy,timeHeader,restOut);
     }
-    if(mode & LOG_SHOW_HEAD && head.compare("")){
-        restOut.append("[");
-        restOut.append(head);
-        restOut.append("]");
-    }
-    if(mode & LOG_SHOW_ELAP){
-        restOut.append("[");
-        restOut.append(to_string(clk.getOffset()));
-        restOut.append(" ms]");
-    }
-    if(mode & LOG_SHOW_PROC){
-        restOut.append("[PID:");
-        restOut.append(to_string(getpid()));
-        restOut.append("]");
-    }
-    if(mode & LOG_SHOW_THID){
-        restOut.append("[TID:");
-        restOut.append(to_string((int)pthread_self()));
-        restOut.append("]");
-    }
-    restOut.append(":");
+    if(!keepMessage)return;
 
-    if(m_inited){
-        CriticalLock lock(cs);
-        const char * v = (mode & LOG_SHOW_TYPE)?(ist.str):("");
-        ofs << timeHeader << v;
-        ofs << restOut << msg << "\n";
-        currentFileBytes += timeHeader.size() + strlen(v) + restOut.size() + msg.size() + 1;
-        trySwapLogFile();
-    }else{
-        CriticalLock lock(cs);
-        buffer += timeHeader;
-        buffer += (mode & LOG_SHOW_TYPE)?ist.str:"";
-        buffer += restOut;
-        buffer += msg;
-        buffer += "\n";
-    }
-    if(output2c){
-        CriticalLock lock(cs);
-        cout << timeHeader;
-        if(mode & LOG_SHOW_TYPE)Util::io_printColor(ist.str,ist.color);
-        cout << restOut;
-        if(neon_color != -1){
-            Util::io_printColor(msg,neon_color);
-        }else cout << msg;
-        cout << endl;
+    {
+        CriticalLock cs(lock);
+        ///Output
+        for(auto &[_,target] : targets){
+            if(target->enabled)target->write(level,msg_copy,timeHeader,restOut,showExtra);
+        }
     }
 }
 
-void Logger::setShowExtra(int mode){this->mode = mode;}
+///Enabled 0:false 1:true -1:can't find
+int Logger::getLogOutputTargetStatus(const std::string& name){
+    auto res = targets.find(name);
+    if(res == targets.end())return -1;
+    return res->second->enabled;
+}
+int Logger::getLogFilterStatus(const std::string& name){
+    auto res = filters.find(name);
+    if(res == filters.end())return -1;
+    return res->second->enabled;
+}
 
-void Logger::setLogVisibilities(int logs){showlg = logs;}
+void Logger::setLogOutputTargetStatus(const std::string& name,bool v){
+    auto res = targets.find(name);
+    if(res == targets.end())return;
+    res->second->enabled = v;
+}
 
-std::string Logger::makeMsg(int level,dstring & msg,dstring &head,bool ends){
+void Logger::setLogFilterStatus(const std::string& name,bool v){
+    auto res = filters.find(name);
+    if(res == filters.end())return;
+    res->second->enabled = v;
+}
+
+void Logger::appendLogOutputTarget(const std::string &name,std::shared_ptr<LogOutputTarget> target){
+    targets.insert_or_assign(name,target);
+}
+
+void Logger::appendLogFilter(const std::string & name,std::shared_ptr<LogFilter> filter){
+    filters.insert_or_assign(name,filter);
+}
+
+void Logger::setShowExtra(int mode){this->showExtra = mode;}
+
+void Logger::makeExtraContent(std::string &tm,std::string& rest,dstring head,dstring showTypeStr,int mode,bool addLg){
+    if(mode & LOG_SHOW_TIME){
+        tm.append("[");
+        tm.append(Util::ot_getTime());
+        tm.append("]");
+    }
+    if(addLg && mode & LOG_SHOW_TYPE){
+        rest.append(showTypeStr);
+    }
+    if(mode & LOG_SHOW_HEAD && head.compare("")){
+        rest.append("[");
+        rest.append(head);
+        rest.append("]");
+    }
+    if(mode & LOG_SHOW_ELAP){
+        rest.append("[");
+        rest.append(to_string(clk.getOffset()));
+        rest.append("ms]");
+    }
+    if(mode & LOG_SHOW_PROC){
+        rest.append("[PID:");
+        rest.append(to_string(getpid()));
+        rest.append("]");
+    }
+    if(mode & LOG_SHOW_THID){
+        rest.append("[TID:");
+        rest.append(to_string((int)pthread_self()));
+        rest.append("]");
+    }
+    rest.append(":");
+}
+
+std::string Logger::makeMsg(int level,dstring msg,dstring head,bool ends){
     using namespace std;
-    LogHeader ist = generateHeader(level);
     static thread_local string rout;
     [[maybe_unused]] static thread_local int simp_init = []{
         rout.reserve(LOG_RESERVE_SIZE);
@@ -220,87 +201,10 @@ std::string Logger::makeMsg(int level,dstring & msg,dstring &head,bool ends){
     }();
 
     rout.clear();
-
-    if(mode & LOG_SHOW_TIME){
-        rout.append("[");
-        rout.append(Util::ot_getTime());
-        rout.append("]");
-    }
-    if(mode & LOG_SHOW_TYPE){
-        rout.append(ist.str);
-    }
-    if(mode & LOG_SHOW_HEAD && head.compare("")){
-        rout.append("[");
-        rout.append(head);
-        rout.append("]");
-    }
-    if(mode & LOG_SHOW_ELAP){
-        rout.append("[");
-        rout.append(to_string(clk.getOffset()));
-        rout.append("ms]");
-    }
-    if(mode & LOG_SHOW_PROC){
-        rout.append("[PID:");
-        rout.append(to_string(getpid()));
-        rout.append("]");
-    }
-    if(mode & LOG_SHOW_THID){
-        rout.append("[TID:");
-        rout.append(to_string((int)pthread_self()));
-        rout.append("]");
-    }
-    rout.append(":");
+    makeExtraContent(rout,rout,head,"MakeMSG",showExtra,true);
     rout.append(msg);
     rout.append(ends?"\n":"");
     return rout;
-}
-
-void Logger::trySwapLogFile(){
-    if(!splitFiles){
-        //log(LOG_WARN,"You havent enabled split files!","ALib::Logger");
-        return;
-    }
-    if(currentFileBytes >= singleLogMaxBytes){
-        currentFileBytes = 0;
-        ofs.close();
-        ++splitIndex;
-        ofs.open(generateFilePath(logFile,splitIndex),ios::out | ios::trunc);
-        if(ofs.bad()){
-            //log(LOG_WARN,"Cannot open a new log file!","ALib::Logger");
-            m_inited = false;
-            return;
-        }
-    }
-}
-
-std::string Logger::generateFilePath(const std::string& in,int index){
-    auto result = in.find_last_of('.');
-    unsigned int pos = (result == std::string::npos)?in.length():(unsigned int)(result);
-    std::string ext = in.substr(pos);/// 1234.ext --> ext=".ext"
-    std::string pre = in.substr(0,pos);///pre = "1234"
-    return pre + " - " + std::to_string(index) + ext;
-}
-
-void Logger::setSplitFiles(bool v){
-    splitFiles = v;
-}
-
-bool Logger::getSplitFiles(){
-    return splitFiles;
-}
-
-void Logger::setSingleFileMaxSize(unsigned long maxBytes){
-    singleLogMaxBytes = maxBytes?maxBytes:1;
-}
-
-unsigned long Logger::getSingleFileMaxSize(){
-    return singleLogMaxBytes;
-}
-
-std::string Logger::getCurrentLogFile(){
-    if(splitFiles){
-        return generateFilePath(logFile,splitIndex);
-    }else return logFile;
 }
 
 void LogFactory::info(dstring msg){i->log(LOG_INFO,msg,head);}
@@ -325,9 +229,8 @@ void LogFactory::setShowContainerName(bool v){
     showContainerName = v;
 }
 
-LogFactory& LogFactory::operator()(int logLevel,int nc){
+LogFactory& LogFactory::operator()(int logLevel){
     defLogType = logLevel;
-    i->neon_color = nc;
     return *this;
 }
 
@@ -519,10 +422,203 @@ LogFactory& LogFactory::operator<<(EndLogFn fn){
     return * this;
 }
 
-void LogFactory::setContentColor(int color){
-    i->neon_color = color;
+
+///Targets
+void LogOutputTarget::write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int ss){}
+void LogOutputTarget::flush(){}
+void LogOutputTarget::close(){}
+LogOutputTarget::LogOutputTarget(){
+    ///Nice!
+    ///cout << "INited" << endl;
+    enabled = true;
+}
+LogOutputTarget::~LogOutputTarget(){
+    ///Nice it will be called!
+    //cout << "Called" << endl;
+    flush();
+    close();
 }
 
-int LogFactory::getContentColor(){
-    return i->neon_color;
+namespace alib::g3::log_output_targets{
+    LogHeader getHeader(int l){
+        if(l&LOG_INFO)return {"[INFO]",0x0E};
+        else if(l&LOG_CRITI)return {"[CRITICAL]",0x4f};
+        else if(l&LOG_WARN)return {"[WARN]",0x09};
+        else if(l&LOG_DEBUG)return {"[DEBUG]",0x0f};
+        else if(l&LOG_ERROR)return {"[ERROR]",0xf4};
+        else if(l&LOG_TRACE)return {"[TRACE]",0x0f};
+        else return {"",0};
+    }
+
+    void Console::write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int ss){
+        LogHeader header = getHeader(logLevel);
+        if(timeHeader.compare(""))std::cout << timeHeader;
+        if(ss & LOG_SHOW_TYPE)Util::io_printColor(header.str,header.color);
+        cout << restContent;
+        if(neonColor != -1)Util::io_printColor(message,neonColor);
+        else cout << message;
+        cout << "\n";
+    }
+
+    void Console::flush(){
+        std::cout.flush();
+    }
+
+    void SingleFile::write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int ss){
+        if(!nice)return;
+        LogHeader header = getHeader(logLevel);
+        if(timeHeader.compare(""))ofs << timeHeader;
+        if(ss & LOG_SHOW_TYPE)ofs << header.str;
+        ofs << restContent << message << "\n";
+    }
+
+    void SingleFile::flush(){
+        if(nice)ofs.flush();
+    }
+
+    void SingleFile::close(){
+        if(nice)ofs.close();
+        nice = false;
+    }
+
+    void SingleFile::open(const std::string & path){
+        if(nice)return;
+        ofs.open(path);
+        if(ofs.bad())return;
+        nice = true;
+    }
+
+    SingleFile::SingleFile(const std::string& path){
+        nice = false;
+        open(path);
+    }
+
+    void SplittedFiles::write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int ss){
+        if(!nice)return;
+        LogHeader header = getHeader(logLevel);
+        if(timeHeader.compare("")){
+            ofs << timeHeader;
+            currentBytes += timeHeader.size();
+        }
+        if(ss & LOG_SHOW_TYPE){
+            ofs << header.str;
+            currentBytes += strlen(header.str);
+        }
+        ofs << restContent << message << "\n";
+        currentBytes += restContent.size() + message.size() + 1;
+        testSwapFile();
+    }
+
+    void SplittedFiles::flush(){
+        if(nice)ofs.flush();
+    }
+
+    void SplittedFiles::close(){
+        if(nice)ofs.close();
+        nice = false;
+        splitIndex = 0;
+    }
+
+    void SplittedFiles::testSwapFile(){
+        if(currentBytes >= maxBytes){
+            splitIndex++;
+            currentBytes = 0;
+            ofs.close();
+            nice = false;
+            open(generateFilePath(path,splitIndex));
+        }
+    }
+
+    void SplittedFiles::open(const std::string & path){
+        if(nice)return;
+        ofs.open(path);
+        if(ofs.bad())return;
+        nice = true;
+    }
+
+    SplittedFiles::SplittedFiles(const std::string& path,unsigned int maxBytes){
+        nice = false;
+        splitIndex = 0;
+        this->maxBytes = maxBytes;
+        this->path = path;
+        open(generateFilePath(path,splitIndex));
+    }
+
+    std::string SplittedFiles::generateFilePath(const std::string & in,int index){
+        auto result = in.find_last_of('.');
+        unsigned int pos = (result == std::string::npos)?in.length():(unsigned int)(result);
+        std::string ext = in.substr(pos);/// 1234.ext --> ext=".ext"
+        std::string pre = in.substr(0,pos);///pre = "1234"
+        return pre + " - " + std::to_string(index) + ext;
+    }
+
+    unsigned int SplittedFiles::getCurrentIndex(){
+        return splitIndex;
+    }
+}
+
+LogFilter::LogFilter(){
+    enabled = true;
+}
+
+LogFilter::~LogFilter(){}
+bool LogFilter::pre_filter(int,dstring){return true;}
+bool LogFilter::filter(int,std::string&,std::string&,std::string&){return true;}
+
+namespace alib::g3::log_filters{
+
+    LogLevel::LogLevel(int sl){
+        showLevels = sl;
+    }
+
+    bool LogLevel::pre_filter(int logLevel,const std::string& originMessage){
+        return logLevel & showLevels;
+    }
+
+    KeywordsBlocker::KeywordsBlocker(const std::vector<std::string> & kw){
+        keywords = kw;
+    }
+
+    bool KeywordsBlocker::pre_filter(int logLevel,const std::string& originMessage){
+        for(const auto & v : keywords){
+            if(originMessage.find(v) != std::string::npos){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    KeywordsReplacerMono::KeywordsReplacerMono(bool useChar,char ch,const std::string & replacement,const std::vector<std::string> & keys){
+        keywords = keys;
+        this->useChar = useChar;
+        this->ch = ch;
+        this->replacement = replacement;
+    }
+
+    bool KeywordsReplacerMono::filter(int logLevel,std::string & mainContent,std::string & timeHeader,std::string & extraContent){
+        auto pos = std::string::npos;
+        const std::string * tg;
+        while(true){
+            tg = NULL;
+            pos = std::string::npos;
+            for(const auto & v : keywords){
+                pos = mainContent.find(v);
+                if(pos != std::string::npos){
+                    tg = &v;
+                    break;
+                }
+            }
+            if(pos == std::string::npos)return true;
+            if(useChar)mainContent.replace(pos,tg->size(),tg->size(),ch);
+            else{
+                std::string value = mainContent.substr(0,pos);
+                std::string rest = mainContent.substr(pos + tg->size());
+
+                mainContent = value + replacement + rest;
+            }
+        }
+        return true;
+    }
+
+
 }

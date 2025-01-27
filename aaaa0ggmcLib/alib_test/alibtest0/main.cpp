@@ -47,6 +47,7 @@ int main(int argc,const char * argv[])
     return 0;
 }
 
+/*
 void test_alogger(){
     Logger logger;
     LogFactory lg("Test",logger);
@@ -192,6 +193,23 @@ void test_alogger(){
                 map<string,string>({{"123","456"},{"kkk","jjj"}}));
         lg << vec << endlog;
     }
+}*/
+
+void test_alogger(){
+    Logger logger;
+    logger.appendLogOutputTarget("console",std::make_shared<log_output_targets::Console>());
+    logger.appendLogOutputTarget("single_file",std::make_shared<log_output_targets::SingleFile>("test_data/logger_newVer"));
+    //logger.appendLogFilter("level",std::make_shared<log_filters::LogLevel>());
+    logger.appendLogFilter("replace",std::make_shared<log_filters::KeywordsReplacerMono>(false,'*',"[Sensitive]",std::vector<std::string>({"Hello"})));
+    LogFactory lg("Test",logger);
+
+    lg(LOG_INFO) << "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!" << endlog;
+    logger.setLogFiltlerStatus("replace",false);
+    lg(LOG_INFO) << "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!" << endlog;
+    lg(LOG_INFO) << "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!" << endlog;
+    lg(LOG_INFO) << "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!" << endlog;
+    lg(LOG_TRACE) << "TRACE" << endlog;
+    lg(LOG_DEBUG) << "DEBUG" << endlog;
 }
 
 void test_autil(){

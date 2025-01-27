@@ -2,5 +2,5 @@
 <CodeBlocks_workspace_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveProject path="../aaaa0ggmcLib/alib_test/alibtest0/alibtest0.cbp" />
-	<PreferredTarget name="Debug" />
+	<PreferredTarget name="gen3-debug" />
 </CodeBlocks_workspace_layout_file>

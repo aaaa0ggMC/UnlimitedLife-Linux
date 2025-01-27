@@ -4,6 +4,8 @@
 #include <memory>
 #include <string>
 #include <fstream>
+#include <unordered_map>
+#include <map>
 #include <optional>
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
@@ -33,7 +35,7 @@
 #define LOG_OFF   0x01000000
 
 #define LOG_FULL (LOG_TRACE | LOG_DEBUG | LOG_INFO | LOG_WARN | LOG_ERROR | LOG_CRITI)
-#define LOG_RELE (LOG_INFO | LOG_ERROR | LOG_CRITI)
+#define LOG_RELE (LOG_INFO | LOG_ERROR | LOG_CRITI | LOG_WARN)
 
 #define LOG_SHOW_TIME 0x00000001
 #define LOG_SHOW_TYPE 0x00000010
@@ -42,8 +44,8 @@
 #define LOG_SHOW_HEAD 0x00010000
 #define LOG_SHOW_PROC 0x00100000
 
-#define LOG_SH_BASIC (LOG_SHOW_TIME | LOG_SHOW_TYPE | LOG_SHOW_ELAP | LOG_SHOW_HEAD)
-#define LOG_SH_FULL  (LOG_SH_BASIC | LOG_SHOW_THID | LOG_SHOW_PROC)
+#define LOG_SHOW_BASIC (LOG_SHOW_TIME | LOG_SHOW_TYPE | LOG_SHOW_ELAP | LOG_SHOW_HEAD)
+#define LOG_SHOW_FULL  (LOG_SHOW_BASIC | LOG_SHOW_THID | LOG_SHOW_PROC)
 
 namespace alib{
 namespace g3{
@@ -70,59 +72,143 @@ namespace g3{
         ~CriticalLock();
     };
 
+    struct LogOutputTarget{
+    public:
+        bool enabled;
+        LogOutputTarget();
+
+        virtual void write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int showExtra);
+        virtual void flush();
+        virtual void close();
+        ///will call flush() & close() automatically
+        virtual ~LogOutputTarget();
+    };
+
+    namespace log_output_targets{
+        LogHeader getHeader(int level);
+
+        struct Console : LogOutputTarget{
+            int neonColor {-1};
+
+            void write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int showExtra);
+            void flush();
+        };
+
+        struct SingleFile : LogOutputTarget{
+            SingleFile(const std::string & path);
+            void write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int showExtra);
+            void flush();
+            void close();
+            void open(const std::string & path);
+        private:
+            std::ofstream ofs;
+            bool nice;
+        };
+
+        struct SplittedFiles : LogOutputTarget{
+            unsigned int maxBytes;
+
+            SplittedFiles(const std::string & path,unsigned int maxBytes);
+
+            void write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int showExtra);
+            void flush();
+            void close();
+            void open(const std::string & path);
+
+            unsigned int getCurrentIndex();
+            static std::string generateFilePath(const std::string & in,int index);
+        private:
+            void testSwapFile();
+
+            unsigned int splitIndex;
+            unsigned int currentBytes;
+            std::ofstream ofs;
+            std::string path;
+            bool nice;
+        };
+    }
+
+    struct LogFilter{
+        bool enabled;
+
+        LogFilter();
+        ///true:keep this log;false:discard the whole log content
+        virtual bool filter(int logLevel,std::string & mainContent,std::string & timeHeader,std::string & extraContent);
+        virtual bool pre_filter(int logLevel,const std::string& originMessage);
+        virtual ~LogFilter();
+    };
+
+    namespace log_filters{
+        struct LogLevel : LogFilter{
+            int showLevels;
+
+            LogLevel(int showLevels = LOG_RELE);
+
+            bool pre_filter(int logLevel,const std::string& originMessage);
+        };
+
+        struct KeywordsBlocker : LogFilter{
+            std::vector<std::string> keywords;
+
+            KeywordsBlocker(const std::vector<std::string>& keywords);
+
+            bool pre_filter(int logLevel,const std::string& originMessage);
+        };
+
+        struct KeywordsReplacerMono : LogFilter{
+            std::vector<std::string> keywords;
+            bool useChar;
+            char ch;
+            std::string replacement;
+
+            //useChar: true usechar,false use string
+            KeywordsReplacerMono(bool useChar,char ch,const std::string & replacement,const std::vector<std::string> & keys);
+
+            bool filter(int logLevel,std::string & mainContent,std::string & timeHeader,std::string & extraContent);
+        };
+
+    }
+
     class DLL_EXPORT Logger{
     private:
         friend class LogFactory;
-        bool output2c;
-        bool m_inited;
-        bool splitFiles;
-        unsigned long singleLogMaxBytes;
-        unsigned int splitIndex;
-        unsigned long currentFileBytes;
-        int mode;
-        int showlg;
-        std::ofstream ofs;
-        std::string buffer;
-        std::string logFile;
+        int showExtra;
         Clock clk;
-        LOCK cs;
         #ifdef __linux__
         pthread_mutexattr_t mutex_attr;
         #endif // __linux__
+        LOCK lock;
         static Logger * instance;
     public:
-        int neon_color;
+        std::unordered_map<std::string,std::shared_ptr<LogOutputTarget>> targets;
+        std::map<std::string,std::shared_ptr<LogFilter>> filters;
 
-        Logger(bool outputToConsole = true,bool setInstanceIfNULL = true,int logVisibilities = LOG_FULL);
+        Logger(int showExtra = LOG_SHOW_BASIC,bool setInstanceIfNULL = true);
         ~Logger();
 
         void log(int level,dstring content,dstring head);
         void flush();
-        void close();
 
-        bool setOutputFile(dstring path);
-        void setOutputToConsole(bool outputToConsole);
-        void setShowExtra(int show);
-        void setLogVisibilities(int visibleLogs);
-        ///Minium: one message
-        void setSplitFiles(bool v);
-        ///Only truly works when split files is on,min 1
-        void setSingleFileMaxSize(unsigned long maxBytes);
+        void setShowExtra(int showMode);
 
-        ///Return: has relevant log file to write in
-        bool getLoggerStatus();
+        void appendLogOutputTarget(const std::string &name,std::shared_ptr<LogOutputTarget> target);
+        void appendLogFilter(const std::string & name,std::shared_ptr<LogFilter> filter);
+
+        void closeLogOutputTarget(const std::string& name);
+        void closeLogFilter(const std::string& name);
+
+        ///Enabled 0:false 1:true -1:can't find
+        int getLogOutputTargetStatus(const std::string& name);
+        int getLogFilterStatus(const std::string& name);
+
+        void setLogOutputTargetStatus(const std::string& name,bool enabled);
+        void setLogFilterStatus(const std::string& name,bool enabled);
+
         int getShowExtra();
-        int getLogVisibilities();
-        bool getSplitFiles();
-        unsigned long getSingleFileMaxSize();
-        std::string getCurrentLogFile();
 
-        void trySwapLogFile();
-
-        static std::string generateFilePath(const std::string & origin,int index);
-
+        //ends:end line
         std::string makeMsg(int level,dstring data,dstring head,bool ends = true);
-        static LogHeader generateHeader(int level);
+        void makeExtraContent(std::string&time,std::string&rest,dstring head,dstring showTypeStr,int showExtra,bool addLg);
         static void setStaticLogger(Logger*);
         static std::optional<Logger*> getStaticLogger();
     };
@@ -151,13 +237,9 @@ namespace g3{
         void trace(dstring msg);
         void warn(dstring msg);
 
-        //it's composed
-        void setContentColor(int color);
-        int getContentColor();
-
         void setShowContainerName(bool v);
 
-        LogFactory& operator()(int logType = LOG_INFO,int content_color = -1);
+        LogFactory& operator()(int logType = LOG_INFO);
 
         ///Multithread is supported below. : )
         LogFactory& operator<<(dstring data);

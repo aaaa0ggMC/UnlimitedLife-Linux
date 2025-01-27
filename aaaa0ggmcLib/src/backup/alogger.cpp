@@ -10,25 +10,43 @@
 
 #define LOG_RESERVE_SIZE 512
 
-using namespace alib::ng;
+using namespace alib::g3;
 
 Logger * Logger::instance;
+thread_local std::string LogFactory::cachedStr = "";
 
 bool Logger::setOutputFile(dstring path){
-    ofs.open(path,ios::out | ios::trunc);
+    CriticalLock lock(cs);
+    if(m_inited){
+        log(LOG_ERROR,"You have already opened a log file!","ALib::Logger");
+        return false;
+    }
+    if(splitFiles)ofs.open(generateFilePath(path,0),ios::out | ios::trunc);
+    else ofs.open(path,ios::out | ios::trunc);
     m_inited = ofs.good();
+    if(!m_inited){
+        log(LOG_ERROR,"Cannot open the log file!","ALib::Logger");
+        return false;
+    }
+    logFile = path;
     if(buffer.compare("")){
         ofs << buffer;
+        currentFileBytes += buffer.size();
         buffer = "";
+        trySwapLogFile();
     }
     return m_inited;
 }
 void Logger::flush(){
+    if(output2c)std::cout.flush();
     if(!m_inited)return;
     ofs.flush();
 }
 void Logger::close(){
-    if(!m_inited)return;
+    if(!m_inited){
+        log(LOG_ERROR,"You havnt inited ALib::Logger with setOutputFile!","ALib::Logger");
+        return;
+    }
     this->flush();
     ofs.close();
     m_inited = false;
@@ -36,7 +54,8 @@ void Logger::close(){
 
 Logger::~Logger(){
     ///Close
-    this->close();
+    if(output2c)std::cout.flush();
+    if(m_inited)this->close();
     #ifdef _WIN32
     DeleteCriticalSection(&cs);
     #elif __linux__
@@ -55,24 +74,30 @@ Logger::Logger(bool otc,bool v,int lg){
     buffer = "";
     neon_color = -1;
     setLogVisibilities(lg);
+    splitFiles = false;
+    singleLogMaxBytes = 1024 * 1024;
+    currentFileBytes = 0;
+    splitIndex = 0;
     #ifdef _WIN32
     InitializeCriticalSection(&cs);
     #elif __linux__
     pthread_mutexattr_init(&mutex_attr);
-    //pthread_mutexattr_settype(&mutex_attr,PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&cs,NULL);
+    pthread_mutexattr_settype(&mutex_attr,PTHREAD_MUTEX_RECURSIVE);
+
+    pthread_mutex_init(&cs,&mutex_attr);
     #endif // __linux__
 }
 
-Logger* Logger::get(){
-    return instance;
+std::optional<Logger*> Logger::getStaticLogger(){
+    if(instance)return {instance};
+    else return std::nullopt;
 }
 
-void Logger::set(Logger* l){
+void Logger::setStaticLogger(Logger* l){
     instance = l;
 }
 
-void Logger::toggleConsoleOutput(bool value){
+void Logger::setOutputToConsole(bool value){
     this->output2c = value;
 }
 
@@ -80,7 +105,7 @@ bool Logger::getLoggerStatus(){
     return m_inited;
 }
 
-IData Logger::genType(int l){
+LogHeader Logger::generateHeader(int l){
     if(l&LOG_INFO)return {"[INFO]",0x0E};
     else if(l&LOG_CRITI)return {"[CRITICAL]",0x4f};
     else if(l&LOG_WARN)return {"[WARN]",0x09};
@@ -90,7 +115,7 @@ IData Logger::genType(int l){
     else return {"",0};
 }
 
-int Logger::getMode(){return mode;}
+int Logger::getShowExtra(){return mode;}
 
 int Logger::getLogVisibilities(){return showlg;}
 
@@ -114,18 +139,15 @@ CriticalLock::~CriticalLock(){
 
 void Logger::log(int level,dstring msg,dstring head){
     using namespace std;
-    static string timeHeader;
-    static string restOut;
-    [[maybe_unused]] static int simp_init = [&]{
+    static thread_local string timeHeader;
+    static thread_local string restOut;
+    [[maybe_unused]] static thread_local int simp_init = [&]{
         timeHeader.reserve(64);
         restOut.reserve(LOG_RESERVE_SIZE);
         return 0;
     }();
-
-    CriticalLock lock(cs);
-
     if(level & LOG_OFF || !(showlg & level))return;
-    IData ist = genType(level);
+    LogHeader ist = generateHeader(level);
 
     timeHeader.clear();
     restOut.clear();
@@ -158,10 +180,14 @@ void Logger::log(int level,dstring msg,dstring head){
     restOut.append(":");
 
     if(m_inited){
+        CriticalLock lock(cs);
         const char * v = (mode & LOG_SHOW_TYPE)?(ist.str):("");
         ofs << timeHeader << v;
         ofs << restOut << msg << "\n";
+        currentFileBytes += timeHeader.size() + strlen(v) + restOut.size() + msg.size() + 1;
+        trySwapLogFile();
     }else{
+        CriticalLock lock(cs);
         buffer += timeHeader;
         buffer += (mode & LOG_SHOW_TYPE)?ist.str:"";
         buffer += restOut;
@@ -169,6 +195,7 @@ void Logger::log(int level,dstring msg,dstring head){
         buffer += "\n";
     }
     if(output2c){
+        CriticalLock lock(cs);
         cout << timeHeader;
         if(mode & LOG_SHOW_TYPE)Util::io_printColor(ist.str,ist.color);
         cout << restOut;
@@ -179,15 +206,15 @@ void Logger::log(int level,dstring msg,dstring head){
     }
 }
 
-void Logger::setMode(int mode){this->mode = mode;}
+void Logger::setShowExtra(int mode){this->mode = mode;}
 
 void Logger::setLogVisibilities(int logs){showlg = logs;}
 
 std::string Logger::makeMsg(int level,dstring & msg,dstring &head,bool ends){
     using namespace std;
-    IData ist = genType(level);
-    static string rout;
-    [[maybe_unused]] static int simp_init = []{
+    LogHeader ist = generateHeader(level);
+    static thread_local string rout;
+    [[maybe_unused]] static thread_local int simp_init = []{
         rout.reserve(LOG_RESERVE_SIZE);
         return 0;
     }();
@@ -228,12 +255,60 @@ std::string Logger::makeMsg(int level,dstring & msg,dstring &head,bool ends){
     return rout;
 }
 
-void LogFactory::info(dstring msg){if(i)i->log(LOG_INFO,msg,head);}
-void LogFactory::error(dstring msg){if(i)i->log(LOG_ERROR,msg,head);}
-void LogFactory::critical(dstring msg){if(i)i->log(LOG_CRITI,msg,head);}
-void LogFactory::debug(dstring msg){if(i)i->log(LOG_DEBUG,msg,head);}
-void LogFactory::trace(dstring msg){if(i)i->log(LOG_TRACE,msg,head);}
-void LogFactory::warn(dstring msg){if(i)i->log(LOG_WARN,msg,head);}
+void Logger::trySwapLogFile(){
+    if(!splitFiles){
+        //log(LOG_WARN,"You havent enabled split files!","ALib::Logger");
+        return;
+    }
+    if(currentFileBytes >= singleLogMaxBytes){
+        currentFileBytes = 0;
+        ofs.close();
+        ++splitIndex;
+        ofs.open(generateFilePath(logFile,splitIndex),ios::out | ios::trunc);
+        if(ofs.bad()){
+            //log(LOG_WARN,"Cannot open a new log file!","ALib::Logger");
+            m_inited = false;
+            return;
+        }
+    }
+}
+
+std::string Logger::generateFilePath(const std::string& in,int index){
+    auto result = in.find_last_of('.');
+    unsigned int pos = (result == std::string::npos)?in.length():(unsigned int)(result);
+    std::string ext = in.substr(pos);/// 1234.ext --> ext=".ext"
+    std::string pre = in.substr(0,pos);///pre = "1234"
+    return pre + " - " + std::to_string(index) + ext;
+}
+
+void Logger::setSplitFiles(bool v){
+    splitFiles = v;
+}
+
+bool Logger::getSplitFiles(){
+    return splitFiles;
+}
+
+void Logger::setSingleFileMaxSize(unsigned long maxBytes){
+    singleLogMaxBytes = maxBytes?maxBytes:1;
+}
+
+unsigned long Logger::getSingleFileMaxSize(){
+    return singleLogMaxBytes;
+}
+
+std::string Logger::getCurrentLogFile(){
+    if(splitFiles){
+        return generateFilePath(logFile,splitIndex);
+    }else return logFile;
+}
+
+void LogFactory::info(dstring msg){i->log(LOG_INFO,msg,head);}
+void LogFactory::error(dstring msg){i->log(LOG_ERROR,msg,head);}
+void LogFactory::critical(dstring msg){i->log(LOG_CRITI,msg,head);}
+void LogFactory::debug(dstring msg){i->log(LOG_DEBUG,msg,head);}
+void LogFactory::trace(dstring msg){i->log(LOG_TRACE,msg,head);}
+void LogFactory::warn(dstring msg){i->log(LOG_WARN,msg,head);}
 
 LogFactory::LogFactory(dstring a,Logger & c){
     head = a;
@@ -241,22 +316,18 @@ LogFactory::LogFactory(dstring a,Logger & c){
     i = &c;
     cachedStr = "";
     cachedStr.reserve(LOG_RESERVE_SIZE);
+    showContainerName = false;
 }
 
-LogFactory::LogFactory(dstring a){
-    head = a;
-    defLogType = LOG_TRACE;
-    i = Logger::instance;
-    cachedStr = "";
-    cachedStr.reserve(LOG_RESERVE_SIZE);
+void LogFactory::log(int l,dstring m){i->log(l,m,head);}
+
+void LogFactory::setShowContainerName(bool v){
+    showContainerName = v;
 }
-
-void LogFactory::log(int l,dstring m){if(i)i->log(l,m,head);}
-
 
 LogFactory& LogFactory::operator()(int logLevel,int nc){
     defLogType = logLevel;
-    if(i)i->neon_color = nc;
+    i->neon_color = nc;
     return *this;
 }
 
@@ -293,7 +364,7 @@ LogFactory& LogFactory::operator<<(unsigned long data){
 }
 
 LogFactory& LogFactory::operator<<(char data){
-    cachedStr += to_string(data);
+    cachedStr += data;
     return *this;
 }
 
@@ -439,21 +510,25 @@ LogFactory& LogFactory::operator<<(glm::mat4 data){
     return *this;
 }
 
-void alib::ng::endlog(LogEnd){}
+void alib::g3::endlog(LogEnd){}
 
 LogFactory& LogFactory::operator<<(EndLogFn fn){
-    if(i){
-        i->log(defLogType,cachedStr,head);
-        cachedStr.clear();
-    }
+    i->log(defLogType,cachedStr,head);
+    defLogType = LOG_TRACE;
+    cachedStr.clear();
     return * this;
 }
 
 void LogFactory::setContentColor(int color){
-    if(i)i->neon_color = color;
+    i->neon_color = color;
 }
 
 int LogFactory::getContentColor(){
-    if(i)return i->neon_color;
-    return -1;
+    return i->neon_color;
 }
+
+
+///Targets
+void LogOutputTarget::write(const std::string&,unsigned int){}
+
+
