@@ -49,18 +49,6 @@
 
 namespace alib{
 namespace g3{
-
-    #ifndef ALIB_DISABLE_TEMPLATES
-    namespace ext_toString{
-        inline std::string toString(const char* v){
-            return v;
-        }
-        template<class T> std::string toString(const T& v){
-            return std::to_string(v);
-        }
-    }
-    #endif // ALIB_DISABLE_TEMPLATES
-
     struct DLL_EXPORT LogHeader{
         const char * str;
         int color;
@@ -265,8 +253,6 @@ namespace g3{
         LogFactory& operator<<(glm::quat data);
         #endif // ALIB_DISABLE_GLM_EXTENSIONS
 
-
-        #ifndef ALIB_DISABLE_TEMPLATES
         ///For more support,use templates
         template<class T> std::string demangleTypeName(const char * mangledName){
             int status;
@@ -392,7 +378,6 @@ namespace g3{
             cachedStr += alib::g3::ext_toString::toString(t);
             return *this;
         }
-        #endif // ALIB_DISABLE_TEMPLATES
     };
 }
 }

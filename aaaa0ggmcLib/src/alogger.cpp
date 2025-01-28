@@ -118,9 +118,9 @@ void Logger::log(int level,dstring msg,dstring head){
     if(!keepMessage)return;
 
     {
-        CriticalLock cs(lock);
         ///Output
         for(auto &[_,target] : targets){
+            CriticalLock cs(lock);
             if(target->enabled)target->write(level,msg_copy,timeHeader,restOut,showExtra);
         }
     }
@@ -614,11 +614,11 @@ namespace alib::g3::log_filters{
                 std::string value = mainContent.substr(0,pos);
                 std::string rest = mainContent.substr(pos + tg->size());
 
-                mainContent = value + replacement + rest;
+                mainContent.reserve(value.size() + replacement.size() + rest.size() + 5);
+                mainContent.clear();
+                mainContent.append(value).append(replacement).append(rest);
             }
         }
         return true;
     }
-
-
 }

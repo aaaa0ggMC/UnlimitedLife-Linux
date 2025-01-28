@@ -66,6 +66,10 @@
 #define APCB_LIGHT_YELLOW (14 << 4)
 #define APCB_BRIGHT_WHITE (15 << 4)
 
+#ifndef ALIB_TO_STRING_RESERVE_SIZE
+#define ALIB_TO_STRING_RESERVE_SIZE 128
+#endif // ALIB_TO_STRING_RESERVE_SIZE
+
 namespace alib {
 namespace g3 {
 using namespace std;
@@ -75,6 +79,18 @@ using mem_bytes = __int64;
 #elif __linux__
 using mem_bytes = __int64_t;
 #endif // _WIN32
+
+namespace ext_toString{
+    inline std::string toString(const char* v){
+        return v;
+    }
+    inline const std::string& toString(const std::string& v){
+        return v;
+    }
+    template<class T> std::string toString(const T& v){
+        return std::to_string(v);
+    }
+}
 
 /** \brief Program Memory 程序使用内存**/
 struct DLL_EXPORT ProgramMemUsage {

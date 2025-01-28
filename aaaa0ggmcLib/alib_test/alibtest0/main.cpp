@@ -47,9 +47,13 @@ int main(int argc,const char * argv[])
     return 0;
 }
 
-/*
 void test_alogger(){
     Logger logger;
+    auto target_split = std::make_shared<log_output_targets::SplittedFiles>("test_data/multi/logs.log",128);
+    auto target_file = std::make_shared<log_output_targets::SingleFile>("test_data/logger_output_single");
+    auto target_template = std::make_shared<log_output_targets::SingleFile>("test_data/template_logger_output");
+    auto target_console = std::make_shared<log_output_targets::Console>();
+    logger.appendLogOutputTarget("console",target_console);
     LogFactory lg("Test",logger);
     cout << "[Stage]Pre output" << endl;
     lg.trace("TraceTest");
@@ -58,16 +62,14 @@ void test_alogger(){
     lg.error("ErrorTest");
     lg.critical("CriticalTest");
 
-    cout << "[Stage]Set output file test_data/logger_ouput" << endl;
-    logger.setOutputFile("test_data/logger_output");
-    lg.info("AfterTest");
-    lg.info("MultiOpen:Should arise error");
-    logger.setOutputFile("test_data/logger_output");
+    cout << "[Stage]Set output file test_data/logger_ouput_single" << endl;
+    logger.appendLogOutputTarget("file",target_file);
+    lg.info("AfterTest(Previous output wont be written into logfile)");
 
     cout << "Content color red" << endl;
-    lg.setContentColor(APCF_RED);
+    target_console->neonColor = APCF_RED;
     lg.info("ColorTest");
-    lg.setContentColor(APCF_WHITE);
+    target_console->neonColor = APCF_WHITE;
 
     cout << "GLM Test" << endl;
     {
@@ -101,15 +103,15 @@ void test_alogger(){
         lg << v << endlog;
     }
 
-    cout << "DisableOutput" << endl;
-    logger.setOutputToConsole(false);
+    cout << "DisableOutput(Next output is HelloWorld!)" << endl;
+    logger.setLogOutputTargetStatus("console",false);
     lg << "HelloWorld!" << endlog;
-    logger.setOutputToConsole(true);
+    logger.setLogOutputTargetStatus("console",true);
 
     cout << "Multithread Output Test:16 threads" << endl;
     auto fn = [&](int id){
         for(unsigned int i = 0;i < 16;++i){
-            lg.info(string("HelloWorld!Th") + std::to_string(id) + " " + to_string(i));
+            lg(LOG_INFO) << "HelloWorld!Th" << id << " " << to_string(i) << endlog;
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     };
@@ -126,23 +128,22 @@ void test_alogger(){
     }
 
     cout << "Test split files,close & reopen logger..." << endl;
-    logger.close();
-    logger.setSplitFiles(true);
-    logger.setSingleFileMaxSize(128);
-    cout << "Split:true MaxFileSize:32 file0: test_data/multi/logs.log" << endl;
-    logger.setOutputFile("test_data/multi/logs.log");
+    cout << "Split:true MaxFileSize:128 file0: test_data/multi/logs.log" << endl;
+    logger.appendLogOutputTarget("split",target_split);
 
-    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    cout << "Now writes " << target_split->getCurrentIndex() << endl;
     lg.info("TestTestTestTestTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
-    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    cout << "Now writes " << target_split->getCurrentIndex() << endl;
     lg.info("TestTestTestTestTestTestTestTestTestTest");
-    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    cout << "Now writes " << target_split->getCurrentIndex() << endl;
     lg.info("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
-    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    cout << "Now writes " << target_split->getCurrentIndex() << endl;
     lg.info("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
 
-    logger.close();
-    logger.setOutputFile("test_data/template_logger_output");
+    target_file->enabled = false;
+    target_split->enabled = false;
+
+    logger.appendLogOutputTarget("template",target_template);
     cout << "Not show container name" << endl;
     cout << "\e[100mTesting templates\e[0m" << endl;
     {
@@ -193,23 +194,6 @@ void test_alogger(){
                 map<string,string>({{"123","456"},{"kkk","jjj"}}));
         lg << vec << endlog;
     }
-}*/
-
-void test_alogger(){
-    Logger logger;
-    logger.appendLogOutputTarget("console",std::make_shared<log_output_targets::Console>());
-    logger.appendLogOutputTarget("single_file",std::make_shared<log_output_targets::SingleFile>("test_data/logger_newVer"));
-    //logger.appendLogFilter("level",std::make_shared<log_filters::LogLevel>());
-    logger.appendLogFilter("replace",std::make_shared<log_filters::KeywordsReplacerMono>(false,'*',"[Sensitive]",std::vector<std::string>({"Hello"})));
-    LogFactory lg("Test",logger);
-
-    lg(LOG_INFO) << "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!" << endlog;
-    logger.setLogFilterStatus("replace",false);
-    lg(LOG_INFO) << "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!" << endlog;
-    lg(LOG_INFO) << "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!" << endlog;
-    lg(LOG_INFO) << "Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!Hello World!" << endlog;
-    lg(LOG_TRACE) << "TRACE" << endlog;
-    lg(LOG_DEBUG) << "DEBUG" << endlog;
 }
 
 void test_autil(){
