@@ -87,7 +87,7 @@ namespace g3{
 
 
         static void set(Translator *);
-        static Translator * get();
+        static Translator* get();
     };
 
 }

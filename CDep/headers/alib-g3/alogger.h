@@ -229,16 +229,6 @@ namespace g3{
 
         LogFactory& operator()(int logType = LOG_INFO);
 
-        ///Multithread is supported below. : )
-        LogFactory& operator<<(dstring data);
-        LogFactory& operator<<(int data);
-        LogFactory& operator<<(float data);
-        LogFactory& operator<<(double data);
-        LogFactory& operator<<(long data);
-        LogFactory& operator<<(unsigned int data);
-        LogFactory& operator<<(unsigned long data);
-        LogFactory& operator<<(char data);
-
         ///end the log
         LogFactory& operator<<(EndLogFn fn);
 
@@ -274,7 +264,7 @@ namespace g3{
                 }
 
         //std::vector<Type,Allocator>
-        template<template<class T,class Allocator> class Cont,class T,class A>
+        template<template<class T,class Allocator> class Cont,class T,class A,typename = std::enable_if_t<std::is_same<Cont<T,A>,std::vector<T,A>>::value>>
             LogFactory& operator<<(const Cont<T,A> & cont){
             if(showContainerName)cachedStr += demangleTypeName<decltype(cont)>(typeid(decltype(cont)).name());
             auto endloc = &(*(--cont.end()));
@@ -293,7 +283,7 @@ namespace g3{
         }
 
         //std::map<Key,Value,Allocator>
-        template<template<class K,class V,class Allocator> class Cont,class K,class V,class A>
+        template<template<class K,class V,class Allocator> class Cont,class K,class V,class A,typename = std::enable_if_t<std::is_same<Cont<K,V,A>,std::map<K,V,A>>::value>>
             LogFactory& operator<<(const Cont<K,V,A> & cont){
             if(showContainerName)cachedStr += demangleTypeName<decltype(cont)>(typeid(decltype(cont)).name());
             auto endloc = &((--cont.end())->second);
@@ -360,7 +350,7 @@ namespace g3{
             }
         };
 
-        template<template<typename... Elements> class Cont,typename... Eles>
+        template<template<typename... Elements> class Cont,typename... Eles,typename = std::enable_if_t<std::is_same<Cont<Eles...>,std::tuple<Eles...>>::value>>
             LogFactory& operator<<(const Cont<Eles...> & t){
             if(showContainerName)cachedStr += demangleTypeName<decltype(t)>(typeid(decltype(t)).name());
             bool old = showContainerName;

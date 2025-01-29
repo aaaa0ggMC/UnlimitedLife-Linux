@@ -234,43 +234,6 @@ LogFactory& LogFactory::operator()(int logLevel){
     return *this;
 }
 
-LogFactory& LogFactory::operator<<(dstring data){
-    cachedStr += data;
-    return *this;
-}
-
-LogFactory& LogFactory::operator<<(int data){
-    cachedStr += to_string(data);
-    return *this;
-}
-LogFactory& LogFactory::operator<<(float data){
-    cachedStr += to_string(data);
-    return *this;
-}
-LogFactory& LogFactory::operator<<(double data){
-    cachedStr += to_string(data);
-    return *this;
-}
-LogFactory& LogFactory::operator<<(long data){
-    cachedStr += to_string(data);
-    return *this;
-}
-
-LogFactory& LogFactory::operator<<(unsigned int data){
-    cachedStr += to_string(data);
-    return *this;
-}
-
-LogFactory& LogFactory::operator<<(unsigned long data){
-    cachedStr += to_string(data);
-    return *this;
-}
-
-LogFactory& LogFactory::operator<<(char data){
-    cachedStr += data;
-    return *this;
-}
-
 LogFactory& LogFactory::operator<<(glm::vec1 data){
     cachedStr += "(";
     cachedStr += to_string(data.x);
