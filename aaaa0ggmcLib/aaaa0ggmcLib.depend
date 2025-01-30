@@ -233,10 +233,11 @@
 	<time.h>
 	<alib-g3/autil.h>
 
-1738117870 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/autil.h
+1738197123 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/autil.h
 	<string>
 	<vector>
 	<fstream>
+	<format>
 	<windows.h>
 	<unistd.h>
 
@@ -278,7 +279,7 @@
 	<string>
 	<alib-g3/autil.h>
 
-1737630653 source:/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/aaaa0ggmcLib/src/atranslator.cpp
+1738205200 source:/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/aaaa0ggmcLib/src/atranslator.cpp
 	<alib-g3/atranslator.h>
 	<alib-g3/autil.h>
 	<alib-g3/adata.h>
@@ -287,13 +288,13 @@
 	<string.h>
 	<iostream>
 
-1737630552 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/atranslator.h
+1738205253 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/atranslator.h
 	<string>
 	<vector>
 	<unordered_map>
 	<optional>
 	<stdarg.h>
-	<alib-g3/astring.h>
+	<alib-g3/autil.h>
 
 1737631763 source:/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/aaaa0ggmcLib/src/autil.cpp
 	<alib-g3/autil.h>
@@ -316,7 +317,7 @@
 	<iostream>
 	<string>
 
-1738116833 source:/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/aaaa0ggmcLib/src/alogger.cpp
+1738202254 source:/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/aaaa0ggmcLib/src/alogger.cpp
 	<time.h>
 	<string.h>
 	<stdlib.h>
@@ -326,7 +327,7 @@
 	<alib-g3/autil.h>
 	<glm/gtc/type_ptr.hpp>
 
-1738117227 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/alogger.h
+1738201667 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/alogger.h
 	<memory>
 	<string>
 	<fstream>

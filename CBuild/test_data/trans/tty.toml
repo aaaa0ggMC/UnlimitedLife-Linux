@@ -1,0 +1,7 @@
+Language = 'TTY'
+Access = 'tty'
+
+test = 'TTYTest%s'
+
+[com]
+test = 'TTTTY'

@@ -161,6 +161,7 @@ void Logger::appendLogFilter(const std::string & name,std::shared_ptr<LogFilter>
 void Logger::setShowExtra(int mode){this->showExtra = mode;}
 
 void Logger::makeExtraContent(std::string &tm,std::string& rest,dstring head,dstring showTypeStr,int mode,bool addLg){
+    if(mode == LOG_SHOW_NONE)return;
     if(mode & LOG_SHOW_TIME){
         tm.append("[");
         tm.append(Util::ot_getTime());

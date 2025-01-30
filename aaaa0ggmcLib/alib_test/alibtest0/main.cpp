@@ -4,6 +4,7 @@
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
 #include <alib-g3/alogger.h>
+#include <alib-g3/atranslator.h>
 #include <string.h>
 #include <glm/glm.hpp>
 #include <thread>
@@ -18,6 +19,7 @@ using namespace alib::g3;
 void test_autil();
 void test_alogger();
 void test_aclock();
+void test_atranslator();
 
 int main(int argc,const char * argv[])
 {
@@ -29,6 +31,7 @@ int main(int argc,const char * argv[])
             cout << "util      Test autil.h" << endl;
             cout << "logger    Test alogger.h" << endl;
             cout << "clock    Test aclock.h" << endl;
+            cout << "translator    Test atranslator.h" << endl;
             cout << "q / Q    Quit" << endl;
             memset(buf,256,sizeof(char));
             scanf("%s",buf);
@@ -43,8 +46,31 @@ int main(int argc,const char * argv[])
         test_alogger();
     }else if(!strcmp("clock",argv[1])){
         test_aclock();
+    }else if(!strcmp("translator",argv[1])){
+        test_atranslator();
     }
     return 0;
+}
+
+void test_atranslator(){
+    cout << "Translations are assumed to be in: ./test_data/trans/";
+    Translator ts("en_us");
+    cout << "Ret:" << ts.readTranslationFiles("test_data/trans") << endl;
+
+    Logger logger;
+    LogFactory lgf("Output",logger);
+    logger.setShowExtra(LOG_SHOW_NONE);
+
+    logger.appendLogOutputTarget("console",std::make_shared<log_output_targets::Console>());
+
+    for(auto & [key,tm] : ts.translations){
+        lgf << key << ":" << tm << endlog;
+    }
+    string value = "";
+    ts.loadTranslation("en_us");
+
+     cout << "NoArgs:" << ts.translate("test") << endl;
+     cout << "Args:" << ts.translate_args("test",value,0,"HelloWorld") << endl;
 }
 
 void test_alogger(){

@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#ifndef ALIB_DISABLE_CPP20
+#include <format>
+#endif // ALIB_DISABLE_CPP20
 
 #define ALIB_SUCCESS 0
 #define ALIB_ERROR -1
@@ -81,15 +84,29 @@ using mem_bytes = __int64_t;
 #endif // _WIN32
 
 namespace ext_toString{
-    inline std::string toString(const char* v){
-        return v;
-    }
+    #ifndef ALIB_DISABLE_CPP20
+    inline thread_local std::string fmtBuf;
+    [[maybe_unused]] inline thread_local bool inited = []()->bool{
+        fmtBuf.reserve(ALIB_TO_STRING_RESERVE_SIZE);
+        return true;
+    }();
+    #endif // ALIB_DISABLE_CPP20
+
     inline const std::string& toString(const std::string& v){
         return v;
     }
-    template<class T> std::string toString(const T& v){
-
-        return std::to_string(v);
+    template<class T> auto toString(const T& v){
+        #ifndef ALIB_DISABLE_CPP20
+        fmtBuf.clear();
+        std::format_to(std::back_inserter(fmtBuf),"{}",v);
+        fmtBuf.append("\0");
+        return (const std::string&)fmtBuf;
+        #else
+            if constexpr(std::is_same<T,const char *>::value)return std::string(v);
+            else if constexpr(std::is_same<T,char *>::value)return std::string(v);
+            else if constexpr (std::is_same_v<std::remove_extent_t<T>, char> && std::is_array_v<T>)return std::string(v);
+            else return std::to_string(v);
+        #endif // ALIB_DISABLE_CPP20
     }
 }
 
