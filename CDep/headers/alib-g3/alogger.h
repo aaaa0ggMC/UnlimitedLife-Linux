@@ -232,6 +232,8 @@ namespace g3{
 
         ///end the log
         LogFactory& operator<<(EndLogFn fn);
+        //std::endl
+        LogFactory& operator<<(std::ostream& (*manip)(std::ostream&));
 
         #ifndef ALIB_DISABLE_GLM_EXTENSIONS
         LogFactory& operator<<(glm::vec1 data);

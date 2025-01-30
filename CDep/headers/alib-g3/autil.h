@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <filesystem>
 #ifndef ALIB_DISABLE_CPP20
 #include <format>
 #endif // ALIB_DISABLE_CPP20
@@ -72,6 +73,8 @@
 #ifndef ALIB_TO_STRING_RESERVE_SIZE
 #define ALIB_TO_STRING_RESERVE_SIZE 128
 #endif // ALIB_TO_STRING_RESERVE_SIZE
+
+namespace fs = std::filesystem;
 
 namespace alib {
 namespace g3 {
@@ -193,6 +196,17 @@ public:
      */
     static bool io_checkExistence(dstring path);
 
+    static void io_traverseImpl(const fs::path& basePath,std::vector<std::string>& results,int remainingDepth,const fs::path& currentAppender,bool includeFiles,bool includeDirs);
+
+    static void io_traverseFiles2(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
+
+    static void io_traverseFilesOnly(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
+
+    static void io_traverseFolders(const std::string& path,std::vector<std::string>& folders,int traverseDepth = -1,const std::string& appender = "");
+
+    static void io_traverseFilesRecursive(const std::string& path,std::vector<std::string>& files,const std::string& appender = "");
+
+    static void io_traverseFoldersRecursive(const std::string& path,std::vector<std::string>& folders,const std::string& appender = "");
 ///other
     /** \brief returns a time formatted as string
      *

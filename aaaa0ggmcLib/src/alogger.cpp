@@ -333,6 +333,11 @@ LogFactory& LogFactory::operator<<(glm::mat3 data){
     return *this;
 }
 
+LogFactory& LogFactory::operator<<(std::ostream& (*manip)(std::ostream&)) {
+    operator<<(endlog);
+    return *this;
+}
+
 
 LogFactory& LogFactory::operator<<(glm::mat4 data){
     //按列->按行 ChatGPT告诉我默认按列的，具体是不是按列我不知道

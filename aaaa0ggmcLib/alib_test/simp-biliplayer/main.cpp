@@ -9,7 +9,7 @@
 #include <string.h>
 #include <algorithm>
 
-using namespace alib::ng;
+using namespace alib::g3;
 
 #define BLOCK(X)
 
@@ -60,6 +60,7 @@ int main(){
     srand(time(0));
     homep = getenv("HOME");
     configp = std::string(homep) + "/.config/";
+    logger.appendLogOutputTarget("console",std::make_shared<log_output_targets::Console>());
     BLOCK(CheckConfig){
         //检查是否有文件夹
         if(!Util::io_checkExistence(configp + "simp-biliplayer")){
@@ -67,7 +68,7 @@ int main(){
             lg << "Executed " << std::string("mkdir '") + configp + "simp-biliplayer'" << endlog;
         }
         configp += "simp-biliplayer/";
-        logger.setOutputFile(configp + "log");
+        logger.appendLogOutputTarget("logFile",std::make_shared<log_output_targets::SingleFile>(configp + "log"));
 
         //default values
         cfg.player = "mpv";
@@ -89,7 +90,7 @@ int main(){
             }
         }
     }
-    logger.toggleConsoleOutput(cfg.verbose);
+    logger.setLogOutputTargetStatus("console",cfg.verbose);
 
     atexit([]{
         std::ofstream ofs(configp + "config.properties");
@@ -242,7 +243,7 @@ int main(){
             system(cmd.c_str());
         }else if(!head.compare("verbose") || !head.compare("v")){
             cfg.verbose = !cfg.verbose;
-            logger.toggleConsoleOutput(cfg.verbose);
+            logger.setLogOutputTargetStatus("console",cfg.verbose);
             std::cout << "Verbose:";
             if(cfg.verbose)Util::io_printColor("On",APCF_GREEN);
             else Util::io_printColor("Off",APCF_GRAY);
@@ -316,8 +317,6 @@ int main(){
         }
     }
     }
-
-
     return 0;
 }
 
@@ -326,7 +325,8 @@ void LoadVideos(const std::string& path_in){
     BLOCK(Traverse Files){
         std::vector<std::string> filestmp;
         if(path[path.size()-1] != '/')path += '/';
-        Util::io_traverseFiles(path,filestmp,2,path);
+        Util::io_traverseFilesOnly(path,filestmp,2,path);
+        lg(LOG_INFO) << "File count:" << filestmp.size() << endlog;
         for(auto & i : filestmp){
             if(i.find("entry.json") != std::string::npos){
                 lg(LOG_TRACE) << "Inserted " << i << endlog;
