@@ -66,7 +66,7 @@ int main(){
         //检查是否有文件夹
         if(!Util::io_checkExistence(configp + "simp-biliplayer")){
             system((std::string("mkdir '") + configp + "simp-biliplayer'").c_str());
-            lg << "Executed " << std::string("mkdir '") + configp + "simp-biliplayer'" << endlog;
+            lg(LOG_INFO) << "Config directory created: " << configp + "simp-biliplayer" << endlog;
         }
         configp += "simp-biliplayer/";
         logger.appendLogOutputTarget("logFile",std::make_shared<log_output_targets::SingleFile>(configp + "log"));
@@ -343,32 +343,52 @@ int main(){
                 //处理个屁
             }
         }else if(!head.compare("help") || !head.compare("h")){
-            Util::io_printColor("Simple Bilibili Player by aaaa0ggmc ---- Version 0.0.1\n",APCF_YELLOW);
-            Util::io_printColor("A set of string wrapped with {} will be considered as one argument.\n"
-                                "Like {show sb} hello      =>      \"show sb\" and \"hello\"\n",APCF_BLUE);
-            std::cout << "help,h                                |Get help\n";
-            std::cout << "show,s,list,ls  [filter][filterString]|Show vids.Filter is optional.'-t' title '-a' author\n";
-            std::cout << "                                      |Default for both;Will flush cache\n";
-            std::cout << "                                      |-m [display_max_count:0 or below for all]; -r random vids,will flush cache\n";
-            std::cout << "                                      |-b [begin at:uint]\n";
-            std::cout << "verbose,v                             |Toggles whether logs will be outputed or not.\n";
-            std::cout << "cache,c                               |List index-cached videos.\n";
-            std::cout << "clear                                 |Clear all loaded videos.\n";
-            std::cout << "play,p  [BVID or CacheID] [subvid_id] |Play the video with bvid or cache id.\n";
-            std::cout << "                                      |subvid_id is optional.Default for 0.\n";
-            std::cout << "detail,d  [BVID or CacheID]           |Play the video with bvid or cache id.\n";
-            std::cout << "exit,q                                |Quit.\n";
-            std::cout << "load [path0:please wrap with{}]  ...  |Load videos.If path0 == 'def',will load default vids.\n";
-            std::cout << "defload [please wrap with{}]          |Set first-load paths,separate with ';' \n";
-            std::cout << "                                      |You can wrap with {} or {0} to be replaced with previous values\n";
-            std::cout << "                                      |Remember to wrap all the args with an additional {} \n";
-            std::cout << "run   [Run terminal commands]         |Run commands,I suggest you warp commands with {}.\n";
-            std::cout << "player [command]                      |Change the player default 'mpv'.\n";
-            std::cout << "                                      |You can wrap with {} to set some prefixes.\n";
+            Util::io_printColor("━━━━ Bilibili Local Player v0.0.1 ━━━━\n", APCF_YELLOW);
+            Util::io_printColor("Syntax: Commands and arguments should be wrapped with {}\n"
+                                "Example: {show -a John} → command=\"show -a John\"\n\n", APCF_CYAN);
 
-            std::cout << "Sample Output:\n" <<
-            "[114] BV15v4y1E7Fr Title Author\n"
-            "cacheid    bvid    title author\n";
+            // Command list with categorized formatting
+            #define fmt1 "%-18s"  // Command+args width
+            #define fmt2 "| %-58s\n"  // Description width
+
+            // Core Commands
+            Util::io_printColor("[ Navigation ]\n", APCF_MAGENTA);
+            printf(fmt1 fmt2, "help/h", "Display this help menu");
+            printf(fmt1 fmt2, "show/s/list/ls", "List videos with filters:");
+            Util::io_printColor("    -t [title]    Filter by title\n"
+                                "    -a [author]   Filter by author\n"
+                                "    -m [max]      Max items to display (0=unlimited)\n"
+                                "    -r            Show random entries\n"
+                                "    -b [start]    Start index\n", APCF_GRAY);
+
+            // Playback Controls
+            Util::io_printColor("\n[ Playback ]\n", APCF_MAGENTA);
+            printf(fmt1 fmt2, "play/p [ID] [sub]", "Play video by BV号/cache ID. Optional sub-index");
+            printf(fmt1 fmt2, "detail/d [ID]", "Show video details");
+
+            // Configuration
+            Util::io_printColor("\n[ Configuration ]\n", APCF_MAGENTA);
+            printf(fmt1 fmt2, "load {path...}", "Load videos. Use 'def' for default path");
+            printf(fmt1 fmt2, "defload {paths}", "Set default paths (separate by ';')\n"
+                                "    Use {0} to reference previous values");
+            printf(fmt1 fmt2, "player {cmd}", "Set media player (default: mpv)");
+
+            // System
+            Util::io_printColor("\n[ System ]\n", APCF_MAGENTA);
+            printf(fmt1 fmt2, "verbose/v", "Toggle debug logging");
+            printf(fmt1 fmt2, "cache/c", "List cached video indexes");
+            printf(fmt1 fmt2, "clear", "Clear all loaded videos");
+            printf(fmt1 fmt2, "run {cmd}", "Execute shell command");
+            printf(fmt1 fmt2, "exit/q", "Quit application");
+
+            // Sample Output
+            Util::io_printColor("\n[ Sample Output ]\n", APCF_MAGENTA);
+            Util::io_printColor("[142] BV1GJ41157d9  \"Advanced C++ Tutorial\"  ", APCF_GREEN);
+            Util::io_printColor("John_Doe\n", APCF_YELLOW);
+            Util::io_printColor("[15]  BV1px41117FL  \"Linux Basics\"  ", APCF_CYAN);
+            Util::io_printColor("TechGuru\n\n", APCF_YELLOW);
+            #undef fmt1
+            #undef fmt2
         }else{
             Util::io_printColor("Unknown command!Enter 'help' or 'h' for help.\n",APCF_RED);
         }
@@ -386,7 +406,7 @@ void LoadVideos(const std::string& path_in){
         lg(LOG_INFO) << "File count:" << filestmp.size() << endlog;
         for(auto & i : filestmp){
             if(i.find("entry.json") != std::string::npos){
-                lg(LOG_TRACE) << "Inserted " << i << endlog;
+                lg(LOG_DEBUG) << "Discovered entry: " << i << endlog; // 只显示文件名
                 files.push_back(i);
             }
         }
@@ -404,7 +424,7 @@ void LoadVideos(const std::string& path_in){
             bool season = false;
             int ecode = doc.read_parseFileJSON(s);
             if(ecode == ALIB_EHAS_PARSE_ERROR){
-                lg(LOG_ERROR) << "Has error when parsing " << s <<  " Code:" << ecode << endlog;
+                lg(LOG_ERROR) << "JSON parse failure: " << s.substr(s.find_last_of("/")+1) << " (code:" << ecode << ")" << endlog;
             }
             auto a = doc["media_type"];
             if(!!a){
@@ -502,7 +522,7 @@ void LoadVideos(const std::string& path_in){
                 if(!media.videoName.compare(mdx.videoName))push = false;
             }
             if(!push){
-                lg << "Conflict meida " << grp->bvid << " " << mdx.videoName << endlog;
+                lg(LOG_WARN) << "Media conflict: [" << grp->bvid << "] " << mdx.videoName << endlog;
                 continue;
             }
             grp->media.push_back(mdx);
@@ -515,8 +535,14 @@ void LoadVideos(const std::string& path_in){
             if(!old){
                 med.emplace(grp->bvid,*grp);
             }
-            lg(LOG_TRACE) << "Inserted Meida " << grp->bvid << " " << mdx.videoName  << " " << mdx.dir  << " " <<
-            mdx.audio << " " << mdx.video << " flashc:" << mdx.flvs.size() << endlog;
+            lg(LOG_TRACE) << "Media track | BVID:" << grp->bvid
+            << " | Title:" << mdx.videoName
+            << " | Type:" << mdx.type
+            << (mdx.type == 2 ?
+                (" | Video:" + mdx.video +
+                " | Audio:" + mdx.audio ):
+                " | FLVs:" + std::to_string(mdx.flvs.size()))
+            << endlog;
         }
     }
 }
