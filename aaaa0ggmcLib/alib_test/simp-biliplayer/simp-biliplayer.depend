@@ -43,3 +43,54 @@
 	<string>
 	<vector>
 
+1739645631 source:/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/aaaa0ggmcLib/alib_test/simp-biliplayer/main.cpp
+	<iostream>
+	<stdlib.h>
+	<alib-g3/adata.h>
+	<alib-g3/alogger.h>
+	<alib-g3/aparser.h>
+	<fstream>
+	<unordered_map>
+	<time.h>
+	<string.h>
+	<algorithm>
+	<format>
+
+1737630446 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/adata.h
+	<string>
+	<unordered_map>
+	<optional>
+	<stdarg.h>
+	<alib-g3/autil.h>
+
+1739644325 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/autil.h
+	<string>
+	<vector>
+	<fstream>
+	<filesystem>
+	<format>
+	<windows.h>
+	<unistd.h>
+
+1738223008 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/alogger.h
+	<memory>
+	<string>
+	<fstream>
+	<unordered_map>
+	<map>
+	<optional>
+	<alib-g3/aclock.h>
+	<alib-g3/autil.h>
+	<cxxabi.h>
+	<pthread.h>
+	<glm/glm.hpp>
+	<glm/ext/quaternion_common.hpp>
+
+1737634155 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/aclock.h
+	<time.h>
+	<alib-g3/autil.h>
+
+1737630535 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/aparser.h
+	<string>
+	<vector>
+

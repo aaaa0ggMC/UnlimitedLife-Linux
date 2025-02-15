@@ -155,7 +155,7 @@ public:
     * \param traverseDepth:(WindowsVersionNotSupported) smaller than 0:traverse all subdirs; >0:traverse certain depth of subdirs
     * \param prefix:(WindowsVersionNotSupported) a fixed prefix of the content in vector files
     */
-    static void io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth = 0,dstring prefix = "");
+    [[deprecated("Use io_traverseFilesOnly instead,this function is not guaranteed to work well")]] static void io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth = 0,dstring prefix = "");
     /** \brief get file size 获取文件大小
      * get file size efficiently using direct.h (better than fstream::seekg&tellg[ChatGPT says])
      * 使用direct.h快速获取文件大小(比fstream::seekg&tellg快[ChatGPT说的])
@@ -200,6 +200,7 @@ public:
 
     static void io_traverseFiles2(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
 
+    ///content in files automatically contacted with path,usually absoulute
     static void io_traverseFilesOnly(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
 
     static void io_traverseFolders(const std::string& path,std::vector<std::string>& folders,int traverseDepth = -1,const std::string& appender = "");

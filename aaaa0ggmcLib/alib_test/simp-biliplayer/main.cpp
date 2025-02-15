@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string.h>
 #include <algorithm>
+#include <format>
 
 using namespace alib::g3;
 
@@ -103,8 +104,12 @@ int main(){
     });
 
     if(cfg.vidpath.compare("")){
-        LoadVideos(cfg.vidpath);
-        std::cout << "Loaded " << cfg.vidpath << std::endl;
+        std::vector<std::string> prePaths;
+        Util::str_split(cfg.vidpath,';',prePaths);
+        for(const auto & v : prePaths){
+            LoadVideos(v);
+            std::cout << "Loaded " << v << std::endl;
+        }
     }
 
     std::string command;
@@ -124,14 +129,52 @@ int main(){
         head = "";
         parser.ParseCommand(command,head,args,sep_args);
         if(!head.compare("show") || !head.compare("s") || !head.compare("list") || !head.compare("ls")){
+            bool random = false;
+            int maxiumCount = 0;
+            int beginV = 0;
             cached.clear();
             BLOCK(Show All Vids){
                 std::string authft = "",titleft = "";
                 if(sep_args.size() != 0){
-                    if(!(sep_args[0].compare("-a")) && sep_args.size() >= 2)authft = sep_args[1];
-                    else if(!(sep_args[0].compare("-t")) && sep_args.size() >= 2)titleft = sep_args[1];
-                    else titleft = authft = sep_args[0];
+                    unsigned int indice = 0;
+                    bool matched;
+                    while(indice < sep_args.size()){
+                        matched = true;
+                        if(!(sep_args[indice].compare("-a")) && sep_args.size() > ++indice)authft = sep_args[indice++];
+                        else if(!(sep_args[indice].compare("-t")) && sep_args.size() > ++indice)titleft = sep_args[indice++];
+                        else if(!(sep_args[indice].compare("-m")) && sep_args.size() > ++indice)maxiumCount = atoi(sep_args[indice++].c_str());
+                        else if(!(sep_args[indice].compare("-b")) && sep_args.size() > ++indice)beginV = atoi(sep_args[indice++].c_str());
+                        else if((!(sep_args[indice].compare("-r"))))random = true;
+                        else matched = false;
+                        ++indice;
+                    }
+
+                    if(beginV < 0)beginV = 0;
+
+                    if(!matched){
+                        titleft = authft = sep_args[0];
+                    }
                 }
+                if(random){
+                    std::vector<unsigned int> vidList;
+                    std::vector<MediaGroup*> vecMeds;
+                    for(auto & [_,gp] : med)vecMeds.push_back(&gp);
+                    for(unsigned int i = 0;i < (maxiumCount<=0?med.size():maxiumCount);){
+                        unsigned int newV = rand() % med.size();
+                        //check conflict
+                        if(std::find(vidList.begin(),vidList.end(),newV) == vidList.end()){
+                            vidList.push_back(newV);
+                            Util::io_printColor(std::string("[") + std::to_string(cached.size()) + "] ",APCF_GREEN);
+                            std::cout << vecMeds[newV]->bvid << " " << vecMeds[newV]->groupName << " ";
+                            cached.push_back(vecMeds[newV]->bvid);
+                            Util::io_printColor(vecMeds[newV]->author,APCF_YELLOW);
+                            std::cout << std::endl;
+                            ++i;
+                        }
+                    }
+                    continue;
+                }
+                int recorder = -beginV;
                 for(auto & [_,gp] : med){
                     bool tvalid = titleft.compare("");
                     bool avalid = authft.compare("");
@@ -140,6 +183,9 @@ int main(){
                         bool resultt = (tvalid && Util::str_toUpper(gp.groupName).find(Util::str_toUpper(titleft)) == std::string::npos);
                         if((resulta || !avalid) && (resultt || !tvalid))continue;
                     }
+                    recorder++;
+                    if(recorder <= 0)continue;
+                    else if(recorder > (maxiumCount<=0?med.size():maxiumCount))break;
                     Util::io_printColor(std::string("[") + std::to_string(cached.size()) + "] ",APCF_GREEN);
                     std::cout << gp.bvid << " " << gp.groupName << " ";
                     cached.push_back(gp.bvid);
@@ -218,9 +264,11 @@ int main(){
             //make commands
             std::string cmd = cfg.player;
             if(tg->type == 2){
+                lg << "Normal(M4S) videos" << endlog;
                 cmd += " '" + tg->video + "' --audio-file='" + tg->audio + "'";
                 //system(cmd.c_str());
             }else if(tg->type == 1){
+                lg << "Flv videos ct:" << tg->flvs.size() <<endlog;
                 std::string app = tg->dir + tg->subdir + "/";
                 //cout << app << endl;
                 //system("read");
@@ -288,7 +336,12 @@ int main(){
                 std::cout << "Currently:" << cfg.vidpath << std::endl;
                 continue;
             }
-            cfg.vidpath = sep_args[0];
+            ///支持vformat
+            try{
+                cfg.vidpath = std::vformat(sep_args[0],std::make_format_args(cfg.vidpath));
+            }catch(...){
+                //处理个屁
+            }
         }else if(!head.compare("help") || !head.compare("h")){
             Util::io_printColor("Simple Bilibili Player by aaaa0ggmc ---- Version 0.0.1\n",APCF_YELLOW);
             Util::io_printColor("A set of string wrapped with {} will be considered as one argument.\n"
@@ -296,6 +349,8 @@ int main(){
             std::cout << "help,h                                |Get help\n";
             std::cout << "show,s,list,ls  [filter][filterString]|Show vids.Filter is optional.'-t' title '-a' author\n";
             std::cout << "                                      |Default for both;Will flush cache\n";
+            std::cout << "                                      |-m [display_max_count:0 or below for all]; -r random vids,will flush cache\n";
+            std::cout << "                                      |-b [begin at:uint]\n";
             std::cout << "verbose,v                             |Toggles whether logs will be outputed or not.\n";
             std::cout << "cache,c                               |List index-cached videos.\n";
             std::cout << "clear                                 |Clear all loaded videos.\n";
@@ -304,7 +359,9 @@ int main(){
             std::cout << "detail,d  [BVID or CacheID]           |Play the video with bvid or cache id.\n";
             std::cout << "exit,q                                |Quit.\n";
             std::cout << "load [path0:please wrap with{}]  ...  |Load videos.If path0 == 'def',will load default vids.\n";
-            std::cout << "defload [please wrap with{}]          |Set first-load path.\n";
+            std::cout << "defload [please wrap with{}]          |Set first-load paths,separate with ';' \n";
+            std::cout << "                                      |You can wrap with {} or {0} to be replaced with previous values\n";
+            std::cout << "                                      |Remember to wrap all the args with an additional {} \n";
             std::cout << "run   [Run terminal commands]         |Run commands,I suggest you warp commands with {}.\n";
             std::cout << "player [command]                      |Change the player default 'mpv'.\n";
             std::cout << "                                      |You can wrap with {} to set some prefixes.\n";
@@ -346,7 +403,7 @@ void LoadVideos(const std::string& path_in){
             bool old = false;
             bool season = false;
             int ecode = doc.read_parseFileJSON(s);
-            if(ecode){
+            if(ecode == ALIB_EHAS_PARSE_ERROR){
                 lg(LOG_ERROR) << "Has error when parsing " << s <<  " Code:" << ecode << endlog;
             }
             auto a = doc["media_type"];
@@ -413,7 +470,9 @@ void LoadVideos(const std::string& path_in){
                 mdx.audio = path + mdx.subdir + "/audio.m4s";
             }else if(mdx.type == 1){
                 std::vector<std::string> flvs;
-                Util::io_traverseFiles(path + mdx.subdir,flvs,2);
+                Util::io_traverseFilesOnly(path+mdx.subdir,flvs,2
+                                           );
+                lg << path << mdx.subdir << " " << flvs.size() << endlog;
                 for(auto & subs : flvs){
                     //std::cout << subs << endl;
                     //system("read");
