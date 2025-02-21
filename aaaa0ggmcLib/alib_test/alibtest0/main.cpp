@@ -4,10 +4,14 @@
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
 #include <alib-g3/alogger.h>
+#include <alib-g3/atranslator.h>
 #include <string.h>
 #include <glm/glm.hpp>
 #include <thread>
 #include <chrono>
+#include <map>
+#include <unordered_map>
+#include <tuple>
 
 using namespace std;
 using namespace alib::g3;
@@ -15,6 +19,7 @@ using namespace alib::g3;
 void test_autil();
 void test_alogger();
 void test_aclock();
+void test_atranslator();
 
 int main(int argc,const char * argv[])
 {
@@ -26,6 +31,7 @@ int main(int argc,const char * argv[])
             cout << "util      Test autil.h" << endl;
             cout << "logger    Test alogger.h" << endl;
             cout << "clock    Test aclock.h" << endl;
+            cout << "translator    Test atranslator.h" << endl;
             cout << "q / Q    Quit" << endl;
             memset(buf,256,sizeof(char));
             scanf("%s",buf);
@@ -40,12 +46,40 @@ int main(int argc,const char * argv[])
         test_alogger();
     }else if(!strcmp("clock",argv[1])){
         test_aclock();
+    }else if(!strcmp("translator",argv[1])){
+        test_atranslator();
     }
     return 0;
 }
 
+void test_atranslator(){
+    cout << "Translations are assumed to be in: ./test_data/trans/";
+    Translator ts("en_us");
+    cout << "Ret:" << ts.readTranslationFiles("test_data/trans") << endl;
+
+    Logger logger;
+    LogFactory lgf("Output",logger);
+    logger.setShowExtra(LOG_SHOW_NONE);
+
+    logger.appendLogOutputTarget("console",std::make_shared<log_output_targets::Console>());
+
+    for(auto & [key,tm] : ts.translations){
+        lgf << key << ":" << tm << endlog;
+    }
+    string value = "";
+    ts.loadTranslation("en_us");
+
+     cout << "NoArgs:" << ts.translate("test") << endl;
+     cout << "Args:" << ts.translate_args("test",value,0,"HelloWorld") << endl;
+}
+
 void test_alogger(){
     Logger logger;
+    auto target_split = std::make_shared<log_output_targets::SplittedFiles>("test_data/multi/logs.log",128);
+    auto target_file = std::make_shared<log_output_targets::SingleFile>("test_data/logger_output_single");
+    auto target_template = std::make_shared<log_output_targets::SingleFile>("test_data/template_logger_output");
+    auto target_console = std::make_shared<log_output_targets::Console>();
+    logger.appendLogOutputTarget("console",target_console);
     LogFactory lg("Test",logger);
     cout << "[Stage]Pre output" << endl;
     lg.trace("TraceTest");
@@ -54,16 +88,14 @@ void test_alogger(){
     lg.error("ErrorTest");
     lg.critical("CriticalTest");
 
-    cout << "[Stage]Set output file test_data/logger_ouput" << endl;
-    logger.setOutputFile("test_data/logger_output");
-    lg.info("AfterTest");
-    lg.info("MultiOpen:Should arise error");
-    logger.setOutputFile("test_data/logger_output");
+    cout << "[Stage]Set output file test_data/logger_ouput_single" << endl;
+    logger.appendLogOutputTarget("file",target_file);
+    lg.info("AfterTest(Previous output wont be written into logfile)");
 
     cout << "Content color red" << endl;
-    lg.setContentColor(APCF_RED);
+    target_console->neonColor = APCF_RED;
     lg.info("ColorTest");
-    lg.setContentColor(APCF_WHITE);
+    target_console->neonColor = APCF_WHITE;
 
     cout << "GLM Test" << endl;
     {
@@ -97,15 +129,15 @@ void test_alogger(){
         lg << v << endlog;
     }
 
-    cout << "DisableOutput" << endl;
-    logger.setOutputToConsole(false);
+    cout << "DisableOutput(Next output is HelloWorld!)" << endl;
+    logger.setLogOutputTargetStatus("console",false);
     lg << "HelloWorld!" << endlog;
-    logger.setOutputToConsole(true);
+    logger.setLogOutputTargetStatus("console",true);
 
     cout << "Multithread Output Test:16 threads" << endl;
     auto fn = [&](int id){
         for(unsigned int i = 0;i < 16;++i){
-            lg.info(string("HelloWorld!Th") + std::to_string(id) + " " + to_string(i));
+            lg(LOG_INFO) << "HelloWorld!Th" << id << " " << to_string(i) << endlog;
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     };
@@ -122,20 +154,72 @@ void test_alogger(){
     }
 
     cout << "Test split files,close & reopen logger..." << endl;
-    logger.close();
-    logger.setSplitFiles(true);
-    logger.setSingleFileMaxSize(128);
-    cout << "Split:true MaxFileSize:32 file0: test_data/multi/logs.log" << endl;
-    logger.setOutputFile("test_data/multi/logs.log");
+    cout << "Split:true MaxFileSize:128 file0: test_data/multi/logs.log" << endl;
+    logger.appendLogOutputTarget("split",target_split);
 
-    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    cout << "Now writes " << target_split->getCurrentIndex() << endl;
     lg.info("TestTestTestTestTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
-    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    cout << "Now writes " << target_split->getCurrentIndex() << endl;
     lg.info("TestTestTestTestTestTestTestTestTestTest");
-    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    cout << "Now writes " << target_split->getCurrentIndex() << endl;
     lg.info("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
-    cout << "Now writes " << logger.getCurrentLogFile() << endl;
+    cout << "Now writes " << target_split->getCurrentIndex() << endl;
     lg.info("TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest");
+
+    target_file->enabled = false;
+    target_split->enabled = false;
+
+    logger.appendLogOutputTarget("template",target_template);
+    cout << "Not show container name" << endl;
+    cout << "\e[100mTesting templates\e[0m" << endl;
+    {
+        cout << "vector<int>" << endl;
+        vector<int> vec = {1,2,3,4,5,6};
+        lg << vec << endlog;
+    }
+    {
+        cout << "vector<string>" << endl;
+        vector<string> vec = {"123","hhh","cnm","111"};
+        lg << vec << endlog;
+    }
+    {
+        cout << "vector<char*>" << endl;
+        vector<const char *> vec = {"123","hhh","cn","111"};
+        lg << vec << endlog;
+    }
+    {
+        cout << "vector<char>" << endl;
+        vector<char> vec = {'1','2','3','4'};
+        lg << vec << endlog;
+    }
+    {
+        cout << "vector<vector<double>>" << endl;
+        vector<vector<double>> vec = {{1.23},{1.444,2.34354,2.43534},{3.45453},{1.53,2.454,4.543},{5.543},{6.54343}};
+        lg << vec << endlog;
+    }
+    {
+        cout << "map<string,int>" << endl;
+        map<string,int> vec = {{"cn",1},{"wd",2}};
+        lg << vec << endlog;
+    }
+    {
+        cout << "map<string,vector<string>>" << endl;
+        map<string,vector<string>> vec = {{"cn",{"123","234"}},{"cm",{"wd","11"}}};
+        lg << vec << endlog;
+    }
+    {
+        cout << "unordered_map<string,vector<string>>" << endl;
+        unordered_map<string,vector<string>> vec = {{"cn",{"123","234"}},{"cm",{"wd","11"}}};
+        lg << vec << endlog;
+    }
+    cout << "Show container name:demangled" << endl;
+    lg.setShowContainerName(true);
+    {
+        cout << "tuple<string,int,double,map<string,string>>" << endl;
+        tuple<string,int,double,map<string,string>> vec = std::make_tuple(std::string("123"),1,2.0123,
+                map<string,string>({{"123","456"},{"kkk","jjj"}}));
+        lg << vec << endlog;
+    }
 }
 
 void test_autil(){

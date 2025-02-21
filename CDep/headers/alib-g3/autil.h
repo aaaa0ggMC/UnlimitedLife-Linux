@@ -3,6 +3,10 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <filesystem>
+#ifndef ALIB_DISABLE_CPP20
+#include <format>
+#endif // ALIB_DISABLE_CPP20
 
 #define ALIB_SUCCESS 0
 #define ALIB_ERROR -1
@@ -66,6 +70,12 @@
 #define APCB_LIGHT_YELLOW (14 << 4)
 #define APCB_BRIGHT_WHITE (15 << 4)
 
+#ifndef ALIB_TO_STRING_RESERVE_SIZE
+#define ALIB_TO_STRING_RESERVE_SIZE 128
+#endif // ALIB_TO_STRING_RESERVE_SIZE
+
+namespace fs = std::filesystem;
+
 namespace alib {
 namespace g3 {
 using namespace std;
@@ -75,6 +85,33 @@ using mem_bytes = __int64;
 #elif __linux__
 using mem_bytes = __int64_t;
 #endif // _WIN32
+
+namespace ext_toString{
+    #ifndef ALIB_DISABLE_CPP20
+    inline thread_local std::string fmtBuf;
+    [[maybe_unused]] inline thread_local bool inited = []()->bool{
+        fmtBuf.reserve(ALIB_TO_STRING_RESERVE_SIZE);
+        return true;
+    }();
+    #endif // ALIB_DISABLE_CPP20
+
+    inline const std::string& toString(const std::string& v){
+        return v;
+    }
+    template<class T> auto toString(const T& v){
+        #ifndef ALIB_DISABLE_CPP20
+        fmtBuf.clear();
+        std::format_to(std::back_inserter(fmtBuf),"{}",v);
+        fmtBuf.append("\0");
+        return (const std::string&)fmtBuf;
+        #else
+            if constexpr(std::is_same<T,const char *>::value)return std::string(v);
+            else if constexpr(std::is_same<T,char *>::value)return std::string(v);
+            else if constexpr (std::is_same_v<std::remove_extent_t<T>, char> && std::is_array_v<T>)return std::string(v);
+            else return std::to_string(v);
+        #endif // ALIB_DISABLE_CPP20
+    }
+}
 
 /** \brief Program Memory 程序使用内存**/
 struct DLL_EXPORT ProgramMemUsage {
@@ -118,7 +155,7 @@ public:
     * \param traverseDepth:(WindowsVersionNotSupported) smaller than 0:traverse all subdirs; >0:traverse certain depth of subdirs
     * \param prefix:(WindowsVersionNotSupported) a fixed prefix of the content in vector files
     */
-    static void io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth = 0,dstring prefix = "");
+    [[deprecated("Use io_traverseFilesOnly instead,this function is not guaranteed to work well")]] static void io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth = 0,dstring prefix = "");
     /** \brief get file size 获取文件大小
      * get file size efficiently using direct.h (better than fstream::seekg&tellg[ChatGPT says])
      * 使用direct.h快速获取文件大小(比fstream::seekg&tellg快[ChatGPT说的])
@@ -159,6 +196,18 @@ public:
      */
     static bool io_checkExistence(dstring path);
 
+    static void io_traverseImpl(const fs::path& basePath,std::vector<std::string>& results,int remainingDepth,const fs::path& currentAppender,bool includeFiles,bool includeDirs);
+
+    static void io_traverseFiles2(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
+
+    ///content in files automatically contacted with path,usually absoulute
+    static void io_traverseFilesOnly(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
+
+    static void io_traverseFolders(const std::string& path,std::vector<std::string>& folders,int traverseDepth = -1,const std::string& appender = "");
+
+    static void io_traverseFilesRecursive(const std::string& path,std::vector<std::string>& files,const std::string& appender = "");
+
+    static void io_traverseFoldersRecursive(const std::string& path,std::vector<std::string>& folders,const std::string& appender = "");
 ///other
     /** \brief returns a time formatted as string
      *

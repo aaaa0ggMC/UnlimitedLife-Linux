@@ -46,3 +46,54 @@
 	<time.h>
 	<alib-g3/autil.h>
 
+1738206175 source:/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/aaaa0ggmcLib/alib_test/alibtest0/main.cpp
+	<iostream>
+	<fstream>
+	<vector>
+	<alib-g3/aclock.h>
+	<alib-g3/autil.h>
+	<alib-g3/alogger.h>
+	<alib-g3/atranslator.h>
+	<string.h>
+	<glm/glm.hpp>
+	<thread>
+	<chrono>
+	<map>
+	<unordered_map>
+	<tuple>
+
+1737634155 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/aclock.h
+	<time.h>
+	<alib-g3/autil.h>
+
+1739644325 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/autil.h
+	<string>
+	<vector>
+	<fstream>
+	<filesystem>
+	<format>
+	<windows.h>
+	<unistd.h>
+
+1738223008 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/alogger.h
+	<memory>
+	<string>
+	<fstream>
+	<unordered_map>
+	<map>
+	<optional>
+	<alib-g3/aclock.h>
+	<alib-g3/autil.h>
+	<cxxabi.h>
+	<pthread.h>
+	<glm/glm.hpp>
+	<glm/ext/quaternion_common.hpp>
+
+1738205253 /home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CDep/headers/alib-g3/atranslator.h
+	<string>
+	<vector>
+	<unordered_map>
+	<optional>
+	<stdarg.h>
+	<alib-g3/autil.h>
+

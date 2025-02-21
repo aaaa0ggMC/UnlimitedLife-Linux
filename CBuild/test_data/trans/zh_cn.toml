@@ -1,0 +1,7 @@
+Language = '简体中文'
+Access = 'zh_cn'
+
+test = '测试%s'
+
+[com]
+test = '内嵌测试'

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iostream>
 #ifdef _WIN32
 #include <direct.h>
 #include <io.h>
@@ -19,6 +20,7 @@
 #include <stdint.h>
 #include <dirent.h>
 using namespace alib::g3;
+namespace fs = std::filesystem;
 
 #include <iostream>
 #include <string>
@@ -195,6 +197,111 @@ void Util::io_traverseFiles(dstring path, std::vector<std::string>& files,int tr
     }
     #endif // _WIN32
 
+}
+// 基础遍历实现
+void Util::io_traverseImpl(
+    const fs::path& basePath,
+    std::vector<std::string>& results,
+    int remainingDepth,
+    const fs::path& currentAppender,
+    bool includeFiles,
+    bool includeDirs
+) {
+    if (!fs::exists(basePath)) {
+        std::cerr << "Path not found: " << basePath << std::endl;
+        return;
+    }
+
+    try {
+        for (const auto& entry : fs::directory_iterator(basePath)) {
+            const auto& path = entry.path();
+            const fs::path relativePath = currentAppender / path.filename();
+
+            // 处理目录
+            if (entry.is_directory()) {
+                if (includeDirs) {
+                    results.push_back(relativePath.generic_string());
+                }
+
+                // 递归处理子目录
+                if (remainingDepth != 0) {
+                    const int newDepth = (remainingDepth > 0) ? remainingDepth - 1 : -1;
+                    io_traverseImpl(
+                        path,
+                        results,
+                        newDepth,
+                        relativePath,
+                        includeFiles,
+                        includeDirs
+                    );
+                }
+            }
+            // 处理文件
+            else if (includeFiles && entry.is_regular_file()) {
+                results.push_back(relativePath.generic_string());
+            }
+        }
+    } catch (const fs::filesystem_error& e) {
+        std::cerr << "Filesystem error: " << e.what() << std::endl;
+    }
+}
+
+// 完整功能版本（保持你的原始接口）
+void Util::io_traverseFiles2(
+    const std::string& path,
+    std::vector<std::string>& files,
+    int traverseDepth,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, files, traverseDepth, initialAppender, true, true);
+}
+
+// 变体1：仅遍历文件
+void Util::io_traverseFilesOnly(
+    const std::string& path,
+    std::vector<std::string>& files,
+    int traverseDepth,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, files, traverseDepth, initialAppender, true, false);
+}
+
+// 变体2：仅遍历目录
+void Util::io_traverseFolders(
+    const std::string& path,
+    std::vector<std::string>& folders,
+    int traverseDepth,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, folders, traverseDepth, initialAppender, false, true);
+}
+
+// 变体3：快速递归文件遍历（深度无限）
+void Util::io_traverseFilesRecursive(
+    const std::string& path,
+    std::vector<std::string>& files,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, files, -1, initialAppender, true, false);
+}
+
+// 变体4：快速递归目录遍历（深度无限）
+void Util::io_traverseFoldersRecursive(
+    const std::string& path,
+    std::vector<std::string>& folders,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, folders, -1, initialAppender, false, true);
 }
 
 std::string Util::str_unescape(dstring in) {
