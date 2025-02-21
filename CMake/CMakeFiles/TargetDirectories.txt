@@ -1,3 +1,0 @@
-/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CMake/CMakeFiles/aaaa0ggmcLib.dir
-/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CMake/CMakeFiles/edit_cache.dir
-/home/aaaa0ggmc/Desktop/UnlimitedLife-Linux/CMake/CMakeFiles/rebuild_cache.dir
