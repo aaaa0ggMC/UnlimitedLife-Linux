@@ -41,6 +41,8 @@ endmacro()
 
 add_subdirectory(aaaa0ggmcLib)
 add_subdirectory(aaaa0ggmcLib-g4)
+add_subdirectory(UnlimitedLife-src)
 
 set_output_directory(aaaa0ggmcLib)
 set_output_directory(aaaa0ggmcLib-g4)
+set_output_directory(UnlimitedLife-src)
