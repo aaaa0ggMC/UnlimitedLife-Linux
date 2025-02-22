@@ -1,8 +1,17 @@
 #include <alib-g4/autil.hpp>
-#include <iostream>
+#include <string>
+
+static thread_local int ecode = AE_SUCCESS;
+static thread_local std::string econtent = "";
 
 extern "C" {
-	void hello(){
-		std::cout << ALIB4_COLOR(red,) << "Hello World!" << std::endl;
-	}
+
+    void asetLastError(int code,const char * content){
+        ecode = code;
+        if(content)econtent = content;
+    }
+
+    aError agetLastError(){
+        return {ecode,econtent.c_str()};
+    }
 }

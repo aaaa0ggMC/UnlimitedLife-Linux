@@ -1,5 +1,6 @@
 #ifndef ALIB4_AUTIL_H_INCLUDED
 #define ALIB4_AUTIL_H_INCLUDED
+#include <alib-g4/ahandle.h>
 
 ///For windows support
 #ifdef _WIN32
@@ -23,7 +24,6 @@
 #endif
 #endif
 #endif
-
 
 #define APCF_black        0
 #define APCF_blue         1
@@ -65,6 +65,9 @@
 #define APCB_keep (1 << 19)
 #define APCB_        APCB_keep
 
+#define AE_SUCCESS 0
+#define AE_CANT_FIND 1
+
 /**Color Macro Examples:
 *	ALIB4_COLOR_BACK(red) ==> APCB_red
 *	ALIB4_COLOR(,red) ==> (APCF_ | APCB_red) ==> (APCF_origin | APCB_red)
@@ -75,8 +78,44 @@
 #define ALIB4_COLOR_BACK(C) (APCB_##C)
 #define ALIB4_COLOR(FRONT,BACK) (APCF_##FRONT | APCF_##BACK)
 
+#ifdef _WIN32
+typedef __int64 amem_bytes;
+#elif __linux__
+typedef __int64_t amem_bytes;
+#endif // _WIN32
+
 extern "C"{
-	void hello();
+/** \brief Program Memory 程序使用内存**/
+typedef struct ALIB4_API {
+    amem_bytes memory;
+    amem_bytes virtualMemory;
+} ALIB4ProgramMemUsage;
+
+/** \brief Global Memory Usage 全局内存使用情况**/
+typedef struct ALIB4_API {
+    ///In linux,percent = phyUsed / phyTotal
+    unsigned int percent;
+    amem_bytes physicalTotal;
+    amem_bytes virtualTotal;
+    amem_bytes physicalUsed;
+    amem_bytes virtualUsed;
+    amem_bytes pageTotal;
+    amem_bytes pageUsed;
+} aGlobalMemUsage;
+
+/** \brief GetCPUInfo 获取CPU信息**/
+typedef struct ALIB4_API {
+    AStrHandle CpuID;
+} aCPUInfo;
+
+typedef struct ALIB4_API{
+    int code;
+    const char * content;
+} aError;
+
+void asetLastError(int code,const char * content);
+aError agetLastError();
+
 }
 
 #endif

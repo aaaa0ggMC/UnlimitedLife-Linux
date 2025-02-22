@@ -20,29 +20,6 @@ include_directories(./CDep/headers)
 include_directories(${custom_include_dir})
 link_directories(${custom_lib_dir})
 
-macro(set_output_directory target)
-    if(TARGET ${target})
-        set_target_properties(${target} PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY "${build_dir}"
-            LIBRARY_OUTPUT_DIRECTORY "${build_dir}"
-            ARCHIVE_OUTPUT_DIRECTORY "${build_dir}"
-        )
-        # 处理多配置生成器（如Visual Studio的Debug/Release）
-        foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
-            string(TOUPPER ${config} config_upper)
-            set_target_properties(${target} PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY_${config_upper} "${build_dir}"
-                LIBRARY_OUTPUT_DIRECTORY_${config_upper} "${build_dir}"
-                ARCHIVE_OUTPUT_DIRECTORY_${config_upper} "${build_dir}"
-            )
-        endforeach()
-    endif()
-endmacro()
-
 add_subdirectory(aaaa0ggmcLib)
 add_subdirectory(aaaa0ggmcLib-g4)
 add_subdirectory(UnlimitedLife-src)
-
-set_output_directory(aaaa0ggmcLib)
-set_output_directory(aaaa0ggmcLib-g4)
-set_output_directory(UnlimitedLife-src)
