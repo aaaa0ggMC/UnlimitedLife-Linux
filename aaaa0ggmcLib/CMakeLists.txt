@@ -1,0 +1,6 @@
+aux_source_directory("./src" ALIB-SRC)
+add_library(aaaa0ggmcLib SHARED ${ALIB-SRC})
+set_target_properties(aaaa0ggmcLib PROPERTIES LINKER_LANGUAGE CXX)
+target_link_directories(aaaa0ggmcLib PRIVATE rapidjson)
+target_compile_options(aaaa0ggmcLib PUBLIC "-Wl,--allow-multiple-definition")
+target_compile_definitions(aaaa0ggmcLib PUBLIC BUILD_DLL)

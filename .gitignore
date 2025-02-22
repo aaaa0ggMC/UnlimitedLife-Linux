@@ -1,5 +1,10 @@
 # Cmake
-MyCMake/
+CMakeFiles/
+CBuild/*/
+CBuild/CMake*
+CBuild/Makefile
+CBuild/cmake_*
+
 
 # Prerequisites
 *.d
