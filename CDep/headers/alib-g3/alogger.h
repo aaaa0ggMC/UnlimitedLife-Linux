@@ -10,9 +10,9 @@
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
 
-#ifndef ALIB_DISABLE_TEMPLATES
-#include <cxxabi.h>
-#endif // ALIB_DISABLE_TEMPLATES
+// #ifndef ALIB_DISABLE_TEMPLATES
+// #include <cxxabi.h>
+// #endif // ALIB_DISABLE_TEMPLATES
 
 #ifdef __linux__
 #include <pthread.h>
@@ -248,12 +248,14 @@ namespace g3{
 
         ///For more support,use templates
         template<class T> std::string demangleTypeName(const char * mangledName){
-            int status;
+            /*int status;
             std::unique_ptr<char,void(*)(void*)> result(
                 abi::__cxa_demangle(mangledName,nullptr,nullptr,&status),
                 std::free
             );
             return (status==0)?result.get():mangledName;
+*/
+	return mangledName;
         }
 
 
