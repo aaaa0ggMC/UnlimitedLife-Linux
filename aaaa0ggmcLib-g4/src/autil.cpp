@@ -14,4 +14,10 @@ extern "C" {
     aError agetLastError(){
         return {ecode,econtent.c_str()};
     }
+	
+	aError aclearLastError(){
+        aError ret = agetLastError();
+		asetLastError(AE_SUCCESS,"");
+		return ret;
+    }
 }

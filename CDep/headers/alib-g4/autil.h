@@ -2,29 +2,6 @@
 #define ALIB4_AUTIL_H_INCLUDED
 #include <alib-g4/ahandle.h>
 
-///For windows support
-#ifdef _WIN32
-#include <windows.h>
-#ifndef ALIB4_API
-#ifdef ALIB4_BUILD_DLL
-    #define ALIB4_API __declspec(dllexport)
-#else
-    #define ALIB4_API __declspec(dllimport)
-#endif
-#endif // BUILD_DLL
-
-#elif __linux__
-
-#include <unistd.h>
-#ifndef ALIB4_API
-#ifdef ALIB4_BUILD_DLL
-    #define ALIB4_API
-#else
-    #define ALIB4_API
-#endif
-#endif
-#endif
-
 #define APCF_black        0
 #define APCF_blue         1
 #define APCF_green        2
@@ -67,6 +44,7 @@
 
 #define AE_SUCCESS 0
 #define AE_CANT_FIND 1
+#define AE_EMPTY_DATA 2
 
 /**Color Macro Examples:
 *	ALIB4_COLOR_BACK(red) ==> APCB_red
@@ -113,8 +91,9 @@ typedef struct ALIB4_API{
     const char * content;
 } aError;
 
-void asetLastError(int code,const char * content);
-aError agetLastError();
+ALIB4_API void asetLastError(int code,const char * content);
+ALIB4_API aError agetLastError();
+ALIB4_API aError aclearLastError();
 
 }
 
