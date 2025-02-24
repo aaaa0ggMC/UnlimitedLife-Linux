@@ -21,10 +21,7 @@ AStrHandle ResourceManager::allocateString(const std::string& data){
 int ResourceManager::freeString(AStrHandle handle){
     auto it = strHandles.find(handle);
     if(it == strHandles.end()){
-        std::string output = "Cannot find the string handle [";
-        output += std::to_string(handle);
-        output += "] in the string pool!";
-        asetLastError(AE_CANT_FIND,output.c_str());
+        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",handle);
         return AE_CANT_FIND;
     }
     strHandles.erase(it);
@@ -35,10 +32,7 @@ int ResourceManager::freeString(AStrHandle handle){
 const char * ResourceManager::getString(AStrHandle handle){
     auto it = strHandles.find(handle);
     if(it == strHandles.end()){
-        std::string output = "Cannot find the string handle [";
-        output += std::to_string(handle);
-        output += "] in the string pool!";
-        asetLastError(AE_CANT_FIND,output.c_str());
+        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",handle);
         return nullptr;
     }
 	aclearLastError();
@@ -48,18 +42,12 @@ const char * ResourceManager::getString(AStrHandle handle){
 const char * ResourceManager::str_add(AStrHandle a,AStrHandle b){
     auto av = strHandles.find(a);
     if(av == strHandles.end()){
-        std::string output = "Cannot find the first string handle [";
-        output += std::to_string(a);
-        output += "] in the string pool!";
-        asetLastError(AE_CANT_FIND,output.c_str());
+        asetLastErrorf(AE_CANT_FIND,"Cannot find the first string handle [%u] in the string pool.",a);
         return nullptr;
     }
     auto bv = strHandles.find(b);
     if(bv == strHandles.end()){
-        std::string output = "Cannot find the second string handle [";
-        output += std::to_string(b);
-        output += "] in the string pool!";
-        asetLastError(AE_CANT_FIND,output.c_str());
+        asetLastErrorf(AE_CANT_FIND,"Cannot find the second string handle [%u] in the string pool.",b);
         return av->second->c_str();
     }
 
@@ -71,10 +59,7 @@ const char * ResourceManager::str_add(AStrHandle a,AStrHandle b){
 const char * ResourceManager::str_add(AStrHandle a,const char * b){
     auto av = strHandles.find(a);
     if(av == strHandles.end()){
-        std::string output = "Cannot find the string handle [";
-        output += std::to_string(a);
-        output += "] in the string pool!";
-        asetLastError(AE_CANT_FIND,output.c_str());
+        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",a);
         return nullptr;
     }
 	aclearLastError();
@@ -85,10 +70,7 @@ const char * ResourceManager::str_add(AStrHandle a,const char * b){
 size_t ResourceManager::str_length(AStrHandle a){
     auto av = strHandles.find(a);
     if(av == strHandles.end()){
-        std::string output = "Cannot find the string handle [";
-        output += std::to_string(a);
-        output += "] in the string pool!";
-        asetLastError(AE_CANT_FIND,output.c_str());
+        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",a);
         return 0;
     }
 	aclearLastError();
@@ -98,10 +80,7 @@ size_t ResourceManager::str_length(AStrHandle a){
 AStrHandle ResourceManager::str_substr(AStrHandle a,size_t beg,size_t length){
     auto av = strHandles.find(a);
     if(av == strHandles.end()){
-        std::string output = "Cannot find the string handle [";
-        output += std::to_string(a);
-        output += "] in the string pool!";
-        asetLastError(AE_CANT_FIND,output.c_str());
+        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",a);
         return AINVALID_HANDLE;
     }
     return allocateString(av->second->substr(beg,length).c_str());

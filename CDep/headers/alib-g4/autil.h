@@ -93,8 +93,8 @@ typedef struct ALIB4_API{
 
 ALIB4_API void asetLastError(int code,const char * content);
 ALIB4_API aError agetLastError();
-ALIB4_API aError aclearLastError();
-
+ALIB4_API void aclearLastError();
+ALIB4_API void asetLastErrorf(int code,const char * fmt,...);
 }
 
 #endif
