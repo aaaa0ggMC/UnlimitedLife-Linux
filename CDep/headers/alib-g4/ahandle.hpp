@@ -27,6 +27,18 @@ namespace alib4{
 
         static ResourceManager resManager;
     };
+
+	struct ALIB4_API StrHandle{
+		StrHandle(int = 0);
+
+		std::shared_ptr<std::pmr::string> operator *();
+
+		AStrHandle handle;
+	};
+}
+
+extern "C"{
+	ALIB4_API std::shared_ptr<std::pmr::string> astr_getcpp(AStrHandle a);
 }
 
 #endif

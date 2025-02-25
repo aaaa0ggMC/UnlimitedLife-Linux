@@ -7,6 +7,14 @@ using namespace alib4;
 
 ResourceManager ResourceManager::resManager;
 
+StrHandle::StrHandle(int v){
+	handle = v;
+}
+
+std::shared_ptr<std::pmr::string> StrHandle::operator *(){
+	return astr_getcpp(handle);
+}
+
 ResourceManager::ResourceManager(){
     //std::pmr::set_default_resource(&pool);
     strHandleCounter = 0;
@@ -21,7 +29,7 @@ AStrHandle ResourceManager::allocateString(const std::string& data){
 int ResourceManager::freeString(AStrHandle handle){
     auto it = strHandles.find(handle);
     if(it == strHandles.end()){
-        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",handle);
+        asetLastErrorf(AE_CANT_FIND,"astr_free->Cannot find the string handle [%u] in the string pool.",__func__,handle);
         return AE_CANT_FIND;
     }
     strHandles.erase(it);
@@ -32,7 +40,7 @@ int ResourceManager::freeString(AStrHandle handle){
 const char * ResourceManager::getString(AStrHandle handle){
     auto it = strHandles.find(handle);
     if(it == strHandles.end()){
-        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",handle);
+        asetLastErrorf(AE_CANT_FIND,"astr_get->Cannot find the string handle [%u] in the string pool.",__func__,handle);
         return nullptr;
     }
 	aclearLastError();
@@ -42,12 +50,12 @@ const char * ResourceManager::getString(AStrHandle handle){
 const char * ResourceManager::str_add(AStrHandle a,AStrHandle b){
     auto av = strHandles.find(a);
     if(av == strHandles.end()){
-        asetLastErrorf(AE_CANT_FIND,"Cannot find the first string handle [%u] in the string pool.",a);
+        asetLastErrorf(AE_CANT_FIND,"astr_add->Cannot find the first string handle [%u] in the string pool.",__func__,a);
         return nullptr;
     }
     auto bv = strHandles.find(b);
     if(bv == strHandles.end()){
-        asetLastErrorf(AE_CANT_FIND,"Cannot find the second string handle [%u] in the string pool.",b);
+        asetLastErrorf(AE_CANT_FIND,"astr_add->Cannot find the second string handle [%u] in the string pool.",__func__,b);
         return av->second->c_str();
     }
 
@@ -59,7 +67,7 @@ const char * ResourceManager::str_add(AStrHandle a,AStrHandle b){
 const char * ResourceManager::str_add(AStrHandle a,const char * b){
     auto av = strHandles.find(a);
     if(av == strHandles.end()){
-        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",a);
+        asetLastErrorf(AE_CANT_FIND,"astr_add_ptr->Cannot find the string handle [%u] in the string pool.",__func__,a);
         return nullptr;
     }
 	aclearLastError();
@@ -70,7 +78,7 @@ const char * ResourceManager::str_add(AStrHandle a,const char * b){
 size_t ResourceManager::str_length(AStrHandle a){
     auto av = strHandles.find(a);
     if(av == strHandles.end()){
-        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",a);
+        asetLastErrorf(AE_CANT_FIND,"astr_length->Cannot find the string handle [%u] in the string pool.",__func__,a);
         return 0;
     }
 	aclearLastError();
@@ -80,7 +88,7 @@ size_t ResourceManager::str_length(AStrHandle a){
 AStrHandle ResourceManager::str_substr(AStrHandle a,size_t beg,size_t length){
     auto av = strHandles.find(a);
     if(av == strHandles.end()){
-        asetLastErrorf(AE_CANT_FIND,"Cannot find the string handle [%u] in the string pool.",a);
+        asetLastErrorf(AE_CANT_FIND,"astr_substr->Cannot find the string handle [%u] in the string pool.",a);
         return AINVALID_HANDLE;
     }
     return allocateString(av->second->substr(beg,length).c_str());
@@ -89,7 +97,7 @@ AStrHandle ResourceManager::str_substr(AStrHandle a,size_t beg,size_t length){
 extern "C"{
     AStrHandle astr_allocate(const char * data){
 		if(!data){
-			asetLastError(AE_EMPTY_DATA,"Null is given to allocate a string in string pool.");
+			asetLastErrorf(AE_EMPTY_DATA,"%s->Null is given to allocate a string in string pool.",__func__);
 			return AE_EMPTY_DATA;
 		}
 		return ResourceManager::resManager.allocateString(data);
@@ -117,5 +125,15 @@ extern "C"{
 
     const char * astr_get(AStrHandle handle){
 		return ResourceManager::resManager.getString(handle);
+	}
+	
+	
+	std::shared_ptr<std::pmr::string> astr_getcpp(AStrHandle a){
+		auto it = ResourceManager::resManager.strHandles.find(a);
+		if(it == ResourceManager::resManager.strHandles.end()){
+			asetLastErrorf(AE_CANT_FIND,"%s->Cannot find the string handle [%u] in the string pool.",__func__,a);
+			return nullptr;
+		}
+		return it->second;
 	}
 }
