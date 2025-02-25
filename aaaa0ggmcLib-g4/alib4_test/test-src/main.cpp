@@ -5,7 +5,8 @@
 
 int main(void){
 	using namespace std;
-	astr_get(11000);
-	cout << agetLastError().code << " " << agetLastError().content << endl;
+	aaddOnErrorCallback(adefaultErrorCallback,NULL);
+	astr_allocate("1");
+	astr_get(22);
 	return 0;
 }

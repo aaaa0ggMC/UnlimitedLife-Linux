@@ -62,6 +62,8 @@ typedef __int64 amem_bytes;
 typedef __int64_t amem_bytes;
 #endif // _WIN32
 
+typedef void*(*aErrorCallbackFn)(int code,const char * content,void * reserved);
+
 extern "C"{
 /** \brief Program Memory 程序使用内存**/
 typedef struct ALIB4_API {
@@ -95,6 +97,10 @@ ALIB4_API void asetLastError(int code,const char * content);
 ALIB4_API aError agetLastError();
 ALIB4_API void aclearLastError();
 ALIB4_API void asetLastErrorf(int code,const char * fmt,...);
+ALIB4_API void aaddOnErrorCallback(aErrorCallbackFn fn,void * reserved);
+//just simply output the data to the console
+ALIB4_API void* adefaultErrorCallback(int,const char *,void*);
+
 }
 
 #endif

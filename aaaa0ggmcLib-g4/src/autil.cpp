@@ -3,15 +3,23 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include <vector>
+#include <iostream>
 
 static thread_local int ecode = AE_SUCCESS;
 static thread_local std::string econtent = "";
+static std::vector<aErrorCallbackFn> callbacks = {};
 
 extern "C" {
 
     void asetLastError(int code,const char * content){
         ecode = code;
         if(content)econtent = content;
+		if(ecode != AE_SUCCESS){
+			for(auto & tg : callbacks){
+				tg(ecode,econtent.c_str(),nullptr);
+			}
+		}
     }
 
     aError agetLastError(){
@@ -28,13 +36,22 @@ extern "C" {
 		if(fmt){
 			va_list val;
 			va_start(val,fmt);
-			alib4::avformatStringf(econtent,fmt,val);
+			avformatStringf(econtent,fmt,val);
 			va_end(val);
 		}
+		if(ecode != AE_SUCCESS){
+			for(auto & tg : callbacks){
+				tg(ecode,econtent.c_str(),nullptr);
+			}
+		}
 	}
-}
-
-namespace alib4{
+	
+	
+	void aaddOnErrorCallback(aErrorCallbackFn fn,void * reserved){
+		if(fn)callbacks.push_back(fn);
+	}
+	
+	
 	int aformatStringf(std::string& tg,const char * fmt,...){
 		if(!fmt){
 			return AE_EMPTY_DATA;
@@ -46,13 +63,13 @@ namespace alib4{
 		return ret;
 	}
 
-	int aformatStringf(std::pmr::string & tg,const char * fmt,...){
+	int aformatStringf_pmr(std::pmr::string & tg,const char * fmt,...){
 		if(!fmt){
 			return AE_EMPTY_DATA;
 		}
 		va_list val;
 		va_start(val,fmt);
-		int ret = avformatStringf(tg,fmt,val);
+		int ret = avformatStringf_pmr(tg,fmt,val);
 		va_end(val);
 		return ret;
 	}
@@ -73,7 +90,7 @@ namespace alib4{
 		return ret;
 	}
 
-	int avformatStringf(std::pmr::string & tg,const char * fmt,va_list ap){
+	int avformatStringf_pmr(std::pmr::string & tg,const char * fmt,va_list ap){
 		va_list cpy;
 		va_copy(cpy,ap);
 		tg.clear();
@@ -86,5 +103,10 @@ namespace alib4{
 		}
 		va_end(cpy);
 		return ret;
+	}
+	
+	void* adefaultErrorCallback(int code,const char * ct,void*){
+		std::cerr << "Alib4Error[CODE:" << code << "]:" << ((ct)?ct:"") << std::endl;
+		return nullptr;
 	}
 }
