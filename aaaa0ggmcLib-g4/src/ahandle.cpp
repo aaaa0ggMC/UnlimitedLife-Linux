@@ -7,14 +7,6 @@ using namespace alib4;
 
 ResourceManager ResourceManager::resManager;
 
-StrHandle::StrHandle(int v){
-	handle = v;
-}
-
-std::shared_ptr<std::pmr::string> StrHandle::operator *(){
-	return astr_getcpp(handle);
-}
-
 ResourceManager::ResourceManager(){
     //std::pmr::set_default_resource(&pool);
     strHandleCounter = 0;
@@ -128,7 +120,7 @@ extern "C"{
 	}
 	
 	
-	std::shared_ptr<std::pmr::string> astr_getcpp(AStrHandle a){
+	std::shared_ptr<std::pmr::string> astr_getstring(AStrHandle a){
 		auto it = ResourceManager::resManager.strHandles.find(a);
 		if(it == ResourceManager::resManager.strHandles.end()){
 			asetLastErrorf(AE_CANT_FIND,"%s->Cannot find the string handle [%u] in the string pool.",__func__,a);

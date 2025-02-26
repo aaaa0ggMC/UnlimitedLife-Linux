@@ -6,7 +6,7 @@
 int main(void){
 	using namespace std;
 	aaddOnErrorCallback(adefaultErrorCallback,NULL);
-	alib4::StrHandle hd = 1;
-	cout << **hd << endl;
+	cout << aio_fileSize("CMakeCache.txt") << " " << aio_fileSize("fdssfds.txt") << endl;
+	cout << ACP_RED << "Hello World Reddish!" << endl;
 	return 0;
 }

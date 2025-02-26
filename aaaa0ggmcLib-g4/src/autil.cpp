@@ -5,10 +5,34 @@
 #include <stdio.h>
 #include <vector>
 #include <iostream>
+#ifdef _WIN32
+#include <windows.h>
+#include <direct.h>
+#include <io.h>
+#include <psapi.h>
+#else
+#include <unistd.h>
+#include <sys/dir.h>
+#include <sys/io.h>
+#endif // _WIN32
+#include <sys/stat.h>
+#include <stdint.h>
+#include <dirent.h>
+
+struct AutoFix{
+	AutoFix(){
+		aenableVirtualTerminal();
+	}
+	
+	~AutoFix(){
+		printf(ACP_RESET);
+	}
+};
 
 static thread_local int ecode = AE_SUCCESS;
 static thread_local std::string econtent = "";
 static std::vector<aErrorCallbackFn> callbacks = {};
+static AutoFix __autofix;
 
 extern "C" {
 
@@ -106,7 +130,33 @@ extern "C" {
 	}
 	
 	void* adefaultErrorCallback(int code,const char * ct,void*){
-		std::cerr << "Alib4Error[CODE:" << code << "]:" << ((ct)?ct:"") << std::endl;
+		std::cerr << ACP_RED << "Alib4Error[CODE:" << code << "]:" << ((ct)?ct:"") << ACP_RESET << std::endl;
 		return nullptr;
+	}
+	
+	void aenableVirtualTerminal(){
+		#ifdef _WIN32
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			DWORD consoleMode;
+			GetConsoleMode(hConsole, &consoleMode);
+			consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+			SetConsoleMode(hConsole, consoleMode);
+		#endif
+		///do nothing in linux/unix or others
+	}
+	
+	long aio_fileSize(const char * file){
+		if(!file){
+			asetLastError(AE_FAILED,"aio_fileSize->Null was given!");
+			return AE_EMPTY_DATA;
+		}
+		struct stat statbuf;
+		int ret;
+		ret = stat(file,&statbuf);
+		if(ret != 0){
+			asetLastErrorf(AE_FAILED,"aio_fileSize Unable to check file %s",file);
+			return AE_FAILED;
+		};
+		return statbuf.st_size;
 	}
 }
