@@ -1,10 +1,12 @@
 #include <alib-g4/autil.hpp>
+#include <alib-g4/ahandle.hpp>
 #include <string>
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #ifdef _WIN32
 #include <windows.h>
 #include <direct.h>
@@ -147,7 +149,7 @@ extern "C" {
 	
 	long aio_fileSize(const char * file){
 		if(!file){
-			asetLastError(AE_FAILED,"aio_fileSize->Null was given!");
+			asetLastError(AE_EMPTY_DATA,"aio_fileSize->Null was given!");
 			return AE_EMPTY_DATA;
 		}
 		struct stat statbuf;
@@ -158,5 +160,63 @@ extern "C" {
 			return AE_FAILED;
 		};
 		return statbuf.st_size;
+	}
+	
+	long aio_readAll(const char * fpath,AStrHandle appender){
+		auto str = astr_getstring(appender);
+		if(str == nullptr)return agetLastError().code;
+		auto & ss = (*str);
+		if(!fpath){
+			asetLastError(AE_EMPTY_DATA,"aio_readAll->Null was given!");
+			return AE_EMPTY_DATA;
+		}
+		FILE * file = fopen(fpath,"r");
+		if(!file){
+			asetLastErrorf(AE_IO,"aio_readAll->Cannot open file %s!",fpath);
+			return AE_IO;
+		}
+		long fsize = aio_fileSize(fpath);
+		if(fsize > 0){
+			std::vector<char> buf;
+			buf.resize(fsize / sizeof(char) +  1);
+			buf[fsize / sizeof(char)] = '\0';
+			fread(buf.data(),sizeof(char),fsize / sizeof(char),file);
+			ss.append(buf.begin(),buf.end());
+		}
+		fclose(file);
+		return (int)fsize;
+	}
+	
+	const char * asafe(const char * ss){
+		if(ss)return ss;
+		return "Invalid String";
+	}
+	
+	long aio_writeAll(const char * fp,const char * data,long length){
+		if(!fp){
+			asetLastError(AE_EMPTY_DATA,"aio_readAll->Null was given!");
+			return AE_EMPTY_DATA;
+		}
+		if(length < 0)length = strlen(data);
+		std::ofstream of;
+		of.open(fp);
+		if(!of.is_open()){
+			asetLastErrorf(AE_IO,"aio_writeAll->Cannot open file %s!",fp);
+			return AE_IO;
+		}
+		of.write(data,length);
+		long ret = (long)of.tellp();
+		of.close();
+		return ret;
+	}
+	
+	
+	_Bool aio_checkExistence(const char * fp){
+		if(!fp){
+			asetLastError(AE_EMPTY_DATA,"aio_readAll->Null was given!");
+			return false;
+		}
+		struct stat buffer;
+		return (stat(fp, &buffer) == 0);
 	}
 }

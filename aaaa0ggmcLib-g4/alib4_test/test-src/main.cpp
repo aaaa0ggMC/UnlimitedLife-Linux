@@ -6,7 +6,8 @@
 int main(void){
 	using namespace std;
 	aaddOnErrorCallback(adefaultErrorCallback,NULL);
-	cout << aio_fileSize("CMakeCache.txt") << " " << aio_fileSize("fdssfds.txt") << endl;
-	cout << ACP_RED << "Hello World Reddish!" << endl;
+	AStrHandle data = astr_allocate("");
+	cout << aio_writeAll("test.txt","Hello World!",-1) << endl;
+	cout << aio_checkExistence("CMakeCache.txt") << endl;
 	return 0;
 }

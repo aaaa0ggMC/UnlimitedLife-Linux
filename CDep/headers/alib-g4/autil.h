@@ -1,6 +1,7 @@
 #ifndef ALIB4_AUTIL_H_INCLUDED
 #define ALIB4_AUTIL_H_INCLUDED
 #include <alib-g4/ahandle.h>
+#include <stdbool.h>
 
 //=============== 基础样式 ================
 #define ACP_RESET       "\e[0m"   // 重置所有样式
@@ -68,8 +69,9 @@
 
 #define AE_SUCCESS 0
 #define AE_FAILED -1
-#define AE_CANT_FIND 1
-#define AE_EMPTY_DATA 2
+#define AE_CANT_FIND -2
+#define AE_EMPTY_DATA -3
+#define AE_IO -4
 
 #ifdef _WIN32
 typedef __int64 amem_bytes;
@@ -117,6 +119,10 @@ ALIB4_API void aaddOnErrorCallback(aErrorCallbackFn fn,void * reserved);
 ALIB4_API void* adefaultErrorCallback(int,const char *,void*);
 ALIB4_API void aenableVirtualTerminal();
 ALIB4_API long aio_fileSize(const char * filepath);
+ALIB4_API long aio_readAll(const char * filename,AStrHandle appender);
+ALIB4_API const char * asafe(const char *);
+ALIB4_API long aio_writeAll(const char * fp,const char * data,long length);
+ALIB4_API _Bool aio_checkExistence(const char * fp);
 
 }
 
