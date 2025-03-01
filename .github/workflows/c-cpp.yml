@@ -17,6 +17,7 @@ jobs:
       run: ./configure
     - uses: actions/upload-artifact@v4
       with:
+        name: UnlimitedLife-Linux-Ubuntu
         # A file, directory or wildcard pattern that describes what to upload
         # Required.
-        path: CBuild
+        path: CBuild/Data

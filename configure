@@ -21,5 +21,14 @@ mkdir -p dep
 cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
 
 make
+
+mkdir -p Data
+cd Data
+
+cp ../libaaaa0ggmcLib-g4.so .
+cp ../test_data/ -r ./test_data
+cp ../UnlimitedLife .
+cp ../alib4test .
+
 # make check
 # make distcheck
