@@ -15,7 +15,7 @@ cp tomlplusplus/toml.hpp dep/toml.hpp
 mkdir -p dep
 
 # Run CMake to configure the project
-cmake .. -Dcustom_include_dir=dep -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
+cmake .. -Dcustom_include_dir=$(pwd)/dep -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
 
 make
 make check
