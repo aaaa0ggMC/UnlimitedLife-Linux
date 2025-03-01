@@ -10,12 +10,12 @@ cd CBuild
 
 # Clone the toml++ repository and copy the toml++.hpp file
 git clone https://github.com/marzer/tomlplusplus.git
-cp tomlplusplus/toml.hpp dep/toml.hpp
+sudo cp tomlplusplus/toml.hpp /usr/include/toml.hpp
 
 mkdir -p dep
 
 # Run CMake to configure the project
-cmake .. -Dcustom_include_dir=$(pwd)/dep -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
+cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
 
 make
 make check
