@@ -123,6 +123,8 @@ ALIB4_API long aio_readAll(const char * filename,AStrHandle appender);
 ALIB4_API const char * asafe(const char *);
 ALIB4_API long aio_writeAll(const char * fp,const char * data,long length);
 ALIB4_API _Bool aio_checkExistence(const char * fp);
+ALIB4_API const char * agetTime();
+ALIB4_API const char * aformatDuration(int seconds);
 
 }
 

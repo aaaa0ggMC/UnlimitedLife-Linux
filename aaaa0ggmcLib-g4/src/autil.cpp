@@ -220,7 +220,7 @@ extern "C" {
 		return (stat(fp, &buffer) == 0);
 	}
 	
-	void aio_traverseImpl(
+	int aio_traverseImpl(
 		const fs::path& basePath,
 		std::vector<std::string>& results,
 		int remainingDepth,
@@ -229,8 +229,8 @@ extern "C" {
 		bool includeDirs
 	){
 		if (!fs::exists(basePath)) {
-			std::cerr << "Path not found: " << basePath << std::endl;
-			return;
+			asetLastErrorf(AE_IO,"Path not found:%s",basePath.c_str());
+			return AE_IO;
 		}
 
 		try {
@@ -247,6 +247,7 @@ extern "C" {
 					// 递归处理子目录
 					if (remainingDepth != 0) {
 						const int newDepth = (remainingDepth > 0) ? remainingDepth - 1 : -1;
+						///No error dealing here
 						aio_traverseImpl(
 							path,
 							results,
@@ -263,11 +264,13 @@ extern "C" {
 				}
 			}
 		} catch (const fs::filesystem_error& e) {
-			std::cerr << "Filesystem error: " << e.what() << std::endl;
+			asetLastErrorf(AE_IO,"Filesystem error:%s",e.what().c_str());
+			return AE_IO;
 		}
+		return AE_SUCCESS;
 	}
 	
-	void aio_traverseFilesDirs(
+	int aio_traverseFilesDirs(
 		const std::string& path,
 		std::vector<std::string>& files,
 		int traverseDepth,
@@ -275,11 +278,11 @@ extern "C" {
 	) {
 		const fs::path basePath(path);
 		const fs::path initialAppender(appender);
-		aio_traverseImpl(basePath, files, traverseDepth, initialAppender, true, true);
+		return aio_traverseImpl(basePath, files, traverseDepth, initialAppender, true, true);
 	}
 
 	// 变体1：仅遍历文件
-	void aio_traverseFilesOnly(
+	int aio_traverseFilesOnly(
 		const std::string& path,
 		std::vector<std::string>& files,
 		int traverseDepth,
@@ -287,11 +290,11 @@ extern "C" {
 	) {
 		const fs::path basePath(path);
 		const fs::path initialAppender(appender);
-		aio_traverseImpl(basePath, files, traverseDepth, initialAppender, true, false);
+		return aio_traverseImpl(basePath, files, traverseDepth, initialAppender, true, false);
 	}
 
 	// 变体2：仅遍历目录
-	void aio_traverseFolders(
+	int aio_traverseFolders(
 		const std::string& path,
 		std::vector<std::string>& folders,
 		int traverseDepth,
@@ -299,28 +302,63 @@ extern "C" {
 	) {
 		const fs::path basePath(path);
 		const fs::path initialAppender(appender);
-		aio_traverseImpl(basePath, folders, traverseDepth, initialAppender, false, true);
+		return aio_traverseImpl(basePath, folders, traverseDepth, initialAppender, false, true);
 	}
 
 	// 变体3：快速递归文件遍历（深度无限）
-	void aio_traverseFilesRecursive(
+	int aio_traverseFilesRecursive(
 		const std::string& path,
 		std::vector<std::string>& files,
 		const std::string& appender
 	) {
 		const fs::path basePath(path);
 		const fs::path initialAppender(appender);
-		aio_traverseImpl(basePath, files, -1, initialAppender, true, false);
+		return aio_traverseImpl(basePath, files, -1, initialAppender, true, false);
 	}
 
 	// 变体4：快速递归目录遍历（深度无限）
-	void aio_traverseFoldersRecursive(
+	int aio_traverseFoldersRecursive(
 		const std::string& path,
 		std::vector<std::string>& folders,
 		const std::string& appender
 	) {
 		const fs::path basePath(path);
 		const fs::path initialAppender(appender);
-		aio_traverseImpl(basePath, folders, -1, initialAppender, false, true);
+		return aio_traverseImpl(basePath, folders, -1, initialAppender, false, true);
+	}
+	
+	
+    const char * agetTime(){
+		static thread_local std::string data = "";
+		data.clear();
+		data.resize(512);
+		time_t rawtime;
+		struct tm *ptminfo;
+		time(&rawtime);
+		ptminfo = localtime(&rawtime);
+		sprintf(&data[0],"%02d-%02d-%02d %02d:%02d:%02d",
+				ptminfo->tm_year + 1900, ptminfo->tm_mon + 1, ptminfo->tm_mday,
+				ptminfo->tm_hour, ptminfo->tm_min, ptminfo->tm_sec);
+		return data.c_str();
+	}
+	
+	const char * aformatDuration(int secs){
+		static thread_local std::string data = "";
+		data.clear();
+		int sec = secs%60;
+		secs /= 60;
+		int min = secs % 60;
+		secs /= 60;
+		int hour = secs % 60;
+		secs /= 60;
+		int day = secs % 24;
+		secs /= 24;
+		int year = secs % 356;
+		if(year != 0)data += std::to_string(year) + "y ";
+		if(day != 0)data += std::to_string(day) + "d ";
+		if(hour != 0)data += std::to_string(hour) + "h ";
+		if(min != 0)data += std::to_string(min) + "m ";
+		if(sec != 0)data += std::to_string(sec) + "s";
+		return data.c_str();
 	}
 }
