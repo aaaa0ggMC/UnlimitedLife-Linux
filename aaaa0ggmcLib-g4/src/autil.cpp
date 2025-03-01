@@ -264,7 +264,7 @@ extern "C" {
 				}
 			}
 		} catch (const fs::filesystem_error& e) {
-			asetLastErrorf(AE_IO,"Filesystem error:%s",e.what().c_str());
+			asetLastErrorf(AE_IO,"Filesystem error:%s",e.what());
 			return AE_IO;
 		}
 		return AE_SUCCESS;
