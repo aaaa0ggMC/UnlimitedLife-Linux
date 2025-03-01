@@ -14,4 +14,7 @@ cp tomlplusplus/toml++/toml++.hpp dep/toml++.hpp
 mkdir -p build
 
 # Run CMake to configure the project
-cmake -S . -B build -Dcustom_include_dir=dep
+cmake -S . -B build -Dcustom_include_dir=dep -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
+
+# Generate Makefiles using CMake
+cmake --build build
