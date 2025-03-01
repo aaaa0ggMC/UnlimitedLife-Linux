@@ -25,7 +25,9 @@ jobs:
 
     steps:
       - name: Install vcpkg
-        uses: lukka/run-vcpkg@v11
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
       - uses: actions/checkout@v4
       - name: configure & build
         run: ./configure.bat

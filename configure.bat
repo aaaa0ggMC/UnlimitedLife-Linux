@@ -6,6 +6,10 @@ if not exist "%VCPKG_ROOT%" (
     exit /b 1
 )
 
+:: Set environment variables
+set VCPKG_ROOT=D:\a\UnlimitedLife-Linux\UnlimitedLife-Linux\vcpkg\
+set PATH=%PATH%;%VCPKG_ROOT%\installed\x64-windows\bin;%VCPKG_ROOT%
+
 :: Install build dependencies using vcpkg
 vcpkg install rapidjson glfw3 glew glm
 
