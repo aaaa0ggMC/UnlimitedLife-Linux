@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Install build dependencies
-sudo apt-get install -y clang
 sudo apt-get install -y build-essential cmake
 sudo apt-get install -y rapidjson-dev
 
@@ -11,9 +10,13 @@ cd CBuild
 
 # Clone the toml++ repository and copy the toml++.hpp file
 git clone https://github.com/marzer/tomlplusplus.git
-cp tomlplusplus/toml++/toml++.hpp dep/toml++.hpp
+cp tomlplusplus/toml.hpp dep/toml.hpp
 
 mkdir -p dep
 
 # Run CMake to configure the project
-cmake .. -Dcustom_include_dir=dep -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -G "Unix Makefiles"
+cmake .. -Dcustom_include_dir=dep -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
+
+make
+make check
+make distcheck
