@@ -20,18 +20,3 @@ jobs:
         # A file, directory or wildcard pattern that describes what to upload
         # Required.
         path: CBuild/Data
-  build-windows:
-    runs-on: windows-latest
-
-    steps:
-      - name: Install vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
-      - uses: actions/checkout@v4
-      - name: configure & build
-        run: ./configure.bat
-      - uses: actions/upload-artifact@v4
-        with:
-          name: UnlimitedLife-Windows
-          path: CBuild/Data
