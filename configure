@@ -8,27 +8,8 @@ sudo apt-get install -y libglew-dev
 sudo apt-get install -y libglm-dev
 
 # Create a build directory if it doesn't exist
-mkdir -p CBuild
-cd CBuild
-
-# Clone the toml++ repository and copy the toml++.hpp file
-git clone https://github.com/marzer/tomlplusplus.git
-sudo cp tomlplusplus/toml.hpp /usr/include/toml.hpp
-
-mkdir -p dep
+mkdir -p CBuild_CACHE
+cd CBuild_CACHE
 
 # Run CMake to configure the project
 cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
-
-make
-
-mkdir -p Data
-cd Data
-
-cp ../libaaaa0ggmcLib-g4.so .
-cp ../test_data/ -r ./test_data
-cp ../UnlimitedLife .
-cp ../alib4test .
-
-# make check
-# make distcheck
