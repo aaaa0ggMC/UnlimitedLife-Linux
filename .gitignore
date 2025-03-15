@@ -1,10 +1,8 @@
 # Cmake
 CMakeFiles/
-CBuild/*/
-CBuild/CMake*
-CBuild/Makefile
-CBuild/cmake_*
-
+CBuild_CACHE/
+CBuild/
+!CBuild/test_data
 
 # Prerequisites
 *.d
