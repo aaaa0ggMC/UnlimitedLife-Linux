@@ -20,6 +20,7 @@ include_directories(./CDep/headers)
 include_directories(${custom_include_dir})
 link_directories(${custom_lib_dir})
 # 我觉得自己是个傻逼，为什么老项目还有build??
-# add_subdirectory(aaaa0ggmcLib)
+add_subdirectory(aaaa0ggmcLib)
 add_subdirectory(aaaa0ggmcLib-g4)
 add_subdirectory(UnlimitedLife-src)
+add_subdirectory(AGE)

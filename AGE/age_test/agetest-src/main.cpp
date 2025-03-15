@@ -1,9 +1,8 @@
-#define private public
 #include <AGE/Application.h>
 #include <alib-g3/alogger.h>
 
 using namespace age;
-using namespace alib::ng;
+using namespace alib::g3;
 
 int main(){
     Application app;
@@ -12,8 +11,10 @@ int main(){
     Window * win;
 
     ///Init logger
-    logger.setOutputFile("test_data/agetest_log.txt");
+    auto target = std::make_shared<log_output_targets::Console>();
+    logger.appendLogOutputTarget("console",target);
 
+    lg.info("Creating window...");
     ///Create Window
     {
         CreateWindowInfo info;

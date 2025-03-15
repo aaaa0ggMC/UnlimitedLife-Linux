@@ -1,20 +1,21 @@
-#include <foonathan/memory/container.hpp>
-#include <foonathan/memory/memory_pool.hpp>
-#include <string.h>
+//#include <foonathan/memory/container.hpp>
+//#include <foonathan/memory/memory_pool.hpp>
+/*#include <string.h>
+
 
 #include <AGE/ResourceManager.h>
 
 using namespace age;
-using namespace memory::literals;
+//using namespace memory::literals;
 
 ResourceManager::ResourceManager(unsigned int poolSize){
-    mempool = new MemPool();
+  //  mempool = new MemPool();
 }
 
 ResourceManager::~ResourceManager(){
-    if(mempool){
-        delete mempool;
-    }
+    //if(mempool){
+      //  delete mempool;
+    //}
 }
 
 std::optional<std::string *> allocateString(const std::string& buf){
@@ -27,4 +28,5 @@ std::optional<std::string *> allocateString(const std::string& buf){
         return {buf};
     }
     return {result->second};
-}
+
+}*/
