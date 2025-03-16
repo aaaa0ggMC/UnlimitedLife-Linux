@@ -3,6 +3,8 @@ CMakeFiles/
 CBuild_CACHE/
 CBuild/
 !CBuild/test_data
+Pacman/
+!Pacman/PKGBUILD
 
 # Prerequisites
 *.d

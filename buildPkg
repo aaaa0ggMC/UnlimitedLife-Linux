@@ -1,0 +1,14 @@
+./compress
+mkdir Pacman
+cd Pacman
+echo Generating PKGBUILD
+cat PKGBUILD > PKGBUILD_SHA
+makepkg -g >> PKGBUILD_SHA
+mv PKGBUILD PKGBUILD_tmp
+mv PKGBUILD_SHA PKGBUILD
+echo Generating SRCINFO
+makepkg --printsrcinfo > .SRCINFO
+echo Building package
+makepkg -si
+rm PKGBUILD
+mv PKGBUILD_tmp PKGBUILD
