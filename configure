@@ -1,11 +1,17 @@
 #!/bin/bash
 
 # Install build dependencies
-sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev
+if [ -f /etc/arch-release ]; then
+    echo "This is Arch Linux."
+    sudo pacman --needed -S cmake rapidjson glfw glew glm 
+else
+  echo "This is not Arch Linux."
+  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev
+fi
 
 # Create a build directory if it doesn't exist
 mkdir -p CBuild_CACHE
 cd CBuild_CACHE
 
 # Run CMake to configure the project
-cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
+cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr
