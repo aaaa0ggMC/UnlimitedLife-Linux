@@ -1,5 +1,5 @@
 #!/bin/bash
-./compress
+sh ./compress
 mkdir Pacman
 cd Pacman
 echo Generating PKGBUILD
