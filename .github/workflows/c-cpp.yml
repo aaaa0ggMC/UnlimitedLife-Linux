@@ -13,9 +13,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: configure
-      run: ./configure
+      run: sh ./configure
     - name: build
-      run: ./build
+      run: sh ./build
     - uses: actions/upload-artifact@v4
       with:
         name: UnlimitedLife-Linux-Ubuntu
