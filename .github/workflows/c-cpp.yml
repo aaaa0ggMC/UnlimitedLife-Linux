@@ -22,3 +22,17 @@ jobs:
         # A file, directory or wildcard pattern that describes what to upload
         # Required.
         path: CBuild/
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: git mingw-w64-ucrt-x86_64-gcc
+     - name: CI-Build
+       run: |
+         echo 'Msys2 build!'
+         ./build.cmd
+
