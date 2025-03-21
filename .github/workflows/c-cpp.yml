@@ -19,20 +19,31 @@ jobs:
     - uses: actions/upload-artifact@v4
       with:
         name: UnlimitedLife-Linux-Ubuntu
-        # A file, directory or wildcard pattern that describes what to upload
-        # Required.
         path: CBuild/
-#  build-windows:
-#    runs-on: windows-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - uses: msys2/setup-msys2@v2
-#        with:
-#          msystem: UCRT64
-#          update: true
-#          install: git mingw-w64-ucrt-x86_64-gcc
-#     - name: CI-Build
-#       run: |
-#         echo 'Msys2 build!'
-#         ./build.cmd
 
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    
+    steps:
+    - uses: actions/checkout@v4
+      
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: git mingw-w64-ucrt-x86_64-gcc
+      
+    - name: CI-Build
+      run: |
+        echo 'Msys2 build!'
+        ./build.cmd
+      
+#    - name: Upload Windows Artifact
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: UnlimitedLife-Windows
+#        path: CBuild/
