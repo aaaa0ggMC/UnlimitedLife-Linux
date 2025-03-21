@@ -6,4 +6,4 @@ cd CBuild_CACHE_WIN
 # Run CMake to configure the project
 cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
 
-
+make

@@ -15,5 +15,3 @@ cd CBuild_CACHE
 
 # Run CMake to configure the project
 cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr
-
-make
