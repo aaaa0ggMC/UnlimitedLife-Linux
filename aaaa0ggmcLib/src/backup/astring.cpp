@@ -3,7 +3,7 @@
 #include <codecvt>
 #include <locale>
 
-using namespace alib::ng;
+using namespace alib::g3;
 
 std::string converter::utf8_to_ansi(dstring utf8) {
     return Util::str_encUTF8ToAnsi(utf8);

@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include <alib-g3/autil.h>
 
-using namespace alib::ng;
+using namespace alib::g3;
 
 int Parser::ParseCommand(dstring cmd,std::string & head,std::string& args,std::vector<std::string> & sep_args){
     head = "";
@@ -40,16 +40,16 @@ int Parser::gen_arg(dstring str,unsigned int beg,std::string & arg){
         index += 1;
         switch(ch){
         case '{':
-            depth++;
-            if(depth <= 0){
+            if(depth > 0){
                 arg += '{';
             }
+            depth++;
             break;
         case '}':
-            if(depth <= 0){
+            depth--;
+            if(depth > 0){
                 arg += '}';
             }
-            depth--;
             break;
         default:
             if(depth == 0 && isspace(ch)){

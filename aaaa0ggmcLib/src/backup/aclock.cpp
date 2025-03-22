@@ -9,7 +9,7 @@
 #include <unistd.h>
 #endif // __linux__
 
-using namespace alib::ng;
+using namespace alib::g3;
 
 #define _d(x) ((double)(x))
 #define AssertSt _d(timeGetTimeEx())
@@ -30,82 +30,84 @@ static inline double timeGetTimeEx(){
 Clock::Clock(bool start){
     this->m_StartTime = this->m_PreTime = 0;
     this->m_pauseGained = 0;
-    this->m_start = false;
-    this->m_paused = false;
+    this->state = Stopped;
     if(start){
         this->start();
     }
 }
 
-bool Clock::isStop(){return !m_start;}
+Clock::ClockState Clock::getState(){
+    return state;
+}
 
 void Clock::start(){
-    if(m_start)return;
-    this->m_start = true;
+    if(state != Stopped)return;
+    state = Running;
     this->m_StartTime = AssertSt;
     clearOffset();
 }
 
-TMST0 Clock::pause(){
-    if(m_paused)return {0,0};
-    m_paused = true;
-    TMST0 ret = now();
+ClockTimeInfo Clock::pause(){
+    if(state == Paused)return {0,0};
+    ClockTimeInfo ret = now();
     m_pauseGained = ret.all;
+    state = Paused;//use this to change stop() 's behavior
     stop();
+    state = Paused;
     return ret;
 }
 
 void Clock::resume(){
-    if(!m_paused)return;
+    if(state != Paused)return;
     start();
-    clearOffset();
-    m_paused = false;
+    state = Running;
 }
 
-TMST0 Clock::now(){
-    if(!m_start)return {0,0};
-    TMST0 t;
+void Clock::reset(){
+    stop();
+    start();
+}
+
+ClockTimeInfo Clock::now(){
+    ClockTimeInfo t;
     t.all = AssertSt - this->m_StartTime + m_pauseGained;
-    t.offset = AssertSt - this->m_PreTime;
+    if(state == Running)t.offset = AssertSt - this->m_PreTime;
+    else t.offset = 0;
     return t;
 }
 
 double Clock::getAllTime(){
-    if(!m_start)return 0;
     return now().all;
 }
 
 //现在getoffset不会清零！
 double Clock::getOffset(){
-    if(!m_start)return 0;
-    double off = now().offset;
-    //this->m_PreTime = AssertSt;
-    return off;
+    return now().offset;
 }
 
 void Clock::clearOffset(){
     this->m_PreTime = AssertSt;
 }
 
-TMST0 Clock::stop(){
-    if(!m_start)return {0,0};
-    TMST0 rt = now();
+ClockTimeInfo Clock::stop(){
+    if(state == Stopped)return {0,0};
+    ClockTimeInfo rt = now();
     this->m_StartTime = 0;
-    this->m_start = false;
-    if(!m_paused){
+    if(state != Paused){
         m_pauseGained = 0;
     }
+    state = Stopped;
     return rt;
 }
 
 Trigger::Trigger(Clock & clk,double d){
     m_clock = &clk;
     duration = d;
-    rec = clk.getAllTime();
+    recordedTime = clk.getAllTime();
 }
 
 bool Trigger::test(bool v){
-    bool ret = (m_clock->getAllTime() - rec) >= duration;
+    bool ret = (m_clock->getAllTime() - recordedTime) >= duration;
     if(v && ret){
         reset();
     }
@@ -115,24 +117,24 @@ bool Trigger::test(bool v){
 void Trigger::setClock(Clock & c){m_clock = &c;}
 
 void Trigger::reset(){
-    rec = m_clock->getAllTime();
+    recordedTime = m_clock->getAllTime();
 }
 
 void Trigger::setDuration(double duration){
     this->duration = duration;
 }
 
-RPSRestrict::RPSRestrict(float wantFps):trig(clk,0){
+RateLimiter::RateLimiter(float wantFps):trig(clk,0){
     desire = 1000 / wantFps;
     trig.setDuration(desire);
 }
 
-void RPSRestrict::wait(){
+void RateLimiter::wait(){
     if(trig.test())return;
-    std::this_thread::sleep_for(std::chrono::milliseconds((int)(desire - (clk.getAllTime() - trig.rec))));
+    std::this_thread::sleep_for(std::chrono::milliseconds((int)(desire - (clk.getAllTime() - trig.recordedTime))));
 }
 
-void RPSRestrict::reset(float wantFps){
+void RateLimiter::reset(float wantFps){
     desire = 1000 / wantFps;
     trig.setDuration(desire);
 }

@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <iostream>
 #ifdef _WIN32
 #include <direct.h>
 #include <io.h>
@@ -18,7 +19,8 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <dirent.h>
-using namespace alib::ng;
+using namespace alib::g3;
+namespace fs = std::filesystem;
 
 #include <iostream>
 #include <string>
@@ -108,7 +110,7 @@ std::string Util::ot_getTime() {
     return rt;
 }
 
-std::string Util::sys_GetCPUId(){
+std::string Util::sys_getCPUId(){
     #ifdef _WIN32
     long lRet;
     HKEY hKey;
@@ -147,6 +149,7 @@ std::string Util::sys_GetCPUId(){
 
 void Util::io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth,dstring appender) {
     #ifdef _WIN32
+    ///TODO:Windows is not the latest one
     //文件句柄 注意：我发现有些文章代码此处是long类型，实测运行中会报错访问异常
     intptr_t hFile = 0;
     //文件信息
@@ -174,7 +177,7 @@ void Util::io_traverseFiles(dstring path, std::vector<std::string>& files,int tr
     while((entry = readdir(dir)) != NULL){
         if(!strncmp(".",entry->d_name,1))continue;
         else if(!strncmp("..",entry->d_name,2))continue;
-        if(traverseDepth > 0 && entry->d_type == DT_DIR){
+        if(traverseDepth != 0 && entry->d_type == DT_DIR){
             std::string newpath = path;
             std::string appenderpp = appender;
             if(newpath[newpath.size() - 1] != '/'){
@@ -194,6 +197,111 @@ void Util::io_traverseFiles(dstring path, std::vector<std::string>& files,int tr
     }
     #endif // _WIN32
 
+}
+// 基础遍历实现
+void Util::io_traverseImpl(
+    const fs::path& basePath,
+    std::vector<std::string>& results,
+    int remainingDepth,
+    const fs::path& currentAppender,
+    bool includeFiles,
+    bool includeDirs
+) {
+    if (!fs::exists(basePath)) {
+        std::cerr << "Path not found: " << basePath << std::endl;
+        return;
+    }
+
+    try {
+        for (const auto& entry : fs::directory_iterator(basePath)) {
+            const auto& path = entry.path();
+            const fs::path relativePath = currentAppender / path.filename();
+
+            // 处理目录
+            if (entry.is_directory()) {
+                if (includeDirs) {
+                    results.push_back(relativePath.generic_string());
+                }
+
+                // 递归处理子目录
+                if (remainingDepth != 0) {
+                    const int newDepth = (remainingDepth > 0) ? remainingDepth - 1 : -1;
+                    io_traverseImpl(
+                        path,
+                        results,
+                        newDepth,
+                        relativePath,
+                        includeFiles,
+                        includeDirs
+                    );
+                }
+            }
+            // 处理文件
+            else if (includeFiles && entry.is_regular_file()) {
+                results.push_back(relativePath.generic_string());
+            }
+        }
+    } catch (const fs::filesystem_error& e) {
+        std::cerr << "Filesystem error: " << e.what() << std::endl;
+    }
+}
+
+// 完整功能版本（保持你的原始接口）
+void Util::io_traverseFiles2(
+    const std::string& path,
+    std::vector<std::string>& files,
+    int traverseDepth,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, files, traverseDepth, initialAppender, true, true);
+}
+
+// 变体1：仅遍历文件
+void Util::io_traverseFilesOnly(
+    const std::string& path,
+    std::vector<std::string>& files,
+    int traverseDepth,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, files, traverseDepth, initialAppender, true, false);
+}
+
+// 变体2：仅遍历目录
+void Util::io_traverseFolders(
+    const std::string& path,
+    std::vector<std::string>& folders,
+    int traverseDepth,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, folders, traverseDepth, initialAppender, false, true);
+}
+
+// 变体3：快速递归文件遍历（深度无限）
+void Util::io_traverseFilesRecursive(
+    const std::string& path,
+    std::vector<std::string>& files,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, files, -1, initialAppender, true, false);
+}
+
+// 变体4：快速递归目录遍历（深度无限）
+void Util::io_traverseFoldersRecursive(
+    const std::string& path,
+    std::vector<std::string>& folders,
+    const std::string& appender
+) {
+    const fs::path basePath(path);
+    const fs::path initialAppender(appender);
+    io_traverseImpl(basePath, folders, -1, initialAppender, false, true);
 }
 
 std::string Util::str_unescape(dstring in) {
@@ -285,23 +393,18 @@ int Util::io_readAll(std::ifstream & reader,string & ss) {
 }
 
 int Util::io_readAll(dstring fpath,std::string & ss) {
-    unsigned long size = io_fileSize(fpath);
-
-    std::ifstream reader(fpath);
-    if(!reader.good())return ALIB_ERROR;
-
-    char * buf = new char[size+1];
-    memset(buf,0,sizeof(char) * (size+1));
-
-    reader.read(buf,size);
-    buf[size] = 0;
-    reader.close();
-
-    ss.append(buf);
-
-    delete [] buf;
-
-    return size;
+    FILE * file = fopen(fpath.c_str(),"r");
+    if(!file)return -1;
+    long fsize = io_fileSize(fpath);
+    if(fsize > 0){
+        std::vector<char> buf;
+        buf.resize(fsize / sizeof(char) +  1);
+        buf[fsize / sizeof(char)] = '\0';
+        fread(buf.data(),sizeof(char),fsize / sizeof(char),file);
+        ss.append(buf.begin(),buf.end());
+    }
+    fclose(file);
+    return (int)fsize;
 }
 
 std::string Util::str_trim_rt(std::string & str) {
@@ -336,7 +439,7 @@ void Util::str_split(dstring line,const char sep,std::vector<std::string> & vct)
     for(int i = 0; i < (int)size; i++) {
         if(str[i] == sep) {
             string st = line.substr(start,end);
-            str_trim(st);
+            str_trim_nrt(st);
             vct.push_back(st);
             start = i + 1;
             end = 0;
@@ -345,7 +448,7 @@ void Util::str_split(dstring line,const char sep,std::vector<std::string> & vct)
     }
     if(end > 0) {
         string st = line.substr(start,end);
-        str_trim(st);
+        str_trim_nrt(st);
         vct.push_back(st);
     }
 }
@@ -436,7 +539,7 @@ std::string Util::ot_formatDuration(int secs) {
     return ret;
 }
 
-MemTp Util::sys_getProgramMemoryUsage() {
+ProgramMemUsage Util::sys_getProgramMemoryUsage() {
     #ifdef _WIN32
     mem_bytes mem = 0, vmem = 0;
     PROCESS_MEMORY_COUNTERS pmc;
@@ -498,24 +601,24 @@ MemTp Util::sys_getProgramMemoryUsage() {
     #endif
 }
 
-GlMem Util::sys_getGlobalMemoryUsage() {
+GlobalMemUsage Util::sys_getGlobalMemoryUsage() {
     #ifdef _WIN32
     MEMORYSTATUSEX statex;
-    GlMem ret = {0};
+    GlobalMemUsage ret = {0};
     statex.dwLength = sizeof(statex);
     GlobalMemoryStatusEx(&statex);
 
-    ret.phy_all = statex.ullTotalPhys;
-    ret.phy_used = ret.phy_all - statex.ullAvailPhys;
-    ret.vir_all = statex.ullTotalVirtual;
-    ret.vir_used = ret.vir_all - statex.ullAvailVirtual;
-    ret.page_all = statex.ullTotalPageFile;
-    ret.page_used = statex.ullTotalPageFile - statex.ullAvailPageFile;
+    ret.physicalTotal = statex.ullTotalPhys;
+    ret.physicalUsed = ret.phy_all - statex.ullAvailPhys;
+    ret.virtualTotal = statex.ullTotalVirtual;
+    ret.virtualUsed = ret.vir_all - statex.ullAvailVirtual;
+    ret.pageTotal = statex.ullTotalPageFile;
+    ret.pageUsed = statex.ullTotalPageFile - statex.ullAvailPageFile;
     ret.percent = statex.dwMemoryLoad;
 
     return ret;
     #else
-    GlMem ret = {0};
+    GlobalMemUsage ret = {0};
 
     // 打开 /proc/meminfo 文件
     std::ifstream meminfo("/proc/meminfo");
@@ -558,26 +661,26 @@ GlMem Util::sys_getGlobalMemoryUsage() {
     meminfo.close();
 
     // 计算物理内存
-    ret.phy_all = memTotal * 1024; // 转换为字节
-    ret.phy_used = (memTotal - memFree - buffers - cached) * 1024;
+    ret.physicalTotal = memTotal * 1024; // 转换为字节
+    ret.physicalUsed = (memTotal - memFree - buffers - cached) * 1024;
 
     // 计算虚拟内存（Linux 没有直接的虚拟内存字段，这里可以选择设置为 0）
-    ret.vir_all = 0;
-    ret.vir_used = 0;
+    ret.virtualTotal = 0;
+    ret.virtualUsed = 0;
 
     // 计算交换空间
-    ret.page_all = swapTotal * 1024;
-    ret.page_used = (swapTotal - swapFree) * 1024;
+    ret.pageTotal = swapTotal * 1024;
+    ret.pageUsed = (swapTotal - swapFree) * 1024;
 
     // 计算内存使用百分比
-    ret.percent = (double)ret.phy_used / ret.phy_all * 100.0;
+    ret.percent = (double)ret.physicalUsed / ret.physicalTotal * 100.0;
 
     return ret;
     #endif
 }
 
 CPUInfo::CPUInfo() {
-    this->CpuID = Util::sys_GetCPUId();
+    this->CpuID = Util::sys_getCPUId();
 }
 
 std::string Util::str_toUpper(dstring in){

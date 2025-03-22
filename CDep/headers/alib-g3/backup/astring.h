@@ -3,8 +3,12 @@
 #include <string>
 #include <alib-g3/autil.h>
 
+#ifndef ALIB_IGNORE_CONFLICT
+
+#endif // ALIB_IGNORE_CONFLICT
+
 namespace alib{
-namespace ng{
+namespace g3{
     using dwstring = const std::wstring&;
 
     struct mstring{

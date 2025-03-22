@@ -1,18 +1,18 @@
-///This file is not of c linkage
 #ifndef AAAA_UTIL_H_INCLUDED
 #define AAAA_UTIL_H_INCLUDED
 #include <string>
 #include <vector>
 #include <fstream>
+#include <filesystem>
+#ifndef ALIB_DISABLE_CPP20
+#include <format>
+#endif // ALIB_DISABLE_CPP20
 
 #define ALIB_SUCCESS 0
 #define ALIB_ERROR -1
 
 ///For windows support
 #ifdef _WIN32
-/*  To use this exported function of dll, include this header
- *  in your project.
- */
 #include <windows.h>
 #ifndef DLL_EXPORT
 #ifdef BUILD_DLL
@@ -34,7 +34,7 @@
 #endif // BUILD_DLL
 
 #endif
-// 前景颜色宏定义 (Windows 专用)
+//Foreground colors
 #define APCF_BLACK        0
 #define APCF_BLUE         1
 #define APCF_GREEN        2
@@ -52,7 +52,7 @@
 #define APCF_LIGHT_YELLOW 14
 #define APCF_BRIGHT_WHITE 15
 
-// 背景颜色宏定义
+//Background colors
 #define APCB_BLACK        (0 << 4)
 #define APCB_BLUE         (1 << 4)
 #define APCB_GREEN        (2 << 4)
@@ -70,8 +70,14 @@
 #define APCB_LIGHT_YELLOW (14 << 4)
 #define APCB_BRIGHT_WHITE (15 << 4)
 
+#ifndef ALIB_TO_STRING_RESERVE_SIZE
+#define ALIB_TO_STRING_RESERVE_SIZE 128
+#endif // ALIB_TO_STRING_RESERVE_SIZE
+
+namespace fs = std::filesystem;
+
 namespace alib {
-namespace ng {
+namespace g3 {
 using namespace std;
 using dstring = const std::string&;
 #ifdef _WIN32
@@ -80,75 +86,84 @@ using mem_bytes = __int64;
 using mem_bytes = __int64_t;
 #endif // _WIN32
 
-/** \brief Program Memory 程序使用内存
- *  mem memory 内存
- *  vmem virtual memory 虚拟内存
- */
-struct DLL_EXPORT MemTp {
-    mem_bytes mem;
-    mem_bytes vmem;
+namespace ext_toString{
+    #ifndef ALIB_DISABLE_CPP20
+    inline thread_local std::string fmtBuf;
+    [[maybe_unused]] inline thread_local bool inited = []()->bool{
+        fmtBuf.reserve(ALIB_TO_STRING_RESERVE_SIZE);
+        return true;
+    }();
+    #endif // ALIB_DISABLE_CPP20
+
+    inline const std::string& toString(const std::string& v){
+        return v;
+    }
+    template<class T> auto toString(const T& v){
+        #ifndef ALIB_DISABLE_CPP20
+        fmtBuf.clear();
+        std::format_to(std::back_inserter(fmtBuf),"{}",v);
+        fmtBuf.append("\0");
+        return (const std::string&)fmtBuf;
+        #else
+            if constexpr(std::is_same<T,const char *>::value)return std::string(v);
+            else if constexpr(std::is_same<T,char *>::value)return std::string(v);
+            else if constexpr (std::is_same_v<std::remove_extent_t<T>, char> && std::is_array_v<T>)return std::string(v);
+            else return std::to_string(v);
+        #endif // ALIB_DISABLE_CPP20
+    }
+}
+
+/** \brief Program Memory 程序使用内存**/
+struct DLL_EXPORT ProgramMemUsage {
+    mem_bytes memory;
+    mem_bytes virtualMemory;
 };
-/** \brief Global Memory Usage 全局内存使用情况（不是(not)OpenGL!!!)
- * percent currently_being_used_mem/mem_all 内存使用百分比
- * phy_all capacity of physical mem 物理内存总量
- * vir_all ...
- * you can understand 你能看懂的
- */
-struct DLL_EXPORT GlMem {
+/** \brief Global Memory Usage 全局内存使用情况**/
+struct DLL_EXPORT GlobalMemUsage {
+    ///In linux,percent = phyUsed / phyTotal
     unsigned int percent;
-    mem_bytes phy_all;
-    mem_bytes vir_all;
-    mem_bytes phy_used;
-    mem_bytes vir_used;
-    mem_bytes page_all;
-    mem_bytes page_used;
+    mem_bytes physicalTotal;
+    mem_bytes virtualTotal;
+    mem_bytes physicalUsed;
+    mem_bytes virtualUsed;
+    mem_bytes pageTotal;
+    mem_bytes pageUsed;
 };
 
-/** \brief GetCPUInfo 获取CPU信息
- * 目前只支持获取CPU Id
- */
+/** \brief GetCPUInfo 获取CPU信息**/
 struct DLL_EXPORT CPUInfo {
     std::string CpuID;
     CPUInfo();
 };
 
-/** \brief Utility 工具类
- * 这还有什么要讲的？？
- */
+/** \brief Utility 工具类**/
 class DLL_EXPORT Util {
 public:
 ///io
     //通过const常量引用支持const char*与std::string
     /** \brief print with colors 颜色输出
-    *
     * print something with a custom color
     * 输出带自定义颜色的字符串
-    *
-    * \param what u want to print 你要打印什么
-    * \param color 颜色
     * \return just like printf 和printf一样
     */
     static int io_printColor(dstring message,int color);
     /** \brief traverse files 遍历文件
-    *
     * traverse all files in a folder(by default not include sub-folders)
     * 遍历一个文件夹下面的所有文件（默认不包括子文件夹）
-    *
-    * \param folder path 文件夹路径
-    * \param a vector to store these file names 一个std::vector用于存放数据
+    * \param path :folder path 文件夹路径
+    * \param files:a vector to store these file names 一个std::vector用于存放数据
+    * \param traverseDepth:(WindowsVersionNotSupported) smaller than 0:traverse all subdirs; >0:traverse certain depth of subdirs
+    * \param prefix:(WindowsVersionNotSupported) a fixed prefix of the content in vector files
     */
-    static void io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth = 0,dstring appender = "");
+    [[deprecated("Use io_traverseFilesOnly instead,this function is not guaranteed to work well")]] static void io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth = 0,dstring prefix = "");
     /** \brief get file size 获取文件大小
-     *
      * get file size efficiently using direct.h (better than fstream::seekg&tellg[ChatGPT says])
-     * 使用direct.h快速获取文件大小(比fstream::seekg&tellg快[ChatGPT说的]）
-     *
+     * 使用direct.h快速获取文件大小(比fstream::seekg&tellg快[ChatGPT说的])
      * \param file path 文件路径
      * \return file size 文件大小
      */
     static long io_fileSize(dstring filePath);
     /** \brief read a file
-     *
      * read the rest content of a std::ifstream
      * 读取std::ifstream吃剩下的所有内容
      *
@@ -181,6 +196,18 @@ public:
      */
     static bool io_checkExistence(dstring path);
 
+    static void io_traverseImpl(const fs::path& basePath,std::vector<std::string>& results,int remainingDepth,const fs::path& currentAppender,bool includeFiles,bool includeDirs);
+
+    static void io_traverseFiles2(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
+
+    ///content in files automatically contacted with path,usually absoulute
+    static void io_traverseFilesOnly(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
+
+    static void io_traverseFolders(const std::string& path,std::vector<std::string>& folders,int traverseDepth = -1,const std::string& appender = "");
+
+    static void io_traverseFilesRecursive(const std::string& path,std::vector<std::string>& files,const std::string& appender = "");
+
+    static void io_traverseFoldersRecursive(const std::string& path,std::vector<std::string>& folders,const std::string& appender = "");
 ///other
     /** \brief returns a time formatted as string
      *
@@ -201,15 +228,15 @@ public:
      *
      * \return CPUId
      */
-    static string sys_GetCPUId();
+    static string sys_getCPUId();
     /** \brief get program memory usage(bytes) currently 获取程序目前内存使用情况(单位:B)
      * \return mem stats 内存使用情况
      */
-    static MemTp sys_getProgramMemoryUsage();
+    static ProgramMemUsage sys_getProgramMemoryUsage();
     /** \brief get global(bytes) 获取全局内存使用情况(单位:B)
      * \return usage
      */
-    static GlMem sys_getGlobalMemoryUsage();
+    static GlobalMemUsage sys_getGlobalMemoryUsage();
 
 ///data_string
     /** \brief unescaping strings 逆转义字符串
@@ -220,14 +247,6 @@ public:
     //有返回值和没返回值的区别
     static void str_trim_nrt(std::string& str);
     static std::string str_trim_rt(std::string& str);
-    /** \brief trim string 移除字符串前后空白字符
-     * \param template<bool returnACopy = false> 自己看
-     * \param string to be modified 要修改的string
-     */
-    template<bool returnACopy = false> static inline auto str_trim(std::string& str) {
-        if constexpr(returnACopy)return str_trim_rt(str);
-        else str_trim_nrt(str);
-    }
     /** \brief split strings as small tokens 分割字符串
      * \param source
      * \param a token

@@ -10,7 +10,7 @@
 #define ALIB_EHAS_PARSE_ERROR ALIB_DATAE(0b1)
 
 namespace alib{
-namespace ng{
+namespace g3{
     using mapping_tp = std::unordered_map<std::string,std::string>;
     class DLL_EXPORT Analyser{
     public:
