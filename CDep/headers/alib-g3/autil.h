@@ -11,6 +11,7 @@ namespace fs = std::filesystem;
 
 ///Platform Related
 #ifdef _WIN32
+#define THREAD_LOCAL __declspec(thread)
 #include <windows.h>
 #ifndef DLL_EXPORT
 #ifdef BUILD_DLL
@@ -20,6 +21,7 @@ namespace fs = std::filesystem;
 #endif
 #endif // BUILD_DLL
 #elif __linux__
+#define THREAD_LOCAL thread_local
 #include <unistd.h>
 #ifndef DLL_EXPORT
 #ifdef BUILD_DLL

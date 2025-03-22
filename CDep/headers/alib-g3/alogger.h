@@ -84,6 +84,8 @@ namespace g3{
             void setContentColor(const char * color);
 
             void flush();
+
+            void close();
         };
 
         struct SingleFile : LogOutputTarget{
@@ -217,7 +219,7 @@ namespace g3{
         int defLogType;
         bool showContainerName;
     public:
-        static thread_local std::string cachedStr;
+        static THREAD_LOCAL std::string cachedStr;
 
         LogFactory(dstring head,Logger& lg);
 

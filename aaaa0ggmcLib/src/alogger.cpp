@@ -13,7 +13,7 @@
 using namespace alib::g3;
 
 Logger * Logger::instance;
-thread_local std::string LogFactory::cachedStr = "";
+THREAD_LOCAL std::string LogFactory::cachedStr = "";
 
 void Logger::flush(){
     for(auto & [_,target] : targets){
@@ -432,6 +432,8 @@ namespace alib::g3::lot{
     void Console::flush(){
         std::cout.flush();
     }
+
+    void Console::close(){}
 
     void Console::setContentColor(const char * col){
         neon = col;
