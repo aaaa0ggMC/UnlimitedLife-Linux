@@ -2,8 +2,12 @@ pacman -S --noconfirm --needed git mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_
 mkdir -p CBuild_CACHE_WIN
 cd CBuild_CACHE_WIN
 
+# del .dll.as
+find /ucrt64/lib -name "*.dll.a" -delete
+
 # Run CMake to configure the project
 cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles"
+
 
 
 
