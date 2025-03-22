@@ -61,7 +61,7 @@ namespace g3{
         ~CriticalLock();
     };
 
-    struct LogOutputTarget{
+    struct DLL_EXPORT LogOutputTarget{
     public:
         bool enabled;
         LogOutputTarget();
@@ -74,9 +74,9 @@ namespace g3{
     };
 
     namespace lot{
-        LogHeader getHeader(int level);
+        LogHeader DLL_EXPORT getHeader(int level);
 
-        struct Console : LogOutputTarget{
+        struct DLL_EXPORT Console : LogOutputTarget{
             const char * neon { NULL };
 
             void write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int showExtra);
@@ -88,7 +88,7 @@ namespace g3{
             void close();
         };
 
-        struct SingleFile : LogOutputTarget{
+        struct DLL_EXPORT SingleFile : LogOutputTarget{
             SingleFile(const std::string & path);
             void write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int showExtra);
             void flush();
@@ -99,7 +99,7 @@ namespace g3{
             bool nice;
         };
 
-        struct SplittedFiles : LogOutputTarget{
+        struct DLL_EXPORT SplittedFiles : LogOutputTarget{
             unsigned int maxBytes;
 
             SplittedFiles(const std::string & path,unsigned int maxBytes);
@@ -122,7 +122,7 @@ namespace g3{
         };
     }
 
-    struct LogFilter{
+    struct DLL_EXPORT LogFilter{
         bool enabled;
 
         LogFilter();
@@ -133,7 +133,7 @@ namespace g3{
     };
 
     namespace lgf{
-        struct LogLevel : LogFilter{
+        struct DLL_EXPORT LogLevel : LogFilter{
             int showLevels;
 
             LogLevel(int showLevels = LOG_RELE);
@@ -141,7 +141,7 @@ namespace g3{
             bool pre_filter(int logLevel,const std::string& originMessage);
         };
 
-        struct KeywordsBlocker : LogFilter{
+        struct DLL_EXPORT KeywordsBlocker : LogFilter{
             std::vector<std::string> keywords;
 
             KeywordsBlocker(const std::vector<std::string>& keywords);
@@ -149,7 +149,7 @@ namespace g3{
             bool pre_filter(int logLevel,const std::string& originMessage);
         };
 
-        struct KeywordsReplacerMono : LogFilter{
+        struct DLL_EXPORT KeywordsReplacerMono : LogFilter{
             std::vector<std::string> keywords;
             bool useChar;
             char ch;
