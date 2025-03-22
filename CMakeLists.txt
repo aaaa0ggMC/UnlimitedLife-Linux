@@ -3,6 +3,10 @@ project(UnlimitedLife-Linux)
 
 set(CMAKE_CXX_STANDARD 20)
 
+if (WIN32)
+    add_compile_options(-ftls-model=global-dynamic)
+endif()
+
 set(custom_include_dir "" CACHE PATH "User customed search include path")
 set(custom_lib_dir "" CACHE PATH "User customed search lib path")
 

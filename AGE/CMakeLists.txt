@@ -1,7 +1,11 @@
 aux_source_directory("./src" AGE-SRC)
 add_library(AGE SHARED ${AGE-SRC})
 set_target_properties(AGE PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(AGE PRIVATE OpenGL GLEW glfw)
+if(WIN32)
+
+else()
+target_link_libraries(AGE PRIVATE opengl32 glew32 glfw3)
+endif()
 target_link_options(AGE PUBLIC "-Wl,--allow-multiple-definition")
 target_compile_definitions(AGE PUBLIC AGE_BUILD_DLL)
 
