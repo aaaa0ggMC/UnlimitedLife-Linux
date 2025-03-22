@@ -47,4 +47,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: UnlimitedLife-Windows
-        path: CBuild/Windows/
+        path: CBuild/

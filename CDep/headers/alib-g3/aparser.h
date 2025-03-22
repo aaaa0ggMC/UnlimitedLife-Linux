@@ -1,7 +1,9 @@
 #ifndef PARSER_H_INCLUDED
 #define PARSER_H_INCLUDED
+#include "alogger.h"
 #include <string>
 #include <vector>
+#include <alib-g3/autil.h>
 
 namespace alib{
 namespace g3{
@@ -9,7 +11,7 @@ namespace g3{
     template<class T> using dvector = const std::vector<T> &;
     using dsvector = const std::vector<std::string> &;
 
-    class Parser{
+    class DLL_EXPORT Parser{
     public:
         int ParseCommand(dstring cmd,std::string & head,std::string& args,std::vector<std::string> & sep_args);
 
