@@ -12,6 +12,10 @@ target_compile_definitions(AGE PUBLIC AGE_BUILD_DLL)
 
 aux_source_directory("./age_test/agetest-src/" AGETEST_SRC)
 add_executable(agetest ${AGETEST_SRC})
+if(WIN32)
+target_link_libraries(agetest PRIVATE glfw3 AGE aaaa0ggmcLib)
+else()
 target_link_libraries(agetest PRIVATE AGE aaaa0ggmcLib glfw)
+endif()
 target_link_options(agetest PUBLIC "-Wl,--rpath,./")
 
