@@ -125,8 +125,8 @@ using mem_bytes = __int64_t;
 
 namespace ext_toString{
     #ifndef ALIB_DISABLE_CPP20
-    static inline thread_local std::string fmtBuf;
-    [[maybe_unused]] inline thread_local bool inited = []()->bool{
+    static inline THREAD_LOCAL std::string fmtBuf;
+    [[maybe_unused]] static inline THREAD_LOCAL bool inited = []()->bool{
         fmtBuf.reserve(ALIB_TO_STRING_RESERVE_SIZE);
         return true;
     }();
