@@ -51,8 +51,8 @@ namespace g3{
         const std::string& translate(dstring id);
 
         ///placeHolder:it's reserved,any value is ok,used for va_list
-        std::string& translate_args(dstring id,string & appender,int placeHolder, ...);
-        int translate_args_vlist(dstring id,string & appender,va_list);
+        std::string& translate_args(dstring id,std::string & appender,int placeHolder, ...);
+        int translate_args_vlist(dstring id,std::string & appender,va_list);
 
         int loadTranslation(dstring language_id);
 

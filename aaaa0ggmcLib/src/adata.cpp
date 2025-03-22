@@ -49,8 +49,8 @@ public:
 
     int parseString(dstring data) override{
         document.Parse(data.c_str());
-        if(document.HasParseError())return ALIB_EHAS_PARSE_ERROR;
-        return ALIB_SUCCESS;
+        if(document.HasParseError())return AE_HAS_PARSE_ERROR;
+        return AE_SUCCESS;
     }
 
     dstring getConst(dstring key) override{
@@ -108,9 +108,9 @@ public:
             tml = toml::parse(data);
         }catch(const toml::parse_error& err){
             cout << err << endl;
-            return ALIB_EHAS_PARSE_ERROR;
+            return AE_HAS_PARSE_ERROR;
         }
-        return ALIB_SUCCESS;
+        return AE_SUCCESS;
     }
 
     dstring getConst(dstring key) override{
@@ -140,7 +140,7 @@ Analyser::Analyser(mapping_tp & mtp) : mapping(mtp){}
 
 void Analyser::mapDocument(){}
 dstring Analyser::getConst(dstring){return empty_ret;}
-int Analyser::parseString(dstring){return ALIB_SUCCESS;}
+int Analyser::parseString(dstring){return AE_SUCCESS;}
 
 void GDoc::clearMapping(){
     mapping.clear();
@@ -170,7 +170,7 @@ int GDoc::read_parseStringJSON(dstring data){
     ///Mapping all the data
     analyser->mapDocument();
 
-    return ALIB_SUCCESS;
+    return AE_SUCCESS;
 }
 
 int GDoc::read_parseFileJSON(dstring fp){
@@ -200,7 +200,7 @@ int GDoc::read_parseStringTOML(dstring data){
     ///Mapping all the data
     analyser->mapDocument();
 
-    return ALIB_SUCCESS;
+    return AE_SUCCESS;
 }
 
 std::optional<const char*> GDoc::operator [](dstring key){

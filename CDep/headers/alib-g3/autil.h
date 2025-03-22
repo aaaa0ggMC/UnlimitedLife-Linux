@@ -6,12 +6,10 @@
 #include <filesystem>
 #ifndef ALIB_DISABLE_CPP20
 #include <format>
-#endif // ALIB_DISABLE_CPP20
+#endif
+namespace fs = std::filesystem;
 
-#define ALIB_SUCCESS 0
-#define ALIB_ERROR -1
-
-///For windows support
+///Platform Related
 #ifdef _WIN32
 #include <windows.h>
 #ifndef DLL_EXPORT
@@ -21,9 +19,7 @@
     #define DLL_EXPORT __declspec(dllimport)
 #endif
 #endif // BUILD_DLL
-
 #elif __linux__
-
 #include <unistd.h>
 #ifndef DLL_EXPORT
 #ifdef BUILD_DLL
@@ -32,53 +28,92 @@
     #define DLL_EXPORT
 #endif
 #endif // BUILD_DLL
-
 #endif
-//Foreground colors
-#define APCF_BLACK        0
-#define APCF_BLUE         1
-#define APCF_GREEN        2
-#define APCF_CYAN         3
-#define APCF_RED          4
-#define APCF_MAGENTA      5
-#define APCF_YELLOW       6
-#define APCF_WHITE        7
-#define APCF_GRAY         8
-#define APCF_LIGHT_BLUE   9
-#define APCF_LIGHT_GREEN  10
-#define APCF_LIGHT_CYAN   11
-#define APCF_LIGHT_RED    12
-#define APCF_LIGHT_MAGENTA 13
-#define APCF_LIGHT_YELLOW 14
-#define APCF_BRIGHT_WHITE 15
 
-//Background colors
-#define APCB_BLACK        (0 << 4)
-#define APCB_BLUE         (1 << 4)
-#define APCB_GREEN        (2 << 4)
-#define APCB_CYAN         (3 << 4)
-#define APCB_RED          (4 << 4)
-#define APCB_MAGENTA      (5 << 4)
-#define APCB_YELLOW       (6 << 4)
-#define APCB_WHITE        (7 << 4)
-#define APCB_GRAY         (8 << 4)
-#define APCB_LIGHT_BLUE   (9 << 4)
-#define APCB_LIGHT_GREEN  (10 << 4)
-#define APCB_LIGHT_CYAN   (11 << 4)
-#define APCB_LIGHT_RED    (12 << 4)
-#define APCB_LIGHT_MAGENTA (13 << 4)
-#define APCB_LIGHT_YELLOW (14 << 4)
-#define APCB_BRIGHT_WHITE (15 << 4)
+///Colors 使用了DeepSeek生成
+#ifndef __ALIB_CONSOLE_COLORS
+#define __ALIB_CONSOLE_COLORS
+//=============== 基础样式 ================
+#define ACP_RESET       "\e[0m"   // 重置所有样式
+#define ACP_BOLD        "\e[1m"   // 加粗
+#define ACP_DIM         "\e[2m"   // 暗化
+#define ACP_ITALIC      "\e[3m"   // 斜体
+#define ACP_UNDERLINE   "\e[4m"   // 下划线
+#define ACP_BLINK       "\e[5m"   // 慢闪烁
+#define ACP_BLINK_FAST  "\e[6m"   // 快闪烁
+#define ACP_REVERSE     "\e[7m"   // 反色（前景/背景交换）
+#define ACP_HIDDEN      "\e[8m"   // 隐藏文字
+
+//=============== 标准前景色 ================
+#define ACP_BLACK     "\e[30m"
+#define ACP_RED       "\e[31m"
+#define ACP_GREEN     "\e[32m"
+#define ACP_YELLOW    "\e[33m"
+#define ACP_BLUE      "\e[34m"
+#define ACP_MAGENTA   "\e[35m"
+#define ACP_CYAN      "\e[36m"
+#define ACP_GRAY      "\e[36m"
+#define ACP_WHITE     "\e[37m"
+
+//=============== 标准背景色 ================
+#define ACP_BG_BLACK   "\e[40m"
+#define ACP_BG_RED     "\e[41m"
+#define ACP_BG_GREEN   "\e[42m"
+#define ACP_BG_YELLOW  "\e[43m"
+#define ACP_BG_BLUE    "\e[44m"
+#define ACP_BG_MAGENTA "\e[45m"
+#define ACP_BG_CYAN    "\e[46m"
+#define ACP_BG_GRAY    "\e[46m"
+#define ACP_BG_WHITE   "\e[47m"
+
+//=============== 亮色模式 ================
+// 前景亮色（如高亮红/绿等）
+#define ACP_LRED     "\e[91m"
+#define ACP_LGREEN   "\e[92m"
+#define ACP_LYELLOW  "\e[93m"
+#define ACP_LBLUE    "\e[94m"
+#define ACP_LMAGENTA "\e[95m"
+#define ACP_LCYAN    "\e[96m"
+#define ACP_LGRAY    "\e[96m"
+#define ACP_LWHITE   "\e[97m"
+
+// 背景亮色
+#define ACP_BG_LRED     "\e[101m"
+#define ACP_BG_LGREEN   "\e[102m"
+#define ACP_BG_LYELLOW  "\e[103m"
+#define ACP_BG_LBLUE    "\e[104m"
+#define ACP_BG_LMAGENTA "\e[105m"
+#define ACP_BG_LCYAN    "\e[106m"
+#define ACP_BG_LGRAY    "\e[106m"
+#define ACP_BG_LWHITE   "\e[107m"
+
+//=============== 256色模式 ================
+/* 用法示例：
+ACP_FG256(160)  // 设置前景色为256色编号160
+ACP_BG256(231)  // 设置背景色为256色编号231 */
+#define ACP_FG256(n) "\e[38;5;" #n "m"
+#define ACP_BG256(n) "\e[48;5;" #n "m"
+
+//=============== RGB真彩色模式 ================
+/* 用法示例：
+ACP_FGRGB(255,0,100)  // 前景RGB颜色
+ACP_BGRGB(50,100,200) // 背景RGB颜色 */
+#define ACP_FGRGB(r,g,b) "\e[38;2;" #r ";" #g ";" #b "m"
+#define ACP_BGRGB(r,g,b) "\e[48;2;" #r ";" #g ";" #b "m"
+#endif
 
 #ifndef ALIB_TO_STRING_RESERVE_SIZE
-#define ALIB_TO_STRING_RESERVE_SIZE 128
+#define ALIB_TO_STRING_RESERVE_SIZE 128   
 #endif // ALIB_TO_STRING_RESERVE_SIZE
 
-namespace fs = std::filesystem;
+
+///Errcodes
+#define AE_SUCCESS 0
+#define AE_FAILED -1
 
 namespace alib {
 namespace g3 {
-using namespace std;
+
 using dstring = const std::string&;
 #ifdef _WIN32
 using mem_bytes = __int64;
@@ -139,23 +174,15 @@ struct DLL_EXPORT CPUInfo {
 /** \brief Utility 工具类**/
 class DLL_EXPORT Util {
 public:
-///io
-    //通过const常量引用支持const char*与std::string
+    ///io//通过const常量引用支持const char*与std::string
     /** \brief print with colors 颜色输出
-    * print something with a custom color
-    * 输出带自定义颜色的字符串
-    * \return just like printf 和printf一样
-    */
-    static int io_printColor(dstring message,int color);
-    /** \brief traverse files 遍历文件
-    * traverse all files in a folder(by default not include sub-folders)
-    * 遍历一个文件夹下面的所有文件（默认不包括子文件夹）
-    * \param path :folder path 文件夹路径
-    * \param files:a vector to store these file names 一个std::vector用于存放数据
-    * \param traverseDepth:(WindowsVersionNotSupported) smaller than 0:traverse all subdirs; >0:traverse certain depth of subdirs
-    * \param prefix:(WindowsVersionNotSupported) a fixed prefix of the content in vector files
-    */
-    [[deprecated("Use io_traverseFilesOnly instead,this function is not guaranteed to work well")]] static void io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth = 0,dstring prefix = "");
+     * print something with a custom color
+     * 输出带自定义颜色的字符串
+     * \return just like printf 和printf一样
+     *
+     * @@Reserved 保留，但是api发生变化
+     */
+    static int io_printColor(dstring message,const char * color);
     /** \brief get file size 获取文件大小
      * get file size efficiently using direct.h (better than fstream::seekg&tellg[ChatGPT says])
      * 使用direct.h快速获取文件大小(比fstream::seekg&tellg快[ChatGPT说的])
@@ -196,18 +223,88 @@ public:
      */
     static bool io_checkExistence(dstring path);
 
-    static void io_traverseImpl(const fs::path& basePath,std::vector<std::string>& results,int remainingDepth,const fs::path& currentAppender,bool includeFiles,bool includeDirs);
+    /**
+     * @brief 核心遍历实现
+     * @param physicalPath 实际要遍历的物理路径
+     * @param results 结果存储容器
+     * @param remainingDepth 剩余遍历深度（-1表示无限）
+     * @param appender 固定前缀字符串
+     * @param includeFiles 是否包含文件
+     * @param includeDirs 是否包含目录
+     * @param useAbsolutePath 是否使用绝对路径格式
+     *
+     * @note
+     * 1. appender会直接拼接到路径字符串前，不添加任何路径分隔符
+     * 2. 当useAbsolutePath=true时，physicalPath会被转换为绝对路径
+     * 3. 结果路径格式为：appender + 处理后的路径字符串
+     * 4. 写入results的路径使用正斜杠(/)
+     */
+    static void io_traverseImpl(
+        const fs::path& physicalPath,
+        std::vector<std::string>& results,
+        const fs::path fixedRoot,
+        int remainingDepth,
+        const std::string& appender,
+        bool includeFiles,
+        bool includeDirs,
+        bool useAbsolutePath
+    );
 
-    static void io_traverseFiles2(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
+    /**
+     * @brief 遍历文件和目录
+     * @param path 要遍历的路径
+     * @param files 结果存储容器
+     * @param traverseDepth 遍历深度（-1表示无限）
+     * @param appender 固定前缀字符串
+     * @param absolute 是否使用绝对路径
+     *
+     * @note 结果示例：appender + "/tmp/a.txt" 或 appender + "./tmp/a.txt"
+     */
+    static void io_traverseFiles(
+        const std::string& path,
+        std::vector<std::string>& files,
+        int traverseDepth = 0,
+        const std::string& appender = "",
+        bool absolute = false
+    );
 
-    ///content in files automatically contacted with path,usually absoulute
-    static void io_traverseFilesOnly(const std::string& path,std::vector<std::string>& files,int traverseDepth = -1,const std::string& appender = "");
+    /// @brief 仅遍历文件（其他参数同io_traverseFiles）
+    static void io_traverseFilesOnly(
+        const std::string& path,
+        std::vector<std::string>& files,
+        int traverseDepth = 0,
+        const std::string& appender = "",
+        bool absolute = false
+    );
 
-    static void io_traverseFolders(const std::string& path,std::vector<std::string>& folders,int traverseDepth = -1,const std::string& appender = "");
+    /// @brief 仅遍历目录（其他参数同io_traverseFiles）
+    static void io_traverseFolders(
+        const std::string& path,
+        std::vector<std::string>& folders,
+        int traverseDepth = 0,
+        const std::string& appender = "",
+        bool absolute = false
+    );
 
-    static void io_traverseFilesRecursive(const std::string& path,std::vector<std::string>& files,const std::string& appender = "");
+    /// @brief 递归遍历文件（无限深度）
+    static void io_traverseFilesRecursive(
+        const std::string& path,
+        std::vector<std::string>& files,
+        const std::string& appender = "",
+        bool absolute = false
+    ) {
+        io_traverseFiles(path, files , -1, appender, absolute);
+    }
 
-    static void io_traverseFoldersRecursive(const std::string& path,std::vector<std::string>& folders,const std::string& appender = "");
+    /// @brief 递归遍历目录（无限深度）
+    static void io_traverseFoldersRecursive(
+        const std::string& path,
+        std::vector<std::string>& folders,
+        const std::string& appender = "",
+        bool absolute = false
+    ) {
+        io_traverseFolders(path, folders, -1, appender, absolute);
+    }
 ///other
     /** \brief returns a time formatted as string
      *
@@ -216,7 +313,7 @@ public:
      *
      * \return time as string,fmt: "YY-MM-DD HH:MM:SS" 返回字符串的时间，格式 "年年-月月-天天 时时:分分:秒秒"
      */
-    static string ot_getTime();
+    static std::string ot_getTime();
     /** \brief format duration 格式化间隔时间
      * \param seconds 秒数
      * \return formatted string 格式化的字符串
@@ -228,7 +325,7 @@ public:
      *
      * \return CPUId
      */
-    static string sys_getCPUId();
+    static std::string sys_getCPUId();
     /** \brief get program memory usage(bytes) currently 获取程序目前内存使用情况(单位:B)
      * \return mem stats 内存使用情况
      */
@@ -237,6 +334,10 @@ public:
      * \return usage
      */
     static GlobalMemUsage sys_getGlobalMemoryUsage();
+    /** \brief enable virtual console in Windows 在Windows系统中开启虚拟终端支持（支持转义彩色文字）
+     * \return none
+     */
+    static void sys_enableVirtualTerminal();
 
 ///data_string
     /** \brief unescaping strings 逆转义字符串

@@ -11,10 +11,10 @@ int main(){
     Window * win;
 
     ///Init logger
-    auto target = std::make_shared<log_output_targets::Console>();
+    auto target = std::make_shared<lot::Console>();
     logger.appendLogOutputTarget("console",target);
 
-    auto fileTarget = std::make_shared<log_output_targets::SingleFile>("hello.log");
+    auto fileTarget = std::make_shared<lot::SingleFile>("hello.log");
     logger.appendLogOutputTarget("file0",fileTarget);
 
     lg.info("Creating window...");

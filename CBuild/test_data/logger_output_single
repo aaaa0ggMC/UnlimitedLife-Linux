@@ -1,286 +1,286 @@
-[2025-03-16 16:23:41][INFO][Test][2.279356ms]:AfterTest(Previous output wont be written into logfile)
-[2025-03-16 16:23:41][INFO][Test][2.461817ms]:ColorTest
-[2025-03-16 16:23:41][TRACE][Test][2.527196ms]:(1.000000,2.000000)
-[2025-03-16 16:23:41][TRACE][Test][2.569874ms]:(1.000000,2.000000,3.000000)
-[2025-03-16 16:23:41][TRACE][Test][2.913413ms]:(1.000000,2.000000,3.000000,4.000000)
-[2025-03-16 16:23:41][TRACE][Test][3.636914ms]:[(1.000000,3.000000),(2.000000,4.000000)]
-[2025-03-16 16:23:41][TRACE][Test][3.691512ms]:[(1.000000,4.000000,7.000000),(2.000000,5.000000,8.000000),(3.000000,6.000000,9.000000)]
-[2025-03-16 16:23:41][TRACE][Test][3.744615ms]:[(1.000000,5.000000,9.000000,13.000000),(2.000000,6.000000,10.000000,14.000000),(3.000000,7.000000,11.000000,15.000000),(4.000000,8.000000,12.000000,16.000000)]
-[2025-03-16 16:23:41][TRACE][Test][3.900975ms]:HelloWorld!
-[2025-03-16 16:23:41][INFO][Test][4.131471ms]:HelloWorld!Th0 0
-[2025-03-16 16:23:41][INFO][Test][5.805670ms]:HelloWorld!Th1 0
-[2025-03-16 16:23:41][INFO][Test][8.144429ms]:HelloWorld!Th5 0
-[2025-03-16 16:23:41][INFO][Test][9.283684ms]:HelloWorld!Main0
-[2025-03-16 16:23:41][INFO][Test][8.266495ms]:HelloWorld!Th6 0
-[2025-03-16 16:23:41][INFO][Test][6.598826ms]:HelloWorld!Th2 0
-[2025-03-16 16:23:41][INFO][Test][8.404853ms]:HelloWorld!Th7 0
-[2025-03-16 16:23:41][INFO][Test][9.703281ms]:HelloWorld!Th9 0
-[2025-03-16 16:23:41][INFO][Test][9.890603ms]:HelloWorld!Th10 0
-[2025-03-16 16:23:41][INFO][Test][10.062397ms]:HelloWorld!Th12 0
-[2025-03-16 16:23:41][INFO][Test][10.241093ms]:HelloWorld!Th14 0
-[2025-03-16 16:23:41][INFO][Test][6.680970ms]:HelloWorld!Th4 0
-[2025-03-16 16:23:41][INFO][Test][9.799213ms]:HelloWorld!Th8 0
-[2025-03-16 16:23:41][INFO][Test][10.158840ms]:HelloWorld!Th13 0
-[2025-03-16 16:23:41][INFO][Test][10.310984ms]:HelloWorld!Th15 0
-[2025-03-16 16:23:41][INFO][Test][9.979661ms]:HelloWorld!Th11 0
-[2025-03-16 16:23:41][INFO][Test][4.920668ms]:HelloWorld!Th3 0
-[2025-03-16 16:23:41][INFO][Test][15.805455ms]:HelloWorld!Th0 1
-[2025-03-16 16:23:41][INFO][Test][17.017231ms]:HelloWorld!Th1 1
-[2025-03-16 16:23:41][INFO][Test][18.752048ms]:HelloWorld!Th5 1
-[2025-03-16 16:23:41][INFO][Test][18.850159ms]:HelloWorld!Main1
-[2025-03-16 16:23:41][INFO][Test][21.024961ms]:HelloWorld!Th2 1
-[2025-03-16 16:23:41][INFO][Test][21.081978ms]:HelloWorld!Th7 1
-[2025-03-16 16:23:41][INFO][Test][21.392838ms]:HelloWorld!Th9 1
-[2025-03-16 16:23:41][INFO][Test][21.435228ms]:HelloWorld!Th10 1
-[2025-03-16 16:23:41][INFO][Test][21.611922ms]:HelloWorld!Th4 1
-[2025-03-16 16:23:41][INFO][Test][21.653171ms]:HelloWorld!Th6 1
-[2025-03-16 16:23:41][INFO][Test][21.696958ms]:HelloWorld!Th14 1
-[2025-03-16 16:23:41][INFO][Test][21.725716ms]:HelloWorld!Th12 1
-[2025-03-16 16:23:41][INFO][Test][21.759972ms]:HelloWorld!Th13 1
-[2025-03-16 16:23:41][INFO][Test][21.799214ms]:HelloWorld!Th15 1
-[2025-03-16 16:23:41][INFO][Test][21.855545ms]:HelloWorld!Th11 1
-[2025-03-16 16:23:41][INFO][Test][21.880919ms]:HelloWorld!Th8 1
-[2025-03-16 16:23:41][INFO][Test][24.355670ms]:HelloWorld!Th3 1
-[2025-03-16 16:23:41][INFO][Test][27.079903ms]:HelloWorld!Th0 2
-[2025-03-16 16:23:41][INFO][Test][27.555266ms]:HelloWorld!Th1 2
-[2025-03-16 16:23:41][INFO][Test][28.755170ms]:HelloWorld!Main2
-[2025-03-16 16:23:41][INFO][Test][31.466170ms]:HelloWorld!Th2 2
-[2025-03-16 16:23:41][INFO][Test][31.599934ms]:HelloWorld!Th7 2
-[2025-03-16 16:23:41][INFO][Test][31.727198ms]:HelloWorld!Th4 2
-[2025-03-16 16:23:41][INFO][Test][31.862619ms]:HelloWorld!Th14 2
-[2025-03-16 16:23:41][INFO][Test][31.935312ms]:HelloWorld!Th6 2
-[2025-03-16 16:23:41][INFO][Test][31.990926ms]:HelloWorld!Th15 2
-[2025-03-16 16:23:41][INFO][Test][32.059889ms]:HelloWorld!Th12 2
-[2025-03-16 16:23:41][INFO][Test][32.143836ms]:HelloWorld!Th13 2
-[2025-03-16 16:23:41][INFO][Test][32.210497ms]:HelloWorld!Th11 2
-[2025-03-16 16:23:41][INFO][Test][32.261565ms]:HelloWorld!Th8 2
-[2025-03-16 16:23:41][INFO][Test][32.329003ms]:HelloWorld!Th10 2
-[2025-03-16 16:23:41][INFO][Test][32.878075ms]:HelloWorld!Th5 2
-[2025-03-16 16:23:41][INFO][Test][31.686394ms]:HelloWorld!Th9 2
-[2025-03-16 16:23:41][INFO][Test][34.656477ms]:HelloWorld!Th3 2
-[2025-03-16 16:23:41][INFO][Test][37.013682ms]:HelloWorld!Main3
-[2025-03-16 16:23:41][INFO][Test][37.623035ms]:HelloWorld!Th0 3
-[2025-03-16 16:23:41][INFO][Test][37.671754ms]:HelloWorld!Th1 3
-[2025-03-16 16:23:41][INFO][Test][42.017984ms]:HelloWorld!Th4 3
-[2025-03-16 16:23:41][INFO][Test][42.836275ms]:HelloWorld!Th7 3
-[2025-03-16 16:23:41][INFO][Test][42.989038ms]:HelloWorld!Th2 3
-[2025-03-16 16:23:41][INFO][Test][43.047312ms]:HelloWorld!Th14 3
-[2025-03-16 16:23:41][INFO][Test][43.114190ms]:HelloWorld!Th6 3
-[2025-03-16 16:23:41][INFO][Test][43.177398ms]:HelloWorld!Th10 3
-[2025-03-16 16:23:41][INFO][Test][43.243349ms]:HelloWorld!Th15 3
-[2025-03-16 16:23:41][INFO][Test][43.314339ms]:HelloWorld!Th11 3
-[2025-03-16 16:23:41][INFO][Test][43.383610ms]:HelloWorld!Th13 3
-[2025-03-16 16:23:41][INFO][Test][45.204132ms]:HelloWorld!Th12 3
-[2025-03-16 16:23:41][INFO][Test][45.365386ms]:HelloWorld!Th8 3
-[2025-03-16 16:23:41][INFO][Test][46.503622ms]:HelloWorld!Th3 3
-[2025-03-16 16:23:41][INFO][Test][46.586141ms]:HelloWorld!Th9 3
-[2025-03-16 16:23:41][INFO][Test][46.625104ms]:HelloWorld!Th5 3
-[2025-03-16 16:23:41][INFO][Test][46.663684ms]:HelloWorld!Main4
-[2025-03-16 16:23:41][INFO][Test][49.537661ms]:HelloWorld!Th1 4
-[2025-03-16 16:23:41][INFO][Test][49.620574ms]:HelloWorld!Th0 4
-[2025-03-16 16:23:41][INFO][Test][52.274325ms]:HelloWorld!Th4 4
-[2025-03-16 16:23:41][INFO][Test][53.049028ms]:HelloWorld!Th7 4
-[2025-03-16 16:23:41][INFO][Test][53.098426ms]:HelloWorld!Th2 4
-[2025-03-16 16:23:41][INFO][Test][53.230028ms]:HelloWorld!Th6 4
-[2025-03-16 16:23:41][INFO][Test][53.528390ms]:HelloWorld!Th13 4
-[2025-03-16 16:23:41][INFO][Test][53.359295ms]:HelloWorld!Th15 4
-[2025-03-16 16:23:41][INFO][Test][53.456369ms]:HelloWorld!Th11 4
-[2025-03-16 16:23:41][INFO][Test][53.309824ms]:HelloWorld!Th10 4
-[2025-03-16 16:23:41][INFO][Test][53.175966ms]:HelloWorld!Th14 4
-[2025-03-16 16:23:41][INFO][Test][54.838215ms]:HelloWorld!Main5
-[2025-03-16 16:23:41][INFO][Test][57.033697ms]:HelloWorld!Th9 4
-[2025-03-16 16:23:41][INFO][Test][55.575430ms]:HelloWorld!Th8 4
-[2025-03-16 16:23:41][INFO][Test][55.483285ms]:HelloWorld!Th12 4
-[2025-03-16 16:23:41][INFO][Test][57.144037ms]:HelloWorld!Th3 4
-[2025-03-16 16:23:41][INFO][Test][56.960482ms]:HelloWorld!Th5 4
-[2025-03-16 16:23:41][INFO][Test][59.853099ms]:HelloWorld!Th1 5
-[2025-03-16 16:23:41][INFO][Test][59.922133ms]:HelloWorld!Th0 5
-[2025-03-16 16:23:41][INFO][Test][62.547909ms]:HelloWorld!Th4 5
-[2025-03-16 16:23:41][INFO][Test][64.083088ms]:HelloWorld!Th14 5
-[2025-03-16 16:23:41][INFO][Test][64.193016ms]:HelloWorld!Th10 5
-[2025-03-16 16:23:41][INFO][Test][64.229660ms]:HelloWorld!Th13 5
-[2025-03-16 16:23:41][INFO][Test][64.262600ms]:HelloWorld!Th11 5
-[2025-03-16 16:23:41][INFO][Test][64.322094ms]:HelloWorld!Th7 5
-[2025-03-16 16:23:41][INFO][Test][64.295295ms]:HelloWorld!Th15 5
-[2025-03-16 16:23:41][INFO][Test][64.704986ms]:HelloWorld!Th2 5
-[2025-03-16 16:23:41][INFO][Test][64.739925ms]:HelloWorld!Th6 5
-[2025-03-16 16:23:41][INFO][Test][67.367664ms]:HelloWorld!Th8 5
-[2025-03-16 16:23:41][INFO][Test][67.483421ms]:HelloWorld!Th12 5
-[2025-03-16 16:23:41][INFO][Test][70.130229ms]:HelloWorld!Th0 6
-[2025-03-16 16:23:41][INFO][Test][70.216718ms]:HelloWorld!Th1 6
-[2025-03-16 16:23:41][INFO][Test][71.506118ms]:HelloWorld!Th5 5
-[2025-03-16 16:23:41][INFO][Test][74.574758ms]:HelloWorld!Th10 6
-[2025-03-16 16:23:41][INFO][Test][74.603650ms]:HelloWorld!Th9 5
-[2025-03-16 16:23:41][INFO][Test][74.632103ms]:HelloWorld!Th3 5
-[2025-03-16 16:23:41][INFO][Test][72.788210ms]:HelloWorld!Th4 6
-[2025-03-16 16:23:41][INFO][Test][74.668685ms]:HelloWorld!Main6
-[2025-03-16 16:23:41][INFO][Test][74.793419ms]:HelloWorld!Th15 6
-[2025-03-16 16:23:41][INFO][Test][74.841788ms]:HelloWorld!Th11 6
-[2025-03-16 16:23:41][INFO][Test][74.936447ms]:HelloWorld!Th6 6
-[2025-03-16 16:23:41][INFO][Test][74.704143ms]:HelloWorld!Th14 6
-[2025-03-16 16:23:41][INFO][Test][74.764493ms]:HelloWorld!Th13 6
-[2025-03-16 16:23:41][INFO][Test][74.872516ms]:HelloWorld!Th2 6
-[2025-03-16 16:23:41][INFO][Test][74.734959ms]:HelloWorld!Th7 6
-[2025-03-16 16:23:41][INFO][Test][77.722582ms]:HelloWorld!Th12 6
-[2025-03-16 16:23:41][INFO][Test][77.808284ms]:HelloWorld!Th8 6
-[2025-03-16 16:23:41][INFO][Test][80.695147ms]:HelloWorld!Th0 7
-[2025-03-16 16:23:41][INFO][Test][80.752374ms]:HelloWorld!Th1 7
-[2025-03-16 16:23:41][INFO][Test][85.125960ms]:HelloWorld!Th10 7
-[2025-03-16 16:23:41][INFO][Test][85.324465ms]:HelloWorld!Th11 7
-[2025-03-16 16:23:41][INFO][Test][85.633688ms]:HelloWorld!Th15 7
-[2025-03-16 16:23:41][INFO][Test][85.725044ms]:HelloWorld!Th3 6
-[2025-03-16 16:23:41][INFO][Test][85.507987ms]:HelloWorld!Th4 7
-[2025-03-16 16:23:41][INFO][Test][85.390460ms]:HelloWorld!Th6 7
-[2025-03-16 16:23:41][INFO][Test][85.768395ms]:HelloWorld!Th2 7
-[2025-03-16 16:23:41][INFO][Test][85.493523ms]:HelloWorld!Th14 7
-[2025-03-16 16:23:41][INFO][Test][88.536629ms]:HelloWorld!Th12 7
-[2025-03-16 16:23:41][INFO][Test][85.810408ms]:HelloWorld!Main7
-[2025-03-16 16:23:41][INFO][Test][85.838551ms]:HelloWorld!Th5 6
-[2025-03-16 16:23:41][INFO][Test][85.778304ms]:HelloWorld!Th9 6
-[2025-03-16 16:23:41][INFO][Test][85.799221ms]:HelloWorld!Th7 7
-[2025-03-16 16:23:41][INFO][Test][85.550360ms]:HelloWorld!Th13 7
-[2025-03-16 16:23:41][INFO][Test][91.088102ms]:HelloWorld!Th0 8
-[2025-03-16 16:23:41][INFO][Test][88.609179ms]:HelloWorld!Th8 7
-[2025-03-16 16:23:41][INFO][Test][91.043240ms]:HelloWorld!Th1 8
-[2025-03-16 16:23:41][INFO][Test][95.381169ms]:HelloWorld!Th10 8
-[2025-03-16 16:23:41][INFO][Test][95.710389ms]:HelloWorld!Th11 8
-[2025-03-16 16:23:41][INFO][Test][95.915818ms]:HelloWorld!Th15 8
-[2025-03-16 16:23:41][INFO][Test][96.176918ms]:HelloWorld!Th4 8
-[2025-03-16 16:23:41][INFO][Test][96.336258ms]:HelloWorld!Th2 8
-[2025-03-16 16:23:41][INFO][Test][96.469789ms]:HelloWorld!Th6 8
-[2025-03-16 16:23:41][INFO][Test][96.519592ms]:HelloWorld!Th14 8
-[2025-03-16 16:23:41][INFO][Test][97.805786ms]:HelloWorld!Main8
-[2025-03-16 16:23:41][INFO][Test][98.794486ms]:HelloWorld!Th12 8
-[2025-03-16 16:23:41][INFO][Test][98.818962ms]:HelloWorld!Th3 7
-[2025-03-16 16:23:41][INFO][Test][101.482988ms]:HelloWorld!Th7 8
-[2025-03-16 16:23:41][INFO][Test][101.510458ms]:HelloWorld!Th9 7
-[2025-03-16 16:23:41][INFO][Test][101.540802ms]:HelloWorld!Th5 7
-[2025-03-16 16:23:41][INFO][Test][101.675303ms]:HelloWorld!Th1 9
-[2025-03-16 16:23:41][INFO][Test][101.586237ms]:HelloWorld!Th8 8
-[2025-03-16 16:23:41][INFO][Test][101.710528ms]:HelloWorld!Th13 8
-[2025-03-16 16:23:41][INFO][Test][101.645276ms]:HelloWorld!Th0 9
-[2025-03-16 16:23:41][INFO][Test][105.724845ms]:HelloWorld!Th10 9
-[2025-03-16 16:23:41][INFO][Test][105.871920ms]:HelloWorld!Th11 9
-[2025-03-16 16:23:41][INFO][Test][106.056363ms]:HelloWorld!Th15 9
-[2025-03-16 16:23:41][INFO][Test][106.550503ms]:HelloWorld!Th2 9
-[2025-03-16 16:23:41][INFO][Test][106.616307ms]:HelloWorld!Th4 9
-[2025-03-16 16:23:41][INFO][Test][106.679873ms]:HelloWorld!Th6 9
-[2025-03-16 16:23:41][INFO][Test][106.757614ms]:HelloWorld!Th14 9
-[2025-03-16 16:23:41][INFO][Test][109.083182ms]:HelloWorld!Th12 9
-[2025-03-16 16:23:41][INFO][Test][111.907816ms]:HelloWorld!Th7 9
-[2025-03-16 16:23:41][INFO][Test][112.039930ms]:HelloWorld!Th1 10
-[2025-03-16 16:23:41][INFO][Test][112.143675ms]:HelloWorld!Th8 9
-[2025-03-16 16:23:41][INFO][Test][112.275609ms]:HelloWorld!Th0 10
-[2025-03-16 16:23:41][INFO][Test][112.224829ms]:HelloWorld!Th13 9
-[2025-03-16 16:23:41][INFO][Test][116.023804ms]:HelloWorld!Th10 10
-[2025-03-16 16:23:41][INFO][Test][116.117374ms]:HelloWorld!Th11 10
-[2025-03-16 16:23:41][INFO][Test][116.244547ms]:HelloWorld!Th15 10
-[2025-03-16 16:23:41][INFO][Test][116.899263ms]:HelloWorld!Th2 10
-[2025-03-16 16:23:41][INFO][Test][116.986609ms]:HelloWorld!Th4 10
-[2025-03-16 16:23:41][INFO][Test][117.052335ms]:HelloWorld!Th14 10
-[2025-03-16 16:23:41][INFO][Test][117.022622ms]:HelloWorld!Th6 10
-[2025-03-16 16:23:41][INFO][Test][119.312115ms]:HelloWorld!Th12 10
-[2025-03-16 16:23:41][INFO][Test][119.471281ms]:HelloWorld!Th5 8
-[2025-03-16 16:23:41][INFO][Test][119.514409ms]:HelloWorld!Th9 8
-[2025-03-16 16:23:41][INFO][Test][119.553996ms]:HelloWorld!Main9
-[2025-03-16 16:23:41][INFO][Test][119.590171ms]:HelloWorld!Th3 8
-[2025-03-16 16:23:41][INFO][Test][122.185912ms]:HelloWorld!Th7 10
-[2025-03-16 16:23:41][INFO][Test][122.280514ms]:HelloWorld!Th1 11
-[2025-03-16 16:23:41][INFO][Test][122.493814ms]:HelloWorld!Th8 10
-[2025-03-16 16:23:41][INFO][Test][122.525475ms]:HelloWorld!Th0 11
-[2025-03-16 16:23:41][INFO][Test][122.562058ms]:HelloWorld!Th13 10
-[2025-03-16 16:23:41][INFO][Test][126.497945ms]:HelloWorld!Th10 11
-[2025-03-16 16:23:41][INFO][Test][126.686672ms]:HelloWorld!Th11 11
-[2025-03-16 16:23:41][INFO][Test][126.746918ms]:HelloWorld!Th15 11
-[2025-03-16 16:23:41][INFO][Test][127.685557ms]:HelloWorld!Th2 11
-[2025-03-16 16:23:41][INFO][Test][127.767918ms]:HelloWorld!Main10
-[2025-03-16 16:23:41][INFO][Test][128.080487ms]:HelloWorld!Th14 11
-[2025-03-16 16:23:41][INFO][Test][127.997459ms]:HelloWorld!Th6 11
-[2025-03-16 16:23:41][INFO][Test][127.455268ms]:HelloWorld!Th4 11
-[2025-03-16 16:23:41][INFO][Test][129.601422ms]:HelloWorld!Th12 11
-[2025-03-16 16:23:41][INFO][Test][129.706534ms]:HelloWorld!Th3 9
-[2025-03-16 16:23:41][INFO][Test][129.625199ms]:HelloWorld!Th5 9
-[2025-03-16 16:23:41][INFO][Test][129.654328ms]:HelloWorld!Th9 9
-[2025-03-16 16:23:41][INFO][Test][132.663410ms]:HelloWorld!Th7 11
-[2025-03-16 16:23:41][INFO][Test][132.732529ms]:HelloWorld!Th1 12
-[2025-03-16 16:23:41][INFO][Test][132.811601ms]:HelloWorld!Th13 11
-[2025-03-16 16:23:41][INFO][Test][132.842386ms]:HelloWorld!Th8 11
-[2025-03-16 16:23:41][INFO][Test][132.861892ms]:HelloWorld!Th0 12
-[2025-03-16 16:23:41][INFO][Test][136.350077ms]:HelloWorld!Main11
-[2025-03-16 16:23:41][INFO][Test][137.036299ms]:HelloWorld!Th10 12
-[2025-03-16 16:23:41][INFO][Test][137.106987ms]:HelloWorld!Th15 12
-[2025-03-16 16:23:41][INFO][Test][137.148583ms]:HelloWorld!Th11 12
-[2025-03-16 16:23:41][INFO][Test][139.403208ms]:HelloWorld!Th6 12
-[2025-03-16 16:23:41][INFO][Test][139.519676ms]:HelloWorld!Th14 12
-[2025-03-16 16:23:41][INFO][Test][139.557166ms]:HelloWorld!Th4 12
-[2025-03-16 16:23:41][INFO][Test][139.616869ms]:HelloWorld!Th2 12
-[2025-03-16 16:23:41][INFO][Test][139.815999ms]:HelloWorld!Th12 12
-[2025-03-16 16:23:41][INFO][Test][143.035909ms]:HelloWorld!Th1 13
-[2025-03-16 16:23:41][INFO][Test][143.143678ms]:HelloWorld!Th7 12
-[2025-03-16 16:23:41][INFO][Test][143.217063ms]:HelloWorld!Th8 12
-[2025-03-16 16:23:41][INFO][Test][143.183567ms]:HelloWorld!Th13 12
-[2025-03-16 16:23:41][INFO][Test][143.249260ms]:HelloWorld!Th0 13
-[2025-03-16 16:23:41][INFO][Test][144.190118ms]:HelloWorld!Th9 10
-[2025-03-16 16:23:41][INFO][Test][144.468581ms]:HelloWorld!Th3 10
-[2025-03-16 16:23:41][INFO][Test][144.564550ms]:HelloWorld!Th5 10
-[2025-03-16 16:23:41][INFO][Test][144.638851ms]:HelloWorld!Main12
-[2025-03-16 16:23:41][INFO][Test][147.520706ms]:HelloWorld!Th11 13
-[2025-03-16 16:23:41][INFO][Test][147.630739ms]:HelloWorld!Th15 13
-[2025-03-16 16:23:41][INFO][Test][147.653648ms]:HelloWorld!Th10 13
-[2025-03-16 16:23:41][INFO][Test][149.918830ms]:HelloWorld!Th2 13
-[2025-03-16 16:23:41][INFO][Test][150.034571ms]:HelloWorld!Th6 13
-[2025-03-16 16:23:41][INFO][Test][150.069928ms]:HelloWorld!Th4 13
-[2025-03-16 16:23:41][INFO][Test][150.102118ms]:HelloWorld!Th14 13
-[2025-03-16 16:23:41][INFO][Test][150.133990ms]:HelloWorld!Th12 13
-[2025-03-16 16:23:41][INFO][Test][152.879006ms]:HelloWorld!Main13
-[2025-03-16 16:23:41][INFO][Test][153.704163ms]:HelloWorld!Th0 14
-[2025-03-16 16:23:41][INFO][Test][153.791536ms]:HelloWorld!Th7 13
-[2025-03-16 16:23:41][INFO][Test][153.944317ms]:HelloWorld!Th13 13
-[2025-03-16 16:23:41][INFO][Test][153.841989ms]:HelloWorld!Th8 13
-[2025-03-16 16:23:41][INFO][Test][153.877006ms]:HelloWorld!Th1 14
-[2025-03-16 16:23:41][INFO][Test][154.951696ms]:HelloWorld!Th5 11
-[2025-03-16 16:23:41][INFO][Test][155.042105ms]:HelloWorld!Th3 11
-[2025-03-16 16:23:41][INFO][Test][155.381056ms]:HelloWorld!Th9 11
-[2025-03-16 16:23:41][INFO][Test][157.872177ms]:HelloWorld!Th11 14
-[2025-03-16 16:23:41][INFO][Test][157.926203ms]:HelloWorld!Th15 14
-[2025-03-16 16:23:41][INFO][Test][157.944859ms]:HelloWorld!Th10 14
-[2025-03-16 16:23:41][INFO][Test][160.407578ms]:HelloWorld!Th6 14
-[2025-03-16 16:23:41][INFO][Test][160.534882ms]:HelloWorld!Th4 14
-[2025-03-16 16:23:41][INFO][Test][160.613012ms]:HelloWorld!Th12 14
-[2025-03-16 16:23:41][INFO][Test][160.644590ms]:HelloWorld!Th14 14
-[2025-03-16 16:23:41][INFO][Test][160.581186ms]:HelloWorld!Th2 14
-[2025-03-16 16:23:41][INFO][Test][161.450998ms]:HelloWorld!Main14
-[2025-03-16 16:23:41][INFO][Test][165.565314ms]:HelloWorld!Th13 14
-[2025-03-16 16:23:41][INFO][Test][165.768721ms]:HelloWorld!Th7 14
-[2025-03-16 16:23:41][INFO][Test][165.614883ms]:HelloWorld!Th3 12
-[2025-03-16 16:23:41][INFO][Test][166.081730ms]:HelloWorld!Th9 12
-[2025-03-16 16:23:41][INFO][Test][165.629540ms]:HelloWorld!Th5 12
-[2025-03-16 16:23:41][INFO][Test][165.664355ms]:HelloWorld!Th1 15
-[2025-03-16 16:23:41][INFO][Test][165.806615ms]:HelloWorld!Th8 14
-[2025-03-16 16:23:41][INFO][Test][165.836826ms]:HelloWorld!Th0 15
-[2025-03-16 16:23:41][INFO][Test][168.164276ms]:HelloWorld!Th15 15
-[2025-03-16 16:23:41][INFO][Test][168.246261ms]:HelloWorld!Th11 15
-[2025-03-16 16:23:41][INFO][Test][168.281806ms]:HelloWorld!Th10 15
-[2025-03-16 16:23:41][INFO][Test][169.875376ms]:HelloWorld!Main15
-[2025-03-16 16:23:41][INFO][Test][171.017568ms]:HelloWorld!Th6 15
-[2025-03-16 16:23:41][INFO][Test][171.138658ms]:HelloWorld!Th14 15
-[2025-03-16 16:23:41][INFO][Test][171.222334ms]:HelloWorld!Th12 15
-[2025-03-16 16:23:41][INFO][Test][171.310011ms]:HelloWorld!Th4 15
-[2025-03-16 16:23:41][INFO][Test][171.190811ms]:HelloWorld!Th2 15
-[2025-03-16 16:23:41][INFO][Test][176.397364ms]:HelloWorld!Th5 13
-[2025-03-16 16:23:41][INFO][Test][177.125897ms]:HelloWorld!Th9 13
-[2025-03-16 16:23:41][INFO][Test][176.609520ms]:HelloWorld!Th3 13
-[2025-03-16 16:23:41][INFO][Test][177.285829ms]:HelloWorld!Th13 15
-[2025-03-16 16:23:41][INFO][Test][177.348265ms]:HelloWorld!Th7 15
-[2025-03-16 16:23:41][INFO][Test][178.193192ms]:HelloWorld!Main16
-[2025-03-16 16:23:41][INFO][Test][179.591786ms]:HelloWorld!Th8 15
-[2025-03-16 16:23:41][INFO][Test][187.410731ms]:HelloWorld!Th9 14
-[2025-03-16 16:23:41][INFO][Test][187.533277ms]:HelloWorld!Th3 14
-[2025-03-16 16:23:41][INFO][Test][187.646861ms]:HelloWorld!Th5 14
-[2025-03-16 16:23:41][INFO][Test][197.912109ms]:HelloWorld!Th3 15
-[2025-03-16 16:23:41][INFO][Test][198.009821ms]:HelloWorld!Th9 15
-[2025-03-16 16:23:41][INFO][Test][198.645861ms]:HelloWorld!Th5 15
-[2025-03-16 16:23:41][INFO][Test][209.366094ms]:TestTestTestTestTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest
-[2025-03-16 16:23:41][INFO][Test][210.355609ms]:TestTestTestTestTestTestTestTestTestTest
-[2025-03-16 16:23:41][INFO][Test][210.490598ms]:TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest
-[2025-03-16 16:23:41][INFO][Test][211.226351ms]:TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest
+[2025-03-23 01:32:18][INFO][Test][0.665088ms]:AfterTest(Previous output wont be written into logfile)
+[2025-03-23 01:32:18][INFO][Test][0.695105ms]:ColorTest
+[2025-03-23 01:32:18][TRACE][Test][0.728886ms]:(1.000000,2.000000)
+[2025-03-23 01:32:18][TRACE][Test][0.760368ms]:(1.000000,2.000000,3.000000)
+[2025-03-23 01:32:18][TRACE][Test][0.791749ms]:(1.000000,2.000000,3.000000,4.000000)
+[2025-03-23 01:32:18][TRACE][Test][0.824274ms]:[(1.000000,3.000000),(2.000000,4.000000)]
+[2025-03-23 01:32:18][TRACE][Test][1.385384ms]:[(1.000000,4.000000,7.000000),(2.000000,5.000000,8.000000),(3.000000,6.000000,9.000000)]
+[2025-03-23 01:32:18][TRACE][Test][1.484906ms]:[(1.000000,5.000000,9.000000,13.000000),(2.000000,6.000000,10.000000,14.000000),(3.000000,7.000000,11.000000,15.000000),(4.000000,8.000000,12.000000,16.000000)]
+[2025-03-23 01:32:18][TRACE][Test][1.554635ms]:HelloWorld!
+[2025-03-23 01:32:18][INFO][Test][1.965569ms]:HelloWorld!Th0 0
+[2025-03-23 01:32:18][INFO][Test][2.149776ms]:HelloWorld!Th1 0
+[2025-03-23 01:32:18][INFO][Test][2.519009ms]:HelloWorld!Th2 0
+[2025-03-23 01:32:18][INFO][Test][2.535088ms]:HelloWorld!Th3 0
+[2025-03-23 01:32:18][TRACE][Test][2.849856ms]:HelloWorld!Th4 0
+[2025-03-23 01:32:18][INFO][Test][2.971790ms]:HelloWorld!Th5 0
+[2025-03-23 01:32:18][TRACE][Test][3.188665ms]:HelloWorld!Th6 0
+[2025-03-23 01:32:18][INFO][Test][3.276003ms]:HelloWorld!Th7 0
+[2025-03-23 01:32:18][TRACE][Test][3.449524ms]:HelloWorld!Th8 0
+[2025-03-23 01:32:18][INFO][Test][3.734836ms]:HelloWorld!Th9 0
+[2025-03-23 01:32:18][INFO][Test][3.796937ms]:HelloWorld!Th10 0
+[2025-03-23 01:32:18][INFO][Test][3.949840ms]:HelloWorld!Th13 0
+[2025-03-23 01:32:18][INFO][Test][4.089389ms]:HelloWorld!Th14 0
+[2025-03-23 01:32:18][INFO][Test][4.125356ms]:HelloWorld!Th11 0
+[2025-03-23 01:32:18][TRACE][Test][4.182702ms]:HelloWorld!Th12 0
+[2025-03-23 01:32:18][INFO][Test][4.402328ms]:HelloWorld!Main0
+[2025-03-23 01:32:18][INFO][Test][4.419554ms]:HelloWorld!Th15 0
+[2025-03-23 01:32:18][INFO][Test][12.115989ms]:HelloWorld!Th0 1
+[2025-03-23 01:32:18][INFO][Test][12.520404ms]:HelloWorld!Th1 1
+[2025-03-23 01:32:18][INFO][Test][12.578422ms]:HelloWorld!Main1
+[2025-03-23 01:32:18][INFO][Test][12.878332ms]:HelloWorld!Th3 1
+[2025-03-23 01:32:18][INFO][Test][12.981382ms]:HelloWorld!Th4 1
+[2025-03-23 01:32:18][INFO][Test][12.638990ms]:HelloWorld!Th2 1
+[2025-03-23 01:32:18][INFO][Test][13.204175ms]:HelloWorld!Th5 1
+[2025-03-23 01:32:18][INFO][Test][13.374475ms]:HelloWorld!Th6 1
+[2025-03-23 01:32:18][INFO][Test][13.447509ms]:HelloWorld!Th7 1
+[2025-03-23 01:32:18][INFO][Test][13.911871ms]:HelloWorld!Th8 1
+[2025-03-23 01:32:18][INFO][Test][14.049065ms]:HelloWorld!Th10 1
+[2025-03-23 01:32:18][INFO][Test][14.230588ms]:HelloWorld!Th14 1
+[2025-03-23 01:32:18][INFO][Test][14.202665ms]:HelloWorld!Th9 1
+[2025-03-23 01:32:18][INFO][Test][14.168577ms]:HelloWorld!Th13 1
+[2025-03-23 01:32:18][INFO][Test][14.420551ms]:HelloWorld!Th11 1
+[2025-03-23 01:32:18][INFO][Test][14.401331ms]:HelloWorld!Th12 1
+[2025-03-23 01:32:18][INFO][Test][14.627097ms]:HelloWorld!Th15 1
+[2025-03-23 01:32:18][INFO][Test][21.103374ms]:HelloWorld!Main2
+[2025-03-23 01:32:18][INFO][Test][22.341928ms]:HelloWorld!Th0 2
+[2025-03-23 01:32:18][INFO][Test][22.973632ms]:HelloWorld!Th1 2
+[2025-03-23 01:32:18][INFO][Test][23.035428ms]:HelloWorld!Th3 2
+[2025-03-23 01:32:18][INFO][Test][23.243754ms]:HelloWorld!Th4 2
+[2025-03-23 01:32:18][INFO][Test][23.303565ms]:HelloWorld!Th5 2
+[2025-03-23 01:32:18][INFO][Test][23.315568ms]:HelloWorld!Th2 2
+[2025-03-23 01:32:18][INFO][Test][23.594756ms]:HelloWorld!Th6 2
+[2025-03-23 01:32:18][INFO][Test][23.655864ms]:HelloWorld!Th7 2
+[2025-03-23 01:32:18][INFO][Test][24.039237ms]:HelloWorld!Th8 2
+[2025-03-23 01:32:18][INFO][Test][24.286454ms]:HelloWorld!Th10 2
+[2025-03-23 01:32:18][INFO][Test][24.399847ms]:HelloWorld!Th14 2
+[2025-03-23 01:32:18][INFO][Test][24.494592ms]:HelloWorld!Th13 2
+[2025-03-23 01:32:18][TRACE][Test][24.515611ms]:HelloWorld!Th12 2
+[2025-03-23 01:32:18][INFO][Test][24.500688ms]:HelloWorld!Th11 2
+[2025-03-23 01:32:18][INFO][Test][24.600965ms]:HelloWorld!Th9 2
+[2025-03-23 01:32:18][INFO][Test][24.711232ms]:HelloWorld!Th15 2
+[2025-03-23 01:32:18][INFO][Test][29.440148ms]:HelloWorld!Main3
+[2025-03-23 01:32:18][INFO][Test][32.671364ms]:HelloWorld!Th0 3
+[2025-03-23 01:32:18][INFO][Test][33.091761ms]:HelloWorld!Th1 3
+[2025-03-23 01:32:18][INFO][Test][33.125044ms]:HelloWorld!Th3 3
+[2025-03-23 01:32:18][INFO][Test][33.431058ms]:HelloWorld!Th4 3
+[2025-03-23 01:32:18][INFO][Test][33.460188ms]:HelloWorld!Th5 3
+[2025-03-23 01:32:18][INFO][Test][33.519117ms]:HelloWorld!Th2 3
+[2025-03-23 01:32:18][INFO][Test][33.748646ms]:HelloWorld!Th6 3
+[2025-03-23 01:32:18][INFO][Test][33.808167ms]:HelloWorld!Th7 3
+[2025-03-23 01:32:18][INFO][Test][34.121112ms]:HelloWorld!Th8 3
+[2025-03-23 01:32:18][INFO][Test][34.367159ms]:HelloWorld!Th10 3
+[2025-03-23 01:32:18][INFO][Test][34.480540ms]:HelloWorld!Th14 3
+[2025-03-23 01:32:18][INFO][Test][34.580363ms]:HelloWorld!Th13 3
+[2025-03-23 01:32:18][INFO][Test][34.635970ms]:HelloWorld!Th12 3
+[2025-03-23 01:32:18][INFO][Test][34.665740ms]:HelloWorld!Th11 3
+[2025-03-23 01:32:18][INFO][Test][34.694024ms]:HelloWorld!Th9 3
+[2025-03-23 01:32:18][INFO][Test][34.838314ms]:HelloWorld!Th15 3
+[2025-03-23 01:32:18][INFO][Test][37.786690ms]:HelloWorld!Main4
+[2025-03-23 01:32:18][INFO][Test][43.312085ms]:HelloWorld!Th1 4
+[2025-03-23 01:32:18][INFO][Test][43.380685ms]:HelloWorld!Th3 4
+[2025-03-23 01:32:18][INFO][Test][43.478938ms]:HelloWorld!Th0 4
+[2025-03-23 01:32:18][INFO][Test][43.573846ms]:HelloWorld!Th4 4
+[2025-03-23 01:32:18][INFO][Test][43.580594ms]:HelloWorld!Th5 4
+[2025-03-23 01:32:18][INFO][Test][43.675531ms]:HelloWorld!Th2 4
+[2025-03-23 01:32:18][INFO][Test][43.879381ms]:HelloWorld!Th6 4
+[2025-03-23 01:32:18][INFO][Test][43.977253ms]:HelloWorld!Th7 4
+[2025-03-23 01:32:18][INFO][Test][44.217016ms]:HelloWorld!Th8 4
+[2025-03-23 01:32:18][INFO][Test][44.451569ms]:HelloWorld!Th10 4
+[2025-03-23 01:32:18][INFO][Test][44.561098ms]:HelloWorld!Th14 4
+[2025-03-23 01:32:18][INFO][Test][44.659583ms]:HelloWorld!Th13 4
+[2025-03-23 01:32:18][INFO][Test][44.765514ms]:HelloWorld!Th12 4
+[2025-03-23 01:32:18][INFO][Test][44.814723ms]:HelloWorld!Th11 4
+[2025-03-23 01:32:18][INFO][Test][44.832982ms]:HelloWorld!Th9 4
+[2025-03-23 01:32:18][TRACE][Test][44.872925ms]:HelloWorld!Th15 4
+[2025-03-23 01:32:18][INFO][Test][45.960011ms]:HelloWorld!Main5
+[2025-03-23 01:32:18][INFO][Test][53.768358ms]:HelloWorld!Th3 5
+[2025-03-23 01:32:18][INFO][Test][53.879618ms]:HelloWorld!Th1 5
+[2025-03-23 01:32:18][INFO][Test][54.051394ms]:HelloWorld!Main6
+[2025-03-23 01:32:18][INFO][Test][54.074258ms]:HelloWorld!Th7 5
+[2025-03-23 01:32:18][INFO][Test][53.838784ms]:HelloWorld!Th5 5
+[2025-03-23 01:32:18][INFO][Test][53.968364ms]:HelloWorld!Th6 5
+[2025-03-23 01:32:18][INFO][Test][53.808602ms]:HelloWorld!Th4 5
+[2025-03-23 01:32:18][INFO][Test][53.771850ms]:HelloWorld!Th0 5
+[2025-03-23 01:32:18][INFO][Test][53.792865ms]:HelloWorld!Th2 5
+[2025-03-23 01:32:18][INFO][Test][54.309390ms]:HelloWorld!Th8 5
+[2025-03-23 01:32:18][INFO][Test][54.535776ms]:HelloWorld!Th10 5
+[2025-03-23 01:32:18][INFO][Test][54.896556ms]:HelloWorld!Th12 5
+[2025-03-23 01:32:18][INFO][Test][54.951948ms]:HelloWorld!Th14 5
+[2025-03-23 01:32:18][INFO][Test][54.969532ms]:HelloWorld!Th9 5
+[2025-03-23 01:32:18][INFO][Test][55.029467ms]:HelloWorld!Th11 5
+[2025-03-23 01:32:18][INFO][Test][55.000167ms]:HelloWorld!Th13 5
+[2025-03-23 01:32:18][INFO][Test][55.057741ms]:HelloWorld!Th15 5
+[2025-03-23 01:32:18][INFO][Test][62.236657ms]:HelloWorld!Main7
+[2025-03-23 01:32:18][INFO][Test][64.094037ms]:HelloWorld!Th3 6
+[2025-03-23 01:32:18][INFO][Test][64.102810ms]:HelloWorld!Th1 6
+[2025-03-23 01:32:18][INFO][Test][64.196702ms]:HelloWorld!Th7 6
+[2025-03-23 01:32:18][INFO][Test][64.251070ms]:HelloWorld!Th5 6
+[2025-03-23 01:32:18][INFO][Test][64.366256ms]:HelloWorld!Th0 6
+[2025-03-23 01:32:18][INFO][Test][64.445255ms]:HelloWorld!Th6 6
+[2025-03-23 01:32:18][INFO][Test][64.470755ms]:HelloWorld!Th2 6
+[2025-03-23 01:32:18][INFO][Test][64.509429ms]:HelloWorld!Th8 6
+[2025-03-23 01:32:18][INFO][Test][64.525986ms]:HelloWorld!Th4 6
+[2025-03-23 01:32:18][INFO][Test][66.284268ms]:HelloWorld!Th10 6
+[2025-03-23 01:32:18][INFO][Test][66.522242ms]:HelloWorld!Th12 6
+[2025-03-23 01:32:18][INFO][Test][66.544378ms]:HelloWorld!Th14 6
+[2025-03-23 01:32:18][INFO][Test][66.633995ms]:HelloWorld!Th9 6
+[2025-03-23 01:32:18][INFO][Test][66.807782ms]:HelloWorld!Th11 6
+[2025-03-23 01:32:18][INFO][Test][67.176463ms]:HelloWorld!Th13 6
+[2025-03-23 01:32:18][INFO][Test][67.347270ms]:HelloWorld!Th15 6
+[2025-03-23 01:32:18][INFO][Test][70.582390ms]:HelloWorld!Main8
+[2025-03-23 01:32:18][INFO][Test][74.444211ms]:HelloWorld!Th3 7
+[2025-03-23 01:32:18][INFO][Test][74.518215ms]:HelloWorld!Th5 7
+[2025-03-23 01:32:18][INFO][Test][74.476047ms]:HelloWorld!Th0 7
+[2025-03-23 01:32:18][INFO][Test][74.458026ms]:HelloWorld!Th1 7
+[2025-03-23 01:32:18][INFO][Test][74.584748ms]:HelloWorld!Th6 7
+[2025-03-23 01:32:18][INFO][Test][74.492486ms]:HelloWorld!Th7 7
+[2025-03-23 01:32:18][INFO][Test][74.568887ms]:HelloWorld!Th2 7
+[2025-03-23 01:32:18][INFO][Test][74.781382ms]:HelloWorld!Th8 7
+[2025-03-23 01:32:18][INFO][Test][74.727808ms]:HelloWorld!Th4 7
+[2025-03-23 01:32:18][INFO][Test][76.771486ms]:HelloWorld!Th14 7
+[2025-03-23 01:32:18][INFO][Test][76.965692ms]:HelloWorld!Th11 7
+[2025-03-23 01:32:18][INFO][Test][76.784493ms]:HelloWorld!Th12 7
+[2025-03-23 01:32:18][INFO][Test][76.815088ms]:HelloWorld!Th9 7
+[2025-03-23 01:32:18][INFO][Test][76.801029ms]:HelloWorld!Th10 7
+[2025-03-23 01:32:18][INFO][Test][77.313673ms]:HelloWorld!Th13 7
+[2025-03-23 01:32:18][INFO][Test][77.445771ms]:HelloWorld!Th15 7
+[2025-03-23 01:32:18][INFO][Test][78.938109ms]:HelloWorld!Main9
+[2025-03-23 01:32:18][INFO][Test][84.895117ms]:HelloWorld!Th3 8
+[2025-03-23 01:32:18][INFO][Test][84.936655ms]:HelloWorld!Th6 8
+[2025-03-23 01:32:18][INFO][Test][84.959890ms]:HelloWorld!Th5 8
+[2025-03-23 01:32:18][INFO][Test][84.986704ms]:HelloWorld!Th4 8
+[2025-03-23 01:32:18][INFO][Test][85.040485ms]:HelloWorld!Th1 8
+[2025-03-23 01:32:18][INFO][Test][85.111239ms]:HelloWorld!Th8 8
+[2025-03-23 01:32:18][INFO][Test][85.014549ms]:HelloWorld!Th0 8
+[2025-03-23 01:32:18][INFO][Test][84.905983ms]:HelloWorld!Th2 8
+[2025-03-23 01:32:18][INFO][Test][85.059196ms]:HelloWorld!Th7 8
+[2025-03-23 01:32:18][INFO][Test][87.108284ms]:HelloWorld!Th14 8
+[2025-03-23 01:32:18][INFO][Test][87.175170ms]:HelloWorld!Th12 8
+[2025-03-23 01:32:18][INFO][Test][87.190850ms]:HelloWorld!Th11 8
+[2025-03-23 01:32:18][INFO][Test][87.260532ms]:HelloWorld!Th10 8
+[2025-03-23 01:32:18][INFO][Test][87.403488ms]:HelloWorld!Main10
+[2025-03-23 01:32:18][INFO][Test][87.426375ms]:HelloWorld!Th9 8
+[2025-03-23 01:32:18][INFO][Test][87.444499ms]:HelloWorld!Th13 8
+[2025-03-23 01:32:18][INFO][Test][87.617534ms]:HelloWorld!Th15 8
+[2025-03-23 01:32:18][INFO][Test][95.363154ms]:HelloWorld!Th3 9
+[2025-03-23 01:32:18][INFO][Test][95.371784ms]:HelloWorld!Th6 9
+[2025-03-23 01:32:18][INFO][Test][95.669306ms]:HelloWorld!Th0 9
+[2025-03-23 01:32:18][INFO][Test][95.427637ms]:HelloWorld!Th4 9
+[2025-03-23 01:32:18][INFO][Test][95.536130ms]:HelloWorld!Th1 9
+[2025-03-23 01:32:18][INFO][Test][95.563305ms]:HelloWorld!Main11
+[2025-03-23 01:32:18][INFO][Test][95.615032ms]:HelloWorld!Th8 9
+[2025-03-23 01:32:18][INFO][Test][95.714570ms]:HelloWorld!Th2 9
+[2025-03-23 01:32:18][INFO][Test][95.402753ms]:HelloWorld!Th5 9
+[2025-03-23 01:32:18][INFO][Test][95.750246ms]:HelloWorld!Th7 9
+[2025-03-23 01:32:18][INFO][Test][97.265972ms]:HelloWorld!Th14 9
+[2025-03-23 01:32:18][INFO][Test][97.369728ms]:HelloWorld!Th12 9
+[2025-03-23 01:32:18][INFO][Test][97.404847ms]:HelloWorld!Th10 9
+[2025-03-23 01:32:18][INFO][Test][97.434000ms]:HelloWorld!Th11 9
+[2025-03-23 01:32:18][INFO][Test][99.087567ms]:HelloWorld!Th9 9
+[2025-03-23 01:32:18][INFO][Test][99.165372ms]:HelloWorld!Th13 9
+[2025-03-23 01:32:18][INFO][Test][99.239128ms]:HelloWorld!Th15 9
+[2025-03-23 01:32:18][INFO][Test][104.425571ms]:HelloWorld!Main12
+[2025-03-23 01:32:18][INFO][Test][105.717901ms]:HelloWorld!Th3 10
+[2025-03-23 01:32:18][INFO][Test][105.892598ms]:HelloWorld!Th0 10
+[2025-03-23 01:32:18][INFO][Test][105.924435ms]:HelloWorld!Th1 10
+[2025-03-23 01:32:18][INFO][Test][105.758218ms]:HelloWorld!Th6 10
+[2025-03-23 01:32:18][INFO][Test][105.956207ms]:HelloWorld!Th4 10
+[2025-03-23 01:32:18][INFO][Test][106.066263ms]:HelloWorld!Th2 10
+[2025-03-23 01:32:18][INFO][Test][106.134459ms]:HelloWorld!Th8 10
+[2025-03-23 01:32:18][INFO][Test][106.115638ms]:HelloWorld!Th7 10
+[2025-03-23 01:32:18][INFO][Test][106.099732ms]:HelloWorld!Th5 10
+[2025-03-23 01:32:18][INFO][Test][107.547915ms]:HelloWorld!Th10 10
+[2025-03-23 01:32:18][INFO][Test][107.569695ms]:HelloWorld!Th12 10
+[2025-03-23 01:32:18][INFO][Test][107.835601ms]:HelloWorld!Th11 10
+[2025-03-23 01:32:18][INFO][Test][107.556328ms]:HelloWorld!Th14 10
+[2025-03-23 01:32:18][INFO][Test][109.446952ms]:HelloWorld!Th13 10
+[2025-03-23 01:32:18][INFO][Test][109.510208ms]:HelloWorld!Th15 10
+[2025-03-23 01:32:18][INFO][Test][109.701920ms]:HelloWorld!Th9 10
+[2025-03-23 01:32:18][INFO][Test][112.766011ms]:HelloWorld!Main13
+[2025-03-23 01:32:18][INFO][Test][116.247496ms]:HelloWorld!Th4 11
+[2025-03-23 01:32:18][INFO][Test][116.453417ms]:HelloWorld!Th7 11
+[2025-03-23 01:32:18][INFO][Test][116.287645ms]:HelloWorld!Th8 11
+[2025-03-23 01:32:18][INFO][Test][116.488554ms]:HelloWorld!Th1 11
+[2025-03-23 01:32:18][INFO][Test][116.575484ms]:HelloWorld!Th0 11
+[2025-03-23 01:32:18][INFO][Test][116.233486ms]:HelloWorld!Th3 11
+[2025-03-23 01:32:18][INFO][Test][116.556426ms]:HelloWorld!Th5 11
+[2025-03-23 01:32:18][INFO][Test][116.589275ms]:HelloWorld!Th6 11
+[2025-03-23 01:32:18][INFO][Test][116.344530ms]:HelloWorld!Th2 11
+[2025-03-23 01:32:18][INFO][Test][117.768747ms]:HelloWorld!Th10 11
+[2025-03-23 01:32:18][INFO][Test][118.032215ms]:HelloWorld!Th12 11
+[2025-03-23 01:32:18][INFO][Test][118.213468ms]:HelloWorld!Th14 11
+[2025-03-23 01:32:18][INFO][Test][118.245016ms]:HelloWorld!Th11 11
+[2025-03-23 01:32:18][INFO][Test][119.966907ms]:HelloWorld!Th15 11
+[2025-03-23 01:32:18][INFO][Test][120.095373ms]:HelloWorld!Th13 11
+[2025-03-23 01:32:18][INFO][Test][120.018769ms]:HelloWorld!Th9 11
+[2025-03-23 01:32:18][INFO][Test][121.076941ms]:HelloWorld!Main14
+[2025-03-23 01:32:18][INFO][Test][126.699903ms]:HelloWorld!Th4 12
+[2025-03-23 01:32:18][INFO][Test][126.883338ms]:HelloWorld!Th7 12
+[2025-03-23 01:32:18][INFO][Test][127.005297ms]:HelloWorld!Th1 12
+[2025-03-23 01:32:18][INFO][Test][127.093482ms]:HelloWorld!Th0 12
+[2025-03-23 01:32:18][INFO][Test][126.902318ms]:HelloWorld!Th8 12
+[2025-03-23 01:32:18][INFO][Test][127.186739ms]:HelloWorld!Th3 12
+[2025-03-23 01:32:18][INFO][Test][127.271053ms]:HelloWorld!Th6 12
+[2025-03-23 01:32:18][INFO][Test][127.357409ms]:HelloWorld!Th5 12
+[2025-03-23 01:32:18][INFO][Test][127.410385ms]:HelloWorld!Th2 12
+[2025-03-23 01:32:18][INFO][Test][127.908654ms]:HelloWorld!Th10 12
+[2025-03-23 01:32:18][INFO][Test][128.507609ms]:HelloWorld!Th11 12
+[2025-03-23 01:32:18][INFO][Test][128.715459ms]:HelloWorld!Th12 12
+[2025-03-23 01:32:18][INFO][Test][128.747980ms]:HelloWorld!Th14 12
+[2025-03-23 01:32:18][INFO][Test][129.284020ms]:HelloWorld!Main15
+[2025-03-23 01:32:18][INFO][Test][130.303550ms]:HelloWorld!Th13 12
+[2025-03-23 01:32:18][INFO][Test][130.394715ms]:HelloWorld!Th15 12
+[2025-03-23 01:32:18][INFO][Test][130.523703ms]:HelloWorld!Th9 12
+[2025-03-23 01:32:18][INFO][Test][137.068182ms]:HelloWorld!Th4 13
+[2025-03-23 01:32:18][INFO][Test][137.183173ms]:HelloWorld!Th7 13
+[2025-03-23 01:32:18][INFO][Test][137.431739ms]:HelloWorld!Th3 13
+[2025-03-23 01:32:18][INFO][Test][137.264193ms]:HelloWorld!Th8 13
+[2025-03-23 01:32:18][INFO][Test][137.233732ms]:HelloWorld!Th1 13
+[2025-03-23 01:32:18][INFO][Test][137.529593ms]:HelloWorld!Main16
+[2025-03-23 01:32:18][INFO][Test][137.290336ms]:HelloWorld!Th0 13
+[2025-03-23 01:32:18][TRACE][Test][137.789965ms]:HelloWorld!Th2 13
+[2025-03-23 01:32:18][INFO][Test][137.645054ms]:HelloWorld!Th5 13
+[2025-03-23 01:32:18][INFO][Test][138.080971ms]:HelloWorld!Th10 13
+[2025-03-23 01:32:18][INFO][Test][137.573303ms]:HelloWorld!Th6 13
+[2025-03-23 01:32:18][INFO][Test][139.184896ms]:HelloWorld!Th11 13
+[2025-03-23 01:32:18][INFO][Test][140.016896ms]:HelloWorld!Th12 13
+[2025-03-23 01:32:18][INFO][Test][140.020095ms]:HelloWorld!Th14 13
+[2025-03-23 01:32:18][INFO][Test][140.564702ms]:HelloWorld!Th13 13
+[2025-03-23 01:32:18][INFO][Test][140.693033ms]:HelloWorld!Th15 13
+[2025-03-23 01:32:18][INFO][Test][140.738476ms]:HelloWorld!Th9 13
+[2025-03-23 01:32:18][INFO][Test][147.527712ms]:HelloWorld!Th7 14
+[2025-03-23 01:32:18][INFO][Test][147.647511ms]:HelloWorld!Th4 14
+[2025-03-23 01:32:18][INFO][Test][147.702916ms]:HelloWorld!Th3 14
+[2025-03-23 01:32:18][INFO][Test][147.824619ms]:HelloWorld!Th8 14
+[2025-03-23 01:32:18][INFO][Test][147.895391ms]:HelloWorld!Th1 14
+[2025-03-23 01:32:18][INFO][Test][148.054001ms]:HelloWorld!Th0 14
+[2025-03-23 01:32:18][INFO][Test][148.212660ms]:HelloWorld!Th2 14
+[2025-03-23 01:32:18][INFO][Test][148.280331ms]:HelloWorld!Th5 14
+[2025-03-23 01:32:18][INFO][Test][148.414520ms]:HelloWorld!Th6 14
+[2025-03-23 01:32:18][INFO][Test][148.467141ms]:HelloWorld!Th10 14
+[2025-03-23 01:32:18][INFO][Test][150.220952ms]:HelloWorld!Th11 14
+[2025-03-23 01:32:18][INFO][Test][150.273016ms]:HelloWorld!Th12 14
+[2025-03-23 01:32:18][INFO][Test][150.331842ms]:HelloWorld!Th14 14
+[2025-03-23 01:32:18][INFO][Test][151.273270ms]:HelloWorld!Th13 14
+[2025-03-23 01:32:18][INFO][Test][151.438996ms]:HelloWorld!Th9 14
+[2025-03-23 01:32:18][INFO][Test][151.503491ms]:HelloWorld!Th15 14
+[2025-03-23 01:32:18][INFO][Test][157.915641ms]:HelloWorld!Th7 15
+[2025-03-23 01:32:18][INFO][Test][157.957522ms]:HelloWorld!Th4 15
+[2025-03-23 01:32:18][INFO][Test][158.168036ms]:HelloWorld!Th8 15
+[2025-03-23 01:32:18][INFO][Test][158.198102ms]:HelloWorld!Th1 15
+[2025-03-23 01:32:18][INFO][Test][158.219896ms]:HelloWorld!Th0 15
+[2025-03-23 01:32:18][INFO][Test][158.239061ms]:HelloWorld!Th3 15
+[2025-03-23 01:32:18][INFO][Test][158.305881ms]:HelloWorld!Th2 15
+[2025-03-23 01:32:18][INFO][Test][158.372124ms]:HelloWorld!Th5 15
+[2025-03-23 01:32:18][INFO][Test][158.584208ms]:HelloWorld!Th6 15
+[2025-03-23 01:32:18][INFO][Test][158.645209ms]:HelloWorld!Th10 15
+[2025-03-23 01:32:18][INFO][Test][160.555215ms]:HelloWorld!Th14 15
+[2025-03-23 01:32:18][INFO][Test][160.549945ms]:HelloWorld!Th11 15
+[2025-03-23 01:32:18][INFO][Test][160.786709ms]:HelloWorld!Th12 15
+[2025-03-23 01:32:18][INFO][Test][161.761681ms]:HelloWorld!Th9 15
+[2025-03-23 01:32:18][INFO][Test][161.833082ms]:HelloWorld!Th15 15
+[2025-03-23 01:32:18][INFO][Test][161.866119ms]:HelloWorld!Th13 15
+[2025-03-23 01:32:18][INFO][Test][172.475715ms]:TestTestTestTestTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTesTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest
+[2025-03-23 01:32:18][INFO][Test][174.034075ms]:TestTestTestTestTestTestTestTestTestTest
+[2025-03-23 01:32:18][INFO][Test][174.116572ms]:TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest
+[2025-03-23 01:32:18][INFO][Test][175.122752ms]:TestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTestTest

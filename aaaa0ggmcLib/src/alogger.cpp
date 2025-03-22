@@ -177,17 +177,17 @@ void Logger::makeExtraContent(std::string &tm,std::string& rest,dstring head,dst
     }
     if(mode & LOG_SHOW_ELAP){
         rest.append("[");
-        rest.append(to_string(clk.getOffset()));
+        rest.append(std::to_string(clk.getOffset()));
         rest.append("ms]");
     }
     if(mode & LOG_SHOW_PROC){
         rest.append("[PID:");
-        rest.append(to_string(getpid()));
+        rest.append(std::to_string(getpid()));
         rest.append("]");
     }
     if(mode & LOG_SHOW_THID){
         rest.append("[TID:");
-        rest.append(to_string((int)pthread_self()));
+        rest.append(std::to_string((int)pthread_self()));
         rest.append("]");
     }
     rest.append(":");
@@ -237,53 +237,53 @@ LogFactory& LogFactory::operator()(int logLevel){
 
 LogFactory& LogFactory::operator<<(glm::vec1 data){
     cachedStr += "(";
-    cachedStr += to_string(data.x);
+    cachedStr += std::to_string(data.x);
     cachedStr += ")";
     return *this;
 }
 
 LogFactory& LogFactory::operator<<(glm::vec2 data){
     cachedStr += "(";
-    cachedStr += to_string(data.x);
+    cachedStr += std::to_string(data.x);
     cachedStr += ",";
-    cachedStr += to_string(data.y);
+    cachedStr += std::to_string(data.y);
     cachedStr += ")";
     return *this;
 }
 
 LogFactory& LogFactory::operator<<(glm::vec3 data){
     cachedStr += "(";
-    cachedStr += to_string(data.x);
+    cachedStr += std::to_string(data.x);
     cachedStr += ",";
-    cachedStr += to_string(data.y);
+    cachedStr += std::to_string(data.y);
     cachedStr += ",";
-    cachedStr += to_string(data.z);
+    cachedStr += std::to_string(data.z);
     cachedStr += ")";
     return *this;
 }
 
 LogFactory& LogFactory::operator<<(glm::vec4 data){
     cachedStr += "(";
-    cachedStr += to_string(data.x);
+    cachedStr += std::to_string(data.x);
     cachedStr += ",";
-    cachedStr += to_string(data.y);
+    cachedStr += std::to_string(data.y);
     cachedStr += ",";
-    cachedStr += to_string(data.z);
+    cachedStr += std::to_string(data.z);
     cachedStr += ",";
-    cachedStr += to_string(data.w);
+    cachedStr += std::to_string(data.w);
     cachedStr += ")";
     return *this;
 }
 
 LogFactory& LogFactory::operator<<(glm::quat data){
     cachedStr += "(";
-    cachedStr += to_string(data.x);
+    cachedStr += std::to_string(data.x);
     cachedStr += ",";
-    cachedStr += to_string(data.y);
+    cachedStr += std::to_string(data.y);
     cachedStr += ",";
-    cachedStr += to_string(data.z);
+    cachedStr += std::to_string(data.z);
     cachedStr += ",";
-    cachedStr += to_string(data.w);
+    cachedStr += std::to_string(data.w);
     cachedStr += ")";
     return *this;
 }
@@ -293,13 +293,13 @@ LogFactory& LogFactory::operator<<(glm::mat2 data){
     glm::mat2 tp = glm::transpose(data);
     const float * dt = glm::value_ptr(tp);
     cachedStr += "[(";
-    cachedStr += to_string(dt[0]);
+    cachedStr += std::to_string(dt[0]);
     cachedStr += ",";
-    cachedStr += to_string(dt[1]);
+    cachedStr += std::to_string(dt[1]);
     cachedStr += "),(";
-    cachedStr += to_string(dt[2]);
+    cachedStr += std::to_string(dt[2]);
     cachedStr += ",";
-    cachedStr += to_string(dt[3]);
+    cachedStr += std::to_string(dt[3]);
     cachedStr += ")]";
     return *this;
 }
@@ -311,23 +311,23 @@ LogFactory& LogFactory::operator<<(glm::mat3 data){
     {
         unsigned int i = 0;
         cachedStr += "[(";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += "),(";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += "),(";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ")]";
     }
     return *this;
@@ -346,37 +346,37 @@ LogFactory& LogFactory::operator<<(glm::mat4 data){
     {
         unsigned int i = 0;
         cachedStr += "[(";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += "),(";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += "),(";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += "),(";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ",";
-        cachedStr += to_string(dt[i++]);
+        cachedStr += std::to_string(dt[i++]);
         cachedStr += ")]";
     }
     return *this;
@@ -408,14 +408,14 @@ LogOutputTarget::~LogOutputTarget(){
     close();
 }
 
-namespace alib::g3::log_output_targets{
+namespace alib::g3::lot{
     LogHeader getHeader(int l){
-        if(l&LOG_INFO)return {"[INFO]",0x0E};
-        else if(l&LOG_CRITI)return {"[CRITICAL]",0x4f};
-        else if(l&LOG_WARN)return {"[WARN]",0x09};
-        else if(l&LOG_DEBUG)return {"[DEBUG]",0x0f};
-        else if(l&LOG_ERROR)return {"[ERROR]",0xf4};
-        else if(l&LOG_TRACE)return {"[TRACE]",0x0f};
+        if(l&LOG_INFO)return {"[INFO]",ACP_YELLOW};
+        else if(l&LOG_CRITI)return {"[CRITICAL]",ACP_WHITE ACP_BG_LRED};
+        else if(l&LOG_WARN)return {"[WARN]",ACP_BLUE};
+        else if(l&LOG_DEBUG)return {"[DEBUG]",ACP_CYAN};
+        else if(l&LOG_ERROR)return {"[ERROR]",ACP_RED};
+        else if(l&LOG_TRACE)return {"[TRACE]",ACP_WHITE};
         else return {"",0};
     }
 
@@ -423,14 +423,18 @@ namespace alib::g3::log_output_targets{
         LogHeader header = getHeader(logLevel);
         if(timeHeader.compare(""))std::cout << timeHeader;
         if(ss & LOG_SHOW_TYPE)Util::io_printColor(header.str,header.color);
-        cout << restContent;
-        if(neonColor != -1)Util::io_printColor(message,neonColor);
-        else cout << message;
-        cout << "\n";
+        std::cout << restContent;
+        if(neon != NULL)Util::io_printColor(message,neon);
+        else std::cout << message;
+        std::cout << "\n";
     }
 
     void Console::flush(){
         std::cout.flush();
+    }
+
+    void Console::setContentColor(const char * col){
+        neon = col;
     }
 
     void SingleFile::write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int ss){
@@ -534,7 +538,7 @@ LogFilter::~LogFilter(){}
 bool LogFilter::pre_filter(int,dstring){return true;}
 bool LogFilter::filter(int,std::string&,std::string&,std::string&){return true;}
 
-namespace alib::g3::log_filters{
+namespace alib::g3::lgf{
 
     LogLevel::LogLevel(int sl){
         showLevels = sl;

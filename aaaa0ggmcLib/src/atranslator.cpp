@@ -28,12 +28,7 @@ int Translator::readTranslationFiles(dstring path){
     }else if(!accessToken.compare("")) return ALIB_TRANSLATION_ACCESS_TOKEN_NOT_SET;
     std::vector<std::string> fs;
 
-    std::string pathx;
-    pathx.resize(path.size() + 2);
-    pathx = path;
-    if(pathx[pathx.size()-1] != '/' && pathx[pathx.size()-1] != '\\')pathx.append("/");
-
-    Util::io_traverseFiles(path,fs,0,pathx);
+    Util::io_traverseFiles(path,fs,0);
     GDoc doc;
     for(dstring ss : fs){
         std::string tail = ss.substr(ss.find_last_of('.')+1);
@@ -71,7 +66,7 @@ int Translator::loadTranslation(dstring id){
         }
     }
     currentTranslation = &(iter->second);
-    return ALIB_SUCCESS;
+    return AE_SUCCESS;
 }
 
 const std::string& Translator::translate(dstring idx){
@@ -121,7 +116,7 @@ int Translator::translate_args_vlist(dstring idx,std::string & ss,va_list ap){
     va_copy(va2,ap);
     translate_args_internal((iter->second),ss,va2);
     va_end(va2);
-    return ALIB_SUCCESS;
+    return AE_SUCCESS;
 }
 
 std::string& Translator::translate_args(dstring id,std::string & ss,int encS,...){

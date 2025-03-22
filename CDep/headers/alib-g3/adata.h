@@ -6,8 +6,7 @@
 #include <stdarg.h>
 #include <alib-g3/autil.h>
 
-#define ALIB_DATAE(x) ((x) | 0x10000000)
-#define ALIB_EHAS_PARSE_ERROR ALIB_DATAE(0b1)
+#define AE_HAS_PARSE_ERROR -1000
 
 namespace alib{
 namespace g3{
@@ -22,7 +21,7 @@ namespace g3{
         virtual ~Analyser();
         Analyser(mapping_tp & mtp);
 
-        const static string empty_ret;
+        const static std::string empty_ret;
     };
 
     class DLL_EXPORT GDoc{

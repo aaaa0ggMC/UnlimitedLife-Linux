@@ -9,8 +9,10 @@
 #include <string.h>
 #include <algorithm>
 #include <format>
+#include <vector>
 
 using namespace alib::g3;
+using namespace std;
 
 #define BLOCK(X)
 
@@ -61,7 +63,7 @@ int main(){
     srand(time(0));
     homep = getenv("HOME");
     configp = std::string(homep) + "/.config/";
-    logger.appendLogOutputTarget("console",std::make_shared<log_output_targets::Console>());
+    logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
     BLOCK(CheckConfig){
         //检查是否有文件夹
         if(!Util::io_checkExistence(configp + "simp-biliplayer")){
@@ -69,7 +71,7 @@ int main(){
             lg(LOG_INFO) << "Config directory created: " << configp + "simp-biliplayer" << endlog;
         }
         configp += "simp-biliplayer/";
-        logger.appendLogOutputTarget("logFile",std::make_shared<log_output_targets::SingleFile>(configp + "log"));
+        logger.appendLogOutputTarget("logFile",std::make_shared<lot::SingleFile>(configp + "log"));
 
         //default values
         cfg.player = "mpv";
@@ -78,7 +80,7 @@ int main(){
 
         //获取.config文件
         GDoc doc;
-        if(doc.read_parseFileTOML(configp + "config.properties") != ALIB_EHAS_PARSE_ERROR){
+        if(doc.read_parseFileTOML(configp + "config.properties") != AE_HAS_PARSE_ERROR){
             auto a = doc["General.player"];
             if(!!a)cfg.player = *a;
             a = doc["General.vidPath"];
@@ -120,9 +122,9 @@ int main(){
     std::vector<std::string> cached;
     BLOCK(Display){
     while(true){
-        Util::io_printColor("Enter command(",APCF_BLUE);
-        Util::io_printColor(std::to_string(med.size()) + " videos loaded",APCF_YELLOW);
-        Util::io_printColor("):",APCF_BLUE);
+        Util::io_printColor("Enter command(",ACP_BLUE);
+        Util::io_printColor(std::to_string(med.size()) + " videos loaded",ACP_YELLOW);
+        Util::io_printColor("):",ACP_BLUE);
         std::getline(std::cin,command);
         sep_args.clear();
         args = "";
@@ -164,10 +166,10 @@ int main(){
                         //check conflict
                         if(std::find(vidList.begin(),vidList.end(),newV) == vidList.end()){
                             vidList.push_back(newV);
-                            Util::io_printColor(std::string("[") + std::to_string(cached.size()) + "] ",APCF_GREEN);
+                            Util::io_printColor(std::string("[") + std::to_string(cached.size()) + "] ",ACP_GREEN);
                             std::cout << vecMeds[newV]->bvid << " " << vecMeds[newV]->groupName << " ";
                             cached.push_back(vecMeds[newV]->bvid);
-                            Util::io_printColor(vecMeds[newV]->author,APCF_YELLOW);
+                            Util::io_printColor(vecMeds[newV]->author,ACP_YELLOW);
                             std::cout << std::endl;
                             ++i;
                         }
@@ -186,10 +188,10 @@ int main(){
                     recorder++;
                     if(recorder <= 0)continue;
                     else if(recorder > (maxiumCount<=0?med.size():maxiumCount))break;
-                    Util::io_printColor(std::string("[") + std::to_string(cached.size()) + "] ",APCF_GREEN);
+                    Util::io_printColor(std::string("[") + std::to_string(cached.size()) + "] ",ACP_GREEN);
                     std::cout << gp.bvid << " " << gp.groupName << " ";
                     cached.push_back(gp.bvid);
-                    Util::io_printColor(gp.author,APCF_YELLOW);
+                    Util::io_printColor(gp.author,ACP_YELLOW);
                     std::cout << std::endl;
                 }
             }
@@ -209,7 +211,7 @@ int main(){
                 }else{
                     //check cache
                     if(cached.size() == 0){
-                        Util::io_printColor("No cache to read!\n",APCF_RED);
+                        Util::io_printColor("No cache to read!\n",ACP_RED);
                         continue;
                     }
                     if(value < 0 || value >= cached.size())value = 0;
@@ -237,7 +239,7 @@ int main(){
                 }else{
                     //check cache
                     if(cached.size() == 0){
-                        Util::io_printColor("No cache to read!\n",APCF_RED);
+                        Util::io_printColor("No cache to read!\n",ACP_RED);
                         continue;
                     }
                     if(value < 0 || value >= cached.size())value = rand() % cached.size();
@@ -293,21 +295,21 @@ int main(){
             cfg.verbose = !cfg.verbose;
             logger.setLogOutputTargetStatus("console",cfg.verbose);
             std::cout << "Verbose:";
-            if(cfg.verbose)Util::io_printColor("On",APCF_GREEN);
-            else Util::io_printColor("Off",APCF_GRAY);
+            if(cfg.verbose)Util::io_printColor("On",ACP_GREEN);
+            else Util::io_printColor("Off",ACP_GRAY);
             std::cout << std::endl;
         }else if(!head.compare("cache") || !head.compare("c")){
             for(unsigned int i =0;i < cached.size();++i){
                 auto it = med.find(cached[i]);
                 if(it != med.end()){
                     MediaGroup&gp = it->second;
-                    Util::io_printColor(std::string("[") + std::to_string(i) + "] ",APCF_GREEN);
+                    Util::io_printColor(std::string("[") + std::to_string(i) + "] ",ACP_GREEN);
                     std::cout << gp.bvid << " " << gp.groupName << " ";
-                    Util::io_printColor(gp.author,APCF_YELLOW);
+                    Util::io_printColor(gp.author,ACP_YELLOW);
                     std::cout << std::endl;
                 }else{
-                    Util::io_printColor(std::string("[") + std::to_string(i) + "] ",APCF_GREEN);
-                    Util::io_printColor("missing missing missing",APCF_RED);
+                    Util::io_printColor(std::string("[") + std::to_string(i) + "] ",ACP_GREEN);
+                    Util::io_printColor("missing missing missing",ACP_RED);
                     std::cout << std::endl;
                 }
             }
@@ -343,38 +345,38 @@ int main(){
                 //处理个屁
             }
         }else if(!head.compare("help") || !head.compare("h")){
-            Util::io_printColor("━━━━ Bilibili Local Player v0.0.1 ━━━━\n", APCF_YELLOW);
+            Util::io_printColor("━━━━ Bilibili Local Player v0.0.1 ━━━━\n", ACP_YELLOW);
             Util::io_printColor("Syntax: Commands and arguments should be wrapped with {}\n"
-                                "Example: {show -a John} → command=\"show -a John\"\n\n", APCF_CYAN);
+                                "Example: {show -a John} → command=\"show -a John\"\n\n", ACP_CYAN);
 
             // Command list with categorized formatting
             #define fmt1 "%-18s"  // Command+args width
             #define fmt2 "| %-58s\n"  // Description width
 
             // Core Commands
-            Util::io_printColor("[ Navigation ]\n", APCF_MAGENTA);
+            Util::io_printColor("[ Navigation ]\n", ACP_MAGENTA);
             printf(fmt1 fmt2, "help/h", "Display this help menu");
             printf(fmt1 fmt2, "show/s/list/ls", "List videos with filters:");
             Util::io_printColor("    -t [title]    Filter by title\n"
                                 "    -a [author]   Filter by author\n"
                                 "    -m [max]      Max items to display (0=unlimited)\n"
                                 "    -r            Show random entries\n"
-                                "    -b [start]    Start index\n", APCF_GRAY);
+                                "    -b [start]    Start index\n", ACP_GRAY);
 
             // Playback Controls
-            Util::io_printColor("\n[ Playback ]\n", APCF_MAGENTA);
+            Util::io_printColor("\n[ Playback ]\n", ACP_MAGENTA);
             printf(fmt1 fmt2, "play/p [ID] [sub]", "Play video by BV号/cache ID. Optional sub-index");
             printf(fmt1 fmt2, "detail/d [ID]", "Show video details");
 
             // Configuration
-            Util::io_printColor("\n[ Configuration ]\n", APCF_MAGENTA);
+            Util::io_printColor("\n[ Configuration ]\n", ACP_MAGENTA);
             printf(fmt1 fmt2, "load {path...}", "Load videos. Use 'def' for default path");
             printf(fmt1 fmt2, "defload {paths}", "Set default paths (separate by ';')\n"
                                 "    Use {0} to reference previous values");
             printf(fmt1 fmt2, "player {cmd}", "Set media player (default: mpv)");
 
             // System
-            Util::io_printColor("\n[ System ]\n", APCF_MAGENTA);
+            Util::io_printColor("\n[ System ]\n", ACP_MAGENTA);
             printf(fmt1 fmt2, "verbose/v", "Toggle debug logging");
             printf(fmt1 fmt2, "cache/c", "List cached video indexes");
             printf(fmt1 fmt2, "clear", "Clear all loaded videos");
@@ -382,15 +384,15 @@ int main(){
             printf(fmt1 fmt2, "exit/q", "Quit application");
 
             // Sample Output
-            Util::io_printColor("\n[ Sample Output ]\n", APCF_MAGENTA);
-            Util::io_printColor("[142] BV1GJ41157d9  \"Advanced C++ Tutorial\"  ", APCF_GREEN);
-            Util::io_printColor("John_Doe\n", APCF_YELLOW);
-            Util::io_printColor("[15]  BV1px41117FL  \"Linux Basics\"  ", APCF_CYAN);
-            Util::io_printColor("TechGuru\n\n", APCF_YELLOW);
+            Util::io_printColor("\n[ Sample Output ]\n", ACP_MAGENTA);
+            Util::io_printColor("[142] BV1GJ41157d9  \"Advanced C++ Tutorial\"  ", ACP_GREEN);
+            Util::io_printColor("John_Doe\n", ACP_YELLOW);
+            Util::io_printColor("[15]  BV1px41117FL  \"Linux Basics\"  ", ACP_CYAN);
+            Util::io_printColor("TechGuru\n\n", ACP_YELLOW);
             #undef fmt1
             #undef fmt2
         }else{
-            Util::io_printColor("Unknown command!Enter 'help' or 'h' for help.\n",APCF_RED);
+            Util::io_printColor("Unknown command!Enter 'help' or 'h' for help.\n",ACP_RED);
         }
     }
     }
@@ -423,7 +425,7 @@ void LoadVideos(const std::string& path_in){
             bool old = false;
             bool season = false;
             int ecode = doc.read_parseFileJSON(s);
-            if(ecode == ALIB_EHAS_PARSE_ERROR){
+            if(ecode == AE_HAS_PARSE_ERROR){
                 lg(LOG_ERROR) << "JSON parse failure: " << s.substr(s.find_last_of("/")+1) << " (code:" << ecode << ")" << endlog;
             }
             auto a = doc["media_type"];

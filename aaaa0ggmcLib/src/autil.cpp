@@ -1,4 +1,5 @@
 #include <alib-g3/autil.h>
+#include <functional>
 #include <time.h>
 #include <malloc.h>
 #include <stdio.h>
@@ -19,81 +20,41 @@
 #include <sys/stat.h>
 #include <stdint.h>
 #include <dirent.h>
+
 using namespace alib::g3;
 namespace fs = std::filesystem;
+using namespace std;
 
-#include <iostream>
-#include <string>
+struct AutoFix{
+    AutoFix(){
+        Util::sys_enableVirtualTerminal();
+    }
 
-int Util::io_printColor(dstring message, int color) {
-#ifdef _WIN32
-    // Windows 保持不变
-    static CONSOLE_SCREEN_BUFFER_INFO info;
-    [[maybe_unused]] static BOOL v = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
+    ~AutoFix(){
+        printf(ACP_RESET);
+    }
+};
 
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (WORD)color);
-    int rt = printf("%s", message.c_str());
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), info.wAttributes); // 恢复默认颜色
-    return rt;
-#else
-    // Linux 映射逻辑
+static AutoFix __autofix;
 
-    // 映射前景色（0~15）
-    static const char* ansi_fg_map[] = {
-        "\e[30m", // APCF_BLACK
-        "\e[34m", // APCF_BLUE
-        "\e[32m", // APCF_GREEN
-        "\e[36m", // APCF_CYAN
-        "\e[31m", // APCF_RED
-        "\e[35m", // APCF_MAGENTA
-        "\e[33m", // APCF_YELLOW
-        "\e[37m", // APCF_WHITE
-        "\e[90m", // APCF_GRAY
-        "\e[94m", // APCF_LIGHT_BLUE
-        "\e[92m", // APCF_LIGHT_GREEN
-        "\e[96m", // APCF_LIGHT_CYAN
-        "\e[91m", // APCF_LIGHT_RED
-        "\e[95m", // APCF_LIGHT_MAGENTA
-        "\e[93m", // APCF_LIGHT_YELLOW
-        "\e[97m", // APCF_BRIGHT_WHITE
-    };
-
-    // 映射背景色（0~15）
-    static const char* ansi_bg_map[] = {
-        "\e[40m", // APCB_BLACK
-        "\e[44m", // APCB_BLUE
-        "\e[42m", // APCB_GREEN
-        "\e[46m", // APCB_CYAN
-        "\e[41m", // APCB_RED
-        "\e[45m", // APCB_MAGENTA
-        "\e[43m", // APCB_YELLOW
-        "\e[47m", // APCB_WHITE
-        "\e[100m", // APCB_GRAY
-        "\e[104m", // APCB_LIGHT_BLUE
-        "\e[102m", // APCB_LIGHT_GREEN
-        "\e[106m", // APCB_LIGHT_CYAN
-        "\e[101m", // APCB_LIGHT_RED
-        "\e[105m", // APCB_LIGHT_MAGENTA
-        "\e[103m", // APCB_LIGHT_YELLOW
-        "\e[107m", // APCB_BRIGHT_WHITE
-    };
-
-    // 分离前景和背景色
-    int fg_color = color & 0x0F;        // 前景色 (低 4 位)
-    int bg_color = (color & 0xF0) >> 4; // 背景色 (高 4 位)
-
-    // 打印颜色转义序列
-    printf("%s", ansi_bg_map[bg_color]); // 背景色
-    printf("%s", ansi_fg_map[fg_color]); // 前景色
-
-    // 打印消息
-    int rt = printf("%s", message.c_str());
-
-    // 重置颜色
-    printf("\e[0m");
-    return rt;
-#endif
+void Util::sys_enableVirtualTerminal(){
+    #ifdef _WIN32
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD consoleMode;
+    GetConsoleMode(hConsole, &consoleMode);
+    consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hConsole, consoleMode);
+    #endif
+    ///do nothing in linux/unix or others
 }
+
+int Util::io_printColor(dstring message,const char * color){
+    printf(color);
+    int ret = printf(message.c_str());
+    printf(ACP_RESET);
+    return ret;
+}
+
 std::string Util::ot_getTime() {
     time_t rawtime;
     struct tm *ptminfo;
@@ -147,98 +108,59 @@ std::string Util::sys_getCPUId(){
     #endif // _WIN32
 }
 
-void Util::io_traverseFiles(dstring path, std::vector<std::string>& files,int traverseDepth,dstring appender) {
-    #ifdef _WIN32
-    ///TODO:Windows is not the latest one
-    //文件句柄 注意：我发现有些文章代码此处是long类型，实测运行中会报错访问异常
-    intptr_t hFile = 0;
-    //文件信息
-    struct _finddata_t fileinfo;
-    std::string p;
-    p.reserve(MAX_PATH);
-    if ((hFile = _findfirst(p.assign(path).append("\\*").c_str(), &fileinfo)) != -1) {
-        do {
-            p.clear();
-            //如果是目录,递归查找
-            //如果不是,把文件绝对路径存入vector中
-            if (traverseSubdir && (fileinfo.attrib & _A_SUBDIR)) {
-                if (strcmp(fileinfo.name, ".") != 0 && strcmp(fileinfo.name, "..") != 0)
-                    getFileNames(p.assign(path).append("\\").append(fileinfo.name), files);
-            } else {
-                files.push_back(p.append(path).append("\\").append(fileinfo.name));
-            }
-        } while (_findnext(hFile, &fileinfo) == 0);
-        _findclose(hFile);
-    }
-    #else
-    DIR * dir = opendir(path.c_str());
-    if(dir == nullptr)return;
-    struct dirent * entry;
-    while((entry = readdir(dir)) != NULL){
-        if(!strncmp(".",entry->d_name,1))continue;
-        else if(!strncmp("..",entry->d_name,2))continue;
-        if(traverseDepth != 0 && entry->d_type == DT_DIR){
-            std::string newpath = path;
-            std::string appenderpp = appender;
-            if(newpath[newpath.size() - 1] != '/'){
-                newpath += "/";
-            }
-            if(appenderpp[appenderpp.size() - 1] != '/'){
-                appenderpp += "/";
-            }
-            newpath += entry->d_name;
-            appenderpp += entry->d_name;
-            appenderpp += "/";
-            ///遍历
-            io_traverseFiles(newpath,files,traverseDepth-1,appenderpp);
-        }else if(entry->d_type == DT_REG){
-            files.push_back(appender + entry->d_name);
-        }
-    }
-    #endif // _WIN32
-
-}
-// 基础遍历实现
+// 实现部分
 void Util::io_traverseImpl(
-    const fs::path& basePath,
+    const fs::path& physicalPath,
     std::vector<std::string>& results,
+    const fs::path fixedRoot,
     int remainingDepth,
-    const fs::path& currentAppender,
+    const std::string& appender,
     bool includeFiles,
-    bool includeDirs
+    bool includeDirs,
+    bool useAbsolutePath
 ) {
-    if (!fs::exists(basePath)) {
-        std::cerr << "Path not found: " << basePath << std::endl;
+    if (!fs::exists(physicalPath)) {
+        std::cerr << "Path not found: " << physicalPath << std::endl;
         return;
     }
 
     try {
-        for (const auto& entry : fs::directory_iterator(basePath)) {
-            const auto& path = entry.path();
-            const fs::path relativePath = currentAppender / path.filename();
+        // 预处理基础路径
+        const fs::path processedBase = useAbsolutePath ?
+        physicalPath.lexically_normal().make_preferred() :
+        physicalPath.lexically_relative(fs::current_path()).make_preferred();
 
-            // 处理目录
+        for (const auto& entry : fs::directory_iterator(physicalPath)) {
+            // 构造逻辑路径
+            const std::string logicalPath = (processedBase / entry.path().filename()).generic_string();
+
+            const fs::path newVer = (fixedRoot / processedBase / entry.path().filename());
+
+            // 构建最终结果路径
+            const std::string finalPath = appender +
+            (useAbsolutePath ?
+            fs::absolute(logicalPath).generic_string() :
+            newVer.generic_string());
+
             if (entry.is_directory()) {
                 if (includeDirs) {
-                    results.push_back(relativePath.generic_string());
+                    results.push_back(finalPath);
                 }
-
-                // 递归处理子目录
                 if (remainingDepth != 0) {
                     const int newDepth = (remainingDepth > 0) ? remainingDepth - 1 : -1;
                     io_traverseImpl(
-                        path,
-                        results,
-                        newDepth,
-                        relativePath,
-                        includeFiles,
-                        includeDirs
+                        entry.path(),
+                                    results,
+                                    newVer,
+                                    newDepth,
+                                    appender,
+                                    includeFiles,
+                                    includeDirs,
+                                    useAbsolutePath
                     );
                 }
-            }
-            // 处理文件
-            else if (includeFiles && entry.is_regular_file()) {
-                results.push_back(relativePath.generic_string());
+            } else if (includeFiles && entry.is_regular_file()) {
+                results.push_back(finalPath);
             }
         }
     } catch (const fs::filesystem_error& e) {
@@ -246,62 +168,37 @@ void Util::io_traverseImpl(
     }
 }
 
-// 完整功能版本（保持你的原始接口）
-void Util::io_traverseFiles2(
+void Util::io_traverseFiles(
     const std::string& path,
     std::vector<std::string>& files,
     int traverseDepth,
-    const std::string& appender
+    const std::string& appender,
+    bool absolute
 ) {
     const fs::path basePath(path);
-    const fs::path initialAppender(appender);
-    io_traverseImpl(basePath, files, traverseDepth, initialAppender, true, true);
+    io_traverseImpl(basePath, files, basePath , traverseDepth, appender, true, true, absolute);
 }
 
-// 变体1：仅遍历文件
 void Util::io_traverseFilesOnly(
     const std::string& path,
     std::vector<std::string>& files,
     int traverseDepth,
-    const std::string& appender
+    const std::string& appender,
+    bool absolute
 ) {
     const fs::path basePath(path);
-    const fs::path initialAppender(appender);
-    io_traverseImpl(basePath, files, traverseDepth, initialAppender, true, false);
+    io_traverseImpl(basePath, files, basePath , traverseDepth, appender, true, false, absolute);
 }
 
-// 变体2：仅遍历目录
 void Util::io_traverseFolders(
     const std::string& path,
     std::vector<std::string>& folders,
     int traverseDepth,
-    const std::string& appender
+    const std::string& appender,
+    bool absolute
 ) {
     const fs::path basePath(path);
-    const fs::path initialAppender(appender);
-    io_traverseImpl(basePath, folders, traverseDepth, initialAppender, false, true);
-}
-
-// 变体3：快速递归文件遍历（深度无限）
-void Util::io_traverseFilesRecursive(
-    const std::string& path,
-    std::vector<std::string>& files,
-    const std::string& appender
-) {
-    const fs::path basePath(path);
-    const fs::path initialAppender(appender);
-    io_traverseImpl(basePath, files, -1, initialAppender, true, false);
-}
-
-// 变体4：快速递归目录遍历（深度无限）
-void Util::io_traverseFoldersRecursive(
-    const std::string& path,
-    std::vector<std::string>& folders,
-    const std::string& appender
-) {
-    const fs::path basePath(path);
-    const fs::path initialAppender(appender);
-    io_traverseImpl(basePath, folders, -1, initialAppender, false, true);
+    io_traverseImpl(basePath, folders, basePath , traverseDepth, appender, false, true, absolute);
 }
 
 std::string Util::str_unescape(dstring in) {
@@ -360,14 +257,14 @@ long Util::io_fileSize(dstring filePath) {
     struct stat statbuf;
     int ret;
     ret = stat(filePath.c_str(),&statbuf);//调用stat函数
-    if(ret != 0) return ALIB_ERROR;//获取失败。
+    if(ret != 0) return AE_FAILED;//获取失败。
     return statbuf.st_size;//返回文件大小。
 }
 
 int Util::io_writeAll(dstring fth,dstring s) {
     std::ofstream of;
     of.open(fth);
-    if(!of.is_open())return ALIB_ERROR;
+    if(!of.is_open())return AE_FAILED;
     of.write(s.c_str(),s.length());
     of.close();
     return s.length();
@@ -609,9 +506,9 @@ GlobalMemUsage Util::sys_getGlobalMemoryUsage() {
     GlobalMemoryStatusEx(&statex);
 
     ret.physicalTotal = statex.ullTotalPhys;
-    ret.physicalUsed = ret.phy_all - statex.ullAvailPhys;
+    ret.physicalUsed = ret.physicalTotal - statex.ullAvailPhys;
     ret.virtualTotal = statex.ullTotalVirtual;
-    ret.virtualUsed = ret.vir_all - statex.ullAvailVirtual;
+    ret.virtualUsed = ret.virtualTotal - statex.ullAvailVirtual;
     ret.pageTotal = statex.ullTotalPageFile;
     ret.pageUsed = statex.ullTotalPageFile - statex.ullAvailPageFile;
     ret.percent = statex.dwMemoryLoad;

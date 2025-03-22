@@ -52,7 +52,7 @@ namespace alib{
 namespace g3{
     struct DLL_EXPORT LogHeader{
         const char * str;
-        int color;
+        const char * color;
     };
 
     struct DLL_EXPORT CriticalLock{
@@ -73,13 +73,16 @@ namespace g3{
         virtual ~LogOutputTarget();
     };
 
-    namespace log_output_targets{
+    namespace lot{
         LogHeader getHeader(int level);
 
         struct Console : LogOutputTarget{
-            int neonColor {-1};
+            const char * neon { NULL };
 
             void write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int showExtra);
+
+            void setContentColor(const char * color);
+
             void flush();
         };
 
@@ -127,7 +130,7 @@ namespace g3{
         virtual ~LogFilter();
     };
 
-    namespace log_filters{
+    namespace lgf{
         struct LogLevel : LogFilter{
             int showLevels;
 

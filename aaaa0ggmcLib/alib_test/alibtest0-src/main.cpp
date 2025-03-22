@@ -61,7 +61,7 @@ void test_atranslator(){
     LogFactory lgf("Output",logger);
     logger.setShowExtra(LOG_SHOW_NONE);
 
-    logger.appendLogOutputTarget("console",std::make_shared<log_output_targets::Console>());
+    logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
 
     for(auto & [key,tm] : ts.translations){
         lgf << key << ":" << tm << endlog;
@@ -75,10 +75,10 @@ void test_atranslator(){
 
 void test_alogger(){
     Logger logger;
-    auto target_split = std::make_shared<log_output_targets::SplittedFiles>("test_data/multi/logs.log",128);
-    auto target_file = std::make_shared<log_output_targets::SingleFile>("test_data/logger_output_single");
-    auto target_template = std::make_shared<log_output_targets::SingleFile>("test_data/template_logger_output");
-    auto target_console = std::make_shared<log_output_targets::Console>();
+    auto target_split = std::make_shared<lot::SplittedFiles>("test_data/multi/logs.log",128);
+    auto target_file = std::make_shared<lot::SingleFile>("test_data/logger_output_single");
+    auto target_template = std::make_shared<lot::SingleFile>("test_data/template_logger_output");
+    auto target_console = std::make_shared<lot::Console>();
     logger.appendLogOutputTarget("console",target_console);
     LogFactory lg("Test",logger);
     cout << "[Stage]Pre output" << endl;
@@ -93,9 +93,9 @@ void test_alogger(){
     lg.info("AfterTest(Previous output wont be written into logfile)");
 
     cout << "Content color red" << endl;
-    target_console->neonColor = APCF_RED;
+    target_console->setContentColor(ACP_RED);
     lg.info("ColorTest");
-    target_console->neonColor = APCF_WHITE;
+    target_console->setContentColor(ACP_WHITE);
 
     cout << "GLM Test" << endl;
     {
@@ -234,38 +234,38 @@ void test_autil(){
     cout << Util::io_fileSize("test_data/file_size") << endl;
 
     cout << "\e[100m    io_printColor\e[0m" << endl;
-    Util::io_printColor("TestRBL ",APCF_RED | APCB_BLACK);
-    Util::io_printColor("TestRB ",APCF_RED | APCB_BLUE);
-    Util::io_printColor("TestRW+ ",APCF_RED | APCB_BRIGHT_WHITE);
-    Util::io_printColor("TestRC ",APCF_RED | APCB_CYAN);
-    Util::io_printColor("TestRGRAY ",APCF_RED | APCB_GRAY);
-    Util::io_printColor("TestRG ",APCF_RED | APCB_GREEN);
-    Util::io_printColor("TestRB+ ",APCF_RED | APCB_LIGHT_BLUE);
-    Util::io_printColor("TestRCYAN+ ",APCF_RED | APCB_LIGHT_CYAN);
-    Util::io_printColor("TestRM+ ",APCF_RED | APCB_LIGHT_MAGENTA);
-    Util::io_printColor("TestRR+ ",APCF_RED | APCB_LIGHT_RED);
-    Util::io_printColor("TestRY+ ",APCF_RED | APCB_LIGHT_YELLOW);
-    Util::io_printColor("TestRR ",APCF_RED | APCB_RED);
-    Util::io_printColor("TestRW ",APCF_RED | APCB_WHITE);
-    Util::io_printColor("TestRY ",APCF_RED | APCB_YELLOW);
-    Util::io_printColor("TestRM ",APCF_RED | APCB_MAGENTA);
-    Util::io_printColor("TestBLW ",APCF_BLACK | APCB_WHITE);
-    Util::io_printColor("TestWBL ",APCF_WHITE | APCB_BLACK);
-    Util::io_printColor("TestBBL ",APCF_BLUE | APCB_BLACK);
-    Util::io_printColor("TestW+BL ",APCF_BRIGHT_WHITE | APCB_BLACK);
-    Util::io_printColor("TestCYANBL ",APCF_CYAN | APCB_BLACK);
-    Util::io_printColor("TestGRAYBL ",APCF_GRAY | APCB_BLACK);
-    Util::io_printColor("TestGBL ",APCF_GREEN | APCB_BLACK);
-    Util::io_printColor("TestB+BL ",APCF_LIGHT_BLUE | APCB_BLACK);
-    Util::io_printColor("TestCYAN+BL ",APCF_LIGHT_CYAN | APCB_BLACK);
-    Util::io_printColor("TestG+BL ",APCF_LIGHT_GREEN | APCB_BLACK);
-    Util::io_printColor("TestM+BL ",APCF_LIGHT_MAGENTA | APCB_BLACK);
-    Util::io_printColor("TestR+BL ",APCF_LIGHT_RED | APCB_BLACK);
-    Util::io_printColor("TestY+BL ",APCF_LIGHT_YELLOW | APCB_BLACK);
-    Util::io_printColor("TestM+BL ",APCF_MAGENTA | APCB_BLACK);
-    Util::io_printColor("TestRBL ",APCF_RED | APCB_BLACK);
-    Util::io_printColor("TestWBL ",APCF_WHITE | APCB_BLACK);
-    Util::io_printColor("TestYBL ",APCF_YELLOW | APCB_BLACK);
+    Util::io_printColor("TestRBL ",ACP_RED ACP_BG_BLACK);
+    Util::io_printColor("TestRB ",ACP_RED  ACP_BG_BLUE);
+    Util::io_printColor("TestRW+ ",ACP_RED  ACP_BG_LWHITE);
+    Util::io_printColor("TestRC ",ACP_RED  ACP_BG_CYAN);
+    Util::io_printColor("TestRGRAY ",ACP_RED  ACP_BG_GRAY);
+    Util::io_printColor("TestRG ",ACP_RED  ACP_BG_GREEN);
+    Util::io_printColor("TestRB+ ",ACP_RED  ACP_BG_LBLUE);
+    Util::io_printColor("TestRCYAN+ ",ACP_RED  ACP_BG_LCYAN);
+    Util::io_printColor("TestRM+ ",ACP_RED  ACP_BG_LMAGENTA);
+    Util::io_printColor("TestRR+ ",ACP_RED  ACP_BG_LRED);
+    Util::io_printColor("TestRY+ ",ACP_RED  ACP_BG_LYELLOW);
+    Util::io_printColor("TestRR ",ACP_RED  ACP_BG_RED);
+    Util::io_printColor("TestRW ",ACP_RED  ACP_BG_WHITE);
+    Util::io_printColor("TestRY ",ACP_RED  ACP_BG_YELLOW);
+    Util::io_printColor("TestRM ",ACP_RED  ACP_BG_MAGENTA);
+    Util::io_printColor("TestBLW ",ACP_BLACK  ACP_BG_WHITE);
+    Util::io_printColor("TestWBL ",ACP_WHITE  ACP_BG_BLACK);
+    Util::io_printColor("TestBBL ",ACP_BLUE  ACP_BG_BLACK);
+    Util::io_printColor("TestW+BL ",ACP_LWHITE  ACP_BG_BLACK);
+    Util::io_printColor("TestCYANBL ",ACP_CYAN  ACP_BG_BLACK);
+    Util::io_printColor("TestGRAYBL ",ACP_GRAY  ACP_BG_BLACK);
+    Util::io_printColor("TestGBL ",ACP_GREEN  ACP_BG_BLACK);
+    Util::io_printColor("TestB+BL ",ACP_LBLUE  ACP_BG_BLACK);
+    Util::io_printColor("TestCYAN+BL ",ACP_LCYAN  ACP_BG_BLACK);
+    Util::io_printColor("TestG+BL ",ACP_LGREEN  ACP_BG_BLACK);
+    Util::io_printColor("TestM+BL ",ACP_LMAGENTA  ACP_BG_BLACK);
+    Util::io_printColor("TestR+BL ",ACP_LRED  ACP_BG_BLACK);
+    Util::io_printColor("TestY+BL ",ACP_LYELLOW  ACP_BG_BLACK);
+    Util::io_printColor("TestM+BL ",ACP_MAGENTA  ACP_BG_BLACK);
+    Util::io_printColor("TestRBL ",ACP_RED  ACP_BG_BLACK);
+    Util::io_printColor("TestWBL ",ACP_WHITE  ACP_BG_BLACK);
+    Util::io_printColor("TestYBL ",ACP_YELLOW  ACP_BG_BLACK);
     cout << "End Test(ShouldBeInNormal)" << endl;
 
     cout << "\e[100m    io_readAll (filename)(86bytes)\e[0m" << endl;
@@ -288,7 +288,6 @@ void test_autil(){
     cout << "\e[100m    io_writeAll\e[0m" << "TestDatadhdhahua9we8q9ha" << endl;
     cout << "Ret:" << Util::io_writeAll("test_data/write_all","TestDatadhdhahua9we8q9ha") << endl;
 
-
     cout << "\e[100m    io_traverseFiles (No Loop No Slash test_data)\e[0m" << endl;
     {
         vector<string> files;
@@ -309,19 +308,19 @@ void test_autil(){
     }
 
 
-    cout << "\e[100m    io_traverseFiles (No Loop No Slash test_data fixed_append/)\e[0m" << endl;
+    cout << "\e[100m    io_traverseFiles (Loop No Slash test_data fixed_append/)\e[0m" << endl;
     {
         vector<string> files;
-        Util::io_traverseFiles("test_data",files,100,"fixed_append/");
+        Util::io_traverseFiles("test_data",files,-1,"fixed_append/");
         for(auto & s : files){
             cout << s << "\n";
         }
         cout << endl;
     }
-    cout << "\e[100m    io_traverseFiles (No Loop Slash test_data/ fixed_append/)\e[0m" << endl;
+    cout << "\e[100m    io_traverseFiles (Loop Slash test_data/ fixed_append/)\e[0m" << endl;
     {
         vector<string> files;
-        Util::io_traverseFiles("test_data/",files,100,"fixed_append/");
+        Util::io_traverseFiles("test_data/",files,-1,"fixed_append/");
         for(auto & s : files){
             cout << s << "\n";
         }
