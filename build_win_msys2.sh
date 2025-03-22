@@ -5,4 +5,4 @@ make
 
 # Move Artifact
 mv ../CBuild/Windows/* ../CBuild/
-rmdir ,,/CBuild/Windows/
+rmdir ../CBuild/Windows/
