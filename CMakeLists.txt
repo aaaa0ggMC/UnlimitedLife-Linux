@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 if (WIN32)
     add_compile_options(-ftls-model=global-dynamic)
+    set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
 endif()
 
 set(custom_include_dir "" CACHE PATH "User customed search include path")
