@@ -1,6 +1,7 @@
 # Cmake
 CMakeFiles/
 CBuild_CACHE/
+CBuild_CACHE_WIN/
 CBuild/
 !CBuild/test_data
 Pacman/
