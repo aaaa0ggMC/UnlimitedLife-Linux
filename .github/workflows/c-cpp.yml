@@ -34,14 +34,13 @@ jobs:
       with:
         msystem: UCRT64
         update: true
-        install: git mingw-w64-ucrt-x86_64-gcc
+        #install: git mingw-w64-ucrt-x86_64-gcc
         path-type: inherit  # 关键修复：继承环境变量
       
     - name: CI-Build
       shell: msys2 {0}  # 显式指定shell
       run: |
-        echo 'Msys2 build!'
-        uname -a
+        sh ./configure_win_msys2.sh
         sh ./build_win_msys2.sh
       
     - name: Upload Windows Artifact
