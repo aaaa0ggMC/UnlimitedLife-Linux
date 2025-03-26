@@ -5,7 +5,7 @@
 #include "Window.h"
 
 namespace age{
-    struct GLInit{
+    struct AGE_API GLInit{
         static void GLFW();
         static void GLEW();
 
@@ -15,7 +15,7 @@ namespace age{
         static bool inited_glew;
     };
 
-    class Application{
+    class AGE_API Application{
     public:
         Application();
         ~Application();

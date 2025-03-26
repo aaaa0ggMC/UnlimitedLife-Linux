@@ -9,6 +9,8 @@ int main(){
     Logger logger;
     LogFactory lg("AGETest",logger);
     Window * win;
+    
+    app.setGLVersion(4,3);
 
     ///Init logger
     auto target = std::make_shared<lot::Console>();
@@ -33,12 +35,14 @@ int main(){
             exit(-1);
         }else win = *i;
     }
-
+    
     win->makeCurrent();
     ///Main Loop
+    lg.info("Entering main loop...");
     while(!(win->ShouldClose())){
-        win->swapBuffers();
-        win->pollEvents();
+	win->swapBuffers();
+        glfwPollEvents();
+	//win->pollEvents();
     }
 
     app.destroyWindow(win);

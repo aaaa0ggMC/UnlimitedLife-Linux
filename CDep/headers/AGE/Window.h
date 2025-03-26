@@ -4,9 +4,11 @@
 #include <string>
 #include <optional>
 
+#include "Base.h"
+
 namespace age{
 
-    class Window{
+    class AGE_API Window{
     private:
         friend class Application;
         GLFWwindow *window;
@@ -22,7 +24,7 @@ namespace age{
         }
 
         inline bool ShouldClose(){
-            return glfwWindowShouldClose(window)!=0;
+           return glfwWindowShouldClose(window)!=0;
         }
         inline void swapBuffers(){
             glfwSwapBuffers(window);
@@ -33,7 +35,7 @@ namespace age{
         }
     };
 
-    struct CreateWindowInfo{
+    struct AGE_API CreateWindowInfo{
         std::string SID;
 
         std::string windowTitle;
@@ -46,3 +48,4 @@ namespace age{
         std::optional<Window*> share;
     };
 }
+

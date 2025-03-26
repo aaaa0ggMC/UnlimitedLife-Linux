@@ -1,5 +1,6 @@
 #include <unordered_map>
 #include <optional>
+#include "Base.h"
 //#ifdef FOONATHAN_MEMORY_MEMORY_POOL_HPP_INCLUDED
 //    #define MemPool memory::memory_pool
 //#else
@@ -7,7 +8,7 @@
 //#endif
 
 namespace age{
-    class ResourceManager{
+    class AGE_API ResourceManager{
     public:
        // MemPool * mempool;
 
