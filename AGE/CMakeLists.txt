@@ -17,6 +17,6 @@ if(WIN32)
 target_link_libraries(agetest PRIVATE glfw3.dll glew32.dll opengl32 AGE aaaa0ggmcLib)
 target_compile_definitions(agetest PRIVATE GLFW_DLL)
 else()
-target_link_libraries(agetest PRIVATE AGE aaaa0ggmcLib glfw glew OpenGL)
+target_link_libraries(agetest PRIVATE AGE aaaa0ggmcLib glfw GLEW OpenGL)
 endif()
 
