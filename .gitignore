@@ -6,6 +6,10 @@ CBuild/
 !CBuild/test_data
 Pacman/
 !Pacman/PKGBUILD
+Doxygen
+
+#vim files
+*.swp
 
 # Prerequisites
 *.d

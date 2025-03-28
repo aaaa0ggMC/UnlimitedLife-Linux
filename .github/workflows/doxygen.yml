@@ -1,0 +1,30 @@
+name: Build and Deploy Documentation
+
+on:
+  push:
+    branches: [ "main" ]  # 在推送到 main/master 分支时触发
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Doxygen
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz
+
+    - name: Generate Documentation
+      run: doxygen Doxyfile  # 确保你的项目根目录有 Doxyfile 配置文件
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./Doxygen/  # Doxygen 默认输出目录（根据你的 Doxyfile 配置调整）
+        keep_files: false  # 清除现有文件
+        force_orphan: true  # 始终使用单次提交
