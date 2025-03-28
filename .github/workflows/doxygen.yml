@@ -25,7 +25,6 @@ jobs:
         doxygen Doxyfile
         mkdir -p public/ULDoc
         cp -R Doxygen/* public/ULDoc/
-        find public/ULDoc -name '*.html' -exec sed -i 's#<head>#<head><base href="/ULDoc/">#g' {} \;
 
     - name: Deploy to gh-pages
       uses: peaceiris/actions-gh-pages@v3
