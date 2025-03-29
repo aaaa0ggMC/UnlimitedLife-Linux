@@ -28,8 +28,7 @@ extern "C"
 #define ALIB_DEF_VERIFY "Language"
 #define ALIB_DEF_ACCESS "Access"
 
-///since generation3,only utf8 is guaranteed to work well
-
+//since generation3,only utf8 is guaranteed to work well
 namespace alib{
 namespace g3{
     ///文字多语言支持,目前支持json与toml文件的读取

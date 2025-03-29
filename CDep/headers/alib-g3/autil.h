@@ -1,3 +1,20 @@
+/**@file autil.h
+* @brief 工具库，提供IO、字符串、系统数据等静态函数
+* @author aaaa0ggmc
+* @date 2025-3-29
+* @version 3.1
+* @copyright Copyright(c)2025
+********************************************************
+@attention
+目前版本为v3.1,仅仅支持C++,最好使用GCC以防符号链接出错
+@par 修改日志:
+<table>
+<tr><th>时间       <th>版本         <th>作者          <th>介绍        
+<tr><td>2025-3-29 <td>3.1          <th>aaaa0ggmc    <td>添加doc  
+</table>
+******************************************************** 
+*/
+
 #ifndef AAAA_UTIL_H_INCLUDED
 #define AAAA_UTIL_H_INCLUDED
 #include <string>
@@ -9,7 +26,7 @@
 #endif
 namespace fs = std::filesystem;
 
-///Platform Related
+//Platform Related
 #ifdef _WIN32
 #define THREAD_LOCAL 
 #include <windows.h>
@@ -32,7 +49,7 @@ namespace fs = std::filesystem;
 #endif // BUILD_DLL
 #endif
 
-///Colors 使用了DeepSeek生成
+//Colors 使用Deepseek生成
 #ifndef __ALIB_CONSOLE_COLORS
 #define __ALIB_CONSOLE_COLORS
 //=============== 基础样式 ================
@@ -45,7 +62,6 @@ namespace fs = std::filesystem;
 #define ACP_BLINK_FAST  "\e[6m"   // 快闪烁
 #define ACP_REVERSE     "\e[7m"   // 反色（前景/背景交换）
 #define ACP_HIDDEN      "\e[8m"   // 隐藏文字
-
 //=============== 标准前景色 ================
 #define ACP_BLACK     "\e[30m"
 #define ACP_RED       "\e[31m"
@@ -56,7 +72,6 @@ namespace fs = std::filesystem;
 #define ACP_CYAN      "\e[36m"
 #define ACP_GRAY      "\e[36m"
 #define ACP_WHITE     "\e[37m"
-
 //=============== 标准背景色 ================
 #define ACP_BG_BLACK   "\e[40m"
 #define ACP_BG_RED     "\e[41m"
@@ -67,7 +82,6 @@ namespace fs = std::filesystem;
 #define ACP_BG_CYAN    "\e[46m"
 #define ACP_BG_GRAY    "\e[46m"
 #define ACP_BG_WHITE   "\e[47m"
-
 //=============== 亮色模式 ================
 // 前景亮色（如高亮红/绿等）
 #define ACP_LRED     "\e[91m"
@@ -78,7 +92,6 @@ namespace fs = std::filesystem;
 #define ACP_LCYAN    "\e[96m"
 #define ACP_LGRAY    "\e[96m"
 #define ACP_LWHITE   "\e[97m"
-
 // 背景亮色
 #define ACP_BG_LRED     "\e[101m"
 #define ACP_BG_LGREEN   "\e[102m"
@@ -89,17 +102,11 @@ namespace fs = std::filesystem;
 #define ACP_BG_LGRAY    "\e[106m"
 #define ACP_BG_LWHITE   "\e[107m"
 
-//=============== 256色模式 ================
-/* 用法示例：
-ACP_FG256(160)  // 设置前景色为256色编号160
-ACP_BG256(231)  // 设置背景色为256色编号231 */
+//256色模式
 #define ACP_FG256(n) "\e[38;5;" #n "m"
 #define ACP_BG256(n) "\e[48;5;" #n "m"
 
-//=============== RGB真彩色模式 ================
-/* 用法示例：
-ACP_FGRGB(255,0,100)  // 前景RGB颜色
-ACP_BGRGB(50,100,200) // 背景RGB颜色 */
+//RGB真彩色模式
 #define ACP_FGRGB(r,g,b) "\e[38;2;" #r ";" #g ";" #b "m"
 #define ACP_BGRGB(r,g,b) "\e[48;2;" #r ";" #g ";" #b "m"
 #endif
@@ -109,15 +116,18 @@ ACP_BGRGB(50,100,200) // 背景RGB颜色 */
 #endif // ALIB_TO_STRING_RESERVE_SIZE
 
 
-///Errcodes
+//错误代码
 #define AE_SUCCESS 0
 #define AE_FAILED -1
 
+///aaaa0ggmcLib：一个主要给自己使用的综合库
 namespace alib {
+///第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。
 namespace g3 {
-
+///一个简称，对std::string&的引用进行简化
 using dstring = const std::string&;
 #ifdef _WIN32
+///对于平台进行区分，MINGW用__int64,Linux用__int64_t
 using mem_bytes = __int64;
 #elif __linux__
 using mem_bytes = __int64_t;

@@ -7,7 +7,6 @@
 extern "C"
 {
 #endif
-///这么写是因为Codeblocks识别不了alib::ng
 namespace alib{
 namespace g3{
     /** \brief time

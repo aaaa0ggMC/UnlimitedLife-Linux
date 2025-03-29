@@ -1,4 +1,4 @@
-# UnlimitedLife-Linux *一个长期项目*
+# UnlimitedLife-Linux 一个长期项目
 ## 项目介绍
 这个项目主要是作为一个游戏来写的，目前我对游戏的构思中的一部分如下：<br>
 >*Dream is a branch of your life.*<br>
