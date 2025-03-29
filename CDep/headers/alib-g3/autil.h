@@ -28,6 +28,7 @@ namespace fs = std::filesystem;
 
 //Platform Related
 #ifdef _WIN32
+//需要注意的是目前Windows版本由于使用msys2 ucrt64构建，因此threadlocal实现比较尴尬
 #define THREAD_LOCAL 
 #include <windows.h>
 #ifndef DLL_EXPORT
@@ -124,17 +125,19 @@ namespace fs = std::filesystem;
 namespace alib {
 ///第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。
 namespace g3 {
-///一个简称，对std::string&的引用进行简化
+//一个简称，对std::string&的引用进行简化
 using dstring = const std::string&;
 #ifdef _WIN32
-///对于平台进行区分，MINGW用__int64,Linux用__int64_t
+//对于平台进行区分，MINGW用__int64,Linux用__int64_t
 using mem_bytes = __int64;
 #elif __linux__
 using mem_bytes = __int64_t;
 #endif // _WIN32
 
+///用于高效转换为字符串，预计比std::to_string更加迅速(需不定义宏 ALIB_DISABLE_CPP20)，但是会动态占用内存
 namespace ext_toString{
     #ifndef ALIB_DISABLE_CPP20
+    //会自动扩充的FormatBuffer,按照C++标准似乎是双倍扩增，初始大小为 ALIB_TO_STRING_RESERVE_SIZE
     static inline THREAD_LOCAL std::string fmtBuf;
     [[maybe_unused]] static inline THREAD_LOCAL bool inited = []()->bool{
         fmtBuf.reserve(ALIB_TO_STRING_RESERVE_SIZE);
@@ -142,9 +145,31 @@ namespace ext_toString{
     }();
     #endif // ALIB_DISABLE_CPP20
 
+    /** @brief 对于可以直接返回的类型直接返回降低额外占用，一般用于模板
+     *  @param[in] v 需要parse的变量
+     *  @return 原样输出
+     */
     inline const std::string& toString(const std::string& v){
         return v;
     }
+
+    /** @brief 用于匹配各种可以通过std::format(C++20 +)或者std::to_string转化的数据
+     *  @param[in] v 需要parse的变量
+     *  @return 经过转化后的值（这里性能并不是很高）
+     *  @par 例子:
+     *  @code
+     * template<class... T> void ezprint(T... args){
+     *     //这里使用了Cpp的折叠语法
+     *     (std::cout << ... << alib::g3::ext_toString::toString(args)) << std::endl;
+     * }
+     * ezprint(1,2,3,"Hello",5,6);
+     *  @endcode
+     *  @par 输出
+     *  @code
+     * 123Hello56
+     *  @endcode
+     *  @see alib::g3::LogFactory
+     */
     template<class T> auto toString(const T& v){
         #ifndef ALIB_DISABLE_CPP20
         fmtBuf.clear();
