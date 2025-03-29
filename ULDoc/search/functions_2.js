@@ -1,0 +1,4 @@
+var searchData=
+[
+  ['demangletypename_0',['demangleTypeName',['../d7/df9/classalib_1_1g3_1_1LogFactory.html#a84b053de9ee8f899d7009eee210aad3d',1,'alib::g3::LogFactory']]]
+];
