@@ -11,6 +11,7 @@
 <table>
 <tr><th>时间       <th>版本         <th>作者          <th>介绍        
 <tr><td>2025-3-29 <td>3.1          <th>aaaa0ggmc    <td>添加doc  
+<tr><td>2025-3-30 <td>3.1          <th>aaaa0ggmc    <td>doc已写完
 </table>
 ******************************************************** 
 */
@@ -185,78 +186,95 @@ namespace ext_toString{
     }
 }
 
-/** \brief Program Memory 程序使用内存**/
+/** @struct ProgramMemUsage
+ *  @brief 程序使用的内存信息
+ */
 struct DLL_EXPORT ProgramMemUsage {
-    mem_bytes memory;
-    mem_bytes virtualMemory;
+    mem_bytes memory;///<内存占用
+    mem_bytes virtualMemory;///<虚拟内存占用
 };
-/** \brief Global Memory Usage 全局内存使用情况**/
+
+/** @struct GlobalMemUsage
+ *  @brief 系统全局内存占用
+ */
 struct DLL_EXPORT GlobalMemUsage {
-    ///In linux,percent = phyUsed / phyTotal
-    unsigned int percent;
-    mem_bytes physicalTotal;
-    mem_bytes virtualTotal;
-    mem_bytes physicalUsed;
-    mem_bytes virtualUsed;
-    mem_bytes pageTotal;
-    mem_bytes pageUsed;
+    //In linux,percent = phyUsed / phyTotal
+    unsigned int percent;///<占用百分比,详情有注意事项 @attention Linux上等于 physicalUsed/physicalTotal,Windows上使用API提供的dwMemoryLoad
+    mem_bytes physicalTotal;///<物理内存总值
+    mem_bytes virtualTotal;///<虚拟内存总值，Linux上暂时固定为0
+    mem_bytes physicalUsed;///<物理内存占用值
+    mem_bytes virtualUsed;///<虚拟内存占用值，Linux上暂时固定为0
+    mem_bytes pageTotal;///<页面文件总值，Linux上为SwapSize
+    mem_bytes pageUsed;///<页面文件占用值,Linux上为SwapUsed
 };
 
-/** \brief GetCPUInfo 获取CPU信息**/
+/** @struct CPUInfo
+ *  @brief 获取CPU的信息，目前比较简陋
+ */
 struct DLL_EXPORT CPUInfo {
-    std::string CpuID;
-    CPUInfo();
+    std::string CpuID; ///<CPU的型号
+    CPUInfo();///<构造函数中使用Util中函数自动初始化值
 };
 
-/** \brief Utility 工具类**/
+/** @class Util
+ *  @brief 工具类
+ *
+ *  @note 该类包含 io sys ot str 四个维度，稍微简化了一下C++的功能
+ */
 class DLL_EXPORT Util {
 public:
-    ///io//通过const常量引用支持const char*与std::string
-    /** \brief print with colors 颜色输出
-     * print something with a custom color
-     * 输出带自定义颜色的字符串
-     * \return just like printf 和printf一样
+    /** @defgroup autil_io Util工具类的io函数
+     *  @{
+     *  @brief 涵盖控制台，文件操作
+     */
+    /** @brief 输出带颜色的字符串
+     *  @return 类似printf的返回值
+     *  @param[in] message 输出的信息
+     *  @param[in] color 颜色，可以和ACP_XXX配合
+     *  @note 需要注意的事，目前printColor比较废（由于Windows上可以开启virtual terminal processing从而识别转义颜色字符）
+     *  @warning 保留，但是api已经发生变化，原本第二个参数是int的
      *
-     * @@Reserved 保留，但是api发生变化
+     *  @par 例子:
+     *  @code
+     *  Util::io_printColor("你好",ACP_RED ACP_BG_GREEN);//输出你好，前景颜色红色，背景颜色绿色
+     *  @endcode
      */
     static int io_printColor(dstring message,const char * color);
-    /** \brief get file size 获取文件大小
-     * get file size efficiently using direct.h (better than fstream::seekg&tellg[ChatGPT says])
-     * 使用direct.h快速获取文件大小(比fstream::seekg&tellg快[ChatGPT说的])
-     * \param file path 文件路径
-     * \return file size 文件大小
+    /** @brief 获取文件大小，使用direct.h，比fstream::seekg&tellg要快
+     *  @param[in] filePath 文件路径
+     *  @return 文件大小
+     *
+     *  @warning 有时候返回值可能比fstream获取的快一点
      */
     static long io_fileSize(dstring filePath);
-    /** \brief read a file
-     * read the rest content of a std::ifstream
-     * 读取std::ifstream吃剩下的所有内容
-     *
-     * \param ifstream
-     * \param storer content 内容（残羹剩饭）
-     * \return status 状态
+    /** @brief 读取文件信息，使用ifstream读取剩下的内容
+     *  @param[in] reader 输入流
+     *  @param[out] storer 内容
+     *  @return 返回读取的字符数
      */
     static int io_readAll(std::ifstream & reader,std::string & out);
-    /** \brief read a file
-     *
-     *  read a file
-     *  读取文件
-     *
-     * \param path
-     * \param storer content 满汉全席
-     * \return status
+    /** @brief 读取文件，使用路径
+     *  @todo 进行错误处理
+     *  @param[in] path 路径
+     *  @param[out] storer 全部内容
+     *  @return 执行结果
+     *  - -1 文件读取失败
+     *  - >=0 读取的大小
      */
     static int io_readAll(dstring path,std::string & out);
-    /** \brief write data 写入数据
-     *
-     * \param file path
-     * \param
-     * \return 0 success,-1 error
+    /** @brief 写入数据
+     *  @param[in] file 文件地址
+     *  @param[in] data 数据
+     *  @return 执行结果
+     *  - AE_FAILED -1 IO失败
+     *  - >=0 写入的大小
      */
     static int io_writeAll(dstring path,dstring data);
-    /** \brief check file/directory existence 检查文件或者文件夹（目录）存在与否
-     * \param path
-     * \return 是否存在
-     *
+    /** @brief 检查文件或者文件夹（目录）存在与否
+     *  @param path 文件或者文件夹的地址
+     *  @return
+     *  - true 文件存在
+     *  - false 文件不存在
      */
     static bool io_checkExistence(dstring path);
 
@@ -342,77 +360,132 @@ public:
     ) {
         io_traverseFolders(path, folders, -1, appender, absolute);
     }
-///other
-    /** \brief returns a time formatted as string
-     *
-     * time!!!!
-     * 时间!!!
-     *
-     * \return time as string,fmt: "YY-MM-DD HH:MM:SS" 返回字符串的时间，格式 "年年-月月-天天 时时:分分:秒秒"
+    /** @} autil_io
+     */
+
+    /** @defgroup autil_other Util中杂项函数
+     *  @{
+     *  @brief 包括时间获取，转化......
+     */
+    /** @brief 将时间转变为特定格式的字符串
+     *  @note 实际上就是用了sprintf...作为一个保留函数
+     *  @note 时间就是力量!!!
+     *  @return 返回字符串的时间，格式 "年年-月月-天天 时时:分分:秒秒"
      */
     static std::string ot_getTime();
-    /** \brief format duration 格式化间隔时间
-     * \param seconds 秒数
-     * \return formatted string 格式化的字符串
+    /** @brief format duration 格式化间隔时间
+     *  @param secs 秒数
+     *  @return 格式化的字符串，格式： XXy XXd XXh XXm XXs
      */
     static std::string ot_formatDuration(int secs);
+    /** @} autil_other
+     */
 
-///system
-    /** \brief GetCPUId
-     *
-     * \return CPUId
+    /** @defgroup autil_sys Util中与系统有关的函数
+     *  @{
+     */
+    /** @brief 获取CPU的型号信息
+     *  @return 字符串形式的CPU型号
      */
     static std::string sys_getCPUId();
-    /** \brief get program memory usage(bytes) currently 获取程序目前内存使用情况(单位:B)
-     * \return mem stats 内存使用情况
+    /** @brief 获取程序目前内存使用情况(单位:B)
+     *  @return 程序内存使用情况
      */
     static ProgramMemUsage sys_getProgramMemoryUsage();
-    /** \brief get global(bytes) 获取全局内存使用情况(单位:B)
-     * \return usage
+    /** @brief  获取全局内存使用情况(单位:B)
+     *  @return 全局内存使用情况
      */
     static GlobalMemUsage sys_getGlobalMemoryUsage();
-    /** \brief enable virtual console in Windows 在Windows系统中开启虚拟终端支持（支持转义彩色文字）
-     * \return none
+    /** @brief 在Windows系统中开启虚拟终端支持（支持转义彩色文字,Linux上没用，因为基本上支持）
      */
     static void sys_enableVirtualTerminal();
+    /** @} autil_sys
+     */
 
-///data_string
-    /** \brief unescaping strings 逆转义字符串
-     * \param data
-     * \return unescaped string
+    /** @defgroup autil_data_string 与字符串有关的函数
+     *  @{
+     *  @brief 包含逆转义，字符串trim,分割，转码（Linux上没用），大小转化等等
+     */
+    /** @brief 逆转义字符串
+     *  @param[in] in 输入数值
+     *  @return 结果
+     *  @note 支持的转义语序: \\n \\\ \\v \\t \\r \\a (alarm) \\f \\b \\0 \\? \\" \n
+     *      其他的直接原样不变
+     *  @par
+     *  <i>这个函数的年龄已经两年了......(2025/3/30)</i>
      */
     static std::string str_unescape(dstring in);
-    //有返回值和没返回值的区别
+    /** @brief 删除字符串收尾的空白字符
+     *  @param[inout] str 输入的字符串,会被处理
+     *  @note 支持删除的空白字符： "\\f\\v\\r\\t\\n "
+     */
     static void str_trim_nrt(std::string& str);
+    /** @brief 删除字符串收尾的空白字符(返回一个copy)
+     *  @param[inout] str 输入的字符串，会被处理
+     *  @note 支持删除的空白字符： "\\f\\v\\r\\t\\n "
+     *  @return 一个copy
+     */
     static std::string str_trim_rt(std::string& str);
-    /** \brief split strings as small tokens 分割字符串
-     * \param source
-     * \param a token
-     * \param a storer
+    /** @brief 分割字符串
+     *  @param[in] source 源字符串
+     *  @param[in] separator 分割字符
+     *  @param[out] restorer push_back对象
+     *
+     *  @par 例子:
+     *  @code
+     *  LogFactory lgf;
+     *  Util::str_split("hello123,123,meow",',',data);
+     *  lgf << data << endlog;
+     *  @endcode
+     *  <i>结果</i> \n
+     *  @code
+     *  ["hello123","123","meow"]
+     *  @endcode
      */
     static void str_split(dstring source,const char separator,std::vector<std::string> & restorer);
-    /** \brief split strings as small tokens 分割字符串
-     * \param source
-     * \param a token as string
-     * \param a storer
+    /** @brief 分割字符串++
+     *  @param[in] source 源字符串
+     *  @param[in] separatorString 分割的字符串
+     *  @param[out] restorer push_back对象
+     *
+     *  @par 例子:
+     *  @code
+     *  LogFactory lgf;
+     *  Util::str_split("hello123,123,meow","123",data);
+     *  lgf << data << endlog;
+     *  @endcode
+     *  <i>结果</i> \n
+     *  @code
+     *  ["hello",",",",","meow"]
+     *  @endcode
      */
     static void str_split(dstring source,dstring separatorString,std::vector<std::string>& restorer);
-
-///data_string_encoding
-    /** \brief transcode 转码
-     * \param ansi
-     * \return utf8
+    /** @brief 转码
+     *  @param[in] strAnsi 本机编码字符串
+     *  @return utf8字符串
+     *  @note Linux上面直接返回原本的字符串
      */
     static std::string str_encAnsiToUTF8(dstring strAnsi);
-    /** \brief transcode 转码
-     * \param utf8
-     * \return ansi
+    /** @brief 转码
+     *  @param[in] strUTF8 utf8字符串
+     *  @return 本机编码字符串
+     *  @note Linux上面直接返回原本的字符串
      */
     static std::string str_encUTF8ToAnsi(dstring strUTF8);
-
+    /** @brief 把字符串的所有字符全部转化为大写字符（如果可以的话）
+     *  @param[in] in 输入
+     *  @return 输出
+     */
     static std::string str_toUpper(dstring in);
+    /** @brief 把字符串的所有字符全部转化为小写字符（如果可以的话）
+     *  @param[in] in 输入
+     *  @return 输出
+     */
     static std::string str_toLower(dstring in);
+    /** @} autil_data_string
+     */
 
+    ///删除构造函数，纯纯作为一个工具类
     Util& operator=(Util&) = delete;
     Util() = delete;
 };
