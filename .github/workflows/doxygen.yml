@@ -23,6 +23,8 @@ jobs:
     - name: Generate Docs
       run: |
         doxygen Doxyfile
+        cp Doxygen/open.png Doxygen/clopen.png
+        cp Doxygen/closed.png Doxygen/clclosed.png
         mkdir -p public/ULDoc
         cp -R Doxygen/* public/ULDoc/
 
