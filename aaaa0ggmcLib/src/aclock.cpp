@@ -93,6 +93,7 @@ ClockTimeInfo Clock::stop(){
     if(state == Stopped)return {0,0};
     ClockTimeInfo rt = now();
     this->m_StartTime = 0;
+	this->m_PreTime = 0;// @change @critical 2025-3-31 changed(added) here
     if(state != Paused){
         m_pauseGained = 0;
     }

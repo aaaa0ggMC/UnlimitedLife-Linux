@@ -402,7 +402,7 @@ public:
     /** @} autil_sys
      */
 
-    /** @defgroup autil_data_string 与字符串有关的函数
+    /** @defgroup autil_data_string Util中与字符串有关的函数
      *  @{
      *  @brief 包含逆转义，字符串trim,分割，转码（Linux上没用），大小转化等等
      */
