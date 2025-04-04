@@ -145,6 +145,7 @@ namespace g3{
         /** @brief 测试时钟
          * @param[in] resetIfSucceeds 如果到时间了自动重置trigger,默认为true
          * @note m_clock为NULL时什么也不干（不过这个正常情况基本上不可能）
+         * @return 是否到时间了
          */
         bool test(bool resetIfSucceeds = true);
         /** @brief 手动重置触发器*/

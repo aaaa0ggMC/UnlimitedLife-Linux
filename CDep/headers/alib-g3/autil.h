@@ -416,12 +416,12 @@ public:
      */
     static std::string str_unescape(dstring in);
     /** @brief 删除字符串收尾的空白字符
-     *  @param[inout] str 输入的字符串,会被处理
+     *  @param[in,out] str 输入的字符串,会被处理
      *  @note 支持删除的空白字符： "\\f\\v\\r\\t\\n "
      */
     static void str_trim_nrt(std::string& str);
     /** @brief 删除字符串收尾的空白字符(返回一个copy)
-     *  @param[inout] str 输入的字符串，会被处理
+     *  @param[in,out] str 输入的字符串，会被处理
      *  @note 支持删除的空白字符： "\\f\\v\\r\\t\\n "
      *  @return 一个copy
      */

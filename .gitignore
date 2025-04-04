@@ -8,6 +8,9 @@ Pacman/
 !Pacman/PKGBUILD
 Doxygen
 
+#kate
+*.kate-swp
+
 #vim files
 *.swp
 
