@@ -27,7 +27,7 @@ namespace g3{
 	 *  @brief Clock返回的时间信息
 	 *  @see Clock::now() Clock::getAllTime() Clock::getOffset()
      */
-    struct DLL_EXPORT ClockTimeInfo{
+    DLL_EXPORT struct ClockTimeInfo{
         double all;///<毫秒·，从clock启动到获取时的所有时间
         double offset;///<毫秒，到上次clearOffset的时间
     };
@@ -36,7 +36,7 @@ namespace g3{
 	 *	@brief 核心计时类，使用clock_gettime高精度计时
 	 *	@note  为了跨平台抛弃了windows的performancecounter
 	 */
-    class DLL_EXPORT Clock{
+    DLL_EXPORT class Clock{
     public:
 		/** @enum ClockState
 		 *	@brief 时钟状态
@@ -112,13 +112,13 @@ namespace g3{
 		 */
         void clearOffset();
     private:
-        double m_pauseGained;//<暂停保存的时间
-        double m_StartTime;//<开始时间
-        double m_PreTime;//<offset之前的时间
-        ClockState state;//<时钟状态
+        double m_pauseGained;///<暂停保存的时间
+        double m_StartTime;///<开始时间
+        double m_PreTime;///<offset之前的时间
+        ClockState state;///<时钟状态
     };
 
-    struct DLL_EXPORT Trigger{
+    DLL_EXPORT struct  Trigger{
     public:
         friend struct RPSRestrict;
         Trigger(Clock& clock,double duration);
@@ -139,7 +139,7 @@ namespace g3{
 
 
     ///RateLimiter Not just for limiting fps
-    struct DLL_EXPORT RateLimiter {
+    DLL_EXPORT struct RateLimiter {
         Clock clk;
         float desire;
         Trigger trig;
