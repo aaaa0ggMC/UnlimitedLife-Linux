@@ -27,9 +27,9 @@
 #include <alib-g3/autil.h>
 
 #ifdef __linux__ //你知道为什么abi支持我只在linux才搞吗，因为windows......编译报错了，但是我又希望保留特性
-#ifndef ALIB_DISABLE_TEMPLATES
-#include <cxxabi.h>
-#endif // ALIB_DISABLE_TEMPLATES
+//#ifndef ALIB_DISABLE_TEMPLATES
+//#include <cxxabi.h>
+//#endif // ALIB_DISABLE_TEMPLATES
 #endif
 
 #ifdef __linux__
@@ -45,7 +45,7 @@
 #include <glm/ext/quaternion_common.hpp>
 #endif // ALIB_DISABLE_GLM_EXTENSIONS
 
-//输出的各种形式
+//输出的各种级别
 #define LOG_TRACE 0x00000001 ///<简简单单的输出
 #define LOG_DEBUG 0x00000010 ///<调试信息
 #define LOG_INFO  0x00000100 ///<比较重要的信息
@@ -58,11 +58,11 @@
 #define LOG_RELE (LOG_INFO | LOG_ERROR | LOG_CRITI | LOG_WARN)
 
 //输出的附加信息
-#define LOG_SHOW_TIME 0x00000001
-#define LOG_SHOW_TYPE 0x00000010
-#define LOG_SHOW_ELAP 0x00000100
-#define LOG_SHOW_THID 0x00001000
-#define LOG_SHOW_HEAD 0x00010000
+#define LOG_SHOW_TIME 0x00000001 ///<时间，格式 [yyyy-dd]
+#define LOG_SHOW_TYPE 0x00000010 ///<显示日志级别
+#define LOG_SHOW_ELAP 0x00000100 ///<显示日志的offset
+#define LOG_SHOW_THID 0x00001000 ///<显示线程id
+#define LOG_SHOW_HEAD 0x00010000 ///<显示头信息(一般用于只是来源)，比如 ALIB4
 #define LOG_SHOW_PROC 0x00100000
 #define LOG_SHOW_NONE 0x00000000
 
