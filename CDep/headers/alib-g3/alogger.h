@@ -9,6 +9,7 @@
 <table>
 <tr><th>时间       <th>版本         <th>作者          <th>介绍
 <tr><td>2025-4-04 <td>3.1          <th>aaaa0ggmc    <td>添加doc
+<tr><td>2025-4-04 <td>3.1          <th>aaaa0ggmc    <td>完成doc
 </table>
 ********************************
 */
@@ -54,8 +55,8 @@
 #define LOG_CRITI 0x00100000 ///<致命错误
 
 #define LOG_OFF   0x01000000 ///<不要输出
-#define LOG_FULL (LOG_TRACE | LOG_DEBUG | LOG_INFO | LOG_WARN | LOG_ERROR | LOG_CRITI)
-#define LOG_RELE (LOG_INFO | LOG_ERROR | LOG_CRITI | LOG_WARN)
+#define LOG_FULL (LOG_TRACE | LOG_DEBUG | LOG_INFO | LOG_WARN | LOG_ERROR | LOG_CRITI) ///<完全版本
+#define LOG_RELE (LOG_INFO | LOG_ERROR | LOG_CRITI | LOG_WARN) ///<Release级别日志
 
 //输出的附加信息
 #define LOG_SHOW_TIME 0x00000001 ///<时间，格式 [yyyy-mm-dd hh:mm:ss]
@@ -67,8 +68,8 @@
 #define LOG_SHOW_NONE 0x00000000 ///<占位符，什么也不显示
 
 //组合拳
-#define LOG_SHOW_BASIC (LOG_SHOW_TIME | LOG_SHOW_TYPE | LOG_SHOW_ELAP | LOG_SHOW_HEAD)
-#define LOG_SHOW_FULL  (LOG_SHOW_BASIC | LOG_SHOW_THID | LOG_SHOW_PROC)
+#define LOG_SHOW_BASIC (LOG_SHOW_TIME | LOG_SHOW_TYPE | LOG_SHOW_ELAP | LOG_SHOW_HEAD) ///<基本显示
+#define LOG_SHOW_FULL  (LOG_SHOW_BASIC | LOG_SHOW_THID | LOG_SHOW_PROC) ///<全部显示
 
 namespace alib{
 namespace g3{
@@ -423,60 +424,97 @@ namespace g3{
      * 上面的代码产生了三段日志，前两段有信息最后一段空的
      */
     void DLL_EXPORT endlog(LogEnd);
+
+    ///用于匹配
     typedef void (*EndLogFn)(LogEnd);
 
-    /**
-     *
+    /** @struct LogFactory
+     * @brief 用于生成log的类，支持 <<
+     * @note 支持 几乎所有基本类，至少支持 \n
+     * std::string , std::vector , std::map , std::unordered_map , std::tuple\<...\> 支持叠加container
      */
     class DLL_EXPORT LogFactory{
     private:
-        std::string head;
-        Logger* i;
-        int defLogType;
-        bool showContainerName;
+        std::string head;///<头信息
+        Logger* i;///<绑定的logger
+        int defLogType;///<默认的log level级别
+        bool showContainerName;///< << 输出时是否显示容器名字
     public:
-        static THREAD_LOCAL std::string cachedStr;
+        static THREAD_LOCAL std::string cachedStr;///<缓存的数据 @todo Windows上THREADLOCAL目前无效,也许需要处理
 
+        /** @brief 初始化
+         * @param[in] head 头信息
+         * @param[in] lg 绑定的logger
+         */
         LogFactory(dstring head,Logger& lg);
 
+        /** @brief 基础输出
+         * @param[in] level 等级
+         * @param[in] msg 信息
+         */
         void log(int level,dstring msg);
+        ///log(LOG_INFO,...)
         void info(dstring msg);
+        ///log(LOG_ERROR,...)
         void error(dstring msg);
+        ///log(LOG_CRITI,...)
         void critical(dstring msg);
+        ///log(LOG_DEBUG,...)
         void debug(dstring msg);
+        ///log(LOG_TRACE,...)
         void trace(dstring msg);
+        ///log(LOG_WARN,...)
         void warn(dstring msg);
 
+        /** @brief 设置是否显示容器名字
+         * @param[in] v 是否显示
+         * - true 显示
+         * - false 不显示
+         */
         void setShowContainerName(bool v);
 
+        /** @brief 用于设置等级，会覆盖
+         * @example logfactory(LOG_ERROR) << ...
+         */
         LogFactory& operator()(int logType = LOG_INFO);
 
-        ///end the log
+        ///终止log
         LogFactory& operator<<(EndLogFn fn);
-        //std::endl
+        //也支持std::endl来终止
         LogFactory& operator<<(std::ostream& (*manip)(std::ostream&));
 
+        //glm支持
         #ifndef ALIB_DISABLE_GLM_EXTENSIONS
+        /// x
         LogFactory& operator<<(glm::vec1 data);
+        /// x y
         LogFactory& operator<<(glm::vec2 data);
+        /// x y z
         LogFactory& operator<<(glm::vec3 data);
+        /// x y z w
         LogFactory& operator<<(glm::vec4 data);
+        /// (x y z w)(a b c d)(e f g h)(i j k l)
         LogFactory& operator<<(glm::mat4 data);
+        /// (x y z)(a b c)(e f g)
         LogFactory& operator<<(glm::mat3 data);
+        /// (a b)(c d)
         LogFactory& operator<<(glm::mat2 data);
+        /// (x,y,z,w)
         LogFactory& operator<<(glm::quat data);
         #endif // ALIB_DISABLE_GLM_EXTENSIONS
 
-        ///For more support,use templates
+        ///解码template的名字
         template<class T> std::string demangleTypeName(const char * mangledName){
-            /*int status;
+#ifdef __linux__
+            int status;
             std::unique_ptr<char,void(*)(void*)> result(
                 abi::__cxa_demangle(mangledName,nullptr,nullptr,&status),
                 std::free
             );
             return (status==0)?result.get():mangledName;
-*/
-	return mangledName;
+#else
+            return mangledName;
+#endif
         }
 
 
@@ -489,7 +527,7 @@ namespace g3{
                     }\
                 }
 
-        //std::vector<Type,Allocator>
+        ///支持 std::vector\<Type,Allocator\>
         template<template<class T,class Allocator> class Cont,class T,class A,typename = std::enable_if_t<std::is_same<Cont<T,A>,std::vector<T,A>>::value>>
             LogFactory& operator<<(const Cont<T,A> & cont){
             if(showContainerName)cachedStr += demangleTypeName<decltype(cont)>(typeid(decltype(cont)).name());
@@ -508,7 +546,7 @@ namespace g3{
             return *this;
         }
 
-        //std::map<Key,Value,Allocator>
+        ///支持 std::map\<Key,Value,Allocator\>
         template<template<class K,class V,class Allocator> class Cont,class K,class V,class A,typename = std::enable_if_t<std::is_same<Cont<K,V,A>,std::map<K,V,A>>::value>>
             LogFactory& operator<<(const Cont<K,V,A> & cont){
             if(showContainerName)cachedStr += demangleTypeName<decltype(cont)>(typeid(decltype(cont)).name());
@@ -531,7 +569,7 @@ namespace g3{
             return *this;
         }
 
-        ///std::unordered_map
+        ///支持 std::unordered_map\<Key,Value,Hash,Predicate,Allocator\>
         template<template<class Key,class Value,class Hash,class Predicate,class Allocator> class Cont,class K,class V,class H,class P,class A>
             LogFactory& operator<<(const Cont<K,V,H,P,A>& cont){
             if(showContainerName)cachedStr += demangleTypeName<decltype(cont)>(typeid(decltype(cont)).name());
@@ -554,7 +592,9 @@ namespace g3{
             return *this;
         }
 
-        ///std::tuple
+        /** @struct tuple_show<Tuple,N>
+         * @brief 用于支持std::tuple
+         */
         template<class Tuple,size_t N> struct tuple_show{
             static void show(const Tuple&t,LogFactory&lg){
                 tuple_show<Tuple,N - 1>::show(t,lg);
@@ -566,6 +606,9 @@ namespace g3{
                 VALUE_FIX(decltype(vl));
             }
         };
+        /** @struct tuple_show<Tuple,1>
+         * @brief 最后一层匹配
+         */
         template<class Tuple> struct tuple_show <Tuple,1>{
             static void show(const Tuple&t,LogFactory&lg){
                 std::string & cachedStr = lg.cachedStr;
@@ -576,6 +619,7 @@ namespace g3{
             }
         };
 
+        ///支持 std::tuple\<...\>
         template<template<typename... Elements> class Cont,typename... Eles,typename = std::enable_if_t<std::is_same<Cont<Eles...>,std::tuple<Eles...>>::value>>
             LogFactory& operator<<(const Cont<Eles...> & t){
             if(showContainerName)cachedStr += demangleTypeName<decltype(t)>(typeid(decltype(t)).name());
@@ -588,7 +632,7 @@ namespace g3{
             return *this;
         }
 
-        ///The last one to match
+        ///匹配剩余的东西
         template<class T>
             LogFactory& operator<<(const T& t){
             cachedStr += alib::g3::ext_toString::toString(t);
