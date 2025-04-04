@@ -1,0 +1,16 @@
+[CMake]
+Build Directory Count=1
+Current Build Directory Index-主机系统=0
+
+[CMake][CMake Build Directory 0]
+Build Directory Path=/home/aaaa0ggmc/Desktop/Projs/UnlimitedLife-Linux/CBuild_CACHE
+Build Type=Release
+CMake Binary=/usr/bin/cmake
+CMake Executable=/usr/bin/cmake
+Environment Profile=
+Extra Arguments=
+Install Directory=/usr
+Runtime=主机系统
+
+[Project]
+VersionControlSupport=kdevgit

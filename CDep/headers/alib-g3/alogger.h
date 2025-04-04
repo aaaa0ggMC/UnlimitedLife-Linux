@@ -1,4 +1,20 @@
-///Not c linkage
+/** @file alogger.h
+* @brief 与日志有关的函数库
+* @author aaaa0ggmc
+* @date 2025-4-04
+* @version 3.1
+* @copyright Copyright(C)2025
+********************************
+@par 修改日志:
+<table>
+<tr><th>时间       <th>版本         <th>作者          <th>介绍
+<tr><td>2025-4-04 <td>3.1          <th>aaaa0ggmc    <td>添加doc
+</table>
+********************************
+*/
+/** @todo Logger添加appendConsole appendFile ...实现简化（不然有点麻烦）
+ * @todo 实现LogManager对log文件（文件夹）进行管理
+ */
 #ifndef ALOGGER_H_INCLUDED
 #define ALOGGER_H_INCLUDED
 #include <memory>
@@ -10,9 +26,11 @@
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
 
-// #ifndef ALIB_DISABLE_TEMPLATES
-// #include <cxxabi.h>
-// #endif // ALIB_DISABLE_TEMPLATES
+#ifdef __linux__ //你知道为什么abi支持我只在linux才搞吗，因为windows......编译报错了，但是我又希望保留特性
+#ifndef ALIB_DISABLE_TEMPLATES
+#include <cxxabi.h>
+#endif // ALIB_DISABLE_TEMPLATES
+#endif
 
 #ifdef __linux__
 #include <pthread.h>
@@ -21,22 +39,25 @@
 #define LOCK CRITICAL_SECTION
 #endif // __linux__
 
+//对glm的支持
 #ifndef ALIB_DISABLE_GLM_EXTENSIONS
 #include <glm/glm.hpp>
 #include <glm/ext/quaternion_common.hpp>
 #endif // ALIB_DISABLE_GLM_EXTENSIONS
 
-#define LOG_TRACE 0x00000001
-#define LOG_DEBUG 0x00000010
-#define LOG_INFO  0x00000100
-#define LOG_WARN  0x00001000
-#define LOG_ERROR 0x00010000
-#define LOG_CRITI 0x00100000
-#define LOG_OFF   0x01000000
+//输出的各种形式
+#define LOG_TRACE 0x00000001 ///<简简单单的输出
+#define LOG_DEBUG 0x00000010 ///<调试信息
+#define LOG_INFO  0x00000100 ///<比较重要的信息
+#define LOG_WARN  0x00001000 ///<警告信息
+#define LOG_ERROR 0x00010000 ///<错误信息
+#define LOG_CRITI 0x00100000 ///<致命错误
 
+#define LOG_OFF   0x01000000 ///<不要输出
 #define LOG_FULL (LOG_TRACE | LOG_DEBUG | LOG_INFO | LOG_WARN | LOG_ERROR | LOG_CRITI)
 #define LOG_RELE (LOG_INFO | LOG_ERROR | LOG_CRITI | LOG_WARN)
 
+//输出的附加信息
 #define LOG_SHOW_TIME 0x00000001
 #define LOG_SHOW_TYPE 0x00000010
 #define LOG_SHOW_ELAP 0x00000100
