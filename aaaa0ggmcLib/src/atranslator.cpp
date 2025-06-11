@@ -10,13 +10,17 @@ using namespace alib::g3;
 
 Translator* Translator::instance;
 
-void Translator::setVerifyToken(dstring verifyUTF8){verifyToken = verifyUTF8;}
-void Translator::setAccessToken(dstring accessUTF8){accessToken = accessUTF8;}
-void Translator::setDefaultKey(dstring s){defaultKey = s;}
+Translator& Translator::setVerifyToken(dstring verifyUTF8){verifyToken = verifyUTF8;return *this;}
+Translator& Translator::setAccessToken(dstring accessUTF8){accessToken = accessUTF8;return *this;}
+Translator& Translator::setDefaultKey(dstring s){defaultKey = s;return *this;}
 const std::string& Translator::getVerifyToken(){return verifyToken;}
 const std::string& Translator::getAccessToken(){return accessToken;}
 const std::string& Translator::getDefaultKey(){return defaultKey;}
-Translator* Translator::get(){return instance;}
+std::optional<Translator> Translator::get(){
+    //三元表达式有问题
+    if(instance)return *instance;
+    return std::nullopt;
+}
 
 void Translator::set(Translator * t){
     instance = t;

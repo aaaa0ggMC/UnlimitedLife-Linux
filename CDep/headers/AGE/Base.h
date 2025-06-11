@@ -1,6 +1,9 @@
 #ifndef AGE_BASE
 #define AGE_BASE
 
+///对象如VAO,VBO为空
+#define AGE_NULL_OBJ 0
+
 ///For windows support
 #ifdef _WIN32
 #include <windows.h>
@@ -23,5 +26,4 @@
 #endif
 #endif
 #endif
-
 #endif

@@ -108,6 +108,7 @@ Trigger::Trigger(Clock & clk,double d){
 }
 
 bool Trigger::test(bool v){
+    if(duration <= 0)return true;
     bool ret = (m_clock->getAllTime() - recordedTime) >= duration;
     if(v && ret){
         reset();

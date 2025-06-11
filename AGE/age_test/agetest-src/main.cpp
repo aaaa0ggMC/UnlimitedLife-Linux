@@ -29,6 +29,7 @@ int main(){
         info.windowTitle = "TestAGE";
         info.x = 100;
         info.y = 100;
+        info.fps = 120;
         auto i = app.createWindow(info);
         if(!i){
             lg.error("Failed to create window,now exit...");
@@ -39,10 +40,9 @@ int main(){
     win->makeCurrent();
     ///Main Loop
     lg.info("Entering main loop...");
-    while(!(win->ShouldClose())){
-	win->swapBuffers();
-        glfwPollEvents();
-	//win->pollEvents();
+    while(!(win->shouldClose())){
+        win->pollEvents();
+        win->display();
     }
 
     app.destroyWindow(win);

@@ -1,4 +1,4 @@
-#include "AGE/Window.h"
+#include <AGE/Window.h>
 
 using namespace age;
 

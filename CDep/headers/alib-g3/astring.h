@@ -1,35 +1,18 @@
-#ifndef A_STRING_H_INCLUDED
-#define A_STRING_H_INCLUDED
-#include <string>
-#include <alib-g3/autil.h>
+/** @file astring.h
+ * @brief 字符串处理，主要为编码
+ * @author aaaa0ggmc
+ * @date 2025-6-11
+ * @version 3.1
+ * @copyright copyright(C)2025
+ ********************************
+ @ *par 修改日志:                      *
+ <table>
+ <tr><th>时间       <th>版本         <th>作者          <th>介绍
+ <tr><td>2025-6-11 <td>3.1          <th>aaaa0ggmc    <td> TODO
+ </table>
+ ********************************
+ @todo fix this
+*/
 
-#ifndef ALIB_IGNORE_CONFLICT
+//deprecated now
 
-#endif // ALIB_IGNORE_CONFLICT
-
-namespace alib{
-namespace g3{
-    using dwstring = const std::wstring&;
-
-    struct mstring{
-        std::string ansi;
-        std::string utf8;
-        std::wstring utf16;
-    };
-
-    class DLL_EXPORT converter{
-    public:
-        static std::string utf8_to_ansi(dstring utf8);
-        static std::string utf16_to_ansi(dwstring utf8);
-
-        static std::string ansi_to_utf8(dstring ansi);
-        static std::string utf16_to_utf8(dwstring utf16);
-
-        static std::wstring ansi_to_utf16(dstring ansi);
-        static std::wstring utf8_to_utf16(dstring utf8);
-    };
-
-}
-}
-
-#endif // A_STRING_H_INCLUDED

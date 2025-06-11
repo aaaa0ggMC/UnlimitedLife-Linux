@@ -1,4 +1,5 @@
 #include <AGE/Application.h>
+#include <ranges>
 
 using namespace age;
 
@@ -81,4 +82,24 @@ Application::~Application(){
     if(counter == 0){
         GLInit::endGLFW();
     }
+}
+
+VAOManager& Application::createVAOs(CreateVAOsInfo info){
+    if(info.count != 0){
+        std::vector<GLuint> values;
+        values.resize(info.count);
+        glGenVertexArrays(info.count,&(values[0]));
+        std::ranges::copy(values | std::views::transform([](GLuint v){return VAO(v);}) | std::ranges::to<std::vector>(),std::back_inserter(vaos.vaos));
+    }
+    return vaos;
+}
+
+VBOManager& Application::createVBOs(CreateVBOsInfo info){
+    if(info.count != 0){
+        std::vector<GLuint> values;
+        values.resize(info.count);
+        glGenBuffers(info.count,&(values[0]));
+        std::ranges::copy(values | std::views::transform([](GLuint v){return VBO(v);}) | std::ranges::to<std::vector>(),std::back_inserter(vbos.vbos));
+    }
+    return vbos;
 }
