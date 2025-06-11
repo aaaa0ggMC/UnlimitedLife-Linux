@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(UnlimitedLife-Linux)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 
 if (WIN32)
     add_compile_options(-ftls-model=global-dynamic)
