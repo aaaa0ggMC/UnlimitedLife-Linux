@@ -22,6 +22,12 @@
 #include <AGE/Window.h>
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
+#include <AGE/Shader.h>
+
+//shader begin from -1000 to -19999
+#define AGEE_CONFLICT_SHADER -10000
+#define AGEE_SHADER_LOG -10001
+#define AGEE_SHADER_FAILED_TO_COMPILE -10002
 
 /// Aaaa0ggmc's Graphics Engine 我的图形引擎
 namespace age{
@@ -49,13 +55,14 @@ namespace age{
     public:
         VAOManager vaos;
         VBOManager vbos;
+        Error defErr;
 
         Application(); ///< 构造函数
         ~Application(); ///< 析构函数
 
         //// Window  ////
         /// 创建一个窗口
-        std::optional<Window*> createWindow(CreateWindowInfo info);
+        std::optional<Window*> createWindow(const CreateWindowInfo & info);
         /// 通过SID获取窗口
         std::optional<Window*> getWindow(const std::string & sid);
         /// 销毁窗口，直接通过指针
@@ -64,15 +71,39 @@ namespace age{
         bool destroyWindow(const std::string & sid);
 
         //// VAO & VBO ////
-        VAOManager& createVAOs(CreateVAOsInfo info);
-        VBOManager& createVBOs(CreateVBOsInfo info);
+        void  createVAOs(const CreateVAOsInfo & info);
+        /// @note 需要注意的是VAO就是纯纯的递增的，所以index不会因为delete而变动
+        VAO getVAO(uint32_t index);
+        bool destroyVAO(VAO);
+
+        void createVBOs(const CreateVBOsInfo & info);
+        /// @note 需要注意的是VBO就是纯纯的递增的，所以index不会因为delete而变动
+        VBO getVBO(uint32_t index);
+        bool destroyVBO(VBO);
+
+        //// Shader ////
+        /// 创建着色器
+        [[nodiscard]] Shader createShader(const CreateShaderInfo & info,Error * err = NULL);
+        /// 通过sid获取着色器
+        Shader getShader(const std::string & sid);
+        /// 获取着色器整体的log
+        void getShaderProgramLog(Shader shader,std::string & logger);
+        /// 获取着色器单体的log,用户一般不使用
+        void getShaderShaderLog(GLuint shader,std::string & logger);
+        /// 删除一个shader，如果一个shader处于bind状态，行为未定义，程序endup前谨慎使用
+        bool destroyShader(const std::string & sid);
 
         /// 设置OpenGL版本要求
         void setGLVersion(unsigned int major,unsigned int minor);
 
+        /// 检测OpenGL出现的错误，默认使用Application自带的，(NULL)
+        void checkOpenGLError(Error * err = NULL);
+
+
     private:
         /// 窗口列表
         std::unordered_map<std::string,Window*> windows;
+        std::unordered_map<std::string,Shader> shaders;
         /// Application实例数目，当counter减为0时自动释放GLFW
         static unsigned int counter;
     };

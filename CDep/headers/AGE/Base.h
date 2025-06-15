@@ -1,6 +1,10 @@
 #ifndef AGE_BASE
 #define AGE_BASE
 
+#include <cstdint>
+#include <string>
+#include <vector>
+
 ///对象如VAO,VBO为空
 #define AGE_NULL_OBJ 0
 
@@ -26,4 +30,36 @@
 #endif
 #endif
 #endif
+
+#define AGEE_CONFLICT_SID -1
+
+namespace age{
+    struct AGE_API ErrorInfo{
+        int32_t code;
+        const char * message;
+    };
+
+    struct AGE_API ErrorInfopp{
+        int32_t code;
+        std::string message;
+    };
+    typedef void(*TriggerFunc)(const ErrorInfopp&);
+
+    /** @struct Error
+     *  @brief handle errors during many operations
+     */
+    struct AGE_API Error{
+    public:
+        TriggerFunc trigger;
+        std::vector<ErrorInfopp> infos;
+
+        Error();
+
+        void setTrigger(TriggerFunc = Error::defTrigger);
+        void pushMessage(const ErrorInfo&);
+
+        static void defTrigger(const ErrorInfopp&);
+    };
+}
+
 #endif

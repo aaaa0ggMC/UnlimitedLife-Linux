@@ -9,18 +9,20 @@ int main(){
     Logger logger;
     LogFactory lg("AGETest",logger);
     Window * win;
-    
+    Shader shader = Shader::null();
+    VAO vao;
+
     app.setGLVersion(4,3);
 
-    ///Init logger
+    //Init logger
     auto target = std::make_shared<lot::Console>();
-    logger.appendLogOutputTarget("console",target);
-
     auto fileTarget = std::make_shared<lot::SingleFile>("hello.log");
+
+    logger.appendLogOutputTarget("console",target);
     logger.appendLogOutputTarget("file0",fileTarget);
 
     lg.info("Creating window...");
-    ///Create Window
+    //// Window ////
     {
         CreateWindowInfo info;
         info.SID = "TestWindow";
@@ -36,12 +38,48 @@ int main(){
             exit(-1);
         }else win = *i;
     }
-    
+    //// Shader ////
+    {
+        CreateShaderInfo info;
+        info.sid = "main";
+        info.vertex = R"(#version 450 core
+            void main(void){
+                gl_Position = vec4(0.0,0.0,0.5,1.0);
+            }
+        )";
+        info.fragment = R"(#version 450 core
+            out vec4 color;
+
+            void main(void){
+                color = vec4(1.0,1.0,1.0,1.0);
+            }
+        )";
+        shader = app.createShader(info);
+    }
+    //// VAOs & VBOs ////
+    {
+        CreateVAOsInfo i_vao;
+        CreateVBOsInfo i_vbo;
+
+        i_vao.count = 1;
+        i_vbo.count = 0;
+
+        app.createVAOs(i_vao);
+        app.createVBOs(i_vbo);
+
+        vao = app.getVAO(0);
+        vao.bind();
+    }
+
     win->makeCurrent();
-    ///Main Loop
+    //Main Loop
     lg.info("Entering main loop...");
     while(!(win->shouldClose())){
         win->pollEvents();
+
+        win->clear();
+        shader.bind();
+        glDrawArrays(GL_POINTS,0,1);
         win->display();
     }
 

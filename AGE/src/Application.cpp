@@ -1,5 +1,7 @@
 #include <AGE/Application.h>
-#include <ranges>
+#include <cstring>
+
+// #include <iostream>
 
 using namespace age;
 
@@ -33,7 +35,7 @@ void Application::setGLVersion(unsigned int major,unsigned int minor){
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR,minor);
 }
 
-std::optional<Window*> Application::createWindow(CreateWindowInfo info){
+std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     Window * win = new Window();
     GLInit::GLFW();
     win->SID = info.SID;
@@ -41,6 +43,7 @@ std::optional<Window*> Application::createWindow(CreateWindowInfo info){
                     info.width,info.height,info.windowTitle.c_str(),
                     (!info.moniter)?NULL:(*info.moniter),
                     (!info.share)?NULL:(*info.share)->window);
+    win->s_current = NULL;
     if(win->window == NULL){
         delete win;
         return std::nullopt;
@@ -75,31 +78,253 @@ bool Application::destroyWindow(Window * win){
 
 Application::Application(){
     counter++;
+    defErr.setTrigger();
 }
 
 Application::~Application(){
+    //cleanup
+    //Step1:Shaders
+    //std::cout << shaders.size() << std::endl;
+    for(auto& [sid,shd] : shaders){
+        shd.destroy();
+    }
+    //Step2:VAOS
+    //std::cout << vaos.vaos.size() << std::endl;
+    glDeleteVertexArrays(vaos.vaos.size(),&(vaos.vaos[0]));
+    //Step3:VBOS
+    //std::cout << vbos.vbos.size() << std::endl;
+    glDeleteBuffers(vbos.vbos.size(),&(vbos.vbos[0]));
+    //Stepn:Windows
+    {
+        std::vector<std::string> window_names;
+        for(auto& [sid,_] : windows){
+            window_names.push_back(sid);
+        }
+
+        for(auto & sid : window_names){
+            destroyWindow(sid);
+        }
+    }
+
     counter--;
     if(counter == 0){
         GLInit::endGLFW();
     }
 }
 
-VAOManager& Application::createVAOs(CreateVAOsInfo info){
+void Application::createVAOs(const CreateVAOsInfo & info){
     if(info.count != 0){
         std::vector<GLuint> values;
         values.resize(info.count);
         glGenVertexArrays(info.count,&(values[0]));
-        std::ranges::copy(values | std::views::transform([](GLuint v){return VAO(v);}) | std::ranges::to<std::vector>(),std::back_inserter(vaos.vaos));
+        for(auto v : values){
+            vaos.add(v);
+        }
     }
-    return vaos;
 }
 
-VBOManager& Application::createVBOs(CreateVBOsInfo info){
+void Application::createVBOs(const CreateVBOsInfo & info){
     if(info.count != 0){
         std::vector<GLuint> values;
         values.resize(info.count);
         glGenBuffers(info.count,&(values[0]));
-        std::ranges::copy(values | std::views::transform([](GLuint v){return VBO(v);}) | std::ranges::to<std::vector>(),std::back_inserter(vbos.vbos));
+        for(auto v : values){
+            vbos.add(v);
+        }
     }
-    return vbos;
+}
+
+VAO Application::getVAO(uint32_t index){
+    return vaos[index];
+}
+
+VBO Application::getVBO(uint32_t index){
+    return vbos[index];
+}
+
+bool Application::destroyVBO(VBO vbo){
+    if(vbo.getId()){
+        auto id = vbo.getId();
+        glDeleteBuffers(1,&id);
+        vbos.markAsFree(vbo.getManagerIndex());
+        return true;
+    }
+    return false;
+}
+
+bool Application::destroyVAO(VAO vao){
+    if(vao.getId()){
+        auto id = vao.getId();
+        glDeleteVertexArrays(1,&id);
+        vaos.markAsFree(vao.getManagerIndex());
+        return true;
+    }
+    return false;
+}
+
+void Application::checkOpenGLError(Error* errs){
+    Error & err = (errs?*errs:defErr);
+    GLint errc = glGetError();
+    while(errc != GL_NO_ERROR){
+        err.pushMessage({errc,"(GL_INTERNAL_ERROR)"});
+    }
+}
+
+void Application::getShaderProgramLog(Shader shader,std::string & logger){
+    int len = 0,chWritten = 0;
+    glGetProgramiv(shader.pid,GL_INFO_LOG_LENGTH,&len);
+    if(len > 0){
+        char * buf = new char[len+1];
+        std::memset(buf,len+1,sizeof(char));
+        glGetProgramInfoLog(shader.pid,len,&chWritten,buf);
+        logger += buf;
+        delete [] buf;
+    }
+}
+
+void Application::getShaderShaderLog(GLuint shader,std::string & logger){
+    int len = 0,chWritten = 0;
+    glGetShaderiv(shader,GL_INFO_LOG_LENGTH,&len);
+    if(len > 0){
+        char * buf = new char[len+1];
+        std::memset(buf,len+1,sizeof(char));
+        glGetShaderInfoLog(shader,len,&chWritten,buf);
+        logger += buf;
+        delete [] buf;
+    }
+}
+
+Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
+    Shader shader;
+    GLuint vid = 0, fid = 0,gid = 0,cid = 0;
+    GLint compile_status = 0;
+    bool errored = false;
+    std::string logv = "";
+
+    Error & err = ((errs)?*errs:defErr);
+
+    if(shaders.find(info.sid) != shaders.end()){
+        err.pushMessage({AGEE_CONFLICT_SID,info.sid.c_str()});
+        return shader;
+    }
+
+    if(info.vertex.compare("")){
+        const char * buf[1] = {info.vertex.c_str()};
+        vid = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vid,1,buf,NULL);
+        glCompileShader(vid);
+
+        checkOpenGLError(&err);
+        glGetShaderiv(vid,GL_COMPILE_STATUS,&compile_status);
+        if(compile_status != 1){
+            getShaderShaderLog(vid,logv);
+            err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
+            logv = "";
+            compile_status = 0;
+            errored = true;
+        }
+    }
+    if(!errored && info.fragment.compare("")){
+        const char * buf[1] = {info.fragment.c_str()};
+        fid = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fid,1,buf,NULL);
+        glCompileShader(fid);
+
+        checkOpenGLError(&err);
+        glGetShaderiv(fid,GL_COMPILE_STATUS,&compile_status);
+        if(compile_status != 1){
+            getShaderShaderLog(fid,logv);
+            err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
+            logv = "";
+            compile_status = 0;
+            errored = true;
+        }
+    }
+    if(!errored && info.geometry.compare("")){
+        const char * buf[1] = {info.geometry.c_str()};
+        gid = glCreateShader(GL_GEOMETRY_SHADER);
+        glShaderSource(gid,1,buf,NULL);
+        glCompileShader(gid);
+
+        checkOpenGLError(&err);
+        glGetShaderiv(gid,GL_COMPILE_STATUS,&compile_status);
+        if(compile_status != 1){
+            getShaderShaderLog(gid,logv);
+            err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
+            logv = "";
+            compile_status = 0;
+            errored = true;
+        }
+    }
+    if(!errored && info.compute.compare("")){
+        if(vid || gid || cid){
+            err.pushMessage({AGEE_CONFLICT_SHADER,"You have already passed vertex/fragment/geometry shader to the program,which conflicts with compute shader!"});
+        }else{
+            const char * buf[1] = {info.compute.c_str()};
+            cid = glCreateShader(GL_COMPUTE_SHADER);
+            glShaderSource(cid,1,buf,NULL);
+            glCompileShader(cid);
+
+            checkOpenGLError(&err);
+            glGetShaderiv(cid,GL_COMPILE_STATUS,&compile_status);
+            if(compile_status != 1){
+                getShaderShaderLog(cid,logv);
+                err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
+                logv = "";
+                compile_status = 0;
+                errored = true;
+            }else shader.computeShader = true;
+        }
+    }
+
+    if(errored){
+        shader.reset();
+        goto cleanup;
+    }
+
+    shader.pid = glCreateProgram();
+
+    if(vid)glAttachShader(shader.pid,vid);
+    if(fid)glAttachShader(shader.pid,fid);
+    if(gid)glAttachShader(shader.pid,gid);
+    if(cid)glAttachShader(shader.pid,cid);
+
+    glLinkProgram(shader.pid);
+
+    checkOpenGLError(&err);
+    glGetShaderiv(shader.pid,GL_COMPILE_STATUS,&compile_status);
+    if(compile_status != 1){
+        getShaderShaderLog(shader.pid,logv);
+        err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
+        shader.reset();
+        goto cleanup;
+    }
+
+
+    shaders.emplace(info.sid,shader);
+
+cleanup:
+    if(vid)glAttachShader(shader.pid,vid);
+    if(gid)glAttachShader(shader.pid,gid);
+    if(cid)glAttachShader(shader.pid,cid);
+    if(fid)glAttachShader(shader.pid,fid);
+
+    return shader;
+}
+
+Shader Application::getShader(const std::string & sid){
+    auto iter = shaders.find(sid);
+    if(iter != shaders.end()){
+        return iter->second;
+    }
+    return Shader::null();
+}
+
+bool Application::destroyShader(const std::string & sid){
+    auto sh = shaders.find(sid);
+    if(sh != shaders.end()){
+        shaders.erase(sh);
+        return true;
+    }
+    return false;
 }

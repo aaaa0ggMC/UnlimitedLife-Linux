@@ -1,6 +1,5 @@
 #ifndef AGE_VAO
 #define AGE_VAO
-#include "Base.h"
 #include <AGE/Base.h>
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -13,11 +12,25 @@ namespace age {
      */
     struct AGE_API VAO{
     private:
+        friend class VBOManager;
         GLuint id;
+        uint32_t index;
     public:
-        VAO(GLuint = AGE_NULL_OBJ);
+        VAO(GLuint = AGE_NULL_OBJ,uint32_t = 0);
 
-        static VAO null_vao();
+        inline void bind(){
+            glBindVertexArray(id);
+        }
+
+        inline GLuint getId(){
+            return id;
+        }
+
+        inline GLuint getManagerIndex(){
+            return index;
+        }
+
+        static VAO null();
     };
 
     /** @struct VAOManager
@@ -26,7 +39,13 @@ namespace age {
     struct AGE_API VAOManager{
     public:
         ///VAOS
-        std::vector<VAO> vaos;
+        std::vector<GLuint> vaos;
+
+        ///添加项目
+        void add(GLuint id);
+
+        ///置空
+        void markAsFree(uint32_t index);
 
         ///获取
         VAO operator[](unsigned int index);

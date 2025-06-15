@@ -1,8 +1,6 @@
 #ifndef AGE_VBO
 #define AGE_VBO
-#include "Base.h"
 #include <AGE/Base.h>
-#include <AGE/VAO.h>
 
 namespace age {
     /** @struct VBO
@@ -10,11 +8,26 @@ namespace age {
      */
     struct VBO{
     private:
+        friend class VBOManager;
         GLuint id;
+        uint32_t index;
     public:
-        VBO(GLuint = AGE_NULL_OBJ);
+        VBO(GLuint = AGE_NULL_OBJ,uint32_t = 0);
 
-        static VBO null_vbo();
+        inline GLuint getId(){
+            return id;
+        }
+
+        inline GLuint getManagerIndex(){
+            return index;
+        }
+
+        //WIP
+        inline void bind(){
+
+        }
+
+        static VBO null();
     };
 
     /** @struct VBOManager
@@ -23,7 +36,13 @@ namespace age {
     struct AGE_API VBOManager{
     public:
         ///VAOS
-        std::vector<VBO> vbos;
+        std::vector<GLuint> vbos;
+
+        ///添加项目
+        void add(GLuint id);
+
+        ///置空
+        void markAsFree(uint32_t index);
 
         ///获取
         VBO operator[](unsigned int index);

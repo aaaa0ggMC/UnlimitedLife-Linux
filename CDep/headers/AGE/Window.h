@@ -36,6 +36,8 @@ namespace age{
         std::string SID;
         /// 限制fps
         alib::g3::RateLimiter fpsLimiter {120};
+        /// 切换current
+        Window * s_current;
 
     public:
         /// 设置 interval
@@ -64,6 +66,26 @@ namespace age{
 
         inline void setFramerateLimit(float fps){
             fpsLimiter.reset(fps);
+        }
+
+        inline void clear(GLuint r = 0,GLuint g = 0,GLuint b = 0){
+            swapCurrent();
+            glClearBufferfi(GL_COLOR,r,g,b);
+            restoreCurrent();
+        }
+
+        inline void swapCurrent(){
+            if(current != this){
+                s_current = current;
+                makeCurrent();
+            }
+        }
+
+        inline void restoreCurrent(){
+            if(s_current){
+                s_current->makeCurrent();
+                s_current = NULL;
+            }
         }
 
     };
