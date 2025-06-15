@@ -323,6 +323,7 @@ Shader Application::getShader(const std::string & sid){
 bool Application::destroyShader(const std::string & sid){
     auto sh = shaders.find(sid);
     if(sh != shaders.end()){
+        sh->second.destroy();
         shaders.erase(sh);
         return true;
     }
