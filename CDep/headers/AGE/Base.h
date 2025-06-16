@@ -34,6 +34,9 @@
 #define AGEE_CONFLICT_SID -1
 
 namespace age{
+    inline constexpr bool AGE_Negate = true;
+    inline constexpr bool AGE_Apply = false;
+
     struct AGE_API ErrorInfo{
         int32_t code;
         const char * message;

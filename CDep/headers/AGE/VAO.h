@@ -5,6 +5,7 @@
 #include <GL/gl.h>
 #include <string>
 #include <vector>
+#include <AGE/VBO.h>
 
 namespace age {
     /** @struct VAO
@@ -12,7 +13,7 @@ namespace age {
      */
     struct AGE_API VAO{
     private:
-        friend class VBOManager;
+        friend class VAOManager;
         GLuint id;
         uint32_t index;
     public:
@@ -28,6 +29,16 @@ namespace age {
 
         inline GLuint getManagerIndex(){
             return index;
+        }
+
+        inline void setAttribute(const VBO & vbo,GLuint bindLocation,GLint numbersOfComponents,GLenum type,GLboolean shouldBeNormalized = GL_FALSE,GLsizei stride = 0,GLuint offset = 0){
+            VBO::ScopedVBO scp(vbo);
+            glVertexAttribPointer(bindLocation,numbersOfComponents,type,shouldBeNormalized,stride,(void*)(intptr_t)offset);
+        }
+
+        inline void setAttribStaus(GLuint bindLocation,bool enableAttrib){
+            if(!enableAttrib) glDisableVertexAttribArray(bindLocation);
+            else glEnableVertexAttribArray(bindLocation);
         }
 
         static VAO null();

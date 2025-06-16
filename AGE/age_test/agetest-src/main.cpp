@@ -1,5 +1,5 @@
-/** @file triangle.cpp
- * @brief display a simple moving triangle
+/** @file cube.cpp
+ * @brief display a simple cube
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
  * @date 2025/6/16
@@ -99,7 +99,6 @@ int main(){
 
         win->clear();
         shader.bind();
-        glPointSize(16.0f);
         glDrawArrays(GL_TRIANGLES,0,3);
         win->display();
     }

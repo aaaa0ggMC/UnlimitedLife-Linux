@@ -82,9 +82,6 @@ namespace age{
     inline constexpr WinStyle WinStylePresetUltility = WinStyle::Visible | WinStyle::Decorated | WinStyle::Floating;
     inline constexpr WinStyle WinStylePresetFullScreen = WinStyle::Visible | WinStyle::Maximized | WinStyle::AutoIconify;
 
-    inline constexpr bool AGE_Negate = true;
-    inline constexpr bool AGE_Apply = false;
-
     /** @struct Window
      * @brief 窗口管理
      */

@@ -3,6 +3,8 @@
 
 using namespace age;
 
+GLuint VBO::current = 0;
+
 VAO::VAO(GLuint idd,uint32_t index){
     id = idd;
     this->index = index;
