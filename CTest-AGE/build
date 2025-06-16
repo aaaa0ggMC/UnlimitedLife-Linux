@@ -1,0 +1,2 @@
+g++ $1 -o $1.out -I../CDep/headers -L../CBuild/ -lAGE -laaaa0ggmcLib -lglfw -lGLEW -lOpenGL -lglm -std=c++20 -Wl,--rpath,../CBuild/
+

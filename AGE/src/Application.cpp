@@ -38,7 +38,7 @@ void Application::setGLVersion(unsigned int major,unsigned int minor){
 std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     Window * win = new Window();
     GLInit::GLFW();
-    win->SID = info.SID;
+    win->sid = info.sid;
     win->window = glfwCreateWindow(
                     info.width,info.height,info.windowTitle.c_str(),
                     (!info.moniter)?NULL:(*info.moniter),
@@ -48,7 +48,7 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
         delete win;
         return std::nullopt;
     }
-    windows.emplace(info.SID,win);
+    windows.emplace(info.sid,win);
     if(info.x >= 0 && info.y >= 0)glfwSetWindowPos(win->window,info.x,info.y);
     if(!(Window::current))win->makeCurrent();
     GLInit::GLEW();
@@ -73,7 +73,7 @@ bool Application::destroyWindow(const std::string & sid){
 
 bool Application::destroyWindow(Window * win){
     if(!win)return false;
-    return destroyWindow(win->SID);
+    return destroyWindow(win->sid);
 }
 
 Application::Application(){
