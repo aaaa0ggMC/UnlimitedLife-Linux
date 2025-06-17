@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <memory_resource>
+#include <numbers>
 
 ///对象如VAO,VBO为空
 #define AGE_NULL_OBJ 0
@@ -37,6 +38,27 @@
 namespace age{
     inline constexpr bool AGE_Enable = true;
     inline constexpr bool AGE_Disable = false;
+
+    template<class T> inline constexpr T rad2deg(const T& in){
+        return in * (T(180) / std::numbers::pi);
+    }
+
+    template<class T> inline constexpr T deg2rad(const T & in){
+        return in * (std::numbers::pi / (T)180);
+    }
+
+    struct DirtyMarker{
+    private:
+        bool dirty {true};
+    public:
+        inline void dm_mark(){
+            dirty = true;
+        }
+
+        inline bool dm_check(){
+            return dirty;
+        }
+    }
 
     struct AGE_API ErrorInfo{
         int32_t code;

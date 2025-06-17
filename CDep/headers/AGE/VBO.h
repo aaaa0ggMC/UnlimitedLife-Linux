@@ -4,8 +4,6 @@
 #include <AGE/Base.h>
 #include <GL/glew.h>
 
-#include <iostream>
-
 namespace age {
     /** @struct VBO
      * @brief OpenGL封装
