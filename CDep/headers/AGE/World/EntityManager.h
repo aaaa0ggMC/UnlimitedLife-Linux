@@ -41,6 +41,7 @@ namespace age::world{
 
         void destroyEntity(Entity e){
             //search for its presence
+
         }
 
         template<class T> static void componentPoolDeleter(void * ptr){
