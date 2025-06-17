@@ -2,36 +2,40 @@
 #define AGE_EM
 #include <AGE/World/Entity.h>
 #include <AGE/Base.h>
-#include <AGE/Components.h>
 #include <cstdint>
 #include <unordered_map>
 #include <memory>
+#include <vector>
+#include <optional>
 
 namespace age::world{
+    template<class T> struct ComponentPool{
+        std::vector<T> data;
+        std::unordered_map<uint64_t,size_t> mapper;
+    };
+
     struct AGE_API EntityManager{
     public:
         using namespace comps;
 
-        std::unordered_map<uint64_t,std::shared_ptr<Basic>> components;
+        // <typeid,vector<...>>
+        std::unordered_map<uint64_t,std::unique_ptr<void>> compPool;
 
-        //initial value is 0,so entity id won't be 0
-        uint64_t id_max;
+        std::vector<Entity> entities;
+        std::vector<size_t> free_entities;
 
         EntityManager();
 
-        inline Entity createEntity(){
-            return Entity(++id_max,*this);
+        template<class T> std::optional<ComponentPool<T>*> getComponentPool(){
+            auto it = comptypeid(T)
         }
-
-        inline Entity getEntity(uint64_t id){
-            //deleted entity may be invalid
-            if(id > id_max)return Entity(0,*this);
-            return Entity(id,*this);
-        }
-
-        void destroyEntity(const Entity& e);
 
     };
+
+    struct EntityWrapper {
+    public:
+        EntityWrapper();
+    }
 }
 
 #endif

@@ -1,31 +1,18 @@
 #ifndef AGE_ENTITY
 #define AGE_ENTITY
-#include <AGE/World/EntityManager.h>
+#include "EntityManager.h"
 #include <AGE/Base.h>
 #include <cstdint>
 #include <optional>
+// 没力了，entity与component的逻辑处理耦合就耦合吧，至少避免了循环依赖header
+#include <AGE/World/Components.h>
 
 namespace  age::world {
 
+    struct EntityManager;
+
     struct AGE_API Entity{
-        using namespace comps;
         uint64_t id;
-        EntityManager& em;
-        //typeid
-        std::unordered_map<uint64_t,uint64_t> components;
-
-        template<class T,class... Ts> T& addComponent(Ts&&... args){
-
-        }
-
-        template<class T> T& getComponent(){
-
-        }
-
-    private:
-        friend class EntityManager;
-
-        Entity(uint64_t,EntityManager&);
     };
 }
 
