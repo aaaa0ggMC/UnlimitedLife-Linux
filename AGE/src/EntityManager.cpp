@@ -5,7 +5,3 @@ using namespace age::world;
 EntityManager::EntityManager(){
 
 }
-
-void EntityManager::destroyEntity(const Entity & e){
-
-}
