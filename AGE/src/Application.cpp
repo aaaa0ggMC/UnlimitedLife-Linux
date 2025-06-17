@@ -45,7 +45,6 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
                     info.width,info.height,info.windowTitle.c_str(),
                     (!info.moniter)?NULL:(*info.moniter),
                     (!info.share)?NULL:(*info.share)->window);
-    win->s_current = NULL;
     if(win->window == NULL){
         delete win;
         return std::nullopt;

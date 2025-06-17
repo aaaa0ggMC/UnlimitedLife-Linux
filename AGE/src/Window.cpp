@@ -19,8 +19,7 @@ CreateWindowInfo::CreateWindowInfo(){
 Window::Window():
 window{nullptr},
 sid{""},
-fpsLimiter{120},
-s_current{nullptr}{
+fpsLimiter{120}{
 
 }
 
