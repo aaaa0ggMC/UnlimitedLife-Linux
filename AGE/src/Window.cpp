@@ -24,12 +24,12 @@ s_current{nullptr}{
 
 }
 
-void Window::setStyle(WinStyle styles,bool negate){
+void Window::setStyle(WinStyle styles,bool enableV){
     if(ws_hasFlag(styles,age::WinStyle::FollowGLFW)){
-        if(!negate)return;
+        if(!enableV)return;
     }
-    auto setAttribute = [this,negate](int styleId){
-        glfwSetWindowAttrib(this->window,styleId,negate?GLFW_FALSE:GLFW_TRUE);
+    auto setAttribute = [this,enableV](int styleId){
+        glfwSetWindowAttrib(this->window,styleId,enableV?GLFW_TRUE:GLFW_FALSE);
     };
     if(ws_hasFlag(styles,age::WinStyle::Resizable))setAttribute(GLFW_RESIZABLE);
     if(ws_hasFlag(styles,age::WinStyle::Visible))setAttribute(GLFW_VISIBLE);
@@ -43,7 +43,7 @@ void Window::setStyle(WinStyle styles,bool negate){
     if(ws_hasFlag(styles,age::WinStyle::AutoIconify))setAttribute(GLFW_AUTO_ICONIFY);
 
     if(ws_hasFlag(styles,age::WinStyle::Maximized)){
-        if(negate)glfwRestoreWindow(window);
+        if(enableV)glfwRestoreWindow(window);
         else glfwMaximizeWindow(window);
     }
 }

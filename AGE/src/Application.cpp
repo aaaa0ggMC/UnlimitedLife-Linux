@@ -1,5 +1,7 @@
 #include <AGE/Application.h>
+#include <GL/glext.h>
 #include <cstring>
+#include <GL/glu.h>
 
 // #include <iostream>
 
@@ -163,10 +165,17 @@ bool Application::destroyVAO(VAO vao){
 }
 
 void Application::checkOpenGLError(Error* errs){
-    Error & err = (errs?*errs:defErr);
+    Error &err = (errs ? *errs : defErr);
     GLint errc = glGetError();
+
     while(errc != GL_NO_ERROR){
-        err.pushMessage({errc,"(GL_INTERNAL_ERROR)"});
+        const char* errStr = (const char *)gluErrorString(errc);
+        if(errStr){
+            err.pushMessage({errc, errStr});
+        }else{
+            err.pushMessage({errc, "(GL_INTERNAL_ERROR)"});
+        }
+        errc = glGetError();  // 继续检查下一个错误
     }
 }
 
@@ -291,25 +300,79 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
 
     glLinkProgram(shader.pid);
 
-    checkOpenGLError(&err);
-    glGetShaderiv(shader.pid,GL_COMPILE_STATUS,&compile_status);
+    glGetProgramiv(shader.pid,GL_LINK_STATUS,&compile_status);
     if(compile_status != 1){
-        getShaderShaderLog(shader.pid,logv);
-        err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
+        getShaderProgramLog(shader,logv);
+        err.pushMessage({AGEE_SHADER_FAILED_TO_LINK,logv.c_str()});
         shader.reset();
         goto cleanup;
     }
-
-
     shaders.emplace(info.sid,shader);
 
 cleanup:
-    if(vid)glAttachShader(shader.pid,vid);
-    if(gid)glAttachShader(shader.pid,gid);
-    if(cid)glAttachShader(shader.pid,cid);
-    if(fid)glAttachShader(shader.pid,fid);
+    if(vid)glDeleteShader(vid);
+    if(gid)glDeleteShader(gid);
+    if(cid)glDeleteShader(cid);
+    if(fid)glDeleteShader(fid);
 
     return shader;
+}
+
+void GLAPIENTRY Application::glErrDefDebugProc(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* userParam
+){
+    Application & app = *((Application*)userParam);
+    static std::string buf = "";
+    buf.clear();
+
+    const char* sourceStr = "";
+    switch (source) {
+        case GL_DEBUG_SOURCE_API:             sourceStr = "API"; break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   sourceStr = "Window System"; break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: sourceStr = "Shader Compiler"; break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:     sourceStr = "Third Party"; break;
+        case GL_DEBUG_SOURCE_APPLICATION:     sourceStr = "Application"; break;
+        case GL_DEBUG_SOURCE_OTHER:           sourceStr = "Other"; break;
+        default:                              sourceStr = "Unknown"; break;
+    }
+
+    const char* typeStr = "";
+    switch (type) {
+        case GL_DEBUG_TYPE_ERROR:                 typeStr = "Error"; break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:   typeStr = "Deprecated Behavior"; break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:    typeStr = "Undefined Behavior"; break;
+        case GL_DEBUG_TYPE_PORTABILITY:           typeStr = "Portability"; break;
+        case GL_DEBUG_TYPE_PERFORMANCE:           typeStr = "Performance"; break;
+        case GL_DEBUG_TYPE_MARKER:                typeStr = "Marker"; break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:            typeStr = "Push Group"; break;
+        case GL_DEBUG_TYPE_POP_GROUP:             typeStr = "Pop Group"; break;
+        case GL_DEBUG_TYPE_OTHER:                 typeStr = "Other"; break;
+        default:                                  typeStr = "Unknown"; break;
+    }
+
+    const char* severityStr = "";
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:         severityStr = "High"; break;
+        case GL_DEBUG_SEVERITY_MEDIUM:       severityStr = "Medium"; break;
+        case GL_DEBUG_SEVERITY_LOW:          severityStr = "Low"; break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: severityStr = "Notification"; break;
+        default:                             severityStr = "Unknown"; break;
+    }
+
+    buf += "[OpenGL Debug]";
+    buf += "\n[ Source ]" + std::string(sourceStr);
+    buf += "\n[  Type  ]" + std::string(typeStr);
+    buf += "\n[   ID   ]" + std::to_string(id);
+    buf += "\n[Severity]" + std::string(severityStr);
+    buf += "\n[Message ]" + std::string(message) + "\n";
+
+    app.defErr.pushMessage({AGEE_OPENGL_DEBUG_MESSAGE,buf.c_str()});
 }
 
 Shader Application::getShader(const std::string & sid){

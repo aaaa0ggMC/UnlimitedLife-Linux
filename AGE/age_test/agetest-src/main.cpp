@@ -5,7 +5,11 @@
  * @date 2025/6/16
  */
 #include <AGE/Application.h>
+#undef private
+#include <GL/gl.h>
 #include <alib-g3/alogger.h>
+#include <iostream>
+#include <vector>
 
 using namespace age;
 using namespace alib::g3;
@@ -19,7 +23,7 @@ int main(){
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
 
-    app.setGLVersion(4,3);
+    app.setGLVersion(4,5);
 
     //Init logger
     auto target = std::make_shared<lot::Console>();
@@ -45,16 +49,38 @@ int main(){
             exit(-1);
         }else win = *i;
     }
+    app.checkOpenGLError();
+
+    //一定要有window才行
+    app.setGLErrCallbackFunc();
+    app.setGLErrCallback(true);
+
+    lg.info("CreateWindow:OK!");
     //// Shader ////
+    lg.info("Creating shader...");
     {
         CreateShaderInfo info;
         info.sid = "main";
         info.vertex = R"(#version 450 core
+            layout(location = 0) in vec3 position;
             uniform float offset;
+
+            mat4 rotateZ(float angle) {
+                float c = cos(angle);
+                float s = sin(angle);
+                return mat4(
+                    c, -s, 0.0, 0.0,
+                    s,  c, 0.0, 0.0,
+                    0.0, 0.0, 1.0, 0.0,
+                    0.0, 0.0, 0.0, 1.0
+                );
+            }
+
             void main(void){
-                if(gl_VertexID == 0)gl_Position = vec4(0.25+offset,-0.25,0.0,1.0);
-                else if(gl_VertexID == 1)gl_Position = vec4(-0.25+offset,-0.25,0.0,1.0);
-                else gl_Position = vec4(0.25+offset,0.25,0.0,1.0);
+                vec4 pos = vec4(position,1.0);
+                pos *= 0.5;
+                pos *= rotateZ(offset * 3.141592);
+                gl_Position = pos;
             }
         )";
         info.fragment = R"(#version 450 core
@@ -65,23 +91,51 @@ int main(){
             }
         )";
         shader = app.createShader(info);
+        lg.info("CreateShader:OK!");
     }
     //// VAOs & VBOs ////
     {
+        lg.info("Creating VAOs & VBOs...");
         CreateVAOsInfo i_vao;
         CreateVBOsInfo i_vbo;
 
         i_vao.count = 1;
-        i_vbo.count = 0;
+        i_vbo.count = 1;
 
         app.createVAOs(i_vao);
+        app.checkOpenGLError();
+        lg.info("VAO:OK!");
         app.createVBOs(i_vbo);
+        app.checkOpenGLError();
+        lg.info("VBO:OK!");
+
+        lg.info("Uploading data...");
+        std::vector<float> data = {
+            -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
+            1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
+            -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f,
+            1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,
+            -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
+            1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f
+        };
+        vbos[0].bufferData<float>(data);
+        app.checkOpenGLError();
+        lg.info("DataUpload:OK!");
     }
 
     vaos[0].bind();
+    vbos[0].bind(); //test: move it later
+    vaos[0].setAttribute(vbos[0],0,3,GL_FLOAT);
+    vaos[0].setAttribStatus(0,true);
 
     win->makeCurrent();
-    win->setStyle(WinStyle::Resizable,AGE_Apply);
+    win->setStyle(WinStyle::Resizable,AGE_Disable);
 
     float x = 0,inc = 0.01;
     ShaderUniform off = shader["offset"];
@@ -94,12 +148,13 @@ int main(){
         if(x > 1.0f)inc = -0.01f;
         else if(x < -1.0f)inc = 0.01f;
         x += inc;
-
         off.upload1f(x);
 
         win->clear();
         shader.bind();
-        glDrawArrays(GL_TRIANGLES,0,3);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glDrawArrays(GL_TRIANGLES,0,36);
         win->display();
     }
 

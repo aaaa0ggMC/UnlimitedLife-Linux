@@ -1,5 +1,6 @@
 #ifndef AGE_VAO
 #define AGE_VAO
+#include "Base.h"
 #include <AGE/Base.h>
 #include <GL/glew.h>
 #include <GL/gl.h>
@@ -16,11 +17,38 @@ namespace age {
         friend class VAOManager;
         GLuint id;
         uint32_t index;
+
+
+        static GLuint current;
+        struct ScopedVAO{
+            GLuint old;
+            bool valid;
+            inline ScopedVAO(const VAO & v){
+                if(v.id == VAO::current)valid = false;
+                else{
+                    valid = true;
+                    old = VAO::current;
+                    VAO(v.id).bind();
+                }
+            }
+
+            inline ~ScopedVAO(){
+                if(valid){
+                    VAO(old,0).bind();
+                }
+            }
+        };
     public:
         VAO(GLuint = AGE_NULL_OBJ,uint32_t = 0);
 
         inline void bind(){
+            current = id;
             glBindVertexArray(id);
+        }
+
+        inline static void unbind(){
+            current = 0;
+            glBindVertexArray(0);
         }
 
         inline GLuint getId(){
@@ -31,14 +59,20 @@ namespace age {
             return index;
         }
 
+        inline static GLuint getCurrent(){
+            return current;
+        }
+
         inline void setAttribute(const VBO & vbo,GLuint bindLocation,GLint numbersOfComponents,GLenum type,GLboolean shouldBeNormalized = GL_FALSE,GLsizei stride = 0,GLuint offset = 0){
+            VAO::ScopedVAO scp_vao(*this);
             VBO::ScopedVBO scp(vbo);
             glVertexAttribPointer(bindLocation,numbersOfComponents,type,shouldBeNormalized,stride,(void*)(intptr_t)offset);
         }
 
-        inline void setAttribStaus(GLuint bindLocation,bool enableAttrib){
-            if(!enableAttrib) glDisableVertexAttribArray(bindLocation);
-            else glEnableVertexAttribArray(bindLocation);
+        inline void setAttribStatus(GLuint bindLocation,bool enableAttrib){
+            ScopedVAO scp(*this);
+            if(enableAttrib) glEnableVertexAttribArray(bindLocation);
+            else glDisableVertexAttribArray(bindLocation);
         }
 
         static VAO null();

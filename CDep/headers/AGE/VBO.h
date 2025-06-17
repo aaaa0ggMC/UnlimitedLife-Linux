@@ -4,6 +4,8 @@
 #include <AGE/Base.h>
 #include <GL/glew.h>
 
+#include <iostream>
+
 namespace age {
     /** @struct VBO
      * @brief OpenGL封装
@@ -18,15 +20,18 @@ namespace age {
         static GLuint current;
         struct ScopedVBO{
             GLuint old;
+            bool valid;
             inline ScopedVBO(const VBO & v){
-                old = (v.id == VBO::current)?0:VBO::current;
-                if(old){ // 这里还可以防止VBO::current为NULL
-                    VBO(v.id,0).bind();
+                if(v.id == VBO::current)valid = false;
+                else{
+                    valid = true;
+                    old = VBO::current;
+                    VBO(v.id).bind();
                 }
             }
 
             inline ~ScopedVBO(){
-                if(old){
+                if(valid){
                     VBO(old,0).bind();
                 }
             }
@@ -52,6 +57,10 @@ namespace age {
             glBindBuffer(GL_ARRAY_BUFFER,0);
         }
 
+        inline static GLuint getCurrent(){
+            return current;
+        }
+
         template<class T> inline void bufferData(const std::vector<T>& data,GLenum usageHint = GL_STATIC_DRAW){
             ScopedVBO scp(*this);
             if(data.empty())return;
@@ -60,7 +69,7 @@ namespace age {
 
         template<class T> inline void bufferData(const T * data,size_t elementCount,GLenum usageHint = GL_STATIC_DRAW){
             ScopedVBO scp(*this);
-            if(data.empty())return;
+            if(data == NULL)return;
             glBufferData(GL_ARRAY_BUFFER,sizeof(T) * elementCount,data,usageHint);
         }
 

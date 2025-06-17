@@ -4,6 +4,7 @@
 using namespace age;
 
 GLuint VBO::current = 0;
+GLuint VAO::current = 0;
 
 VAO::VAO(GLuint idd,uint32_t index){
     id = idd;

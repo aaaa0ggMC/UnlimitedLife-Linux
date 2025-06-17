@@ -16,6 +16,7 @@
 #define AGE_APP
 #include "VAO.h"
 #include "VBO.h"
+#include <GL/glext.h>
 #include <unordered_map>
 #include <string>
 #include <optional>
@@ -28,6 +29,9 @@
 #define AGEE_CONFLICT_SHADER -10000
 #define AGEE_SHADER_LOG -10001
 #define AGEE_SHADER_FAILED_TO_COMPILE -10002
+#define AGEE_SHADER_FAILED_TO_LINK -10003
+#define AGEE_OPENGL_DEBUG_MESSAGE -10004
+#define AGEE_OPENGL_NO_CONTEXT -10005
 
 /// Aaaa0ggmc's Graphics Engine 我的图形引擎
 namespace age{
@@ -99,6 +103,29 @@ namespace age{
         /// 检测OpenGL出现的错误，默认使用Application自带的，(NULL)
         void checkOpenGLError(Error * err = NULL);
 
+        /// 设置OpenGL错误回显函数
+        inline void setGLErrCallbackFunc(GLDEBUGPROC proc = glErrDefDebugProc,void * useParam = NULL){
+            if(windows.size() == 0){
+                defErr.pushMessage({AGEE_OPENGL_NO_CONTEXT,"You havent created a window to activate OpenGL context."});
+                return;
+            }
+            if(proc == glErrDefDebugProc){
+                useParam = (void*)this;
+            }
+            glDebugMessageCallback(proc,useParam);
+        }
+        /// 设置OpenGL错误是否回显
+        inline void setGLErrCallback(bool enable){
+            if(windows.size() == 0){
+                defErr.pushMessage({AGEE_OPENGL_NO_CONTEXT,"You havent created a window to activate OpenGL context."});
+                return;
+            }
+            if(enable)glEnable(GL_DEBUG_OUTPUT);
+            else glDisable(GL_DEBUG_OUTPUT);
+        }
+
+        /// 默认错误回调，使用Error类
+        static void GLAPIENTRY glErrDefDebugProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
     private:
         /// 窗口列表

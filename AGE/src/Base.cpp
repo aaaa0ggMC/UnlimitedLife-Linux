@@ -3,8 +3,14 @@
 
 using namespace age;
 
-Error::Error(){
+
+std::pmr::unsynchronized_pool_resource Error::pool;
+std::pmr::polymorphic_allocator<char> Error::alloc (&pool);
+
+Error::Error():
+infos(alloc){
     trigger = nullptr;
+    limit = -1;
 }
 
 void Error::setTrigger(TriggerFunc fn){
@@ -12,7 +18,8 @@ void Error::setTrigger(TriggerFunc fn){
 }
 
 void Error::pushMessage(const ErrorInfo& info){
-    infos.emplace_back(info.code,std::string(info.message));
+    infos.emplace_back(info.code,std::pmr::string(info.message,alloc));
+    if(limit > 0 && infos.size() >= limit)infos.erase(infos.begin());
     if(trigger)trigger(infos[infos.size()-1]);
 }
 
@@ -27,4 +34,8 @@ void Error::defTrigger(const ErrorInfopp& data){
     }();
 
     lg(LOG_ERROR) << "[" << data.code  << "]" << data.message << endlog;
+}
+
+void Error::setLimit(int32_t count){
+    limit = count;
 }

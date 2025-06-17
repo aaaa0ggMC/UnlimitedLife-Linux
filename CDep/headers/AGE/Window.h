@@ -14,6 +14,7 @@
  */
 #ifndef AGE_WIN
 #define AGE_WIN
+#include "Base.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -152,8 +153,8 @@ namespace age{
             glClear(target);
         }
 
-        /// true means negate false means apply
-        void setStyle(WinStyle styles,bool operation = AGE_Apply);
+        /// true: enable ; false: diable
+        void setStyle(WinStyle styles,bool operation = AGE_Enable);
 
     };
 

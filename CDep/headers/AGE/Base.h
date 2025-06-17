@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <memory_resource>
 
 ///对象如VAO,VBO为空
 #define AGE_NULL_OBJ 0
@@ -34,8 +35,8 @@
 #define AGEE_CONFLICT_SID -1
 
 namespace age{
-    inline constexpr bool AGE_Negate = true;
-    inline constexpr bool AGE_Apply = false;
+    inline constexpr bool AGE_Enable = true;
+    inline constexpr bool AGE_Disable = false;
 
     struct AGE_API ErrorInfo{
         int32_t code;
@@ -44,7 +45,7 @@ namespace age{
 
     struct AGE_API ErrorInfopp{
         int32_t code;
-        std::string message;
+        std::pmr::string message;
     };
     typedef void(*TriggerFunc)(const ErrorInfopp&);
 
@@ -54,9 +55,16 @@ namespace age{
     struct AGE_API Error{
     public:
         TriggerFunc trigger;
-        std::vector<ErrorInfopp> infos;
+        int32_t limit;
+
+        static std::pmr::unsynchronized_pool_resource pool;
+        static std::pmr::polymorphic_allocator<char> alloc;
+
+        std::pmr::vector<ErrorInfopp> infos;
 
         Error();
+
+        void setLimit(int32_t count);
 
         void setTrigger(TriggerFunc = Error::defTrigger);
         void pushMessage(const ErrorInfo&);
