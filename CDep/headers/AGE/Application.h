@@ -24,6 +24,7 @@
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
 #include <AGE/Shader.h>
+#include <AGE/World/EntityManager.h>
 
 //shader begin from -1000 to -19999
 #define AGEE_CONFLICT_SHADER -10000
@@ -60,6 +61,8 @@ namespace age{
         VAOManager vaos;
         VBOManager vbos;
         Error defErr;
+        world::EntityManager em;
+
 
         Application(); ///< 构造函数
         ~Application(); ///< 析构函数

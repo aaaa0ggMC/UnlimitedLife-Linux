@@ -16,8 +16,6 @@ namespace age::world{
 
     struct AGE_API EntityManager{
     public:
-        using namespace comps;
-
         // <typeid,vector<...>>
         std::unordered_map<uint64_t,std::unique_ptr<void,void(*)(void*)>> compPool;
 
