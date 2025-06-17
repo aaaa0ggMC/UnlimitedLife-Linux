@@ -7,8 +7,7 @@ using namespace age;
 std::pmr::unsynchronized_pool_resource Error::pool;
 std::pmr::polymorphic_allocator<char> Error::alloc (&pool);
 
-Error::Error():
-infos(alloc){
+Error::Error(): infos(alloc){
     trigger = nullptr;
     limit = -1;
 }

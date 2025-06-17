@@ -97,8 +97,7 @@ namespace age{
         std::string sid;
         /// 限制fps
         alib::g3::RateLimiter fpsLimiter;
-        /// 切换current
-        Window * s_current;
+
 
         Window();
 

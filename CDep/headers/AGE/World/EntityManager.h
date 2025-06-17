@@ -29,13 +29,12 @@ namespace age::world{
         template<class T> std::optional<ComponentPool<T>*> getComponentPool(){
             auto it = comptypeid(T)
         }
-
     };
 
     struct EntityWrapper {
     public:
         EntityWrapper();
-    }
+    };
 }
 
 #endif

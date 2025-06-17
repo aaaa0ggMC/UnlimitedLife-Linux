@@ -157,8 +157,12 @@ namespace age::world{
                 proj_matrix = glm::perspective(1.0472f,4.0f / 3.0f,0.1f,1000.0f);
                 return proj_matrix;
             }
-        };
 
+            inline glm::mat4& buildProjectionMatrix(float fovInRadius, float aspectRatio, float zNear, float zFar){
+                proj_matrix = glm::perspective(fovInRadius, aspectRatio, zNear, zFar);
+                return proj_matrix;
+            }
+        };
     }
 }
 
