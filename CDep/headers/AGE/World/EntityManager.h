@@ -1,5 +1,6 @@
 #ifndef AGE_EM
 #define AGE_EM
+#include "Entity.h"
 #include <AGE/World/Entity.h>
 #include <AGE/Base.h>
 #include <cstdint>
@@ -22,7 +23,25 @@ namespace age::world{
         std::vector<Entity> entities;
         std::vector<size_t> free_entities;
 
+        // 0 initial
+        size_t id_max;
+
         EntityManager();
+
+        Entity addEntity(){
+            if(free_entities.empty()){
+                return Entity(++id_max);
+            }else{
+                auto it = free_entities.begin();
+                uint64_t id = *it;
+                free_entities.erase(it);
+                return {id};
+            }
+        }
+
+        void destroyEntity(Entity e){
+            //search for its presence
+        }
 
         template<class T> static void componentPoolDeleter(void * ptr){
             delete static_cast<T*>(ptr);
