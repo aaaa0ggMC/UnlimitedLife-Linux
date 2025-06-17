@@ -58,7 +58,7 @@ namespace age{
         inline bool dm_check(){
             return dirty;
         }
-    }
+    };
 
     struct AGE_API ErrorInfo{
         int32_t code;
