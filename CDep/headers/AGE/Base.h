@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory_resource>
 #include <numbers>
+//#include <iostream>
 
 ///对象如VAO,VBO为空
 #define AGE_NULL_OBJ 0
@@ -55,7 +56,10 @@ namespace age{
         inline void dm_mark(){
             if(dirty)return;
             dirty = true;
-            if(chain)chain->dm_mark();
+            if(chain){
+                chain->dm_mark();
+                //std::cout << "chained" << std::endl;
+            }
         }
 
         inline bool dm_check(){

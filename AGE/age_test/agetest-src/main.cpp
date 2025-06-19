@@ -6,7 +6,7 @@
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
-#include <AGE/World/EntityFactory.h>
+#include <AGE/World/Camera.h>
 #undef private
 #include <GL/gl.h>
 #include <alib-g3/alogger.h>
@@ -15,6 +15,7 @@
 
 using namespace age;
 using namespace age::world;
+using namespace age::world::comps;
 using namespace alib::g3;
 
 int main(){
@@ -115,17 +116,31 @@ int main(){
     win->setStyle(WinStyle::Resizable,AGE_Disable);
 
     //Entities
-    EntityWrapper camera = EntityFactory::createCamera(em);
+    Camera camera (em);
+    EntityWrapper(em.createEntity(),em).add<Transform>();
+    EntityWrapper(em.createEntity(),em).add<Transform>();
+    EntityWrapper(em.createEntity(),em).add<Transform>();
+    EntityWrapper(em.createEntity(),em).add<Transform>();
+    EntityWrapper(em.createEntity(),em).add<Transform>();
+    EntityWrapper(em.createEntity(),em).add<Transform>();
+    EntityWrapper(em.createEntity(),em).add<Transform>();
 
     ShaderUniform mvp = shader["mvp_matrix"];
-    mvp.uploadmat4(glm::mat4(1.0));
+    //mvp.uploadmat4(glm::mat4(1.0));
+
+    camera.transform().move(0,0,-8);
+    //tcube->move(0,-2,0);
+
+    //std::cout << camera.cameraEntity.e.id << " " << cube.e.id << std::endl;
+
+    //std::cout << tcube << " " << camera.m_transform << std::endl;
 
     //Main Loop
     lg.info("Entering main loop...");
     while(!(win->shouldClose())){
         win->pollEvents();
 
-
+        mvp.uploadmat4(camera.buildVPMatrix());
 
         win->clear();
         shader.bind();
@@ -133,7 +148,6 @@ int main(){
         glDepthFunc(GL_LEQUAL);
         glDrawArrays(GL_TRIANGLES,0,36);
         win->display();
-        em.update<comps::Runner>();
     }
 
     app.destroyWindow(win);

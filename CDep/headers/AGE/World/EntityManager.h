@@ -11,6 +11,10 @@
 #include <vector>
 #include <optional>
 
+#ifdef AGE_EM_DEBUG
+#include <iostream>
+#endif
+
 namespace age::world{
     template<class T> concept CanUpdate = requires(T&t){
         t.run();
@@ -123,29 +127,28 @@ namespace age::world{
             //OK
             auto cmp = comp->mapper.find(e.id);
             if(cmp == comp->mapper.end()){
+                size_t index = 0;
                 if(comp->free_comps.empty()){
                     //create new
                     comp->data.emplace_back(args...);
                     //store mapper
-                    comp->mapper.emplace(e.id,comp->data.size()-1);
-                    if constexpr(sizeof...(Ts) == 0)comp->data[comp->data.size()-1].reset();
-                    else comp->data[comp->data.size()-1] = T(args...);
+                    index = comp->data.size()-1;
 #ifdef AGE_EM_DEBUG
-                    std::cout << "append new:" << typeid(T).name() << std::endl;
+                    std::cout << "append new:" << typeid(T).name()  << " mapper:" << e.id << "->"  << comp->data.size()-1 << std::endl;
 #endif
-                    return &(comp->data.back());
                 }else {
                     auto dt = comp->free_comps.begin();
-                    size_t index= *dt;
+                    index= *dt;
                     comp->free_comps.erase(dt);
-                    if constexpr(sizeof...(Ts) == 0)comp->data[index].reset();
-                    else comp->data[index] = T(args...);
-                    comp->mapper.emplace(e.id,index);
 #ifdef AGE_EM_DEBUG
                     std::cout << "reuse: " << typeid(T).name() << std::endl;
 #endif
-                    return &(comp->data[index]);
                 }
+                comp->mapper.emplace(e.id,comp->data.size()-1);
+                if constexpr(sizeof...(Ts) == 0)comp->data[comp->data.size()-1].reset();
+                else comp->data[comp->data.size()-1] = T(args...);
+                return &(comp->data[index]);
+
             }else return &(comp->data[cmp->second]);
         }
 

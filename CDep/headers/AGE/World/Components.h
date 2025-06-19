@@ -185,7 +185,7 @@ namespace age::world{
             }
         };
 
-        struct AGE_API Runner: public DirtyMarker{
+        struct AGE_API Runner{
         public:
             void (*fn)(void*,void*);
             void * arg1;
@@ -200,16 +200,6 @@ namespace age::world{
 
             inline void run(){
                 if(fn)fn(arg1,arg2);
-            }
-        };
-    }
-
-    namespace outs {
-        struct AGE_API VPCalc : public DirtyMarker{
-            glm::mat4 vp_matrix;
-
-            inline void reset(){
-                vp_matrix = glm::mat4(1.0f);
             }
         };
     }
