@@ -37,7 +37,7 @@ namespace age::world{
                 Transform &ret = *this;
                 ret.m_position = glm::vec3(0,0,0);
                 ret.m_scale = glm::vec3(1,1,1);
-                ret.m_rotation = glm::quat(0,0,0,0);
+                ret.m_rotation = glm::quat(1,0,0,0);
                 ret.model_matrix = glm::mat4(1.0f);
             }
 

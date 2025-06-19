@@ -1,5 +1,6 @@
 #ifndef AGE_H_CAMERA
 #define AGE_H_CAMERA
+#include "Components.h"
 #include <AGE/Base.h>
 #include <AGE/World/EntityManager.h>
 #include <AGE/World/Components.h>
@@ -11,9 +12,11 @@ namespace age::world{
 #endif
         EntityManager& em;
         EntityWrapper cameraEntity;
-        comps::Transform * m_transform;
-        comps::Viewer * m_viewer;
-        comps::Projector * m_projector;
+        std::vector<comps::Transform>* ts;
+        std::vector<comps::Viewer>* vs ;
+        std::vector<comps::Projector>* ps;
+
+        size_t mp_t,mp_v,mp_p;
 
     public:
         glm::mat4 vp_matrix;
@@ -21,12 +24,23 @@ namespace age::world{
         inline Camera(EntityManager& iem):
         em{iem},
         cameraEntity{iem.createEntity(),iem}{
-            m_transform = cameraEntity.add<comps::Transform>();
-            m_viewer = cameraEntity.add<comps::Viewer>();
-            m_projector = cameraEntity.add<comps::Projector>();
+            cameraEntity.add<comps::Transform>();
+            cameraEntity.add<comps::Viewer>();
+            cameraEntity.add<comps::Projector>();
+            auto t = (*iem.getComponentPool<comps::Transform>());
+            auto v = (*iem.getComponentPool<comps::Viewer>());
+            auto p = (*iem.getComponentPool<comps::Projector>());
 
-            m_transform->chain = (DirtyMarker*)this;
-            m_projector->chain = (DirtyMarker*)this;
+            ts = &(t->data);
+            vs = &(v->data);
+            ps = &(p->data);
+
+            mp_t = t->mapper[cameraEntity.e.id];
+            mp_v = v->mapper[cameraEntity.e.id];
+            mp_p = p->mapper[cameraEntity.e.id];
+
+            ((*ts)[mp_t]).chain = (DirtyMarker*)this;
+            ((*ps)[mp_p]).chain = (DirtyMarker*)this;
         }
 
         inline ~Camera(){
@@ -35,17 +49,14 @@ namespace age::world{
 
         inline glm::mat4& buildVPMatrix(){
             if(!dm_check())return vp_matrix;
-            m_transform = cameraEntity.add<comps::Transform>();
-            m_viewer = cameraEntity.add<comps::Viewer>();
-            m_projector = cameraEntity.add<comps::Projector>();
             //std::cout << "Changed,so i updated" << std::endl;
-            vp_matrix = m_projector->buildProjectionMatrix() * m_viewer->buildViewMatrix(*m_transform);
+            vp_matrix = projector().buildProjectionMatrix() * viewer().buildViewMatrix(transform());
             return vp_matrix;
         }
 
-        inline comps::Transform& transform(){return *m_transform;}
-        inline comps::Viewer& viewer(){return *m_viewer;}
-        inline comps::Projector& projector(){return *m_projector;}
+        inline comps::Transform& transform(){return (*ts)[mp_t];}
+        inline comps::Viewer& viewer(){return (*vs)[mp_v];}
+        inline comps::Projector& projector(){return (*ps)[mp_p];}
 
         Camera(const Camera&) = delete;
         Camera& operator=(const Camera&) = delete;

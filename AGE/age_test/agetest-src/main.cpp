@@ -53,6 +53,8 @@ int main(){
             lg.error("Failed to create window,now exit...");
             exit(-1);
         }else win = *i;
+
+        Window::setSwapInterval(0);
     }
     app.checkOpenGLError();
 
@@ -117,19 +119,14 @@ int main(){
 
     //Entities
     Camera camera (em);
-    EntityWrapper(em.createEntity(),em).add<Transform>();
-    EntityWrapper(em.createEntity(),em).add<Transform>();
-    EntityWrapper(em.createEntity(),em).add<Transform>();
-    EntityWrapper(em.createEntity(),em).add<Transform>();
-    EntityWrapper(em.createEntity(),em).add<Transform>();
-    EntityWrapper(em.createEntity(),em).add<Transform>();
-    EntityWrapper(em.createEntity(),em).add<Transform>();
+    EntityWrapper cube (em.createEntity(),em);
+    Transform * tcube = cube.add<Transform>();
 
     ShaderUniform mvp = shader["mvp_matrix"];
     //mvp.uploadmat4(glm::mat4(1.0));
 
     camera.transform().move(0,0,-8);
-    //tcube->move(0,-2,0);
+    tcube->move(1,-2,1);
 
     //std::cout << camera.cameraEntity.e.id << " " << cube.e.id << std::endl;
 
@@ -139,8 +136,10 @@ int main(){
     lg.info("Entering main loop...");
     while(!(win->shouldClose())){
         win->pollEvents();
+        mvp.uploadmat4(camera.buildVPMatrix() * tcube->buildModelMatrix());
 
-        mvp.uploadmat4(camera.buildVPMatrix());
+        tcube->rotateLocal(glm::vec3(1.0f,1.0f,1.0f),0.004);
+        tcube->rotateWorld(glm::vec3(0.0f,1.0f,0.0f),0.001);
 
         win->clear();
         shader.bind();
