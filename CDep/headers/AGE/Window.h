@@ -12,16 +12,16 @@
  </table>
  ********************************
  */
-#ifndef AGE_WIN
-#define AGE_WIN
-#include "Base.h"
+#ifndef AGE_H_WIN
+#define AGE_H_WIN
+#include <AGE/Base.h>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <algorithm>
 #include <cstdlib>
 #include <string>
 #include <optional>
-#include <AGE/Base.h>
 #include <alib-g3/aclock.h>
 
 namespace age{

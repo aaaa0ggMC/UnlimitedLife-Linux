@@ -12,19 +12,18 @@
  </table>
  ********************************
  */
-#ifndef AGE_APP
-#define AGE_APP
-#include "VAO.h"
-#include "VBO.h"
-#include <GL/glext.h>
-#include <unordered_map>
-#include <string>
-#include <optional>
+#ifndef AGE_H_APP
+#define AGE_H_APP
 #include <AGE/Window.h>
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
 #include <AGE/Shader.h>
 #include <AGE/World/EntityManager.h>
+
+#include <GL/glext.h>
+#include <unordered_map>
+#include <string>
+#include <optional>
 
 //shader begin from -1000 to -19999
 #define AGEE_CONFLICT_SHADER -10000
@@ -33,6 +32,7 @@
 #define AGEE_SHADER_FAILED_TO_LINK -10003
 #define AGEE_OPENGL_DEBUG_MESSAGE -10004
 #define AGEE_OPENGL_NO_CONTEXT -10005
+#define AGEE_OPENGL_EMPTY_SHADER -10006
 
 /// Aaaa0ggmc's Graphics Engine 我的图形引擎
 namespace age{

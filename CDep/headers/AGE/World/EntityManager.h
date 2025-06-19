@@ -1,14 +1,23 @@
-#ifndef AGE_EM
-#define AGE_EM
+#ifndef AGE_H_EM
+#define AGE_H_EM
 #include <AGE/World/Entity.h>
 #include <AGE/Base.h>
+
 #include <cstdint>
+#include <cstdlib>
+#include <unistd.h>
 #include <unordered_map>
 #include <memory>
 #include <vector>
 #include <optional>
 
 namespace age::world{
+    template<class T> concept CanUpdate = requires(T&t){
+        t.run();
+    } || requires (T&t){
+        t.update();
+    };
+
     template<class T> struct AGE_API ComponentPool{
         std::vector<T> data;
         std::unordered_map<uint64_t,size_t> mapper;
@@ -116,11 +125,11 @@ namespace age::world{
             if(cmp == comp->mapper.end()){
                 if(comp->free_comps.empty()){
                     //create new
-                    comp->data.emplace_back(std::forward<Ts>(args)...);
+                    comp->data.emplace_back(args...);
                     //store mapper
                     comp->mapper.emplace(e.id,comp->data.size()-1);
                     if constexpr(sizeof...(Ts) == 0)comp->data[comp->data.size()-1].reset();
-                    else comp->data[comp->data.size()-1] = T(std::forward<T>(args)...);
+                    else comp->data[comp->data.size()-1] = T(args...);
 #ifdef AGE_EM_DEBUG
                     std::cout << "append new:" << typeid(T).name() << std::endl;
 #endif
@@ -130,7 +139,7 @@ namespace age::world{
                     size_t index= *dt;
                     comp->free_comps.erase(dt);
                     if constexpr(sizeof...(Ts) == 0)comp->data[index].reset();
-                    else comp->data[index] = T(std::forward<T>(args)...);
+                    else comp->data[index] = T(args...);
                     comp->mapper.emplace(e.id,index);
 #ifdef AGE_EM_DEBUG
                     std::cout << "reuse: " << typeid(T).name() << std::endl;
@@ -139,8 +148,22 @@ namespace age::world{
                 }
             }else return &(comp->data[cmp->second]);
         }
+
+        template<CanUpdate T> inline void update(){
+            auto opt_pool = getComponentPool<T>();
+            if(!opt_pool)return;
+            auto pool = (*opt_pool);
+            for(auto & [_,index] : pool->mapper){
+                auto& runner = pool->data[index];
+                if constexpr(requires(T & t){ t.run(); }){
+                    runner.run();
+                }else runner.update();
+            }
+        }
+
     };
 
+    ///@warning EntityWrapper is not that safe.It gives you convenience,but you need to guarantee your behaviour is nice
     struct AGE_API EntityWrapper{
     public:
         Entity e;
@@ -148,6 +171,10 @@ namespace age::world{
 
         template<class T> inline std::optional<T*> get(){
             return em.getComponent<T>(e);
+        }
+
+        template<class T> inline T* get_unsafe(){
+            return *em.getComponent<T>(e);
         }
 
         template<class T,class... Ts> inline T* add(Ts&&... args){

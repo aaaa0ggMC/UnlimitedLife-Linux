@@ -1,7 +1,7 @@
-#ifndef AGE_VBO
-#define AGE_VBO
-#include "Base.h"
+#ifndef AGE_H_VBO
+#define AGE_H_VBO
 #include <AGE/Base.h>
+
 #include <GL/glew.h>
 
 namespace age {

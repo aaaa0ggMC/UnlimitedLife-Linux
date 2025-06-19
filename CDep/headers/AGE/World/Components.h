@@ -4,9 +4,11 @@
  * @date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
-#ifndef AGE_COMP
-#define AGE_COMP
+#ifndef AGE_H_COMP
+#define AGE_H_COMP
 #include <AGE/Base.h>
+
+#include <cstdio>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
@@ -131,6 +133,7 @@ namespace age::world{
             //mat
             inline glm::mat4& buildModelMatrix(){
                 if(!dm_check())return model_matrix;
+                dm_clear();
                 model_matrix = glm::scale(glm::mat4(1.0f), m_scale);
                 model_matrix = model_matrix * glm::mat4_cast(glm::normalize(m_rotation));
                 model_matrix = glm::translate(model_matrix, m_position);
@@ -144,6 +147,7 @@ namespace age::world{
 
             inline glm::mat4& buildViewMatrix(Transform & trs){
                 if(!trs.dm_check())return trs.model_matrix;
+                trs.dm_clear();
                 glm::mat4 & model = trs.model_matrix;
                 model = glm::scale(glm::mat4(1.0f), trs.m_scale);
                 model = model * glm::transpose(glm::mat4_cast(glm::normalize(trs.m_rotation)));
@@ -162,7 +166,7 @@ namespace age::world{
         };
 
         /// 投影矩阵，目前的版本由懒惰的 raleeuuen 写的
-        struct AGE_API Projector{
+        struct AGE_API Projector : public DirtyMarker{
             glm::mat4 proj_matrix;
 
             inline void reset(){
@@ -178,6 +182,34 @@ namespace age::world{
             inline glm::mat4& buildProjectionMatrix(float fovInRadius, float aspectRatio, float zNear, float zFar){
                 proj_matrix = glm::perspective(fovInRadius, aspectRatio, zNear, zFar);
                 return proj_matrix;
+            }
+        };
+
+        struct AGE_API Runner: public DirtyMarker{
+        public:
+            void (*fn)(void*,void*);
+            void * arg1;
+            void * arg2;
+
+            inline Runner(void (*ifn)(void*,void*),void * iarg1,void * iarg2):fn{ifn},arg1{iarg1},arg2{iarg2}{}
+
+            inline void reset(){
+                fn = NULL;
+                arg1 = arg2 = NULL;
+            }
+
+            inline void run(){
+                if(fn)fn(arg1,arg2);
+            }
+        };
+    }
+
+    namespace outs {
+        struct AGE_API VPCalc : public DirtyMarker{
+            glm::mat4 vp_matrix;
+
+            inline void reset(){
+                vp_matrix = glm::mat4(1.0f);
             }
         };
     }

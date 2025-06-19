@@ -1,5 +1,5 @@
-#ifndef AGE_BASE
-#define AGE_BASE
+#ifndef AGE_H_BASE
+#define AGE_H_BASE
 
 #include <cstdint>
 #include <string>
@@ -51,12 +51,19 @@ namespace age{
     private:
         bool dirty {true};
     public:
+        DirtyMarker * chain {NULL};
         inline void dm_mark(){
+            if(dirty)return;
             dirty = true;
+            if(chain)chain->dm_mark();
         }
 
         inline bool dm_check(){
             return dirty;
+        }
+
+        inline void dm_clear(){
+            dirty = false;
         }
     };
 

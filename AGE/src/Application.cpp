@@ -208,6 +208,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
     GLint compile_status = 0;
     bool errored = false;
     std::string logv = "";
+    bool created = false;
 
     Error & err = ((errs)?*errs:defErr);
 
@@ -230,7 +231,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
             logv = "";
             compile_status = 0;
             errored = true;
-        }
+        }else created = true;
     }
     if(!errored && info.fragment.compare("")){
         const char * buf[1] = {info.fragment.c_str()};
@@ -246,7 +247,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
             logv = "";
             compile_status = 0;
             errored = true;
-        }
+        }else created = true;
     }
     if(!errored && info.geometry.compare("")){
         const char * buf[1] = {info.geometry.c_str()};
@@ -262,7 +263,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
             logv = "";
             compile_status = 0;
             errored = true;
-        }
+        }else created = true;
     }
     if(!errored && info.compute.compare("")){
         if(vid || gid || cid){
@@ -281,7 +282,10 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
                 logv = "";
                 compile_status = 0;
                 errored = true;
-            }else shader.computeShader = true;
+            }else {
+                shader.computeShader = true;
+                created = true;
+            }
         }
     }
 
@@ -305,6 +309,9 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
         err.pushMessage({AGEE_SHADER_FAILED_TO_LINK,logv.c_str()});
         shader.reset();
         goto cleanup;
+    }
+    if(!created){
+        err.pushMessage({AGEE_OPENGL_EMPTY_SHADER,"The shader has no shader subprogram inside."});
     }
     shaders.emplace(info.sid,shader);
 

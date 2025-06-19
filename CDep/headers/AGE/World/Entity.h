@@ -1,6 +1,7 @@
-#ifndef AGE_ENTITY
-#define AGE_ENTITY
+#ifndef AGE_H_ENTITY
+#define AGE_H_ENTITY
 #include <AGE/Base.h>
+
 #include <cstdint>
 #include <optional>
 

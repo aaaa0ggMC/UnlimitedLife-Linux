@@ -6,6 +6,7 @@
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
+#include <AGE/World/EntityFactory.h>
 #undef private
 #include <GL/gl.h>
 #include <alib-g3/alogger.h>
@@ -64,35 +65,8 @@ int main(){
     {
         CreateShaderInfo info;
         info.sid = "main";
-        info.vertex = R"(#version 450 core
-            layout(location = 0) in vec3 position;
-            uniform float offset;
-
-            mat4 rotateZ(float angle) {
-                float c = cos(angle);
-                float s = sin(angle);
-                return mat4(
-                    c, -s, 0.0, 0.0,
-                    s,  c, 0.0, 0.0,
-                    0.0, 0.0, 1.0, 0.0,
-                    0.0, 0.0, 0.0, 1.0
-                );
-            }
-
-            void main(void){
-                vec4 pos = vec4(position,1.0);
-                pos *= 0.5;
-                pos *= rotateZ(offset * 3.141592);
-                gl_Position = pos;
-            }
-        )";
-        info.fragment = R"(#version 450 core
-            out vec4 color;
-
-            void main(void){
-                color = vec4(1.0,1.0,0.0,1.0);
-            }
-        )";
+        Util::io_readAll("test_data/cube.vert",info.vertex);
+        Util::io_readAll("test_data/cube.frag",info.fragment);
         shader = app.createShader(info);
         lg.info("CreateShader:OK!");
     }
@@ -141,36 +115,17 @@ int main(){
     win->setStyle(WinStyle::Resizable,AGE_Disable);
 
     //Entities
-    EntityWrapper camera = wrap(em.createEntity(),em);
-    camera.add<comps::TestOutput>();
+    EntityWrapper camera = EntityFactory::createCamera(em);
 
-    auto comp = unwrap(camera.get<comps::TestOutput>());
-    comp->out("Hello Simple ECS!");
-
-    camera.remove<comps::TestOutput>();
-    camera.adds<comps::TestOutput,comps::Transform>();
-
-    comp = unwrap(camera.get<comps::TestOutput>());
-    auto trans = unwrap(camera.get<comps::Transform>());
-
-    camera.removes<comps::TestOutput,comps::Transform>();
-
-    comp->out("A new ecs item.");
-    //trans->m_scale.x = 1;
-    std::cout << trans->m_scale.x << std::endl;
-
-    float x = 0,inc = 0.01;
-    ShaderUniform off = shader["offset"];
+    ShaderUniform mvp = shader["mvp_matrix"];
+    mvp.uploadmat4(glm::mat4(1.0));
 
     //Main Loop
     lg.info("Entering main loop...");
     while(!(win->shouldClose())){
         win->pollEvents();
 
-        if(x > 1.0f)inc = -0.01f;
-        else if(x < -1.0f)inc = 0.01f;
-        x += inc;
-        off.upload1f(x);
+
 
         win->clear();
         shader.bind();
@@ -178,6 +133,7 @@ int main(){
         glDepthFunc(GL_LEQUAL);
         glDrawArrays(GL_TRIANGLES,0,36);
         win->display();
+        em.update<comps::Runner>();
     }
 
     app.destroyWindow(win);

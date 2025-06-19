@@ -1,12 +1,12 @@
-#ifndef AGE_VAO
-#define AGE_VAO
-#include "Base.h"
+#ifndef AGE_H_VAO
+#define AGE_H_VAO
 #include <AGE/Base.h>
+#include <AGE/VBO.h>
+
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <string>
 #include <vector>
-#include <AGE/VBO.h>
 
 namespace age {
     /** @struct VAO

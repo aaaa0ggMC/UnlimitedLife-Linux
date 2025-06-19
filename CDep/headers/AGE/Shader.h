@@ -1,9 +1,10 @@
 /** @file Shader.h
  * @brief Shader for OpenGL program
  */
-#ifndef AGE_SHADER
-#define AGE_SHADER
+#ifndef AGE_H_SHADER
+#define AGE_H_SHADER
 #include <AGE/Base.h>
+
 #include <GL/glew.h>
 #include <GL/gl.h>
 #include <string>
