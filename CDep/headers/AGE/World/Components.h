@@ -19,13 +19,12 @@ namespace age::world{
 
             glm::mat4 model_matrix;
 
-            inline static Transform null(){
-                Transform ret;
+            inline void reset(){
+                Transform &ret = *this;
                 ret.m_position = glm::vec3(0,0,0);
                 ret.m_scale = glm::vec3(1,1,1);
                 ret.m_rotation = glm::quat(0,0,0,0);
                 ret.model_matrix = glm::mat4(1.0f);
-                return ret;
             }
 
             //pos
@@ -128,9 +127,7 @@ namespace age::world{
         };
 
         struct Viewer{
-            inline static Viewer null(){
-                return Viewer();
-            }
+            inline static void reset(){}
 
             inline glm::mat4& buildViewMatrix(Transform & trs){
                 if(!trs.dm_check())return trs.model_matrix;
@@ -143,9 +140,7 @@ namespace age::world{
         };
 
         struct TestOutput{
-            inline static TestOutput null(){
-                return {};
-            }
+            inline void reset(){}
 
             inline void out(const std::string& data){
                 std::cout << data << std::endl;
@@ -155,10 +150,9 @@ namespace age::world{
         struct Projector{
             glm::mat4 proj_matrix;
 
-            inline static Projector null(){
-                Projector ret;
+            inline void reset(){
+                Projector ret = *this;
                 ret.proj_matrix = glm::mat4(1.0f);
-                return ret;
             }
 
             inline glm::mat4& buildProjectionMatrix(){

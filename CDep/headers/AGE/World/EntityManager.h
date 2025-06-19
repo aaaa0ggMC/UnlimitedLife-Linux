@@ -119,7 +119,7 @@ namespace age::world{
                     comp->data.emplace_back(std::forward<Ts>(args)...);
                     //store mapper
                     comp->mapper.emplace(e.id,comp->data.size()-1);
-                    if constexpr(sizeof...(Ts) == 0)comp->data[comp->data.size()-1] = T::null();
+                    if constexpr(sizeof...(Ts) == 0)comp->data[comp->data.size()-1].reset();
                     else comp->data[comp->data.size()-1] = T(std::forward<T>(args)...);
 #ifdef AGE_EM_DEBUG
                     std::cout << "append new:" << typeid(T).name() << std::endl;
@@ -129,7 +129,7 @@ namespace age::world{
                     auto dt = comp->free_comps.begin();
                     size_t index= *dt;
                     comp->free_comps.erase(dt);
-                    if constexpr(sizeof...(Ts) == 0)comp->data[index] = T::null();
+                    if constexpr(sizeof...(Ts) == 0)comp->data[index].reset();
                     else comp->data[index] = T(std::forward<T>(args)...);
                     comp->mapper.emplace(e.id,index);
 #ifdef AGE_EM_DEBUG
