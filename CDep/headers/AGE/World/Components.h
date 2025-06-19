@@ -1,3 +1,9 @@
+/** @file world/Components.h
+ * @brief 提供一些预制的components
+ * @author aaaa0ggmc,euuen
+ * @date 2025/6/19
+ * @copyright copyright(c)2025 aaaa0ggmc
+ */
 #ifndef AGE_COMP
 #define AGE_COMP
 #include <AGE/Base.h>
@@ -11,8 +17,14 @@
 #include <iostream>
 
 namespace age::world{
+    /** @brief 这里是默认提供的一些组件，实际上你也可以自己写
+      * @par 组件类规则:
+      * 1.需要包含 void reset();这个函数
+      * 2.没了
+      */
     namespace comps{
-        struct Transform : public DirtyMarker{
+        /// 有关模型与世界
+        struct AGE_API Transform : public DirtyMarker{
             glm::vec3 m_position;
             glm::vec3 m_scale;
             glm::quat m_rotation;
@@ -126,7 +138,8 @@ namespace age::world{
             }
         };
 
-        struct Viewer{
+        /// 仅用于构建视图矩阵，而且还依赖Transform这个module @todo maybe可以使用c++模板元编程把组件之间的依赖关系也写出来
+        struct AGE_API Viewer{
             inline static void reset(){}
 
             inline glm::mat4& buildViewMatrix(Transform & trs){
@@ -139,7 +152,8 @@ namespace age::world{
             }
         };
 
-        struct TestOutput{
+        /// reserved used for test
+        struct AGE_API TestOutput{
             inline void reset(){}
 
             inline void out(const std::string& data){
@@ -147,7 +161,8 @@ namespace age::world{
             }
         };
 
-        struct Projector{
+        /// 投影矩阵，目前的版本由懒惰的 raleeuuen 写的
+        struct AGE_API Projector{
             glm::mat4 proj_matrix;
 
             inline void reset(){

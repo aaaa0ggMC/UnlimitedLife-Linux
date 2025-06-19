@@ -5,6 +5,7 @@
  * @date 2025/6/119
  */
 #include <AGE/Application.h>
+#include <AGE/World/Components.h>
 #undef private
 #include <GL/gl.h>
 #include <alib-g3/alogger.h>

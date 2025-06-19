@@ -47,7 +47,7 @@ namespace age{
         return in * (std::numbers::pi / (T)180);
     }
 
-    struct DirtyMarker{
+    struct AGE_API DirtyMarker{
     private:
         bool dirty {true};
     public:

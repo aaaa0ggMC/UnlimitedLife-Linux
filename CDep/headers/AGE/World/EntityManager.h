@@ -9,7 +9,7 @@
 #include <optional>
 
 namespace age::world{
-    template<class T> struct ComponentPool{
+    template<class T> struct AGE_API ComponentPool{
         std::vector<T> data;
         std::unordered_map<uint64_t,size_t> mapper;
         std::vector<size_t> free_comps;
@@ -141,7 +141,7 @@ namespace age::world{
         }
     };
 
-    struct EntityWrapper{
+    struct AGE_API EntityWrapper{
     public:
         Entity e;
         EntityManager & em;
