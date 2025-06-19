@@ -20,6 +20,7 @@ namespace age {
 
 
         static GLuint current;
+    public:
         struct ScopedVAO{
             GLuint old;
             bool valid;
@@ -38,7 +39,7 @@ namespace age {
                 }
             }
         };
-    public:
+
         VAO(GLuint = AGE_NULL_OBJ,uint32_t = 0);
 
         inline void bind(){

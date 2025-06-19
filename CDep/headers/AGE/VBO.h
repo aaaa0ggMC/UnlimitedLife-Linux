@@ -4,7 +4,25 @@
 
 #include <GL/glew.h>
 
+#include <iostream>
+
 namespace age {
+    enum class PrimitiveType : GLenum {
+        Points = GL_POINTS,
+        Lines = GL_LINES,
+        LineLoop = GL_LINE_LOOP,
+        LineStrip = GL_LINE_STRIP,
+        Triangles = GL_TRIANGLES,
+        TriangleStrip = GL_TRIANGLE_STRIP,
+        TriangleFan = GL_TRIANGLE_FAN,
+        //WIP: 下面的我自己都还不知道是什么
+        LinesAdjacency = GL_LINES_ADJACENCY,
+        LineStripAdjacency = GL_LINE_STRIP_ADJACENCY,
+        TrianglesAdjacency = GL_TRIANGLES_ADJACENCY,
+        TriangleStripAdjacency = GL_TRIANGLE_STRIP_ADJACENCY,
+        Patches = GL_PATCHES
+    };
+
     /** @struct VBO
      * @brief OpenGL封装
      */
@@ -16,6 +34,7 @@ namespace age {
         uint32_t index;
 
         static GLuint current;
+    public:
         struct ScopedVBO{
             GLuint old;
             bool valid;
@@ -34,7 +53,7 @@ namespace age {
                 }
             }
         };
-    public:
+
         VBO(GLuint = AGE_NULL_OBJ,uint32_t = 0);
 
         inline GLuint getId(){

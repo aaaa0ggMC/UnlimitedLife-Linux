@@ -123,14 +123,8 @@ int main(){
     Transform * tcube = cube.add<Transform>();
 
     ShaderUniform mvp = shader["mvp_matrix"];
-    //mvp.uploadmat4(glm::mat4(1.0));
-
-    camera.transform().move(0,0,-8);
+    camera.transform().move(0,0,-120);
     tcube->move(1,-2,1);
-
-    //std::cout << camera.cameraEntity.e.id << " " << cube.e.id << std::endl;
-
-    //std::cout << tcube << " " << camera.m_transform << std::endl;
 
     //Main Loop
     lg.info("Entering main loop...");
@@ -138,14 +132,15 @@ int main(){
         win->pollEvents();
         mvp.uploadmat4(camera.buildVPMatrix() * tcube->buildModelMatrix());
 
-        tcube->rotateLocal(glm::vec3(1.0f,1.0f,1.0f),0.004);
+        tcube->rotateLocal(glm::vec3(1.0f,0.0f,1.0f),0.001);
         tcube->rotateWorld(glm::vec3(0.0f,1.0f,0.0f),0.001);
 
         win->clear();
         shader.bind();
+
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        glDrawArrays(GL_TRIANGLES,0,36);
+        win->draw(PrimitiveType::Triangles,0,36,10'000);
         win->display();
     }
 

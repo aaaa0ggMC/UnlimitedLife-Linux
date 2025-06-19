@@ -14,8 +14,12 @@
  */
 #ifndef AGE_H_WIN
 #define AGE_H_WIN
+#include "VBO.h"
 #include <AGE/Base.h>
+#include <AGE/VAO.h>
+#include <AGE/VBO.h>
 
+#include <GL/gl.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <algorithm>
@@ -150,6 +154,17 @@ namespace age{
             ScopedWindow scp(this);
             glClearColor(r,g,b,a);
             glClear(target);
+        }
+
+        /// this function uses glDrawArrays when instanceCount == 1
+        inline void draw(PrimitiveType type,GLuint startIndex,GLint count,GLuint instanceCount = 1,VAO vao = VAO::null()){
+            if(!instanceCount)return;
+            std::optional<VAO::ScopedVAO> scp = std::nullopt;
+            if(vao.getId() != 0){
+                scp.emplace(vao);
+            }
+            if(instanceCount == 1)glDrawArrays(static_cast<GLenum>(type),startIndex,count);
+            else glDrawArraysInstanced(static_cast<GLenum>(type),startIndex,count,instanceCount);
         }
 
         /// true: enable ; false: diable

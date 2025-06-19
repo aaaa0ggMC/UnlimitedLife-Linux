@@ -14,6 +14,7 @@ VAO::VAO(GLuint idd,uint32_t index){
 VAO VAO::null(){
     VAO ret;
     ret.id = AGE_NULL_OBJ;
+    ret.index = 0;
     return ret;
 }
 
@@ -40,6 +41,7 @@ VBO::VBO(GLuint idd,uint32_t index){
 VBO VBO::null(){
     VBO ret;
     ret.id = AGE_NULL_OBJ;
+    ret.index = 0;
     return ret;
 }
 
