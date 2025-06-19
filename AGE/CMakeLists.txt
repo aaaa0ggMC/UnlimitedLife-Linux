@@ -1,6 +1,7 @@
 aux_source_directory("./src" AGE-SRC)
 add_library(AGE SHARED ${AGE-SRC})
 set_target_properties(AGE PROPERTIES LINKER_LANGUAGE CXX)
+# target_compile_options(AGE PUBLIC "-Winline") # 查看内联函数
 target_compile_definitions(AGE PRIVATE AGE_BUILD_DLL)
 if(WIN32)	
 target_link_libraries(AGE PRIVATE glu32 glfw3.dll glew32.dll opengl32 gdi32 user32 kernel32)

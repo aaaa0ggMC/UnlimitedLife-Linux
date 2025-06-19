@@ -61,7 +61,7 @@ namespace age{
         VAOManager vaos;
         VBOManager vbos;
         Error defErr;
-        world::EntityManager em;
+        world::EntityManager em; ///< EntityManager
 
 
         Application(); ///< 构造函数

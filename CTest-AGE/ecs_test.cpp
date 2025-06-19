@@ -29,7 +29,7 @@ int main(){
 
     //Init logger
     auto target = std::make_shared<lot::Console>();
-    auto fileTarget = std::make_shared<lot::SingleFile>("logs/triangle.log");
+    auto fileTarget = std::make_shared<lot::SingleFile>("logs/ecs_test.log");
 
     logger.appendLogOutputTarget("console",target);
     logger.appendLogOutputTarget("file0",fileTarget);
@@ -182,3 +182,4 @@ int main(){
     app.destroyWindow(win);
     return 0;
 }
+

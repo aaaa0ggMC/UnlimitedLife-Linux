@@ -7,14 +7,12 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <string>
+#include <iostream>
+
 namespace age::world{
     namespace comps{
-
-        struct Basic{
-
-        };
-
-        struct Transform : public DirtyMarker,public Basic{
+        struct Transform : public DirtyMarker{
             glm::vec3 m_position;
             glm::vec3 m_scale;
             glm::quat m_rotation;
@@ -129,7 +127,7 @@ namespace age::world{
             }
         };
 
-        struct Viewer: public Basic{
+        struct Viewer{
             inline static Viewer null(){
                 return Viewer();
             }
@@ -144,7 +142,17 @@ namespace age::world{
             }
         };
 
-        struct Projector: public Basic{
+        struct TestOutput{
+            inline static TestOutput null(){
+                return {};
+            }
+
+            inline void out(const std::string& data){
+                std::cout << data << std::endl;
+            }
+        };
+
+        struct Projector{
             glm::mat4 proj_matrix;
 
             inline static Projector null(){
