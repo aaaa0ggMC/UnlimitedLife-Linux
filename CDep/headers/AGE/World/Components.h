@@ -29,15 +29,35 @@ namespace age::world{
         struct AGE_API Transform : public DirtyMarker{
             glm::vec3 m_position;
             glm::vec3 m_scale;
-            glm::quat m_rotation;
-
             glm::mat4 model_matrix;
+
+            struct AGE_API RotationProxy : public DirtyMarker{
+            private:
+                glm::quat m_rotation;
+            public:
+                inline const glm::quat& get(){
+                    if(dm_check()){
+                        m_rotation = glm::normalize(m_rotation);
+                        dm_clear();
+                    }
+                    return m_rotation;
+                }
+
+                //assume that you've changed the data
+                inline glm::quat& get_mutable_unnorm(){
+                    dm_mark();
+                    return m_rotation;
+                }
+
+            };
+            RotationProxy m_rotation;
 
             inline void reset(){
                 Transform &ret = *this;
                 ret.m_position = glm::vec3(0,0,0);
                 ret.m_scale = glm::vec3(1,1,1);
-                ret.m_rotation = glm::quat(1,0,0,0);
+                ret.m_rotation.get_mutable_unnorm() = glm::quat(1,0,0,0);
+                ret.m_rotation.dm_clear();
                 ret.model_matrix = glm::mat4(1.0f);
             }
 
@@ -100,33 +120,21 @@ namespace age::world{
             }
 
             //m_rotation
-            inline Transform& rotateLocal(const glm::vec3& axis,float rad){
+            inline Transform& rotate(const glm::vec3& axis,float rad){
                 dm_mark();
-                m_rotation = glm::angleAxis(rad, glm::normalize(axis)) *m_rotation;
+                m_rotation.get_mutable_unnorm() = glm::angleAxis(rad,glm::normalize(axis)) * m_rotation.get_mutable_unnorm();
                 return *this;
             }
 
-            inline Transform& rotateLocal(const glm::quat & iquat){
+            inline Transform& rotate(const glm::quat & iquat){
                 dm_mark();
-                m_rotation = iquat *m_rotation;
-                return *this;
-            }
-
-            inline Transform& rotateWorld(const glm::vec3& axis,float rad){
-                dm_mark();
-                m_rotation = m_rotation * glm::angleAxis(rad, glm::normalize(axis));
-                return *this;
-            }
-
-            inline Transform& rotateWorld(const glm::quat & iquat){
-                dm_mark();
-                m_rotation = m_rotation * iquat;
+                m_rotation.get_mutable_unnorm() = iquat * m_rotation.get_mutable_unnorm();
                 return *this;
             }
 
             inline Transform& setRotation(const glm::quat & rot){
                 dm_mark();
-                m_rotation = rot;
+                m_rotation.get_mutable_unnorm() = rot;
                 return *this;
             }
 
@@ -134,9 +142,9 @@ namespace age::world{
             inline glm::mat4& buildModelMatrix(){
                 if(!dm_check())return model_matrix;
                 dm_clear();
-                model_matrix = glm::scale(glm::mat4(1.0f), m_scale);
-                model_matrix = model_matrix * glm::mat4_cast(glm::normalize(m_rotation));
-                model_matrix = glm::translate(model_matrix, m_position);
+                model_matrix = glm::translate(glm::mat4(1.0), m_position);
+                model_matrix *= glm::mat4_cast(m_rotation.get());
+                model_matrix *= glm::scale(glm::mat4(1.0f), m_scale);
                 return model_matrix;
             }
         };
@@ -149,8 +157,7 @@ namespace age::world{
                 if(!trs.dm_check())return trs.model_matrix;
                 trs.dm_clear();
                 glm::mat4 & model = trs.model_matrix;
-                model = glm::scale(glm::mat4(1.0f), trs.m_scale);
-                model = model * glm::transpose(glm::mat4_cast(glm::normalize(trs.m_rotation)));
+                model = glm::transpose(glm::mat4_cast(trs.m_rotation.get()));
                 model = glm::translate(model,trs.m_position);
                 return model;
             }

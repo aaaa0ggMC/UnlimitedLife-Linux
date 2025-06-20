@@ -4,6 +4,7 @@
 
 #include <GL/glew.h>
 
+#include <span>
 #include <iostream>
 
 namespace age {
@@ -21,6 +22,30 @@ namespace age {
         TrianglesAdjacency = GL_TRIANGLES_ADJACENCY,
         TriangleStripAdjacency = GL_TRIANGLE_STRIP_ADJACENCY,
         Patches = GL_PATCHES
+    };
+
+    struct AGE_API VBOStat{
+    public:
+        size_t eleCount;
+        uint16_t typeSize;
+
+        template<PrimitiveType type> size_t primCount(){
+            int64_t ret = 0;
+            static_assert(type != PrimitiveType::Patches, "Patches require explicit patch vertex count setup");
+            if constexpr(type == PrimitiveType::Points) ret = eleCount;
+            else if constexpr(type == PrimitiveType::Lines) ret = eleCount / 2;
+            else if constexpr(type == PrimitiveType::LineLoop) ret = eleCount;
+            else if constexpr(type == PrimitiveType::LineStrip) ret = eleCount - 1;
+            else if constexpr(type == PrimitiveType::Triangles) ret = eleCount / 3;
+            else if constexpr(type == PrimitiveType::TriangleStrip) ret = eleCount - 2;
+            else if constexpr(type == PrimitiveType::TriangleFan) ret = eleCount - 2;
+            else if constexpr(type == PrimitiveType::LinesAdjacency) ret = eleCount / 4;
+            else if constexpr(type == PrimitiveType::LineStripAdjacency) ret = eleCount - 3;
+            else if constexpr(type == PrimitiveType::TrianglesAdjacency) ret =eleCount / 6;
+            else if constexpr(type == PrimitiveType::TriangleStripAdjacency) ret =(eleCount - 4) / 2;
+            if(ret < 0)ret = 0;
+            return ret;
+        }
     };
 
     /** @struct VBO
@@ -78,16 +103,18 @@ namespace age {
             return current;
         }
 
-        template<class T> inline void bufferData(const std::vector<T>& data,GLenum usageHint = GL_STATIC_DRAW){
+        template<class T> inline VBOStat bufferData(const std::vector<T>& data,GLenum usageHint = GL_STATIC_DRAW){
             ScopedVBO scp(*this);
-            if(data.empty())return;
+            if(data.empty())return {0,0};
             glBufferData(GL_ARRAY_BUFFER,sizeof(T) * data.size(),data.data(),usageHint);
+            return VBOStat{data.size(),sizeof(T)};
         }
 
-        template<class T> inline void bufferData(const T * data,size_t elementCount,GLenum usageHint = GL_STATIC_DRAW){
+        template<class T> inline VBOStat bufferData(const T * data,size_t elementCount,GLenum usageHint = GL_STATIC_DRAW){
             ScopedVBO scp(*this);
-            if(data == NULL)return;
+            if(data == NULL)return {0,0};
             glBufferData(GL_ARRAY_BUFFER,sizeof(T) * elementCount,data,usageHint);
+            return VBOStat{elementCount,sizeof(T)};
         }
 
         static VBO null();

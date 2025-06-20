@@ -16,6 +16,7 @@ target_compile_definitions(AGE PUBLIC AGE_BUILD_DLL)
 
 aux_source_directory("./age_test/agetest-src/" AGETEST_SRC)
 add_executable(agetest ${AGETEST_SRC})
+#target_compile_options(agetest PUBLIC "-O3")
 target_compile_definitions(agetest PRIVATE AGE_EM_DEBUG)
 if(WIN32)
 target_link_libraries(agetest PRIVATE glfw3.dll glew32.dll opengl32 AGE aaaa0ggmcLib)

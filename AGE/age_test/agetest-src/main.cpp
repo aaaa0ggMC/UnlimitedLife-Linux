@@ -1,8 +1,8 @@
-/** @file ecs_test.cpp
- * @brief test a simple ecs system developed by me
+/** @file cube.cpp
+ * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/6/119
+ * @date 2025/6/20
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -32,7 +32,7 @@ int main(){
 
     //Init logger
     auto target = std::make_shared<lot::Console>();
-    auto fileTarget = std::make_shared<lot::SingleFile>("logs/triangle.log");
+    auto fileTarget = std::make_shared<lot::SingleFile>("logs/cube.log");
 
     logger.appendLogOutputTarget("console",target);
     logger.appendLogOutputTarget("file0",fileTarget);
@@ -123,7 +123,7 @@ int main(){
     Transform * tcube = cube.add<Transform>();
 
     ShaderUniform mvp = shader["mvp_matrix"];
-    camera.transform().move(0,0,-120);
+    camera.transform().move(0,0,-10);
     tcube->move(1,-2,1);
 
     //Main Loop
@@ -132,15 +132,16 @@ int main(){
         win->pollEvents();
         mvp.uploadmat4(camera.buildVPMatrix() * tcube->buildModelMatrix());
 
-        tcube->rotateLocal(glm::vec3(1.0f,0.0f,1.0f),0.001);
-        tcube->rotateWorld(glm::vec3(0.0f,1.0f,0.0f),0.001);
+        tcube->rotate(glm::vec3(1.0f,0.0f,0.0f),0.004);
 
         win->clear();
         shader.bind();
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        win->draw(PrimitiveType::Triangles,0,36,10'000);
+        glEnable(GL_CULL_FACE);
+        glFrontFace(GL_CW);
+        win->draw(PrimitiveType::Triangles,0,36);
         win->display();
     }
 
