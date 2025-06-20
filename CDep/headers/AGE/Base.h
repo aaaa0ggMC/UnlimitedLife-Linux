@@ -106,10 +106,10 @@ namespace age{
         static void defTrigger(const ErrorInfopp&);
     };
 
-    struct Noncopyable{
-        Noncopyable() = default;
-        Noncopyable(const Noncopyable&) = delete;
-        Noncopyable& operator=(const Noncopyable&) = delete;
+    struct NonCopyable{
+        NonCopyable() = default;
+        NonCopyable(const NonCopyable&) = delete;
+        NonCopyable& operator=(const NonCopyable&) = delete;
     };
 }
 

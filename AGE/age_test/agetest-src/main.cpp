@@ -83,7 +83,7 @@ int main(){
     ShaderUniform mvp = shader["mvp_matrix"];
 
     ////InitWorld////
-    camera.transform().move(0,0,-10);
+    camera.transform().move(0,0,10);
     cube.transform().move(1,-2,1);
 
     //// Main Loop ////
@@ -92,10 +92,10 @@ int main(){
     while(!(win->shouldClose())){
         win->pollEvents();
         ////upload shader data////
-        mvp.uploadmat4(camera.buildVPMatrix() * tcube->buildModelMatrix());
+        mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
 
         ////update////
-        tcube->rotate(glm::vec3(1.0f,0.0f,0.0f),0.004);
+        cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),0.004);
 
         ////draw phase////
         win->clear();

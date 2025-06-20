@@ -234,8 +234,8 @@ namespace age::world{
         inline void build(EntityManager&em,uint64_t entity_id){
             auto pool = em.getComponentPool<T>();
             if(!!pool){
-                pool_data = &(pool->data);
-                index = pool->mapper[entity_id];
+                pool_data = &((*pool)->data);
+                index = (*pool)->mapper[entity_id];
             }else{
                 pool_data = NULL;
                 index = 0;

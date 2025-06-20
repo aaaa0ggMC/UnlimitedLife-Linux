@@ -46,11 +46,11 @@ namespace age {
             glProgramUniform2f(program,location,x,y);
         }
 
-        inline void upload2f(GLfloat x,GLfloat y,GLfloat z){
+        inline void upload3f(GLfloat x,GLfloat y,GLfloat z){
             glProgramUniform3f(program,location,x,y,z);
         }
 
-        inline void upload2f(GLfloat x,GLfloat y,GLfloat z,GLfloat w){
+        inline void upload4f(GLfloat x,GLfloat y,GLfloat z,GLfloat w){
             glProgramUniform4f(program,location,x,y,z,w);
         }
 

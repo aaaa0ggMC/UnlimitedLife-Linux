@@ -6,6 +6,7 @@
 #include <AGE/World/Components.h>
 
 namespace age::world{
+    using namespace comps;
     struct Camera : public DirtyMarker,public NonCopyable{
 #ifndef AGE_EM_DEBUG
     private:
@@ -33,6 +34,8 @@ namespace age::world{
 
             tran->chain = (DirtyMarker*)this;
             proj->chain = (DirtyMarker*)this;
+
+            vp_matrix = glm::mat4(1.0f);
         }
 
         inline ~Camera(){

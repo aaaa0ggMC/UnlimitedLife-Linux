@@ -208,11 +208,9 @@ void Application::getShaderProgramLog(Shader shader,std::string & logger){
     int len = 0,chWritten = 0;
     glGetProgramiv(shader.pid,GL_INFO_LOG_LENGTH,&len);
     if(len > 0){
-        char * buf = new char[len+1];
-        std::memset(buf,len+1,sizeof(char));
-        glGetProgramInfoLog(shader.pid,len,&chWritten,buf);
-        logger += buf;
-        delete [] buf;
+        std::vector<char> buf(len+1,0);
+        glGetProgramInfoLog(shader.pid,len,&chWritten,buf.data());
+        logger.append(buf.begin(),buf.end());
     }
 }
 
@@ -220,11 +218,9 @@ void Application::getShaderShaderLog(GLuint shader,std::string & logger){
     int len = 0,chWritten = 0;
     glGetShaderiv(shader,GL_INFO_LOG_LENGTH,&len);
     if(len > 0){
-        char * buf = new char[len+1];
-        std::memset(buf,len+1,sizeof(char));
-        glGetShaderInfoLog(shader,len,&chWritten,buf);
-        logger += buf;
-        delete [] buf;
+        std::vector<char> buf(len+1,0);
+        glGetShaderInfoLog(shader,len,&chWritten,buf.data());
+        logger.append(buf.begin(),buf.end());
     }
 }
 

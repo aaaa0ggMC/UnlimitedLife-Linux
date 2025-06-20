@@ -7,7 +7,8 @@
 #include <cerrno>
 
 namespace age::world {
-    struct AGE_API Object : public Noncopyable{
+    using namespace comps;
+    struct AGE_API Object : public NonCopyable{
     private:
         ComponentWrapper<comps::Transform> tran;
         EntityManager & em;
@@ -16,7 +17,7 @@ namespace age::world {
         inline Object(EntityManager & emm):em{emm},
         e{emm.createEntity(),emm}{
             e.add<Transform>();
-            tran.build(emm,e.id);
+            tran.build(emm,e.e.id);
         }
 
         inline ~Object(){

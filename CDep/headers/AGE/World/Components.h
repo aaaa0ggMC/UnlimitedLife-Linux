@@ -157,8 +157,8 @@ namespace age::world{
                 if(!trs.dm_check())return trs.model_matrix;
                 trs.dm_clear();
                 glm::mat4 & model = trs.model_matrix;
-                model = glm::transpose(glm::mat4_cast(trs.m_rotation.get()));
-                model = glm::translate(model,trs.m_position);
+                model = glm::mat4_cast(glm::conjugate(trs.m_rotation.get()));
+                model = glm::translate(model,-trs.m_position);
                 return model;
             }
         };
@@ -177,7 +177,7 @@ namespace age::world{
             glm::mat4 proj_matrix;
 
             inline void reset(){
-                Projector ret = *this;
+                Projector& ret = *this;
                 ret.proj_matrix = glm::mat4(1.0f);
             }
 

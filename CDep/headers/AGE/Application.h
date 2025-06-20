@@ -41,6 +41,8 @@ namespace age{
      * @brief 初始化OpenGL
      */
     struct AGE_API GLInit{
+        GLInit() = delete;
+
         /// 初始化GLFW
         static void GLFW();
         /// 初始化 GLEW
