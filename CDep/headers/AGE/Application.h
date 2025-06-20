@@ -62,10 +62,10 @@ namespace age{
         VAOManager vaos;
         VBOManager vbos;
         Error defErr;
-        world::EntityManager em; ///< EntityManager
+        world::EntityManager& em; ///< EntityManager
 
 
-        Application(); ///< 构造函数
+        Application(world::EntityManager & emm); ///< 构造函数
         ~Application(); ///< 析构函数
 
         //// Window  ////
@@ -74,7 +74,12 @@ namespace age{
         /// 通过SID获取窗口
         std::optional<Window*> getWindow(const std::string & sid);
         /// baby模式
-        std::optional<Window*> createWindow(const std::string& sid,const std::string & title,unsigned int width,unsigned int height,int x,int y,WinStyle style,float fpsRestrict = 60);
+        std::optional<Window*> createWindow(const std::string& sid,
+                                            const std::string & title,
+                                            unsigned int width,
+                                            unsigned int height,
+                                            int x,int y,WinStyle style,
+                                            float fpsRestrict = 60);
         /// 销毁窗口，直接通过指针
         bool destroyWindow(Window * window);
         /// 通过SID销毁窗口
@@ -82,11 +87,14 @@ namespace age{
 
         //// VAO & VBO ////
         void  createVAOs(const CreateVAOsInfo & info);
+        /// baby mode
+        void  createVAOs(uint32_t count);
         /// @note 需要注意的是VAO就是纯纯的递增的，所以index不会因为delete而变动
         VAO getVAO(uint32_t index);
         bool destroyVAO(VAO);
-
         void createVBOs(const CreateVBOsInfo & info);
+        /// baby mode
+        void  createVBOs(uint32_t count);
         /// @note 需要注意的是VBO就是纯纯的递增的，所以index不会因为delete而变动
         VBO getVBO(uint32_t index);
         bool destroyVBO(VBO);
@@ -94,6 +102,19 @@ namespace age{
         //// Shader ////
         /// 创建着色器
         [[nodiscard]] Shader createShader(const CreateShaderInfo & info,Error * err = NULL);
+        /// baby模式
+        [[nodiscard]] Shader createShaderFromFile(const std::string& sid,
+                                                  const std::string& fvert,
+                                                  const std::string& ffrag = "",
+                                                  const std::string& fgeom = "",
+                                                  const std::string& fcomp = "",
+                                                  Error* errs = NULL);
+        [[nodiscard]] Shader createShaderFromSrc(const std::string& sid,
+                                                 const std::string& vert = "",
+                                                 const std::string& frag = "",
+                                                 const std::string& geom = "",
+                                                 const std::string& comp = "",
+                                                 Error* errs = NULL);
         /// 通过sid获取着色器
         Shader getShader(const std::string & sid);
         /// 获取着色器整体的log

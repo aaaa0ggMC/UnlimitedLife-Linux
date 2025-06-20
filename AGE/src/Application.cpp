@@ -2,10 +2,12 @@
 #include <GL/glext.h>
 #include <cstring>
 #include <GL/glu.h>
+#include <alib-g3/autil.h>
 
 // #include <iostream>
 
 using namespace age;
+using namespace alib::g3;
 
 bool GLInit::inited_glew = false;
 bool GLInit::inited_glfw = false;
@@ -59,6 +61,19 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     return {win};
 }
 
+std::optional<Window*> Application::createWindow(const std::string& sid,const std::string & title,unsigned int width,unsigned int height,int x,int y,WinStyle style,float fpsRestrict){
+    CreateWindowInfo wi;
+    wi.sid = sid;
+    wi.windowTitle = title;
+    wi.width = width;
+    wi.height = height;
+    wi.x = x;
+    wi.y = y;
+    wi.style = style;
+    wi.fps = fpsRestrict;
+    return createWindow(wi);
+}
+
 std::optional<Window*> Application::getWindow(const std::string & sid){
     auto v = windows.find(sid);
     if(v == windows.end())return std::nullopt;
@@ -80,7 +95,7 @@ bool Application::destroyWindow(Window * win){
     return destroyWindow(win->sid);
 }
 
-Application::Application(){
+Application::Application(world::EntityManager & emm):em{emm}{
     counter++;
     defErr.setTrigger();
 }
@@ -125,6 +140,14 @@ void Application::createVAOs(const CreateVAOsInfo & info){
             vaos.add(v);
         }
     }
+}
+
+void Application::createVAOs(uint32_t count){
+    createVAOs({count,0});
+}
+
+void Application::createVBOs(uint32_t count){
+    createVBOs({count,0});
 }
 
 void Application::createVBOs(const CreateVBOsInfo & info){
@@ -203,6 +226,45 @@ void Application::getShaderShaderLog(GLuint shader,std::string & logger){
         logger += buf;
         delete [] buf;
     }
+}
+
+
+Shader Application::createShaderFromFile(const std::string& sid,
+                                          const std::string& fvert,
+                                          const std::string& ffrag,
+                                          const std::string& fgeom,
+                                          const std::string& fcomp,
+                                          Error* errs){
+    std::string vert,frag,geom,comp;
+    vert = frag = geom = comp = "";
+
+    if(fvert.compare("")){
+        Util::io_readAll(fvert,vert);
+    }
+    if(ffrag.compare("")){
+        Util::io_readAll(ffrag,frag);
+    }
+    if(fgeom.compare("")){
+        Util::io_readAll(fgeom,geom);
+    }
+    if(fcomp.compare("")){
+        Util::io_readAll(fcomp,comp);
+    }
+
+    return createShaderFromSrc(sid,vert,frag,geom,comp,errs);
+}
+Shader Application::createShaderFromSrc(const std::string& sid,
+                                         const std::string& vert,
+                                         const std::string& frag,
+                                         const std::string& geom,
+                                         const std::string& comp,
+                                         Error* errs){
+    CreateShaderInfo si;
+    si.sid = sid;
+    si.vertex = vert;
+    si.fragment = frag;
+    si.compute = comp;
+    return createShader(si,errs);
 }
 
 Shader Application::createShader(const CreateShaderInfo &info,Error * errs){

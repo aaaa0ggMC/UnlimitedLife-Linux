@@ -5,6 +5,7 @@
 
 #include <GL/glew.h>
 #include <GL/gl.h>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -99,6 +100,7 @@ namespace age {
 
     struct AGE_API CreateVAOsInfo{
         unsigned int count;
+        unsigned int reserved; //不这样有bug
     };
 }
 

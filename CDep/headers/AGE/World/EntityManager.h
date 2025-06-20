@@ -218,6 +218,38 @@ namespace age::world{
     template<class T> inline T* unwrap(std::optional<T*> opt){
         return (*opt); //segment fault may be arisen here
     }
+
+
+    /// use it with caution
+    template<class T> struct ComponentWrapper{
+    public:
+        std::vector<T> * pool_data;
+        size_t index;
+
+        inline ComponentWrapper(){
+            pool_data = nullptr;
+            index = 0;
+        }
+
+        inline void build(EntityManager&em,uint64_t entity_id){
+            auto pool = em.getComponentPool<T>();
+            if(!!pool){
+                pool_data = &(pool->data);
+                index = pool->mapper[entity_id];
+            }else{
+                pool_data = NULL;
+                index = 0;
+            }
+        }
+
+        inline T& operator *(){
+            return (*pool_data)[index];
+        }
+
+        inline T* operator ->(){
+            return &((*pool_data)[index]);
+        }
+    };
 }
 
 #endif

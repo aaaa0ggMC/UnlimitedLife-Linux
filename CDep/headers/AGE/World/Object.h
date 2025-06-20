@@ -1,0 +1,30 @@
+#ifndef AGE_H_OBJ
+#define AGE_H_OBJ
+#include "EntityManager.h"
+#include <AGE/Base.h>
+#include <AGE/World/Components.h>
+#include <AGE/World/EntityManager.h>
+#include <cerrno>
+
+namespace age::world {
+    struct AGE_API Object : public Noncopyable{
+    private:
+        ComponentWrapper<comps::Transform> tran;
+        EntityManager & em;
+        EntityWrapper e;
+    public:
+        inline Object(EntityManager & emm):em{emm},
+        e{emm.createEntity(),emm}{
+            e.add<Transform>();
+            tran.build(emm,e.id);
+        }
+
+        inline ~Object(){
+            e.destroy();
+        }
+
+        inline Transform& transform(){return *tran;}
+    };
+}
+
+#endif

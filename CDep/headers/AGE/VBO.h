@@ -4,6 +4,7 @@
 
 #include <GL/glew.h>
 
+#include <cstring>
 #include <span>
 #include <iostream>
 
@@ -140,6 +141,7 @@ namespace age {
 
     struct AGE_API CreateVBOsInfo{
         unsigned int count;
+        unsigned int reserved;
     };
 }
 

@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory_resource>
 #include <numbers>
+#include <optional>
 //#include <iostream>
 
 ///对象如VAO,VBO为空
@@ -103,6 +104,12 @@ namespace age{
         void pushMessage(const ErrorInfo&);
 
         static void defTrigger(const ErrorInfopp&);
+    };
+
+    struct Noncopyable{
+        Noncopyable() = default;
+        Noncopyable(const Noncopyable&) = delete;
+        Noncopyable& operator=(const Noncopyable&) = delete;
     };
 }
 
