@@ -14,6 +14,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <numbers>
 
 #include <string>
 #include <iostream>
@@ -53,6 +54,7 @@ namespace age::world{
             RotationProxy m_rotation;
 
             inline void reset(){
+                dm_clear();
                 Transform &ret = *this;
                 ret.m_position = glm::vec3(0,0,0);
                 ret.m_scale = glm::vec3(1,1,1);
@@ -176,18 +178,46 @@ namespace age::world{
         struct AGE_API Projector : public DirtyMarker{
             glm::mat4 proj_matrix;
 
+            float fovRad;
+            float aspectRatio;
+            float zNear;
+            float zFar;
+
             inline void reset(){
-                Projector& ret = *this;
-                ret.proj_matrix = glm::mat4(1.0f);
+                dm_clear();
+                proj_matrix = glm::mat4(1.0f);
+                fovRad = std::numbers::pi / 3.0f;
+                aspectRatio = 4.0 / 3.0;
+                zNear = 0.1;
+                zFar = 1000;
+            }
+
+            inline Projector& set(float angleRad,float w,float h,float near = 0.1f,float far = 1000.0f){
+                return setFOV(angleRad).setAspectRatio(w,h).setClipPlane(near,far);
+            }
+
+            inline Projector& setFOV(float angleRad){
+                fovRad = angleRad;
+                return *this;
+            }
+
+            inline Projector& setAspectRatio(float w,float h){
+                dm_mark();
+                aspectRatio = w/h;
+                return *this;
+            }
+
+            inline Projector& setClipPlane(float near,float far){
+                dm_mark();
+                zNear = near;
+                zFar = far;
+                return *this;
             }
 
             inline glm::mat4& buildProjectionMatrix(){
-                proj_matrix = glm::perspective(1.0472f,4.0f / 3.0f,0.1f,1000.0f);
-                return proj_matrix;
-            }
-
-            inline glm::mat4& buildProjectionMatrix(float fovInRadius, float aspectRatio, float zNear, float zFar){
-                proj_matrix = glm::perspective(fovInRadius, aspectRatio, zNear, zFar);
+                if(!dm_check())return proj_matrix;
+                dm_clear();
+                proj_matrix = glm::perspective(fovRad,aspectRatio,zNear,zFar);
                 return proj_matrix;
             }
         };

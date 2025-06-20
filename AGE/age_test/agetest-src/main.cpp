@@ -8,11 +8,13 @@
 #include <AGE/World/Components.h>
 #include <AGE/World/Camera.h>
 #include <AGE/World/Object.h>
-#undef private
+#include <AGE/Input.h>
+
 #include <GL/gl.h>
 #include <alib-g3/alogger.h>
 #include <iostream>
 #include <vector>
+#include <numbers>
 
 using namespace age;
 using namespace age::world;
@@ -30,6 +32,7 @@ int main(){
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
     Shader shader = Shader::null();
+    Input input;
 
     //Init logger
     logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
@@ -42,6 +45,11 @@ int main(){
         lg.error("Failed to create window,now exit...");
         exit(-1);
     }else win = *app.getWindow("TestWindow");
+    /*win->setKeyCallback([](GLFWwindow* win,int key,int scancode,int action,int mods){
+        KeyWrapper kw (win,key,scancode,action,mods);
+        if(action == GLFW_PRESS)std::cout << "Pressed " << kw.getKeyCodeString() << std::endl;
+    });*/
+    input.setWindow(*win);
     lg.info("CreateWindow:OK!");
 
 
@@ -84,6 +92,7 @@ int main(){
 
     ////InitWorld////
     camera.transform().move(0,0,10);
+    camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
     cube.transform().move(1,-2,1);
 
     //// Main Loop ////
@@ -96,6 +105,12 @@ int main(){
 
         ////update////
         cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),0.004);
+
+        input.update();
+        /// @todo follow with input's tick to update,which means i need to do some extra change
+        if(input.getKeyInfo(KeyCode::A).status == KeyState::Pressed){
+            std::cout << "Pressed A" << std::endl;
+        }
 
         ////draw phase////
         win->clear();

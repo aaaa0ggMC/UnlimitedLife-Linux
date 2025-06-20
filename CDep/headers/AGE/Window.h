@@ -14,7 +14,6 @@
  */
 #ifndef AGE_H_WIN
 #define AGE_H_WIN
-#include "VBO.h"
 #include <AGE/Base.h>
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
@@ -27,6 +26,7 @@
 #include <string>
 #include <optional>
 #include <alib-g3/aclock.h>
+#include <glm/glm.hpp>
 
 namespace age{
     enum class WinStyle: uint32_t {
@@ -140,6 +140,10 @@ namespace age{
             fpsLimiter.wait();
         }
 
+        inline GLFWwindow* getSystemHandle(){
+            return window;
+        }
+
         /// 激活窗口的GL上下文
         inline void makeCurrent(){
             current = this;
@@ -148,6 +152,26 @@ namespace age{
 
         inline void setFramerateLimit(float fps){
             fpsLimiter.reset(fps);
+        }
+
+        inline glm::vec2 getSize(){
+            int width, height;
+            glfwGetWindowSize(window, &width, &height);
+            return {width, height};
+        }
+
+        inline void setKeyCallback(void (*func)(GLFWwindow * glfwWin,int key,int scancode,int action,int mods)){
+            glfwSetKeyCallback(window,func);
+        }
+
+        inline void removeKeyCallback(){
+            setKeyCallback(NULL);
+        }
+
+        inline glm::vec2 getFrameBufferSize(){
+            int width, height;
+            glfwGetFramebufferSize(window, &width, &height);
+            return {width, height};
         }
 
         inline void clear(GLuint r = 0,GLuint g = 0,GLuint b = 0,GLuint a = 255,GLuint target = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT){
