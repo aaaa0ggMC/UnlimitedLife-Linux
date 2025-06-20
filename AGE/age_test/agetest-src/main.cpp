@@ -47,7 +47,7 @@ int main(){
         info.windowTitle = "TestAGE";
         info.x = 100;
         info.y = 100;
-        info.fps = 120;
+        info.fps = 60;
         auto i = app.createWindow(info);
         if(!i){
             lg.error("Failed to create window,now exit...");
@@ -126,6 +126,20 @@ int main(){
     camera.transform().move(0,0,-10);
     tcube->move(1,-2,1);
 
+    Clock myCounter;
+    uint64_t ct = 0;
+
+    std::cout << "PreTest:" << std::endl;
+    {
+        RateLimiter rps (60);
+        while(ct <= 100){
+            ++ct;
+            rps.wait();
+        }
+        std::cout << "rps:" << 1000 * ct /myCounter.getOffset() << std::endl;
+        myCounter.reset();
+    }
+
     //Main Loop
     lg.info("Entering main loop...");
     while(!(win->shouldClose())){
@@ -143,7 +157,9 @@ int main(){
         glFrontFace(GL_CW);
         win->draw(PrimitiveType::Triangles,0,36);
         win->display();
+        ct++;
     }
+    std::cout << "Average FPS in " << myCounter.getOffset() << " ms is" << ct/myCounter.getOffset() * 1000 << ". " << std::endl;
 
     app.destroyWindow(win);
     return 0;

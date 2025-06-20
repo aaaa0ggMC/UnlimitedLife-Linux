@@ -52,7 +52,10 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     windows.emplace(info.sid,win);
     if(info.x >= 0 && info.y >= 0)glfwSetWindowPos(win->window,info.x,info.y);
     if(!(Window::current))win->makeCurrent();
+    win->setFramerateLimit(info.fps);
     GLInit::GLEW();
+    // no vsync
+    glfwSwapInterval(0);
     return {win};
 }
 
@@ -68,7 +71,7 @@ bool Application::destroyWindow(const std::string & sid){
     Window * win = v->second;
     glfwDestroyWindow(win->window);
     delete win;
-    windows.erase(sid);
+    windows.erase(v);//这里我能出错也是没谁了
     return true;
 }
 

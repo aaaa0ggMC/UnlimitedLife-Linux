@@ -14,6 +14,7 @@
  */
 #ifndef AGE_H_APP
 #define AGE_H_APP
+#include "Window.h"
 #include <AGE/Window.h>
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
@@ -72,6 +73,8 @@ namespace age{
         std::optional<Window*> createWindow(const CreateWindowInfo & info);
         /// 通过SID获取窗口
         std::optional<Window*> getWindow(const std::string & sid);
+        /// baby模式
+        std::optional<Window*> createWindow(const std::string& sid,const std::string & title,unsigned int width,unsigned int height,int x,int y,WinStyle style,float fpsRestrict = 60);
         /// 销毁窗口，直接通过指针
         bool destroyWindow(Window * window);
         /// 通过SID销毁窗口

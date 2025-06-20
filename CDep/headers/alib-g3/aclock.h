@@ -182,11 +182,12 @@ namespace g3{
     struct DLL_EXPORT RateLimiter {
         //这里的命名比较垃圾了......
         Clock clk; ///<内部时钟
-        float desire; ///<用户想要的fps,可以为小数（就看系统做不做得到了）
+        float desire; ///<用户想要的fps,可以为小数（就看系统做不做得到了），这个为睡眠时间
         Trigger trig; ///<RateLimiter内部用的就是trigger,相当于是一个简单的封装
 
         /** @brief 构造函数
          * @param[in] wantFps 你想要的速率
+         * @param[in] highResolution 高精度调整，动态调整
          */
         RateLimiter(float wantFps);
 

@@ -1,4 +1,5 @@
 #include <alib-g3/aclock.h>
+#include <cstdlib>
 #include <thread>
 #include <chrono>
 
@@ -133,11 +134,14 @@ RateLimiter::RateLimiter(float wantFps):trig(clk,0){
 }
 
 void RateLimiter::wait(){
+    if(desire <= 0)return;
     if(trig.test())return;
-    std::this_thread::sleep_for(std::chrono::milliseconds((int)(desire - (clk.getAllTime() - trig.recordedTime))));
+    std::this_thread::sleep_for(std::chrono::milliseconds((int)((desire - (clk.getAllTime() - trig.recordedTime)))));
+    trig.reset();
 }
 
 void RateLimiter::reset(float wantFps){
     desire = 1000 / wantFps;
+    trig.reset();
     trig.setDuration(desire);
 }

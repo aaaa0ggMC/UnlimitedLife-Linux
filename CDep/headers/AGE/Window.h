@@ -137,7 +137,7 @@ namespace age{
 
         inline void display(){
             glfwSwapBuffers(window);
-            //fpsLimiter.wait();
+            fpsLimiter.wait();
         }
 
         /// 激活窗口的GL上下文
