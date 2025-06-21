@@ -5,14 +5,23 @@ using namespace age;
 void Input::update(){
     if(!trig.test() || !win)return;
     trig.reset();
+    ticked = true;
     for(auto & [keycode,keyinfo] : codes){
         bool down = glfwGetKey(win->getSystemHandle(),static_cast<int>(keycode)) == GLFW_PRESS;
 
         switch(keyinfo.status){
         case KeyState::Released:
-            if(down)keyinfo.status = KeyState::Pressed;
+            if(down){
+                keyinfo.status = KeyState::PressedThisTick;
+                keyinfo.this_pressed = rater.getAllTime();
+                if(keyinfo.double_time_ms > 0){
+                    if(keyinfo.this_pressed - keyinfo.last_pressed >= keyinfo.double_time_ms){
+                        keyinfo.last_pressed = keyinfo.this_pressed;
+                    }
+                }
+            }
             break;
-        case KeyState::Pressed:
+        case KeyState::PressedThisTick:
             if(down)keyinfo.status = KeyState::Held;
             else keyinfo.status = KeyState::ReleasedThisTick;
             break;
@@ -20,7 +29,17 @@ void Input::update(){
             if(!down)keyinfo.status = KeyState::ReleasedThisTick;
             break;
         case KeyState::ReleasedThisTick:
-            if(!down)keyinfo.status = KeyState::Released;
+            if(!down){
+                keyinfo.status = KeyState::Released;
+            }else {
+                keyinfo.status = KeyState::PressedThisTick;
+                keyinfo.this_pressed = rater.getAllTime();
+                if(keyinfo.double_time_ms > 0){
+                    if(keyinfo.this_pressed - keyinfo.last_pressed >= keyinfo.double_time_ms){
+                        keyinfo.last_pressed = keyinfo.this_pressed;
+                    }
+                }
+            }
             break;
         }
     }

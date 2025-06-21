@@ -10,17 +10,42 @@
 namespace age {
     enum class KeyState : uint8_t {
         Released = 0,
-        Pressed,
+        PressedThisTick,
         Held,
         ReleasedThisTick
     };
 
     struct AGE_API KeyInfo{
         KeyState status; ///<键盘状态
+        float double_time_ms; ///<双击时间
+        float last_pressed; ///<上一次
+        float this_pressed; ///<这一次
 
         inline KeyInfo(){
             status = KeyState::Released;
+            double_time_ms = -1;
         }
+
+        inline bool isPressing(bool invalidDurDoubleTime = false){
+            if(!invalidDurDoubleTime)return (status == KeyState::PressedThisTick) || (status == KeyState::Held);
+            return ((status == KeyState::PressedThisTick) || (status == KeyState::Held)) && this_pressed != last_pressed;
+        }
+
+        inline bool isReleased(){
+            return (status == KeyState::Released) || (status == KeyState::ReleasedThisTick);
+        }
+
+        inline bool hasDoubleTapped(){
+            if(double_time_ms <= 0)return false;
+            if(status != KeyState::PressedThisTick)return false;
+            std::cout << (this_pressed - last_pressed) << std::endl;
+            if(this_pressed != last_pressed && (this_pressed - last_pressed) <= double_time_ms){
+                return true;
+            }
+            last_pressed = this_pressed;
+            return false;
+        }
+
     };
 
 #include <AGE/keycode.inl>
@@ -30,23 +55,43 @@ namespace age {
         std::unordered_map<KeyCode,KeyInfo> codes;
         alib::g3::Clock rater;
         alib::g3::Trigger trig;
+        bool ticked;
 
         void update();
 
-        inline const KeyInfo& getKeyInfo(KeyCode code){
+        ///call this function will clear the ticked flag
+        inline bool checkTick(){
+            if(ticked){
+                ticked = false;
+                return true;
+            }
+            return false;
+        }
+
+        inline KeyInfo& getKeyInfo(KeyCode code){
             auto it = codes.try_emplace(code,KeyInfo());
             return it.first->second;
         }
 
-        inline const KeyInfo& getKeyInfo(int code){
+        inline KeyInfo& getKeyInfo(int code){
             return getKeyInfo(static_cast<KeyCode>(code));
+        }
+
+        inline void setKeyDoubleTap(KeyCode code,float time_ms){
+            getKeyInfo(code).double_time_ms = time_ms;
+        }
+
+        inline void setKeyDoubleTap(int code,float time_ms){
+            setKeyDoubleTap(static_cast<KeyCode>(code),time_ms);
         }
 
         inline void setWindow(Window & win){
             this->win = &win;
         }
 
-        inline Input(float runRate = 20,Window * window = nullptr):win{window},trig{rater,1000/runRate}{}
+        inline Input(float runRate = 30,Window * window = nullptr):win{window},trig{rater,1000/runRate}{
+            ticked = false;
+        }
     };
 
     struct AGE_API KeyWrapper{

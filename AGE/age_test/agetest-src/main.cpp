@@ -21,6 +21,9 @@ using namespace age::world;
 using namespace age::world::comps;
 using namespace alib::g3;
 
+constexpr glm::vec3 cam_speed = glm::vec3(0.1,0.1,0.1);
+constexpr glm::vec2 cam_rot = glm::vec2(0.03,0.03);
+
 void upload_data(VBOManager & vbos,Application &);
 
 int main(){
@@ -32,7 +35,7 @@ int main(){
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
     Shader shader = Shader::null();
-    Input input;
+    Input input (60);
 
     //Init logger
     logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
@@ -41,7 +44,7 @@ int main(){
     //// Window ////
     lg.info("Creating window...");
     app.setGLVersion(4,5);
-    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal^(~WinStyle::Resizable),60)){
+    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal^(~WinStyle::Resizable),0)){
         lg.error("Failed to create window,now exit...");
         exit(-1);
     }else win = *app.getWindow("TestWindow");
@@ -107,9 +110,38 @@ int main(){
         cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),0.004);
 
         input.update();
-        /// @todo follow with input's tick to update,which means i need to do some extra change
-        if(input.getKeyInfo(KeyCode::A).status == KeyState::Pressed){
-            std::cout << "Pressed A" << std::endl;
+        if(input.checkTick()){
+            ///@todo directional movement,may integrated with speed
+            ///@todo velocity comp & system
+            if(input.getKeyInfo(KeyCode::W).isPressing()){
+                camera.transform().move(0,0,-cam_speed.z);
+            }else if(input.getKeyInfo(KeyCode::S).isPressing()){
+                camera.transform().move(0,0,cam_speed.z);
+            }
+
+            if(input.getKeyInfo(KeyCode::A).isPressing()){
+                camera.transform().move(-cam_speed.x,0,0);
+            }else if(input.getKeyInfo(KeyCode::D).isPressing()){
+                camera.transform().move(cam_speed.x,0,0);
+            }
+
+            if(input.getKeyInfo(KeyCode::Space).isPressing()){
+                camera.transform().move(0,cam_speed.y,0);
+            }else if(input.getKeyInfo(KeyCode::LeftShift).isPressing()){
+                camera.transform().move(0,-cam_speed.y,0);
+            }
+
+            if(input.getKeyInfo(KeyCode::Left).isPressing()){
+                camera.transform().rotate(glm::vec3(0,1,0),cam_rot.x);
+            }else if(input.getKeyInfo(KeyCode::Right).isPressing()){
+                camera.transform().rotate(glm::vec3(0,1,0),-cam_rot.x);
+            }
+
+            if(input.getKeyInfo(KeyCode::Up).isPressing()){
+                camera.transform().rotate(glm::vec3(1,0,0),cam_rot.y);
+            }else if(input.getKeyInfo(KeyCode::Down).isPressing()){
+                camera.transform().rotate(glm::vec3(1,0,0),-cam_rot.y);
+            }
         }
 
         ////draw phase////
