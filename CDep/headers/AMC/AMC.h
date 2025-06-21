@@ -32,6 +32,7 @@ namespace amc
         bool isRunning = false;
         bool isDestroyed = false;
         std::vector<Manager> managers = std::vector<Manager>();
+        
         virtual void initialize() {}
         virtual void update() {}
         virtual void cleanup() {}

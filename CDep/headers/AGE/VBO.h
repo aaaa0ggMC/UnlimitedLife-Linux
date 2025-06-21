@@ -1,6 +1,6 @@
 #ifndef AGE_H_VBO
 #define AGE_H_VBO
-#include <AGE/Base.h>
+#include <AGE/Utils.h>
 
 #include <GL/glew.h>
 

@@ -1,7 +1,7 @@
 #ifndef AGE_H_CAMERA
 #define AGE_H_CAMERA
 #include "Components.h"
-#include <AGE/Base.h>
+#include <AGE/Utils.h>
 #include <AGE/World/EntityManager.h>
 #include <AGE/World/Components.h>
 

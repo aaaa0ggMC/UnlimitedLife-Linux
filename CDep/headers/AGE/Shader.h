@@ -3,7 +3,7 @@
  */
 #ifndef AGE_H_SHADER
 #define AGE_H_SHADER
-#include <AGE/Base.h>
+#include <AGE/Utils.h>
 
 #include <GL/glew.h>
 #include <GL/gl.h>

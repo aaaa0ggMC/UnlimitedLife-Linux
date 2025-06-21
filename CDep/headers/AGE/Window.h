@@ -14,7 +14,7 @@
  */
 #ifndef AGE_H_WIN
 #define AGE_H_WIN
-#include <AGE/Base.h>
+#include <AGE/Utils.h>
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
 

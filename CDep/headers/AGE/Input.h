@@ -1,6 +1,6 @@
 #ifndef AGE_H_INPUT
 #define AGE_H_INPUT
-#include <AGE/Base.h>
+#include <AGE/Utils.h>
 #include <AGE/Window.h>
 #include <alib-g3/aclock.h>
 

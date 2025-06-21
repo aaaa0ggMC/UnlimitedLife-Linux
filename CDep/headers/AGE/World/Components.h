@@ -6,7 +6,7 @@
  */
 #ifndef AGE_H_COMP
 #define AGE_H_COMP
-#include <AGE/Base.h>
+#include <AGE/Utils.h>
 
 #include <cstdio>
 #include <glm/ext/matrix_transform.hpp>

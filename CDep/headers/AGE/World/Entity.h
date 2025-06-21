@@ -1,6 +1,6 @@
 #ifndef AGE_H_ENTITY
 #define AGE_H_ENTITY
-#include <AGE/Base.h>
+#include <AGE/Utils.h>
 
 #include <cstdint>
 #include <optional>

@@ -56,6 +56,8 @@ namespace age{
         static bool inited_glew;
     };
 
+    // TODO: 解耦这个类，这个类是个superclass,干的事情太多了
+    
     /** @struct Application
      * @brief 应用程序，尝试支持多窗口
      */

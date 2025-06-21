@@ -23,6 +23,7 @@ using namespace alib::g3;
 
 constexpr glm::vec3 cam_speed = glm::vec3(0.1,0.1,0.1);
 constexpr glm::vec2 cam_rot = glm::vec2(0.03,0.03);
+constexpr float framerate = 60;
 
 void upload_data(VBOManager & vbos,Application &);
 
@@ -35,7 +36,7 @@ int main(){
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
     Shader shader = Shader::null();
-    Input input (60);
+    Input input (framerate);
 
     //Init logger
     logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());

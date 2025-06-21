@@ -1,7 +1,7 @@
 #ifndef AGE_H_EM
 #define AGE_H_EM
 #include <AGE/World/Entity.h>
-#include <AGE/Base.h>
+#include <AGE/Utils.h>
 
 #include <cstdint>
 #include <cstdlib>
