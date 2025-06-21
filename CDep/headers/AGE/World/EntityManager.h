@@ -152,15 +152,15 @@ namespace age::world{
             }else return &(comp->data[cmp->second]);
         }
 
-        template<CanUpdate T> inline void update(){
+        template<CanUpdate T,class... Ts> inline void update(Ts&&... args){
             auto opt_pool = getComponentPool<T>();
             if(!opt_pool)return;
             auto pool = (*opt_pool);
             for(auto & [_,index] : pool->mapper){
                 auto& runner = pool->data[index];
                 if constexpr(requires(T & t){ t.run(); }){
-                    runner.run();
-                }else runner.update();
+                    runner.run(args...);
+                }else runner.update(args...);
             }
         }
 

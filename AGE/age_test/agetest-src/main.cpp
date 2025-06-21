@@ -91,6 +91,9 @@ int main(){
     Camera camera (em);
     Object cube (em);
 
+    ////Clocks////
+    Clock elapse;
+
     ////ShaderArgs////
     ShaderUniform mvp = shader["mvp_matrix"];
 
@@ -144,6 +147,8 @@ int main(){
                 camera.transform().rotate(glm::vec3(1,0,0),-cam_rot.y);
             }
         }
+        em.update<comps::Transform>(elapse.getOffset());
+        elapse.clearOffset();
 
         ////draw phase////
         win->clear();

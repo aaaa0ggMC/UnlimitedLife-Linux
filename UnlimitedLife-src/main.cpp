@@ -8,7 +8,9 @@ using namespace std;
 class AppManager: public amc::Manager {
     public:
     age::Application app;
-    AppManager(){
+    age::world::EntityManager em;
+    AppManager():
+    app(em){
         std::cout << 'h'<< std::endl;
     }
 };

@@ -10,6 +10,7 @@
 
 #include <cstdio>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/quaternion_geometric.hpp>
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -31,6 +32,8 @@ namespace age::world{
             glm::vec3 m_position;
             glm::vec3 m_scale;
             glm::mat4 model_matrix;
+
+            glm::vec3 velocity;
 
             struct AGE_API RotationProxy : public DirtyMarker{
             private:
@@ -61,7 +64,16 @@ namespace age::world{
                 ret.m_rotation.get_mutable_unnorm() = glm::quat(1,0,0,0);
                 ret.m_rotation.dm_clear();
                 ret.model_matrix = glm::mat4(1.0f);
+                ret.velocity = glm::vec3(0,0,0);
             }
+
+            ///velocity
+            inline Transform& buildVelocity(float speed){
+                velocity = speed * glm::normalize(velocity);
+                return *this;
+            }
+
+            inline Transform&
 
             //pos
             inline Transform& move(const glm::vec3& v){
@@ -148,6 +160,10 @@ namespace age::world{
                 model_matrix *= glm::mat4_cast(m_rotation.get());
                 model_matrix *= glm::scale(glm::mat4(1.0f), m_scale);
                 return model_matrix;
+            }
+
+            inline void update(float elapseTime_ms){
+                move(velocity * elapseTime / 1000.0f);
             }
         };
 
