@@ -174,7 +174,7 @@ namespace age::world{
             }
         };
 
-        /// 投影矩阵，目前的版本由懒惰的 raleeuuen 写的
+        /// 投影矩阵，目前的版本由懒惰的 raleeuuen 写的。补充：居然给我改了？？
         struct AGE_API Projector : public DirtyMarker{
             glm::mat4 proj_matrix;
 
