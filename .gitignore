@@ -2,11 +2,21 @@
 CMakeFiles/
 CBuild_CACHE/
 CBuild_CACHE_WIN/
-CBuild/
-!CBuild/test_data
+CBuild/agetest
+CBuild/alibtest0
+CBuild/alib4test
+CBuild/hello.log
+CBuild/log
+CBuild/logs/
+CBuild/simp-biliplayer
+CBuild/UnlimitedLife
+CBuild/agetest
+
+
 Pacman/
 !Pacman/PKGBUILD
 Doxygen
+
 
 #kate
 *.kate-swp
