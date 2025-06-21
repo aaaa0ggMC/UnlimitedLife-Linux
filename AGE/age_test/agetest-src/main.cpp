@@ -105,6 +105,7 @@ int main(){
     //// Main Loop ////
     lg.info("Entering main loop...");
     win->makeCurrent();//enable window
+    win->setFramerateLimit(60);
     while(!(win->shouldClose())){
         win->pollEvents();
         ////upload shader data////

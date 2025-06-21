@@ -1,17 +1,21 @@
+// @author:里挥发
+// @brief:游戏main入口
 #include <iostream>
 #include <AMC/AMC.h>
 #include <AGE/Application.h>
+#include <AGE/World/EntityManager.h>
+#include <AGE/Window.h>
 
 using namespace std;
 
-// 复用AGE代码
+// @brief:复用age::Application
 class AppManager: public amc::Manager {
     public:
-    age::Application app;
+    age::Window* window;
     age::world::EntityManager em;
-    AppManager():
-    app(em){
-        std::cout << 'h'<< std::endl;
+    age::Application app;
+    AppManager(): app(em){
+       
     }
 };
 
