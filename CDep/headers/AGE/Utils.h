@@ -4,9 +4,12 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <memory_resource>
 #include <numbers>
 #include <optional>
+#include <functional>
+#include <alib-g3/aclock.h>
 //#include <iostream>
 
 ///对象如VAO,VBO为空
@@ -110,6 +113,81 @@ namespace age{
         NonCopyable() = default;
         NonCopyable(const NonCopyable&) = delete;
         NonCopyable& operator=(const NonCopyable&) = delete;
+    };
+
+    // @author:里挥发
+    // @brief:事件
+    class Event {
+        public:
+        int64_t startOn;
+        int64_t interval = 0;
+        std::function<void()> task;
+    };
+
+    // @author:里挥发
+    // @brief:事件循环器
+    class EventLoop {
+        public:
+        alib::g3::Clock clock;
+        std::vector<Event> events;
+        bool isRunning;
+
+        inline void setInterval(const std::function<void()>&task, int64_t time){
+            int64_t now = (int64_t) clock.getAllTime();
+            Event event;
+            event.startOn = now + time;
+            event.task = task;
+            event.interval = time;
+            addEvent(event);
+        }
+
+        inline void setTimeout(const std::function<void()>& task, int64_t time){
+            int64_t now = (int64_t) clock.getAllTime();
+            Event event;
+            event.startOn = now + time;
+            event.task = task;
+            addEvent(event);
+        }
+
+        inline void addEvent(Event& event){
+            events.push_back(event);
+        }
+
+        inline void loop(){
+            while (isRunning){
+                std::vector<int> toErase;
+                // 事件循环
+                int size = events.size();
+                for (int index = 0;index < size;index++){
+                    auto& event = events[index];
+                    int64_t now = (int64_t) clock.getAllTime();
+                    // std::cout << now  << "  "<< event.startOn << std::endl;
+                    if (now >= event.startOn){
+                        event.task();
+                        if (event.interval > 0){
+                            // std::cout<< size << std::endl;
+                            // // std::cout << now << " "<< event.startOn << std::endl;
+                            event.startOn = now + event.interval;
+                        }else {
+                            toErase.push_back(index);
+                        }
+                    }
+                }
+                // 删除事件
+                for (int& i : toErase){
+                    events.erase(events.begin() + i);
+                }
+            }
+        }
+
+        inline void start(){
+            isRunning = true;
+            loop();
+        }
+
+        inline void stop(){
+            isRunning = false;
+        }
     };
 }
 

@@ -1,11 +1,13 @@
-#include <alib-g4/autil.hpp>
-#include <alib-g4/ahandle.hpp>
-#include <cstdio>
+#include <AGE/Utils.h>
 #include <iostream>
 
-int main(void){
-	using namespace std;
-	aaddOnErrorCallback(adefaultErrorCallback,NULL);
-	cout << agetTime() << endl;
-	return 0;
+using namespace age;
+using namespace std;
+
+int main(){
+	EventLoop loop;
+	loop.setInterval([](){
+		cout << "hello world" << endl;
+	}, 1000);
+	loop.start();
 }
