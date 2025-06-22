@@ -131,6 +131,7 @@ namespace age{
     class EventLoop {
         public:
         alib::g3::Clock clock;
+        alib::g3::RateLimiter ratelimiter = alib::g3::RateLimiter(1000.0f);
         std::vector<Event> events;
         bool isRunning;
 
@@ -177,7 +178,7 @@ namespace age{
                 for (int& i : toErase){
                     events.erase(events.begin() + i);
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                ratelimiter.wait();
             }
         }
 
