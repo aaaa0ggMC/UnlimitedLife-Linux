@@ -165,6 +165,7 @@ namespace age{
                     int64_t now = (int64_t) clock.getAllTime();
                     if (now >= event.startOn){
                         event.task();
+                        if (!isRunning) break;
                         if (event.interval > 0){
                             event.startOn = now + event.interval;
                         }else {
