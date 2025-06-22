@@ -45,7 +45,7 @@ int main(){
     //// Window ////
     lg.info("Creating window...");
     app.setGLVersion(4,5);
-    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal^(~WinStyle::Resizable),120)){
+    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal^(~WinStyle::Resizable),0)){
         lg.error("Failed to create window,now exit...");
         exit(-1);
     }else win = *app.getWindow("TestWindow");
@@ -98,7 +98,7 @@ int main(){
     ShaderUniform mvp = shader["mvp_matrix"];
 
     ////InitWorld////
-    camera.transform().move(0,0,10);
+    camera.transform().move(1,0,10);
     camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
     cube.transform().move(1,-2,1);
 
@@ -107,20 +107,12 @@ int main(){
     win->makeCurrent();//enable window
     while(!(win->shouldClose())){
         win->pollEvents();
-        ////upload shader data////
-        mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
-
-        ////update////
-        //cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),0.004);
 
         input.update();
         if(input.checkTick()){
-            ///@todo directional movement,may integrated with speed
-            ///@todo velocity comp & system
             float p = elapse.getOffset() / 1000.0f;
 
             veloDir = glm::vec3(0,0,0);
-
             if(input.getKeyInfo(KeyCode::W).isPressing()){
                 veloDir.z -= 1;
             }else if(input.getKeyInfo(KeyCode::S).isPressing()){
@@ -153,7 +145,15 @@ int main(){
             }
 
             camera.transform().buildVelocity(veloDir,cam_speed);
+            //post-input-update
+            cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),3 * p);
             em.update<comps::Transform>(elapse.getOffset(),true);
+
+
+            //post-game-update -- shader
+            ////upload shader data////
+            mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
+
             elapse.clearOffset();
         }
 

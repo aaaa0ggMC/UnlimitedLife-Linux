@@ -94,12 +94,14 @@ namespace age::world{
 
             //pos
             inline Transform& move(const glm::vec3& v){
+                if(v.x == 0 && v.y == 0 && v.z == 0)return *this;
                 dm_mark();
                 m_position += v;
                 return *this;
             }
 
             inline Transform& move(float x,float y,float z){
+                if(x == 0 && y == 0 && z == 0)return *this;
                 dm_mark();
                 m_position.x += x;
                 m_position.y += y;
@@ -108,6 +110,7 @@ namespace age::world{
             }
 
             inline Transform& move(const glm::vec3& velo,float mul){
+                if(velo.x == 0 && velo.y == 0 && velo.z == 0)return *this;
                 dm_mark();
                 m_position.x += velo.x * mul;
                 m_position.y += velo.y * mul;
@@ -116,6 +119,7 @@ namespace age::world{
             }
 
             inline Transform& move(float x,float y,float z,float mul){
+                if(x == 0 && y == 0 && z == 0)return *this;
                 dm_mark();
                 m_position.x += x * mul;
                 m_position.y += y * mul;
@@ -125,24 +129,28 @@ namespace age::world{
 
             //move directional
             inline Transform& moveDirectional(const glm::vec3& v){
+                if(v.x == 0 && v.y == 0 && v.z == 0)return *this;
                 dm_mark();
                 glm_e_add(m_position,v.x,v.y,v.z,m_left,m_up,m_forward,1);
                 return *this;
             }
 
             inline Transform& moveDirectional(float x,float y,float z){
+                if(x == 0 && y == 0 && z == 0)return *this;
                 dm_mark();
                 glm_e_add(m_position,x,y,z,m_left,m_up,m_forward,1);
                 return *this;
             }
 
             inline Transform& moveDirectional(const glm::vec3& v,float mul){
+                if(v.x == 0 && v.y == 0 && v.z == 0)return *this;
                 dm_mark();
                 glm_e_add(m_position,v.x,v.y,v.z,m_left,m_up,m_forward,mul);
                 return *this;
             }
 
             inline Transform& moveDirectional(float x,float y,float z,float mul){
+                if(x == 0 && y == 0 && z == 0)return *this;
                 dm_mark();
                 glm_e_add(m_position,x,y,z,m_left,m_up,m_forward,mul);
                 return *this;
@@ -162,6 +170,7 @@ namespace age::world{
 
             //scale
             inline Transform& scale(const glm::vec3 & s){
+                if(s.x == 1 && s.y == 1 && s.z == 1)return *this;
                 dm_mark();
                 m_scale.x *= s.x;
                 m_scale.y *= s.y;
@@ -170,6 +179,7 @@ namespace age::world{
             }
 
             inline Transform& scale(float x,float y,float z){
+                if(x == 1 && y == 1 && z == 1)return *this;
                 dm_mark();
                 m_scale.x *= x;
                 m_scale.y *= y;
@@ -193,13 +203,14 @@ namespace age::world{
 
             //m_rotation
             inline Transform& rotate(const glm::vec3& axis,float rad){
+                if(axis.x == 0 && axis.y == 0 && axis.z == 0)return *this;
                 dm_mark();
-                if(!(axis.x == 0 && axis.y == 0 && axis.z == 0))
-                    m_rotation.get_mutable_unnorm() = glm::angleAxis(rad,glm::normalize(axis)) * m_rotation.get_mutable_unnorm();
+                m_rotation.get_mutable_unnorm() = glm::angleAxis(rad,glm::normalize(axis)) * m_rotation.get_mutable_unnorm();
                 return *this;
             }
 
             inline Transform& rotate(const glm::quat & iquat){
+                if(iquat.x == 0 && iquat.y == 0 && iquat.z == 0)return *this;
                 dm_mark();
                 m_rotation.get_mutable_unnorm() = iquat * m_rotation.get_mutable_unnorm();
                 return *this;
@@ -224,10 +235,10 @@ namespace age::world{
             }
 
             //mat
-            inline glm::mat4& buildModelMatrix(bool skipModelBuild = false){
+            inline glm::mat4& buildModelMatrix(bool keepModelBuild = true){
                 if(!dm_check())return model_matrix;
                 dm_clear();
-                if(skipModelBuild){
+                if(keepModelBuild){
                     model_matrix = glm::translate(glm::mat4(1.0), m_position);
                     model_matrix *= glm::mat4_cast(m_rotation.get());
                     model_matrix *= glm::scale(glm::mat4(1.0f), m_scale);
@@ -257,7 +268,7 @@ namespace age::world{
 
             inline glm::mat4& buildViewMatrix(Transform & trs){
                 if(!trs.dm_check())return trs.model_matrix;
-                trs.buildModelMatrix(true);
+                trs.buildModelMatrix(false);
                 trs.dm_clear();
                 glm::mat4 & model = trs.model_matrix;
                 model = glm::mat4_cast((trs.m_rotation.get()));
