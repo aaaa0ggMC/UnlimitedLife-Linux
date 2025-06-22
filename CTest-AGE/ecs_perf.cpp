@@ -1,4 +1,5 @@
 #include <AGE/World/Components.h>
+#include <AGE/World/Camera.h>
 #include <AGE/World/Object.h>
 #include <AGE/Input.h>
 #include <alib-g3/aclock.h>
@@ -19,6 +20,7 @@ using namespace alib::g3;
 int main(){
   EntityManager em;
   EntityWrapper e (em.createEntity(),em);
+  Camera cam (em);
   uint64_t tloop = 0;
   Clock clk;
   e.add<comps::Transform>();
@@ -27,7 +29,8 @@ int main(){
   sepl;
   info("get()",1e8);
   loop{
-    e.get<comps::Transform>();
+    cam.transform();
+    //e.get<comps::Transform>();
   }
   tm;
   return 0;

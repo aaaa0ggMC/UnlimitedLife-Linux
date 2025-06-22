@@ -9,8 +9,10 @@
 #include <AGE/Utils.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/quaternion_geometric.hpp>
+#include <glm/ext/quaternion_trigonometric.hpp>
 #include <glm/geometric.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -19,6 +21,10 @@
 
 #include <string>
 #include <iostream>
+
+inline static void glm_e_add(glm::vec3 & outp,float x1,float x2,float x3,const glm::vec3& left,const glm::vec3& up,const glm::vec3& forward,float mul){
+    outp += mul * (x1*left + x2*up + x3*forward);
+}
 
 namespace age::world{
     /** @brief 这里是默认提供的一些组件，实际上你也可以自己写
@@ -32,6 +38,9 @@ namespace age::world{
             glm::vec3 m_position;
             glm::vec3 m_scale;
             glm::mat4 model_matrix;
+            glm::vec3 velocity;
+
+            glm::vec3 m_up,m_left,m_forward;
 
             struct AGE_API RotationProxy : public DirtyMarker{
             private:
@@ -62,6 +71,25 @@ namespace age::world{
                 ret.m_rotation.get_mutable_unnorm() = glm::quat(1,0,0,0);
                 ret.m_rotation.dm_clear();
                 ret.model_matrix = glm::mat4(1.0f);
+                ret.velocity = glm::vec3(0,0,0);
+                ret.m_up = glm::vec3(0,1,0);
+                ret.m_left = glm::vec3(1,0,0);
+                ret.m_forward = glm::vec3(0,0,1);
+            }
+
+            //velocity
+            inline Transform& buildVelocity(const glm::vec3& direction,float length){
+                if(direction.x == 0 && direction.y == 0 && direction.z == 0){
+                    velocity = glm::vec3(0,0,0);
+                    return *this;
+                }
+                velocity = length * glm::normalize(direction);
+                return *this;
+            }
+
+            inline Transform& buildVelocity(const glm::vec3& velo){
+                velocity = velo;
+                return *this;
             }
 
             //pos
@@ -76,6 +104,47 @@ namespace age::world{
                 m_position.x += x;
                 m_position.y += y;
                 m_position.z += z;
+                return *this;
+            }
+
+            inline Transform& move(const glm::vec3& velo,float mul){
+                dm_mark();
+                m_position.x += velo.x * mul;
+                m_position.y += velo.y * mul;
+                m_position.z += velo.z * mul;
+                return *this;
+            }
+
+            inline Transform& move(float x,float y,float z,float mul){
+                dm_mark();
+                m_position.x += x * mul;
+                m_position.y += y * mul;
+                m_position.z += z * mul;
+                return *this;
+            }
+
+            //move directional
+            inline Transform& moveDirectional(const glm::vec3& v){
+                dm_mark();
+                glm_e_add(m_position,v.x,v.y,v.z,m_left,m_up,m_forward,1);
+                return *this;
+            }
+
+            inline Transform& moveDirectional(float x,float y,float z){
+                dm_mark();
+                glm_e_add(m_position,x,y,z,m_left,m_up,m_forward,1);
+                return *this;
+            }
+
+            inline Transform& moveDirectional(const glm::vec3& v,float mul){
+                dm_mark();
+                glm_e_add(m_position,v.x,v.y,v.z,m_left,m_up,m_forward,mul);
+                return *this;
+            }
+
+            inline Transform& moveDirectional(float x,float y,float z,float mul){
+                dm_mark();
+                glm_e_add(m_position,x,y,z,m_left,m_up,m_forward,mul);
                 return *this;
             }
 
@@ -125,7 +194,8 @@ namespace age::world{
             //m_rotation
             inline Transform& rotate(const glm::vec3& axis,float rad){
                 dm_mark();
-                m_rotation.get_mutable_unnorm() = glm::angleAxis(rad,glm::normalize(axis)) * m_rotation.get_mutable_unnorm();
+                if(!(axis.x == 0 && axis.y == 0 && axis.z == 0))
+                    m_rotation.get_mutable_unnorm() = glm::angleAxis(rad,glm::normalize(axis)) * m_rotation.get_mutable_unnorm();
                 return *this;
             }
 
@@ -141,18 +211,43 @@ namespace age::world{
                 return *this;
             }
 
+            inline const glm::vec3& left(){
+                return m_left;
+            }
+
+            inline const glm::vec3& up(){
+                return m_up;
+            }
+
+            inline const glm::vec3& forward(){
+                return m_forward;
+            }
+
             //mat
-            inline glm::mat4& buildModelMatrix(){
+            inline glm::mat4& buildModelMatrix(bool skipModelBuild = false){
                 if(!dm_check())return model_matrix;
                 dm_clear();
-                model_matrix = glm::translate(glm::mat4(1.0), m_position);
-                model_matrix *= glm::mat4_cast(m_rotation.get());
-                model_matrix *= glm::scale(glm::mat4(1.0f), m_scale);
+                if(skipModelBuild){
+                    model_matrix = glm::translate(glm::mat4(1.0), m_position);
+                    model_matrix *= glm::mat4_cast(m_rotation.get());
+                    model_matrix *= glm::scale(glm::mat4(1.0f), m_scale);
+                }
+
+                /// build drs
+                m_up  = glm::vec3(0,1,0) * m_rotation.get();
+                m_left =  glm::vec3(1,0,0) * m_rotation.get();
+                m_forward = glm::vec3(0,0,1) * m_rotation.get();
+
                 return model_matrix;
             }
 
-            inline void update(float elapseTime_ms){
-
+            inline void update(float elapseTime_ms,bool ignore_y_directional){
+                float p = (elapseTime_ms / 1000.0);
+                if(ignore_y_directional){
+                    moveDirectional(velocity.x,0,velocity.z,p);
+                    move(0,velocity.y,0,p);
+                }
+                else moveDirectional(velocity,p);
             }
         };
 
@@ -162,9 +257,10 @@ namespace age::world{
 
             inline glm::mat4& buildViewMatrix(Transform & trs){
                 if(!trs.dm_check())return trs.model_matrix;
+                trs.buildModelMatrix(true);
                 trs.dm_clear();
                 glm::mat4 & model = trs.model_matrix;
-                model = glm::mat4_cast(glm::conjugate(trs.m_rotation.get()));
+                model = glm::mat4_cast((trs.m_rotation.get()));
                 model = glm::translate(model,-trs.m_position);
                 return model;
             }

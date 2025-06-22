@@ -269,6 +269,7 @@ namespace age::world{
             }
         }
 
+        //perf[1]: 17ns/call
         inline T& operator *(){
             return (*pool_data)[index];
         }

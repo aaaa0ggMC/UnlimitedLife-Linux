@@ -1,6 +1,5 @@
 #ifndef AGE_H_OBJ
 #define AGE_H_OBJ
-#include "EntityManager.h"
 #include <AGE/Utils.h>
 #include <AGE/World/Components.h>
 #include <AGE/World/EntityManager.h>

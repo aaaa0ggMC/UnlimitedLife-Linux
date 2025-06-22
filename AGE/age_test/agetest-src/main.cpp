@@ -21,9 +21,9 @@ using namespace age::world;
 using namespace age::world::comps;
 using namespace alib::g3;
 
-constexpr glm::vec3 cam_speed = glm::vec3(0.1,0.1,0.1);
-constexpr glm::vec2 cam_rot = glm::vec2(0.03,0.03);
-constexpr float framerate = 60;
+constexpr float cam_speed = 3;
+constexpr glm::vec2 cam_rot = glm::vec2(1,1);
+constexpr float framerate = 120;
 
 void upload_data(VBOManager & vbos,Application &);
 
@@ -45,7 +45,7 @@ int main(){
     //// Window ////
     lg.info("Creating window...");
     app.setGLVersion(4,5);
-    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal^(~WinStyle::Resizable),0)){
+    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal^(~WinStyle::Resizable),120)){
         lg.error("Failed to create window,now exit...");
         exit(-1);
     }else win = *app.getWindow("TestWindow");
@@ -83,6 +83,10 @@ int main(){
     vaos[0].setAttribute(vbos[0],0,3,GL_FLOAT);
     vaos[0].setAttribStatus(0,true);
 
+    ////Data////
+    glm::vec3 veloDir;
+    glm::quat rotDir;
+
     ////Entities////
     Camera camera (em);
     Object cube (em);
@@ -101,51 +105,57 @@ int main(){
     //// Main Loop ////
     lg.info("Entering main loop...");
     win->makeCurrent();//enable window
-    win->setFramerateLimit(60);
     while(!(win->shouldClose())){
         win->pollEvents();
         ////upload shader data////
         mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
 
         ////update////
-        cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),0.004);
+        //cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),0.004);
 
         input.update();
         if(input.checkTick()){
             ///@todo directional movement,may integrated with speed
             ///@todo velocity comp & system
+            float p = elapse.getOffset() / 1000.0f;
+
+            veloDir = glm::vec3(0,0,0);
+
             if(input.getKeyInfo(KeyCode::W).isPressing()){
-                camera.transform().move(0,0,-cam_speed.z);
+                veloDir.z -= 1;
             }else if(input.getKeyInfo(KeyCode::S).isPressing()){
-                camera.transform().move(0,0,cam_speed.z);
+                veloDir.z += 1;
             }
 
             if(input.getKeyInfo(KeyCode::A).isPressing()){
-                camera.transform().move(-cam_speed.x,0,0);
+                veloDir.x -= 1;
             }else if(input.getKeyInfo(KeyCode::D).isPressing()){
-                camera.transform().move(cam_speed.x,0,0);
+                veloDir.x += 1;
             }
 
             if(input.getKeyInfo(KeyCode::Space).isPressing()){
-                camera.transform().move(0,cam_speed.y,0);
+                veloDir.y += 1;
             }else if(input.getKeyInfo(KeyCode::LeftShift).isPressing()){
-                camera.transform().move(0,-cam_speed.y,0);
+                veloDir.y -= 1;
             }
 
             if(input.getKeyInfo(KeyCode::Left).isPressing()){
-                camera.transform().rotate(glm::vec3(0,1,0),cam_rot.x);
+
+                camera.transform().rotate(glm::vec3(0,1,0),-cam_rot.x * p);
             }else if(input.getKeyInfo(KeyCode::Right).isPressing()){
-                camera.transform().rotate(glm::vec3(0,1,0),-cam_rot.x);
+                camera.transform().rotate(glm::vec3(0,1,0),cam_rot.x * p);
             }
 
             if(input.getKeyInfo(KeyCode::Up).isPressing()){
-                camera.transform().rotate(glm::vec3(1,0,0),cam_rot.y);
+                camera.transform().rotate(glm::vec3(1,0,0),-cam_rot.y * p);
             }else if(input.getKeyInfo(KeyCode::Down).isPressing()){
-                camera.transform().rotate(glm::vec3(1,0,0),-cam_rot.y);
+                camera.transform().rotate(glm::vec3(1,0,0),cam_rot.y * p);
             }
+
+            camera.transform().buildVelocity(veloDir,cam_speed);
+            em.update<comps::Transform>(elapse.getOffset(),true);
+            elapse.clearOffset();
         }
-        em.update<comps::Transform>(elapse.getOffset());
-        elapse.clearOffset();
 
         ////draw phase////
         win->clear();

@@ -1,2 +1,2 @@
-g++ -O3 $1 -o $1.out -DGLM_ENABLE_EXPERIMENTAL -DAGE_EM_DEBUG -I../CDep/headers -L../CBuild/ -lAGE -laaaa0ggmcLib -lglfw -lGLEW -lOpenGL -lglm -std=c++20 -Wl,--rpath,../CBuild/
+g++ $1 -o $1.out -DGLM_ENABLE_EXPERIMENTAL -DAGE_EM_DEBUG -I../CDep/headers -L../CBuild/ -lAGE -laaaa0ggmcLib -lglfw -lGLEW -lOpenGL -lglm -std=c++20 -Wl,--rpath,../CBuild/
 
