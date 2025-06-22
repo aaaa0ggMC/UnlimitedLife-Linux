@@ -49,10 +49,6 @@ int main(){
         lg.error("Failed to create window,now exit...");
         exit(-1);
     }else win = *app.getWindow("TestWindow");
-    /*win->setKeyCallback([](GLFWwindow* win,int key,int scancode,int action,int mods){
-        KeyWrapper kw (win,key,scancode,action,mods);
-        if(action == GLFW_PRESS)std::cout << "Pressed " << kw.getKeyCodeString() << std::endl;
-    });*/
     input.setWindow(*win);
     lg.info("CreateWindow:OK!");
 

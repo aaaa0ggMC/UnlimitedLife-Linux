@@ -33,8 +33,6 @@ namespace age::world{
             glm::vec3 m_scale;
             glm::mat4 model_matrix;
 
-            glm::vec3 velocity;
-
             struct AGE_API RotationProxy : public DirtyMarker{
             private:
                 glm::quat m_rotation;
@@ -64,16 +62,7 @@ namespace age::world{
                 ret.m_rotation.get_mutable_unnorm() = glm::quat(1,0,0,0);
                 ret.m_rotation.dm_clear();
                 ret.model_matrix = glm::mat4(1.0f);
-                ret.velocity = glm::vec3(0,0,0);
             }
-
-            ///velocity
-            inline Transform& buildVelocity(float speed){
-                velocity = speed * glm::normalize(velocity);
-                return *this;
-            }
-
-            inline Transform&
 
             //pos
             inline Transform& move(const glm::vec3& v){
@@ -163,7 +152,7 @@ namespace age::world{
             }
 
             inline void update(float elapseTime_ms){
-                move(velocity * elapseTime / 1000.0f);
+
             }
         };
 

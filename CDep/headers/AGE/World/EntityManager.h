@@ -16,11 +16,12 @@
 #endif
 
 namespace age::world{
-    template<class T> concept CanUpdate = requires(T&t){
-        t.run();
+    /* 使用concept我无法写出可以接受随便的参数的concept,所以这里抛弃，改为用户约定
+     * template<class T> concept CanUpdate = requires(T&t){
+        t.run;
     } || requires (T&t){
-        t.update();
-    };
+        t.update;
+    };*/
 
     template<class T> struct AGE_API ComponentPool{
         std::vector<T> data;
@@ -42,23 +43,43 @@ namespace age::world{
         // 0 initial
         size_t id_max;
 
+        /// indicator
+        bool hasNoFreeEnts;
+
         inline EntityManager(){
             id_max = AGE_NULL_OBJ;
+            hasNoFreeEnts = true;
         }
 
+        //perf[1]: 5.6ns/call
         inline Entity createEntity(){
-            if(free_entities.empty()){
+            // 2025/6/22 aaaa0ggmc
+            // 优化前 1e8 用时 3-4s     Entity本位构造(单纯执行Entity(1)): 260ms
+            // 问题出在free_entities.empty 耗时太久！
+            // origin: if(free_entities.empty()){
+            // 优化后 1e8 用时 560ms
+            if(hasNoFreeEnts){
                 return Entity(++id_max);
             }else{
                 auto it = free_entities.begin();
                 uint64_t id = *it;
                 free_entities.erase(it);
+                if(free_entities.empty())hasNoFreeEnts = true;
                 return {id};
             }
         }
 
+        //perf[1]: 80ns/call (with no Components)
         inline void destroyEntity(Entity e){
+            // 2025/6/22 aaaa0ggmc
+            // 优化前 1e8 9175.65ms
+            //    个体:
+            //        hasNoFreeEnts = false; ==> 350ms
+            //        if(hasNoFreeEnts)hasNoFreeEnts = false; ==> 300ms
             //search for its presence,it's much more complex...
+            //优化后 1e8 8000ms
+
+            //if(compPool.empty())有必要吗？？完全没有必要！！因为实战情况下不可能为empty
             for(auto & ref_comp : compPool){
                 auto cp = (ref_comp.second.get());//@Note: it's data is not usable!!!
                 auto destroyer = ((ComponentPool<int>*)cp)->destroyer;
@@ -66,6 +87,7 @@ namespace age::world{
                     destroyer(cp,e.id);
                 }
             }
+            if(hasNoFreeEnts)hasNoFreeEnts = false;
             free_entities.push_back(e.id);
         }
 
@@ -152,13 +174,16 @@ namespace age::world{
             }else return &(comp->data[cmp->second]);
         }
 
-        template<CanUpdate T,class... Ts> inline void update(Ts&&... args){
+        template<class T,class... Ts> inline void update(Ts&&... args)
+    requires
+        requires(T&t,Ts&&... ts){t.run(ts...);} ||
+        requires(T&t,Ts&&... ts){t.update(ts...);}{
             auto opt_pool = getComponentPool<T>();
             if(!opt_pool)return;
             auto pool = (*opt_pool);
             for(auto & [_,index] : pool->mapper){
                 auto& runner = pool->data[index];
-                if constexpr(requires(T & t){ t.run(); }){
+                if constexpr(requires(T & t,Ts&&... ts){ t.run(ts...); }){
                     runner.run(args...);
                 }else runner.update(args...);
             }
@@ -172,6 +197,8 @@ namespace age::world{
         Entity e;
         EntityManager & em;
 
+        //perf[1]:
+        //perf[1](pre): 518.876 ns/call
         template<class T> inline std::optional<T*> get(){
             return em.getComponent<T>(e);
         }
