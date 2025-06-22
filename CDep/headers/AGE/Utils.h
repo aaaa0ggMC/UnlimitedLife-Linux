@@ -10,6 +10,8 @@
 #include <optional>
 #include <functional>
 #include <alib-g3/aclock.h>
+#include <thread>
+#include <chrono>
 //#include <iostream>
 
 ///对象如VAO,VBO为空
@@ -161,12 +163,9 @@ namespace age{
                 for (int index = 0;index < size;index++){
                     auto& event = events[index];
                     int64_t now = (int64_t) clock.getAllTime();
-                    // std::cout << now  << "  "<< event.startOn << std::endl;
                     if (now >= event.startOn){
                         event.task();
                         if (event.interval > 0){
-                            // std::cout<< size << std::endl;
-                            // // std::cout << now << " "<< event.startOn << std::endl;
                             event.startOn = now + event.interval;
                         }else {
                             toErase.push_back(index);
@@ -177,6 +176,7 @@ namespace age{
                 for (int& i : toErase){
                     events.erase(events.begin() + i);
                 }
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
         }
 
