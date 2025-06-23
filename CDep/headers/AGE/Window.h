@@ -168,6 +168,14 @@ namespace age{
             setKeyCallback(NULL);
         }
 
+        inline void setWindowSizeCallback(void (*func)(GLFWwindow* glfwWin,int newWidth,int newHeight)){
+            glfwSetWindowSizeCallback(window,func);
+        }
+
+        inline void removeWindowSizeCallback(){
+            glfwSetWindowSizeCallback(window,NULL);
+        }
+
         inline glm::vec2 getFrameBufferSize(){
             int width, height;
             glfwGetFramebufferSize(window, &width, &height);

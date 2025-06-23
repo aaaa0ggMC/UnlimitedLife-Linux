@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/6/20
+ * @date 2025/6/23
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -11,6 +11,7 @@
 #include <AGE/Input.h>
 
 #include <GL/gl.h>
+#include <GLFW/glfw3.h>
 #include <alib-g3/alogger.h>
 #include <iostream>
 #include <vector>
@@ -26,81 +27,64 @@ constexpr glm::vec2 cam_rot = glm::vec2(1,1);
 constexpr float framerate = 120;
 
 void upload_data(VBOManager & vbos,Application &);
+Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader);
+void dealInput(Input & input,glm::vec3& veloDir,Camera & cam,float mul);
+
+EntityManager& getEntityManager(){
+    static EntityManager em;
+    return em;
+}
+
+Camera& getCamera(){
+    static Camera cam (getEntityManager());
+    return cam;
+}
+
+Object& getCube(){
+    static Object cube (getEntityManager());
+    return cube;
+}
+
+//Entities
+EntityManager & em = getEntityManager();
+Camera & camera = getCamera();
+Object & cube = getCube();
+
+
+
+//Graphics ptrs
+Window * win;
 
 int main(){
+    //Log
     Logger logger;
     LogFactory lg("AGETest",logger);
-    Window * win;
-    EntityManager em;
+    ////Data////
+    glm::vec3 veloDir;
+    //Graphics & Input
+    Input input (framerate);
     Application app (em);
+    Shader shader = Shader::null();
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
-    Shader shader = Shader::null();
-    Input input (framerate);
-
-    //Init logger
-    logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
-    logger.appendLogOutputTarget("file0",std::make_shared<lot::SingleFile>("logs/cube.log"));
-
-    //// Window ////
-    lg.info("Creating window...");
-    app.setGLVersion(4,5);
-    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal^(~WinStyle::Resizable),0)){
-        lg.error("Failed to create window,now exit...");
-        exit(-1);
-    }else win = *app.getWindow("TestWindow");
-    input.setWindow(*win);
-    lg.info("CreateWindow:OK!");
-
-
-    //一定要有window才行
-    app.setGLErrCallbackFunc();
-    app.setGLErrCallback(true);
-
-    //// Shader ////
-    lg.info("Creating shader...");
-    shader = app.createShaderFromFile("main","test_data/cube.vert","test_data/cube.frag");
-    lg.info("CreateShader:OK!");
-
-    //// VAOs & VBOs ////
-    lg.info("Creating VAOs & VBOs...");
-    app.createVAOs(1);
-    app.checkOpenGLError();
-    lg.info("VAO:OK!");
-
-    app.createVBOs(1);
-    app.checkOpenGLError();
-    lg.info("VBO:OK!");
-
-    ////VBO data upload////
-    lg.info("Uploading data...");
-    upload_data(vbos,app);
-    lg.info("DataUpload:OK!");
+    win = setup(logger,lg,app,input,shader);
+    ////ShaderArgs////
+    ShaderUniform mvp = shader["mvp_matrix"];
+    ////Clocks////
+    Clock elapse (false);
 
     ////Bindings////
     vaos[0].bind();
     vbos[0].bind();
     vaos[0].setAttribute(vbos[0],0,3,GL_FLOAT);
     vaos[0].setAttribStatus(0,true);
-
-    ////Data////
-    glm::vec3 veloDir;
-    glm::quat rotDir;
-
-    ////Entities////
-    Camera camera (em);
-    Object cube (em);
-
-    ////Clocks////
-    Clock elapse;
-
-    ////ShaderArgs////
-    ShaderUniform mvp = shader["mvp_matrix"];
-
     ////InitWorld////
     camera.transform().move(1,0,10);
     camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
     cube.transform().move(1,-2,1);
+
+    //launch clock
+    elapse.start();
 
     //// Main Loop ////
     lg.info("Entering main loop...");
@@ -111,45 +95,11 @@ int main(){
         input.update();
         if(input.checkTick()){
             float p = elapse.getOffset() / 1000.0f;
+            dealInput(input,veloDir,camera,p);
 
-            veloDir = glm::vec3(0,0,0);
-            if(input.getKeyInfo(KeyCode::W).isPressing()){
-                veloDir.z -= 1;
-            }else if(input.getKeyInfo(KeyCode::S).isPressing()){
-                veloDir.z += 1;
-            }
-
-            if(input.getKeyInfo(KeyCode::A).isPressing()){
-                veloDir.x -= 1;
-            }else if(input.getKeyInfo(KeyCode::D).isPressing()){
-                veloDir.x += 1;
-            }
-
-            if(input.getKeyInfo(KeyCode::Space).isPressing()){
-                veloDir.y += 1;
-            }else if(input.getKeyInfo(KeyCode::LeftShift).isPressing()){
-                veloDir.y -= 1;
-            }
-
-            if(input.getKeyInfo(KeyCode::Left).isPressing()){
-
-                camera.transform().rotate(glm::vec3(0,1,0),-cam_rot.x * p);
-            }else if(input.getKeyInfo(KeyCode::Right).isPressing()){
-                camera.transform().rotate(glm::vec3(0,1,0),cam_rot.x * p);
-            }
-
-            if(input.getKeyInfo(KeyCode::Up).isPressing()){
-                camera.transform().rotate(glm::vec3(1,0,0),-cam_rot.y * p);
-            }else if(input.getKeyInfo(KeyCode::Down).isPressing()){
-                camera.transform().rotate(glm::vec3(1,0,0),cam_rot.y * p);
-            }
-
-            camera.transform().buildVelocity(veloDir,cam_speed);
             //post-input-update
             cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),3 * p);
             em.update<comps::Transform>(elapse.getOffset(),true);
-
-
             //post-game-update -- shader
             ////upload shader data////
             mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
@@ -174,6 +124,92 @@ int main(){
     //// cleanup ////
     app.destroyWindow(win);
     return 0;
+}
+
+void dealInput(Input & input,glm::vec3& veloDir,Camera & camera,float p){
+    veloDir = glm::vec3(0,0,0);
+    if(input.getKeyInfo(KeyCode::W).isPressing()){
+        veloDir.z -= 1;
+    }else if(input.getKeyInfo(KeyCode::S).isPressing()){
+        veloDir.z += 1;
+    }
+
+    if(input.getKeyInfo(KeyCode::A).isPressing()){
+        veloDir.x -= 1;
+    }else if(input.getKeyInfo(KeyCode::D).isPressing()){
+        veloDir.x += 1;
+    }
+
+    if(input.getKeyInfo(KeyCode::Space).isPressing()){
+        veloDir.y += 1;
+    }else if(input.getKeyInfo(KeyCode::LeftShift).isPressing()){
+        veloDir.y -= 1;
+    }
+
+    if(input.getKeyInfo(KeyCode::Left).isPressing()){
+
+        camera.transform().rotate(glm::vec3(0,1,0),-cam_rot.x * p);
+    }else if(input.getKeyInfo(KeyCode::Right).isPressing()){
+        camera.transform().rotate(glm::vec3(0,1,0),cam_rot.x * p);
+    }
+
+    if(input.getKeyInfo(KeyCode::Up).isPressing()){
+        camera.transform().rotate(glm::vec3(1,0,0),-cam_rot.y * p);
+    }else if(input.getKeyInfo(KeyCode::Down).isPressing()){
+        camera.transform().rotate(glm::vec3(1,0,0),cam_rot.y * p);
+    }
+
+    camera.transform().buildVelocity(veloDir,cam_speed);
+}
+
+Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader){
+    Window * win = nullptr;
+
+    //Init logger
+    logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
+    logger.appendLogOutputTarget("file0",std::make_shared<lot::SingleFile>("logs/cube.log"));
+
+    //// Window ////
+    lg.info("Creating window...");
+    app.setGLVersion(4,5);
+    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal,0)){
+        lg.error("Failed to create window,now exit...");
+        exit(-1);
+    }else win = *app.getWindow("TestWindow");
+    input.setWindow(*win);
+    lg.info("CreateWindow:OK!");
+
+    win->setWindowSizeCallback([](GLFWwindow*win,int nw,int nh){
+        glViewport(0,0,nw,nh);
+        camera.projector().setAspectRatio((float)nw,(float)nh);
+    });
+
+
+    //一定要有window才行
+    app.setGLErrCallbackFunc();
+    app.setGLErrCallback(true);
+
+    //// Shader ////
+    lg.info("Creating shader...");
+    shader = app.createShaderFromFile("main","test_data/cube.vert","test_data/cube.frag");
+    lg.info("CreateShader:OK!");
+
+    //// VAOs & VBOs ////
+    lg.info("Creating VAOs & VBOs...");
+    app.createVAOs(1);
+    app.checkOpenGLError();
+    lg.info("VAO:OK!");
+
+    app.createVBOs(1);
+    app.checkOpenGLError();
+    lg.info("VBO:OK!");
+
+    ////VBO data upload////
+    lg.info("Uploading data...");
+    upload_data(app.vbos,app);
+    lg.info("DataUpload:OK!");
+
+    return win;
 }
 
 void upload_data(VBOManager & vbos,Application& app){
