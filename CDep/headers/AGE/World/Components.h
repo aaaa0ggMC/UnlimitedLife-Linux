@@ -304,8 +304,10 @@ namespace age::world{
                 zFar = 1000;
             }
 
-            inline Projector& set(float angleRad,float w,float h,float near = 0.1f,float far = 1000.0f){
-                return setFOV(angleRad).setAspectRatio(w,h).setClipPlane(near,far);
+            inline Projector& set(float angleRad,float w,float h,float lnear = 0.1f,float lfar = 1000.0f){
+		auto & p = *this;
+		p.setFOV(angleRad).setAspectRatio(w,h).setClipPlane(lnear,lfar);
+                return p;
             }
 
             inline Projector& setFOV(float angleRad){
@@ -319,10 +321,10 @@ namespace age::world{
                 return *this;
             }
 
-            inline Projector& setClipPlane(float near,float far){
+            inline Projector& setClipPlane(float lnear,float lfar){
                 dm_mark();
-                zNear = near;
-                zFar = far;
+                zNear = lnear;
+                zFar = lfar;
                 return *this;
             }
 

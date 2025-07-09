@@ -12,3 +12,4 @@ aux_source_directory("./alib_test/alibtest0-src" TEST0_SRC)
 add_executable(alibtest0 ${TEST0_SRC})
 target_link_libraries(alibtest0 PRIVATE aaaa0ggmcLib)
 
+

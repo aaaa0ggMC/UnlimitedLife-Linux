@@ -1,0 +1,9 @@
+[2025-06-17 23:22:17][TRACE][Test][163.927764ms]:[1,2,3,4,5,6]
+[2025-06-17 23:22:17][TRACE][Test][163.953649ms]:["123","hhh","cnm","111"]
+[2025-06-17 23:22:17][TRACE][Test][163.965477ms]:["123","hhh","cn","111"]
+[2025-06-17 23:22:17][TRACE][Test][163.975296ms]:['1','2','3','4']
+[2025-06-17 23:22:17][TRACE][Test][164.003507ms]:[[1.23],[1.444,2.34354,2.43534],[3.45453],[1.53,2.454,4.543],[5.543],[6.54343]]
+[2025-06-17 23:22:17][TRACE][Test][164.020230ms]:{"cn":1,"wd":2}
+[2025-06-17 23:22:17][TRACE][Test][164.031308ms]:{"cm":["wd","11"],"cn":["123","234"]}
+[2025-06-17 23:22:17][TRACE][Test][164.046905ms]:{"cm":["wd","11"],"cn":["123","234"]}
+[2025-06-17 23:22:17][TRACE][Test][164.085164ms]:std::tuple<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, int, double, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > >["123",1,2.0123,{"123":"456","kkk":"jjj"}]

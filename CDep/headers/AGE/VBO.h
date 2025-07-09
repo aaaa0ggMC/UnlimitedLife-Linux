@@ -52,7 +52,7 @@ namespace age {
     /** @struct VBO
      * @brief OpenGL封装
      */
-    struct VBO{
+    struct AGE_API VBO{
     private:
         friend class VBOManager;
         friend class VAO;
