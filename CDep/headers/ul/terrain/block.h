@@ -1,13 +1,13 @@
-module;
+#ifndef UL_TERRAIN_BLOCK_H
+#define UL_TERRAIN_BLOCK_H
 #include <glm/glm.hpp>
 #include <ctype.h>
-export module Terrain.Block;
 
 namespace ul{
     // this is unexported, but used in Block
     class Chunk;
 
-    export class Block{
+    class Block{
     public:
         ////properties
 
@@ -20,3 +20,5 @@ namespace ul{
 
     };
 }
+
+#endif // UL_TERRAIN_BLOCK_H

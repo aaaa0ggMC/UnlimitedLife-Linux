@@ -1,7 +1,7 @@
-import ULServer;
-import ULSimpleRenderer;
-
 #include <iostream>
+#include <ul/ULServer.h>
+#include <ul/ULSimpleRenderer.h>
+#include <ul/base/requests.h>
 
 int main(void){
     //// Initializing Server & Simple Renderer(for test...) ////
@@ -16,6 +16,12 @@ int main(void){
     //// Directly Use Server's Data ////
     renderer.bindServer(&server);
     renderer.launch();
+
+    ul::RequestList rl;
+
+    rl.push(ul::Request<int>{1,{2}});
+    auto r = (ul::Request<int>*)rl.pop();
+    rl.releaseRequest(r);
 
     return 0;
 }

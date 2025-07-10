@@ -1,12 +1,10 @@
-module;
+#ifndef UL_ULSIMPLE_RENDERER_H
+#define UL_ULSIMPLE_RENDERER_H
 
-export module ULSimpleRenderer;
-
-import ULServer;
+#include "ULServer.h"
 
 namespace ul {
-
-    export class ULSimpleRenderer {
+    class ULSimpleRenderer {
     public:
         ULSimpleRenderer(){
         }
@@ -26,3 +24,5 @@ namespace ul {
         ULServer* server = nullptr;
     };
 }
+
+#endif // UL_ULSIMPLE_RENDERER_H
