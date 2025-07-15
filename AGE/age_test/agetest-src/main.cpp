@@ -25,6 +25,9 @@ using namespace alib::g3;
 constexpr float cam_speed = 3;
 constexpr glm::vec2 cam_rot = glm::vec2(1,1);
 constexpr float framerate = 120;
+constexpr int vbo_count = 2;
+constexpr int vao_count = 2;
+constexpr float fpsCountTimeMS = 1500;
 
 void upload_data(VBOManager & vbos,Application &);
 Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader);
@@ -40,17 +43,9 @@ Camera& getCamera(){
     return cam;
 }
 
-Object& getCube(){
-    static Object cube (getEntityManager());
-    return cube;
-}
-
 //Entities
 EntityManager & em = getEntityManager();
 Camera & camera = getCamera();
-Object & cube = getCube();
-
-
 
 //Graphics ptrs
 Window * win;
@@ -68,28 +63,49 @@ int main(){
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
     win = setup(logger,lg,app,input,shader);
+
     ////ShaderArgs////
     ShaderUniform mvp = shader["mvp_matrix"];
     ////Clocks////
     Clock elapse (false);
+    Clock fpsCounter (false);
+
+    uint64_t frame_count = 0;
 
     ////Bindings////
     vaos[0].bind();
     vbos[0].bind();
     vaos[0].setAttribute(vbos[0],0,3,GL_FLOAT);
     vaos[0].setAttribStatus(0,true);
+
+    vaos[1].bind();
+    vbos[1].bind();
+    vaos[1].setAttribute(vbos[1],0,3,GL_FLOAT);
+    vaos[1].setAttribStatus(0,true);
+    ////World Objects////
+    Object cube (em);
+    Object pyramid (em);
+
     ////InitWorld////
     camera.transform().move(1,0,10);
     camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
     cube.transform().move(1,-2,1);
+    pyramid.transform().move(1,1,1);
 
     //launch clock
     elapse.start();
+    fpsCounter.start();
 
     //// Main Loop ////
     lg.info("Entering main loop...");
     win->makeCurrent();//enable window
     while(!(win->shouldClose())){
+        ++frame_count;
+        if(fpsCounter.getOffset() >= fpsCountTimeMS){
+            fpsCounter.clearOffset();
+            lg(LOG_INFO) << "FPS:" << (int)(frame_count / fpsCountTimeMS * 1000) << endlog;
+            frame_count = 0;
+        }
         win->pollEvents();
 
         input.update();
@@ -100,9 +116,6 @@ int main(){
             //post-input-update
             cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),3 * p);
             em.update<comps::Transform>(elapse.getOffset(),true);
-            //post-game-update -- shader
-            ////upload shader data////
-            mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
 
             elapse.clearOffset();
         }
@@ -115,9 +128,19 @@ int main(){
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_CULL_FACE);
-        glFrontFace(GL_CW);
 
+        ///Cube
+        vaos[0].bind();
+        glFrontFace(GL_CW);
+        mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
         win->draw(PrimitiveType::Triangles,0,36);
+
+        ///Pyramid
+        vaos[1].bind();
+        glFrontFace(GL_CCW);
+        mvp.uploadmat4(camera.buildVPMatrix() * pyramid.transform().buildModelMatrix());
+        win->draw(PrimitiveType::Triangles,0,36);
+        
         win->display();
     }
 
@@ -179,6 +202,7 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     input.setWindow(*win);
     lg.info("CreateWindow:OK!");
 
+    /// @TODO make the function much more better to use 
     win->setWindowSizeCallback([](GLFWwindow*win,int nw,int nh){
         glViewport(0,0,nw,nh);
         camera.projector().setAspectRatio((float)nw,(float)nh);
@@ -196,11 +220,11 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
 
     //// VAOs & VBOs ////
     lg.info("Creating VAOs & VBOs...");
-    app.createVAOs(1);
+    app.createVAOs(vao_count);
     app.checkOpenGLError();
     lg.info("VAO:OK!");
 
-    app.createVBOs(1);
+    app.createVBOs(vbo_count);
     app.checkOpenGLError();
     lg.info("VBO:OK!");
 
@@ -213,7 +237,7 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
 }
 
 void upload_data(VBOManager & vbos,Application& app){
-    std::vector<float> data = {
+    std::vector<float> cube_data = {
         -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f,
         1.0f, -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f, -1.0f,
         1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, -1.0f,
@@ -227,6 +251,17 @@ void upload_data(VBOManager & vbos,Application& app){
         -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
         1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f
     };
-    vbos[0].bufferData<float>(data);
+    std::vector<float> pyramid_data = {
+    -1.0f, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // front face
+	 1.0f, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // right face
+	 1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // back face
+	 -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, // left face
+	 -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, // base – left front
+	 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f // base – right back
+	};
+    
+    vbos[0].bufferData<float>(cube_data);
+    vbos[1].bufferData<float>(pyramid_data);
+
     app.checkOpenGLError();
 }

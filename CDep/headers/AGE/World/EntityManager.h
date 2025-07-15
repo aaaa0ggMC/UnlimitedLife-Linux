@@ -150,6 +150,16 @@ namespace age::world{
             auto cmp = comp->mapper.find(e.id);
             if(cmp == comp->mapper.end()){
                 size_t index = 0;
+                ////Deal with requisitions
+                if constexpr (requires { T::requisitions; }){
+#ifdef AGE_EM_DEBUG
+                    std::cout << "Req count:" << T::requisitions.getContSize() << std::endl;
+#endif
+                    ///If the required component has no constructor that needs no args,compilation would fail
+                    T::requisitions.action([]<class Need>(EntityManager &em,const Entity & e){
+                        em.addComponent<Need>(e);
+                    },*this,e);
+                }
                 if(comp->free_comps.empty()){
                     //create new
                     comp->data.emplace_back(args...);

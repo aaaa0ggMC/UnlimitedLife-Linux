@@ -32,6 +32,35 @@ namespace age::world{
       * 1.需要包含 void reset();这个函数
       * 2.没了
       */
+    
+    template<size_t index,class... Ts> struct TypeAt;
+
+    
+    template<class T,class... Ts> struct TypeAt <0,T,Ts...>{
+        using type = T;
+    };
+
+    template<size_t index,class T,class... Ts> struct TypeAt <index,T,Ts...>{
+        static_assert(index < sizeof...(Ts) + 1,"Index out of range!");
+        using type = TypeAt<index-1,Ts...>::type;
+    };
+
+    template<class... Ts> struct ComponentRequisitions{
+    public:
+
+        inline size_t getContSize(){
+            return sizeof...(Ts);
+        }
+    
+        template<size_t Index>
+        using getType = typename TypeAt<Index, Ts...>::type;
+
+        template<class Function,class... Args> void action(Function && func,Args&&... args){
+            (func.template operator()<Ts>(args...),...);
+        }
+
+    };
+
     namespace comps{
         /// 有关模型与世界
         struct AGE_API Transform : public DirtyMarker{
@@ -263,14 +292,18 @@ namespace age::world{
         };
 
         /// 仅用于构建视图矩阵，而且还依赖Transform这个module @todo maybe可以使用c++模板元编程把组件之间的依赖关系也写出来
-        struct AGE_API Viewer{
+        struct AGE_API Viewer : public DirtyMarker{
+            static ComponentRequisitions<Transform> requisitions;
+
+            glm::mat4 view_matrix;
+
             inline static void reset(){}
 
             inline glm::mat4& buildViewMatrix(Transform & trs){
-                if(!trs.dm_check())return trs.model_matrix;
-                trs.buildModelMatrix(false);
-                trs.dm_clear();
-                glm::mat4 & model = trs.model_matrix;
+                if(!trs.dm_check() && !dm_check())return view_matrix;
+                trs.buildModelMatrix();
+                dm_clear();
+                glm::mat4 & model = view_matrix;
                 model = glm::mat4_cast((trs.m_rotation.get()));
                 model = glm::translate(model,-trs.m_position);
                 return model;

@@ -24,7 +24,7 @@ namespace age::world{
         inline Camera(EntityManager& iem):
         em{iem},
         cameraEntity{iem.createEntity(),iem}{
-            cameraEntity.add<comps::Transform>();
+            //cameraEntity.add<comps::Transform>();
             cameraEntity.add<comps::Viewer>();
             cameraEntity.add<comps::Projector>();
 
