@@ -150,6 +150,7 @@ namespace age::world{
             auto cmp = comp->mapper.find(e.id);
             if(cmp == comp->mapper.end()){
                 size_t index = 0;
+#ifndef AGE_NO_COMP_REQUISITIONS
                 ////Deal with requisitions
                 if constexpr (requires { T::requisitions; }){
 #ifdef AGE_EM_DEBUG
@@ -160,6 +161,7 @@ namespace age::world{
                         em.addComponent<Need>(e);
                     },*this,e);
                 }
+#endif
                 if(comp->free_comps.empty()){
                     //create new
                     comp->data.emplace_back(args...);
