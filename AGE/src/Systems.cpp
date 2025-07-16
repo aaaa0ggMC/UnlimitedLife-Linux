@@ -3,6 +3,10 @@
 #include <unordered_set>
 
 using namespace age::world::systems;
+using namespace age::world::comps;
+using namespace age::world;
+
+ComponentRequisitions<Transform> Viewer::requisitions;
 
 void ParentSystem::update(){
     if(!pool || !transformPool)initPool();
