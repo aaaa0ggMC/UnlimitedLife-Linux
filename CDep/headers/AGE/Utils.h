@@ -138,6 +138,8 @@ namespace age{
     public:
         TriggerFunc trigger;
         int32_t limit;
+        
+        static Error def;
 
         static std::pmr::unsynchronized_pool_resource pool;
         static std::pmr::polymorphic_allocator<char> alloc;

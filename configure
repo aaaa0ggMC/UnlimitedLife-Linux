@@ -1,12 +1,13 @@
 #!/bin/bash
 
+# @todo stb能不能成我不知道
 # Install build dependencies
 if [ -f /etc/arch-release ]; then
     echo "This is Arch Linux."
-    sudo pacman --needed -S cmake rapidjson glfw glew glm 
+    sudo pacman --needed -S cmake rapidjson glfw glew glm stb
 else
   echo "This is not Arch Linux."
-  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev
+  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb
 fi
 
 # Create a build directory if it doesn't exist

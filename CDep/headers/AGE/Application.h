@@ -20,6 +20,7 @@
 #include <AGE/VBO.h>
 #include <AGE/Shader.h>
 #include <AGE/World/EntityManager.h>
+#include <AGE/Texture.h>
 
 #include <GL/glext.h>
 #include <unordered_map>
@@ -65,9 +66,7 @@ namespace age{
     public:
         VAOManager vaos;
         VBOManager vbos;
-        Error defErr;
         world::EntityManager& em; ///< EntityManager
-
 
         Application(world::EntityManager & emm); ///< 构造函数
         ~Application(); ///< 析构函数
@@ -105,20 +104,18 @@ namespace age{
 
         //// Shader ////
         /// 创建着色器
-        [[nodiscard]] Shader createShader(const CreateShaderInfo & info,Error * err = NULL);
+        [[nodiscard]] Shader createShader(const CreateShaderInfo & info);
         /// baby模式
         [[nodiscard]] Shader createShaderFromFile(const std::string& sid,
                                                   const std::string& fvert,
                                                   const std::string& ffrag = "",
                                                   const std::string& fgeom = "",
-                                                  const std::string& fcomp = "",
-                                                  Error* errs = NULL);
+                                                  const std::string& fcomp = "");
         [[nodiscard]] Shader createShaderFromSrc(const std::string& sid,
                                                  const std::string& vert = "",
                                                  const std::string& frag = "",
                                                  const std::string& geom = "",
-                                                 const std::string& comp = "",
-                                                 Error* errs = NULL);
+                                                 const std::string& comp = "");
         /// 通过sid获取着色器
         Shader getShader(const std::string & sid);
         /// 获取着色器整体的log
@@ -128,16 +125,20 @@ namespace age{
         /// 删除一个shader，如果一个shader处于bind状态，行为未定义，程序endup前谨慎使用
         bool destroyShader(const std::string & sid);
 
+        //// Texture ////
+        Texture& createTexture(const CreateTextureInfo & info);
+        
+
         /// 设置OpenGL版本要求
         void setGLVersion(unsigned int major,unsigned int minor);
 
         /// 检测OpenGL出现的错误，默认使用Application自带的，(NULL)
-        void checkOpenGLError(Error * err = NULL);
+        void checkOpenGLError();
 
         /// 设置OpenGL错误回显函数
         inline void setGLErrCallbackFunc(GLDEBUGPROC proc = glErrDefDebugProc,void * useParam = NULL){
             if(windows.size() == 0){
-                defErr.pushMessage({AGEE_OPENGL_NO_CONTEXT,"You havent created a window to activate OpenGL context."});
+                Error::def.pushMessage({AGEE_OPENGL_NO_CONTEXT,"You havent created a window to activate OpenGL context."});
                 return;
             }
             if(proc == glErrDefDebugProc){
@@ -148,7 +149,7 @@ namespace age{
         /// 设置OpenGL错误是否回显
         inline void setGLErrCallback(bool enable){
             if(windows.size() == 0){
-                defErr.pushMessage({AGEE_OPENGL_NO_CONTEXT,"You havent created a window to activate OpenGL context."});
+                Error::def.pushMessage({AGEE_OPENGL_NO_CONTEXT,"You havent created a window to activate OpenGL context."});
                 return;
             }
             if(enable)glEnable(GL_DEBUG_OUTPUT);
@@ -163,6 +164,9 @@ namespace age{
         std::unordered_map<std::string,Window*> windows;
         std::unordered_map<std::string,Shader> shaders;
         /// Application实例数目，当counter减为0时自动释放GLFW
+        ///纹理表
+        std::unordered_map<std::string,Texture> textures;
+        std::unordered_map<std::string,TextureInfo> texturesInfo;
         static unsigned int counter;
     };
 }

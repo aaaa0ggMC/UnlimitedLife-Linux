@@ -18,7 +18,7 @@
     aaaa0ggmcLib
     glfw
     GLEW
-    foonathan_memory
+    stb
 
 [AGE_tests]
 [[agetest]]

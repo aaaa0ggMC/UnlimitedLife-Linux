@@ -4,6 +4,7 @@
 #include <GL/glu.h>
 #include <AGE/Input.h>
 #include <alib-g3/autil.h>
+#include <stb/stb_image.h>
 
 // #include <iostream>
 
@@ -111,7 +112,7 @@ bool Application::destroyWindow(Window * win){
 
 Application::Application(world::EntityManager & emm):em{emm}{
     counter++;
-    defErr.setTrigger();
+    Error::def.setTrigger();
 }
 
 Application::~Application(){
@@ -203,8 +204,8 @@ bool Application::destroyVAO(VAO vao){
     return false;
 }
 
-void Application::checkOpenGLError(Error* errs){
-    Error &err = (errs ? *errs : defErr);
+void Application::checkOpenGLError(){
+    Error &err = Error::def;
     GLint errc = glGetError();
 
     while(errc != GL_NO_ERROR){
@@ -243,8 +244,7 @@ Shader Application::createShaderFromFile(const std::string& sid,
                                           const std::string& fvert,
                                           const std::string& ffrag,
                                           const std::string& fgeom,
-                                          const std::string& fcomp,
-                                          Error* errs){
+                                          const std::string& fcomp){
     std::string vert,frag,geom,comp;
     vert = frag = geom = comp = "";
 
@@ -261,23 +261,22 @@ Shader Application::createShaderFromFile(const std::string& sid,
         Util::io_readAll(fcomp,comp);
     }
 
-    return createShaderFromSrc(sid,vert,frag,geom,comp,errs);
+    return createShaderFromSrc(sid,vert,frag,geom,comp);
 }
 Shader Application::createShaderFromSrc(const std::string& sid,
                                          const std::string& vert,
                                          const std::string& frag,
                                          const std::string& geom,
-                                         const std::string& comp,
-                                         Error* errs){
+                                         const std::string& comp){
     CreateShaderInfo si;
     si.sid = sid;
     si.vertex = vert;
     si.fragment = frag;
     si.compute = comp;
-    return createShader(si,errs);
+    return createShader(si);
 }
 
-Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
+Shader Application::createShader(const CreateShaderInfo &info){
     Shader shader;
     GLuint vid = 0, fid = 0,gid = 0,cid = 0;
     GLint compile_status = 0;
@@ -285,7 +284,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
     std::string logv = "";
     bool created = false;
 
-    Error & err = ((errs)?*errs:defErr);
+    Error & err = Error::def;
 
     if(shaders.find(info.sid) != shaders.end()){
         err.pushMessage({AGEE_CONFLICT_SID,info.sid.c_str()});
@@ -298,7 +297,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
         glShaderSource(vid,1,buf,NULL);
         glCompileShader(vid);
 
-        checkOpenGLError(&err);
+        checkOpenGLError();
         glGetShaderiv(vid,GL_COMPILE_STATUS,&compile_status);
         if(compile_status != 1){
             getShaderShaderLog(vid,logv);
@@ -314,7 +313,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
         glShaderSource(fid,1,buf,NULL);
         glCompileShader(fid);
 
-        checkOpenGLError(&err);
+        checkOpenGLError();
         glGetShaderiv(fid,GL_COMPILE_STATUS,&compile_status);
         if(compile_status != 1){
             getShaderShaderLog(fid,logv);
@@ -330,7 +329,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
         glShaderSource(gid,1,buf,NULL);
         glCompileShader(gid);
 
-        checkOpenGLError(&err);
+        checkOpenGLError();
         glGetShaderiv(gid,GL_COMPILE_STATUS,&compile_status);
         if(compile_status != 1){
             getShaderShaderLog(gid,logv);
@@ -349,7 +348,7 @@ Shader Application::createShader(const CreateShaderInfo &info,Error * errs){
             glShaderSource(cid,1,buf,NULL);
             glCompileShader(cid);
 
-            checkOpenGLError(&err);
+            checkOpenGLError();
             glGetShaderiv(cid,GL_COMPILE_STATUS,&compile_status);
             if(compile_status != 1){
                 getShaderShaderLog(cid,logv);
@@ -453,7 +452,7 @@ void GLAPIENTRY Application::glErrDefDebugProc(
     buf += "\n[Severity]" + std::string(severityStr);
     buf += "\n[Message ]" + std::string(message) + "\n";
 
-    app.defErr.pushMessage({AGEE_OPENGL_DEBUG_MESSAGE,buf.c_str()});
+    Error::def.pushMessage({AGEE_OPENGL_DEBUG_MESSAGE,buf.c_str()});
 }
 
 Shader Application::getShader(const std::string & sid){
@@ -472,4 +471,13 @@ bool Application::destroyShader(const std::string & sid){
         return true;
     }
     return false;
+}
+
+Texture Application::createTexture(const CreateTextureInfo & info){
+    if(textures.find(info.sid) != textures.end()){
+        Error::def.pushMessage({AGEE_CONFLICT_SID,"Texture SID conflicts!!!"});
+    }
+    ///...WIP
+    texturesInfo.emplace();
+    stbi_load(info.file.c_str(),)
 }

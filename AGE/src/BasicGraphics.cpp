@@ -1,5 +1,6 @@
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
+#include <AGE/Texture.h>
 
 using namespace age;
 
@@ -58,4 +59,16 @@ void VBOManager::add(GLuint v){
 void VBOManager::markAsFree(uint32_t index){
     if(index >= vbos.size())return;
     vbos[index] = 0;
+}
+
+// 你知道为什么texture在这里吗，因为我不想多写个文件了
+CreateTextureInfo::CreateShaderInfo(){
+    this->source = Source::FromFile;
+
+    this->file.path = "";
+    this->sid = "";
+    this->buffer.eleCount = 0;
+    this->buffer.data = nullptr;
+    this->vec.data = nullptr;
+    this->channel_desired = 4;
 }
