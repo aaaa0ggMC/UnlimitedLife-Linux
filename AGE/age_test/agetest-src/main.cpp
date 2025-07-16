@@ -31,25 +31,8 @@ constexpr int vao_count = 2;
 constexpr float fpsCountTimeMS = 1500;
 
 void upload_data(VBOManager & vbos,Application &);
-Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader);
+Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader,Camera & cam);
 void dealInput(Input & input,glm::vec3& veloDir,Camera & cam,float mul);
-
-EntityManager& getEntityManager(){
-    static EntityManager em;
-    return em;
-}
-
-Camera& getCamera(){
-    static Camera cam (getEntityManager());
-    return cam;
-}
-
-//Entities
-EntityManager & em = getEntityManager();
-Camera & camera = getCamera();
-
-//Graphics ptrs
-Window * win;
 
 int main(){
     //Log
@@ -59,11 +42,14 @@ int main(){
     glm::vec3 veloDir;
     //Graphics & Input
     Input input (framerate);
+    EntityManager em;
     Application app (em);
+    ////World Camera////
+    Camera camera (em);
     Shader shader = Shader::null();
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
-    win = setup(logger,lg,app,input,shader);
+    Window * win = setup(logger,lg,app,input,shader,camera);
 
     ////ShaderArgs////
     ShaderUniform mvp = shader["mvp_matrix"];
@@ -193,7 +179,7 @@ void dealInput(Input & input,glm::vec3& veloDir,Camera & camera,float p){
     camera.transform().buildVelocity(veloDir,cam_speed);
 }
 
-Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader){
+Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader,Camera & camera){
     Window * win = nullptr;
 
     //Init logger
@@ -210,12 +196,15 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     input.setWindow(*win);
     lg.info("CreateWindow:OK!");
 
-    /// @TODO make the function much more better to use 
-    win->setWindowSizeCallback([](GLFWwindow*win,int nw,int nh){
+    win->setWindowSizeCallback([&camera](Window & win,int nw,int nh){
         glViewport(0,0,nw,nh);
         camera.projector().setAspectRatio((float)nw,(float)nh);
     });
-
+    win->setKeyCallback([](Window & win,KeyWrapper kw){
+        if(kw.key == GLFW_KEY_A && kw.hasControl()){
+            std::cout << "Ctrl+A" << std::endl;
+        }
+    });
 
     //一定要有window才行
     app.setGLErrCallbackFunc();

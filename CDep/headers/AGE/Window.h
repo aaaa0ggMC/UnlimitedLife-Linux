@@ -1,6 +1,7 @@
 /** @file Window.h
  * @brief 窗口
  * @author aaaa0ggmc
+ * @start-date 2025-6-11
  * @date 2025-6-11
  * @version 3.1
  * @copyright copyright(C)2025
@@ -17,6 +18,7 @@
 #include <AGE/Utils.h>
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
+#include <AGE/Input.h>
 
 #include <GL/gl.h>
 #include <GL/glew.h>
@@ -97,10 +99,17 @@ namespace age{
         GLFWwindow *window;
         /// 静态变量
         static Window * current;
+        /// 用于处理绑定 Actually,It can be replaced by glfwSetWindowUserPointer & glfwGetWindowUserPointer,however,my impl isnt that bad
+        static BinderArray binderArray;
         /// 窗口的SID
         std::string sid;
         /// 限制fps
         alib::g3::RateLimiter fpsLimiter;
+        /// 绑定便于访问
+        Binder binder { binderArray };
+        /// OnResize
+        std::function<void(Window&,int nw,int nh)> m_onResize;
+        std::function<void(Window&,age::KeyWrapper wrapper)> m_onKey;
 
 
         Window();
@@ -160,20 +169,20 @@ namespace age{
             return {width, height};
         }
 
-        inline void setKeyCallback(void (*func)(GLFWwindow * glfwWin,int key,int scancode,int action,int mods)){
-            glfwSetKeyCallback(window,func);
+        inline void setKeyCallback(std::function<void(Window&,age::KeyWrapper wrapper)> func){
+            m_onKey = func;
         }
 
         inline void removeKeyCallback(){
-            setKeyCallback(NULL);
+            m_onKey = nullptr;
         }
 
-        inline void setWindowSizeCallback(void (*func)(GLFWwindow* glfwWin,int newWidth,int newHeight)){
-            glfwSetWindowSizeCallback(window,func);
+        inline void setWindowSizeCallback(std::function<void(Window&,int nw,int nh)> func){
+            m_onResize = func;
         }
 
         inline void removeWindowSizeCallback(){
-            glfwSetWindowSizeCallback(window,NULL);
+            m_onResize = nullptr;
         }
 
         inline glm::vec2 getFrameBufferSize(){

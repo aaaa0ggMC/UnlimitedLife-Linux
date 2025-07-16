@@ -1,8 +1,9 @@
 #ifndef AGE_H_INPUT
 #define AGE_H_INPUT
 #include <AGE/Utils.h>
-#include <AGE/Window.h>
 #include <alib-g3/aclock.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #include <unordered_map>
 #include <cstdint>
@@ -50,6 +51,8 @@ namespace age {
 
 #include <AGE/keycode.inl>
 
+    /// 这里要用到Window
+    class Window;
     struct AGE_API Input{
         Window* win;
         std::unordered_map<KeyCode,KeyInfo> codes;

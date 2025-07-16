@@ -4,6 +4,7 @@
 using namespace age;
 
 Window * Window::current = NULL;
+BinderArray Window::binderArray;
 
 CreateWindowInfo::CreateWindowInfo(){
     sid = "default";
@@ -19,9 +20,7 @@ CreateWindowInfo::CreateWindowInfo(){
 Window::Window():
 window{nullptr},
 sid{""},
-fpsLimiter{120}{
-
-}
+fpsLimiter{120}{}
 
 void Window::setStyle(WinStyle styles,bool enableV){
     if(ws_hasFlag(styles,age::WinStyle::FollowGLFW)){

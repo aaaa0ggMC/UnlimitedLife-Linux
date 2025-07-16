@@ -2,6 +2,7 @@
 #include <GL/glext.h>
 #include <cstring>
 #include <GL/glu.h>
+#include <AGE/Input.h>
 #include <alib-g3/autil.h>
 
 // #include <iostream>
@@ -55,7 +56,20 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     if(info.x >= 0 && info.y >= 0)glfwSetWindowPos(win->window,info.x,info.y);
     if(!(Window::current))win->makeCurrent();
     win->setFramerateLimit(info.fps);
+    win->binder.bind((intptr_t)(win->window),(intptr_t)win);
     GLInit::GLEW();
+    //bindings
+    glfwSetWindowSizeCallback(win->window,[](GLFWwindow * win,int nw,int nh){
+        Window & window = *((Window*)Window::binderArray.get<Window>((intptr_t)win));
+        if(window.m_onResize)window.m_onResize(window,nw,nh);
+    });
+
+    glfwSetKeyCallback(win->window,[](GLFWwindow * glfwWin,int key,int scancode,int action,int mods){
+        age::KeyWrapper wrapper (glfwWin,key,scancode,action,mods);
+        Window & window = *((Window*)Window::binderArray.get<Window>((intptr_t)glfwWin));
+        if(window.m_onKey)window.m_onKey(window,wrapper);
+    });
+
     // no vsync
     glfwSwapInterval(0);
     return {win};

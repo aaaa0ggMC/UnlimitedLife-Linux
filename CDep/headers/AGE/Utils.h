@@ -88,6 +88,49 @@ namespace age{
     };
     typedef void(*TriggerFunc)(const ErrorInfopp&);
 
+    struct AGE_API BinderArray{
+        std::unordered_map<intptr_t,intptr_t> bindings;
+    
+        template<class T> inline T* get(intptr_t data){
+            auto iter = bindings.find(data);
+            if(iter != bindings.end()){
+                return (T*)(iter->second);
+            }
+            return nullptr;
+        }
+    };
+
+    struct AGE_API Binder{
+        BinderArray & ba;
+        intptr_t addr;
+        intptr_t target;
+
+        inline Binder(BinderArray&b):ba{b}{
+            addr = 0;
+        }
+
+        inline void bind(intptr_t a,intptr_t tg){
+            addr = a;
+            target = tg;
+            ba.bindings[a] = tg;
+        }
+
+        inline void unbind(){
+            if(addr){
+                auto iter = ba.bindings.find(addr);
+                if(iter != ba.bindings.end()){
+                    ba.bindings.erase(iter);
+                }
+                addr = 0;
+            }
+        }
+
+        inline ~Binder(){
+            //自动销毁
+            unbind();
+        }
+    };
+
     /** @struct Error
      *  @brief handle errors during many operations
      */
@@ -192,5 +235,4 @@ namespace age{
         }
     };
 }
-
 #endif

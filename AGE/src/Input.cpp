@@ -1,4 +1,5 @@
 #include <AGE/Input.h>
+#include <AGE/Window.h>
 
 using namespace age;
 
