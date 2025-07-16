@@ -200,11 +200,6 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
         glViewport(0,0,nw,nh);
         camera.projector().setAspectRatio((float)nw,(float)nh);
     });
-    win->setKeyCallback([](Window & win,KeyWrapper kw){
-        if(kw.key == GLFW_KEY_A && kw.hasControl()){
-            std::cout << "Ctrl+A" << std::endl;
-        }
-    });
 
     //一定要有window才行
     app.setGLErrCallbackFunc();
