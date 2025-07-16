@@ -19,6 +19,14 @@ namespace age::world {
             tran.build(emm,e.e.id);
         }
 
+        inline Entity getEntity(){
+            return e.e;
+        }
+
+        inline EntityWrapper getEntityWrapper(){
+            return e;
+        }
+
         inline ~Object(){
             e.destroy();
         }

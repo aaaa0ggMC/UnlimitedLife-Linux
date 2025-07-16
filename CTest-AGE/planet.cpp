@@ -1,5 +1,5 @@
-/** @file cube.cpp
- * @brief cubic
+/** @file planet.cpp
+ * @brief simulate simple planet
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
  * @date 2025/07/16

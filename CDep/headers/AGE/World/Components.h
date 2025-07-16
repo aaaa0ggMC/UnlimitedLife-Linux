@@ -1,13 +1,14 @@
 /** @file world/Components.h
  * @brief 提供一些预制的components
  * @author aaaa0ggmc,euuen
- * @date 2025/07/15
+ * @date 2025/07/16
  * @start-date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
 #ifndef AGE_H_COMP
 #define AGE_H_COMP
 #include <AGE/Utils.h>
+#include <AGE/World/Entity.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -34,10 +35,10 @@ namespace age::world{
       * 2.没了
       */
     
-    template<size_t index,class... Ts> struct TypeAt;
+    template<size_t index,class... Ts> struct AGE_API TypeAt;
 
     
-    template<class T,class... Ts> struct TypeAt <0,T,Ts...>{
+    template<class T,class... Ts> struct AGE_API TypeAt <0,T,Ts...>{
         using type = T;
     };
 
@@ -46,7 +47,7 @@ namespace age::world{
         using type = TypeAt<index-1,Ts...>::type;
     };
 
-    template<class... Ts> struct ComponentRequisitions{
+    template<class... Ts> struct AGE_API ComponentRequisitions{
     public:
 
         inline size_t getContSize(){
@@ -282,6 +283,24 @@ namespace age::world{
                 return model_matrix;
             }
 
+            /// @brief It's a simple function,supports only 1 layer of parent-child relationship
+            /// @note use ParentSystem for more reliable operations
+            inline glm::mat4& buildModelMatrixWithParent(Transform & parent){
+                if(!dm_check() && !parent.dm_check())return model_matrix;
+                dm_clear();
+                
+                model_matrix = parent.buildModelMatrix();
+                model_matrix *= glm::translate(glm::mat4(1.0), m_position);
+                model_matrix *= glm::mat4_cast(m_rotation.get());
+                model_matrix *= glm::scale(glm::mat4(1.0f), m_scale);
+                /// build drs
+                m_up  = glm::vec3(0,1,0) * m_rotation.get() * parent.m_rotation.get();
+                m_left =  glm::vec3(1,0,0) * m_rotation.get() * parent.m_rotation.get();
+                m_forward = glm::vec3(0,0,1) * m_rotation.get() * parent.m_rotation.get();
+
+                return model_matrix;
+            }
+
             inline void update(float elapseTime_ms,bool ignore_y_directional){
                 float p = (elapseTime_ms / 1000.0);
                 if(ignore_y_directional){
@@ -309,6 +328,15 @@ namespace age::world{
                 model = glm::translate(model,-trs.m_position);
                 return model;
             }
+        };
+
+        struct AGE_API Parent{
+            Entity parent;
+
+            Parent(Entity & p){
+                parent = p;
+            }
+            //Cache Component Index is not a good option,because the index may vary when the user deleted the component and then added it
         };
 
         /// reserved used for test
