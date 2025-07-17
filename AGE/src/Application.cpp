@@ -76,7 +76,7 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     return {win};
 }
 
-std::optional<Window*> Application::createWindow(std::string_view sid,std::string_view title,unsigned int width,unsigned int height,int x,int y,WinStyle style,float fpsRestrict){
+std::optional<Window*> Application::createWindow(std::string_view sid,std::string_view title,int width,int height,int x,int y,WinStyle style,float fpsRestrict){
     CreateWindowInfo wi;
     wi.sid = sid;
     wi.windowTitle = title;

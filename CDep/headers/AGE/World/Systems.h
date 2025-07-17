@@ -3,7 +3,7 @@
  * @author aaaa0ggmc
  * @brief 提供一些预设的System插件
  * @version 0.1
- * @date 2025/07/16
+ * @date 2025/07/17
  * @start-date 2025/7/16
  * @copyright Copyright (c) 2025
  */
@@ -39,6 +39,68 @@ namespace age::world{
             }
 
             void update();
+        };
+
+
+        //需要对Marker的comp限制，起码要有dm_mark才行
+        template<typename T>
+        concept ComponentMarkable = requires(T & t) {
+            t.dm_mark();
+        };
+
+        /// @brief 直接把一个pool都标记了
+        template<ComponentMarkable T> struct AGE_API MarkerSystem{
+            ComponentPool<T> * pool;
+            EntityManager &em;
+
+            inline MarkerSystem(EntityManager & iem): em{iem}{
+                initPool();    
+            }
+
+            inline void initPool(){
+                auto opt = em.getComponentPool<T>();
+                if(!opt)pool = nullptr;
+                else pool = *opt;
+            }
+
+            inline void update(){
+                if(!pool)return;
+                if constexpr(std::is_same_v<T,comps::Transform> == true){
+                    //额外处理
+                    for(T & c: pool->data){
+                        c.dm_mark();
+                        c.m_rotation.dm_mark();
+                    }
+                }else{
+                    for(T & c: pool->data){
+                        c.dm_mark();
+                    }
+                }
+            }
+        };
+
+        /// @brief 更加通用的Marker
+        struct AGE_API GenericMarkerSystem{
+            EntityManager &em;
+
+            inline GenericMarkerSystem(EntityManager & iem): em{iem}{}
+
+            template<ComponentMarkable T> inline void update(){
+                auto opool = em.getComponentPool<T>();
+                if(!opool)return;
+                auto * pool = *opool;
+                if constexpr(std::is_same_v<T,comps::Transform> == true){
+                    //额外处理
+                    for(T & c: pool->data){
+                        c.dm_mark();
+                        c.m_rotation.dm_mark();
+                    }
+                }else{
+                    for(T & c: pool->data){
+                        c.dm_mark();
+                    }
+                }
+            }
         };
     }
 }

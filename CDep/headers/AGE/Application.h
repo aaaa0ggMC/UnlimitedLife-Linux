@@ -96,8 +96,8 @@ namespace age{
         /// baby模式
         std::optional<Window*> createWindow(std::string_view sid,
                                             std::string_view title,
-                                            unsigned int width,
-                                            unsigned int height,
+                                            int width,
+                                            int height,
                                             int x,int y,WinStyle style,
                                             float fpsRestrict = 60);
         /// 销毁窗口，直接通过指针

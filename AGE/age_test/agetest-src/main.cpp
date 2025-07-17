@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/16
+ * @date 2025/07/17
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -18,6 +18,13 @@
 #include <vector>
 #include <numbers>
 
+////使用IMGUI对帧率的影响：从6000降到3000,imgui大概用了0.1ms来运作（我的电脑）////
+////限制imgui 100fps更新后，帧率达到6000fps
+#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_internal.h>
+
 using namespace age;
 using namespace age::world;
 using namespace age::world::comps;
@@ -28,7 +35,7 @@ constexpr glm::vec2 cam_rot = glm::vec2(1,1);
 constexpr float framerate = 120;
 constexpr int vbo_count = 2;
 constexpr int vao_count = 2;
-constexpr float fpsCountTimeMS = 1500;
+constexpr float fpsCountTimeMS = 500;
 
 void upload_data(VBOManager & vbos,Application &);
 Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader,Camera & cam);
@@ -83,10 +90,33 @@ int main(){
 
     ////Systems////
     systems::ParentSystem parent_system (em);
+    systems::MarkerSystem<comps::Transform> marker (em);
+
+    ////IMGUI Settings////
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& im_io = ImGui::GetIO(); (void)im_io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(win->getSystemHandle(),true);
+    ImGui_ImplOpenGL3_Init("#version 150");
+    ImFont* im_font = im_io.Fonts->AddFontFromFileTTF
+    (
+        "C:\\Windows\\Fonts\\msyh.ttc",
+        30,
+        nullptr,
+        im_io.Fonts->GetGlyphRangesChineseFull()
+    );
+    IM_ASSERT(font != nullptr);
+    Clock imgui_clock (false);
+    Trigger im_trigger(imgui_clock,10); // 100fps
+    ImDrawData * im_cached = nullptr;
+    float im_showfps = 0;
+
 
     //launch clock
     elapse.start();
     fpsCounter.start();
+    imgui_clock.start();
 
     //// Main Loop ////
     lg.info("Entering main loop...");
@@ -95,15 +125,40 @@ int main(){
         ++frame_count;
         if(fpsCounter.getOffset() >= fpsCountTimeMS){
             fpsCounter.clearOffset();
-            lg(LOG_INFO) << "FPS:" << (int)(frame_count / fpsCountTimeMS * 1000) << endlog;
+            im_showfps = (int)(frame_count / fpsCountTimeMS * 1000);
             frame_count = 0;
         }
         win->pollEvents();
+        ////IMGUI////
+        //我想imgui 100fps
+        if(im_trigger.test(true) || !im_cached){
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            ImGui::Begin("Controller", nullptr , ImGuiWindowFlags_MenuBar);
+            ImGui::Text("ImGuiFPS: %.2f ", im_io.Framerate);
+            ImGui::Text("FPS: %.2f" , im_showfps);
+            ImGui::DragFloat3("Cube Position",glm::value_ptr(cube.transform().m_position),0.05F);
+            ImGui::DragFloat4("Cube Rotation",glm::value_ptr(cube.transform().m_rotation.get_mutable_unnorm()),0.05F);
+            ImGui::DragFloat3("Pyramid Local Position",glm::value_ptr(pyramid.transform().m_position),0.05F);
+            ImGui::DragFloat4("Pyramid Rotation",glm::value_ptr(pyramid.transform().m_rotation.get_mutable_unnorm()),0.05F);
+            ImGui::DragFloat3("Camera Position",glm::value_ptr(camera.transform().m_position),0.05F);
+            ImGui::DragFloat4("Camera Rotation",glm::value_ptr(camera.transform().m_rotation.get_mutable_unnorm()),0.05F);
+            ImGui::End();
+            ImGui::Render();
+            //缓存绘制数据
+            im_cached = ImGui::GetDrawData();
+        }
+
 
         input.update();
         if(input.checkTick()){
             float p = elapse.getOffset() / 1000.0f;
             dealInput(input,veloDir,camera,p);
+
+            
+            //由于imgui同步问题，所以数据要dm_mark，但是imgui更新频率大于tick频率，所以要下checkTick里面hhh
+            marker.update();
 
             //post-input-update
             cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),1 * p);
@@ -135,6 +190,9 @@ int main(){
         mvp.uploadmat4(camera.buildVPMatrix() * pyramid.transform().buildModelMatrix());
         win->draw(PrimitiveType::Triangles,0,36);
         
+        //// IMGUI Finish up////
+        if(im_cached)ImGui_ImplOpenGL3_RenderDrawData(im_cached);
+
         win->display();
     }
 
@@ -189,10 +247,26 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     //// Window ////
     lg.info("Creating window...");
     app.setGLVersion(4,5);
-    if(!app.createWindow("TestWindow","TestAGE",800,600,100,100,WinStylePresetNormal,0)){
-        lg.error("Failed to create window,now exit...");
-        exit(-1);
-    }else win = *app.getWindow("TestWindow");
+    {
+        CreateWindowInfo ci;
+        ci.sid = "TestWindow";
+        ci.windowTitle = "TestAGE";
+        ci.width = 800;
+        ci.height = 600;
+        ci.x = 100;
+        ci.y = 100;
+        ci.style = WinStylePresetNormal;
+        ci.fps = 0;
+        ci.ScreenPercent(0.6,1,&ci.width,&ci.height);
+        ci.KeepRatio(ci.width,ci.height,800,600);
+        ci.ScreenPercent(0.2,0.2,&ci.x,&ci.y);
+
+        if(!app.createWindow(ci)){
+            lg.error("Failed to create window,now exit...");
+            exit(-1);
+        }else win = *app.getWindow("TestWindow");
+    }
+    
     input.setWindow(*win);
     lg.info("CreateWindow:OK!");
 
@@ -202,8 +276,9 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     });
 
     //一定要有window才行
-    app.setGLErrCallbackFunc();
-    app.setGLErrCallback(true);
+    // @TODO 因为IMGUI太吵了，所以暂时关了
+    //app.setGLErrCallbackFunc();
+    //app.setGLErrCallback(true);
 
     //// Shader ////
     lg.info("Creating shader...");

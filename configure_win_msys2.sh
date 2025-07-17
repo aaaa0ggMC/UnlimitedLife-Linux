@@ -2,8 +2,8 @@ pacman -S --noconfirm --needed git mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_
 # @todo IMGUI编译
 mkdir -p CBuild_CACHE_WIN
 mkdir -p CBuild/Windows
-mkdir -p @externals
-cd @externals
+mkdir -p third_party
+cd third_party
 git clone https://github.com/ocornut/imgui.git
 cd imgui
 git branch docking

@@ -12,8 +12,8 @@ fi
 mkdir -p CBuild_CACHE
 mkdir -p CBuild
 # @todo IMGUI编译
-mkdir -p @externals
-cd @externals
+mkdir -p third_party
+cd third_party
 git clone https://github.com/ocornut/imgui.git
 cd imgui
 git branch docking

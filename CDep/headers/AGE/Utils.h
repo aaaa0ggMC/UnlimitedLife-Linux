@@ -44,6 +44,7 @@
 #define AGEE_CONFLICT_SID -1
 #define AGEE_EMPTY_DATA -2
 #define AGEE_WRONG_ENUM -3
+#define AGEE_FEATURE_NOT_SUPPORTED -4
 
 namespace age{
     inline constexpr bool AGE_Enable = true;

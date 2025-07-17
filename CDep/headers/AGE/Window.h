@@ -220,8 +220,8 @@ namespace age{
         std::string sid;///< 窗口的字符串id
 
         std::string windowTitle;///< 窗口标题
-        unsigned int width;///< 窗口宽度
-        unsigned int height;///< 窗口高度
+        int width;///< 窗口宽度
+        int height;///< 窗口高度
         int x; ///< x坐标
         int y; ///< y坐标
 
@@ -233,6 +233,16 @@ namespace age{
         std::optional<GLFWmonitor*> moniter;
         /// 共享
         std::optional<Window*> share;
+
+        static std::pair<int,int> ScreenPercent(float px,float py,int *x,int * y);
+        /// @brief 保持比例
+        /// @param tokeep 
+        /// @param tochange 
+        /// @param a 分子
+        /// @param b 分母
+        static inline void KeepRatio(int & tokeep,int & tochange,float a,float b){
+            tochange = tokeep * b / a;
+        }
 
         CreateWindowInfo();
     };
