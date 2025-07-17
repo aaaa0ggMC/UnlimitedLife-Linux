@@ -4,10 +4,10 @@
 # Install build dependencies
 if [ -f /etc/arch-release ]; then
     echo "This is Arch Linux."
-    sudo pacman --needed -S cmake rapidjson glfw glew glm stb ninja
+    sudo pacman --needed -S cmake rapidjson glfw glew glm stb
 else
   echo "This is not Arch Linux."
-  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb-dev ninja-build
+  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb-dev
 fi
 mkdir -p CBuild_CACHE
 mkdir -p CBuild
@@ -26,8 +26,8 @@ cp ./backends/imgui_impl_glfw.h .
 cp ../../scripts/imgui/CMakeLists.txt .
 mkdir -p abuild
 cd abuild
-cmake ..
-ninja
+cmake .. -G "Unix Makefiles"
+make
 # I dont know what will be built on linux(my linux is not on now),so I just see the action result
 ls
 #copy headers

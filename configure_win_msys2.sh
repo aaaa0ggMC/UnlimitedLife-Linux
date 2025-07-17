@@ -15,8 +15,8 @@ cp ./backends/imgui_impl_glfw.cpp .
 cp ./backends/imgui_impl_glfw.h .
 mkdir -p abuild
 cd abuild
-cmake ..
-ninja
+cmake .. -G "Unix Makefiles"
+make
 mv libimgui.dll ../../../CBuild/Windows
 mv libimgui.dll.a ../../../CBuild/Windows
 #copy headers
