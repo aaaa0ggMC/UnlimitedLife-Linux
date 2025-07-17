@@ -17,6 +17,7 @@ cd @externals
 git clone https://github.com/ocornut/imgui.git
 cd imgui
 git branch docking
+cp ../scripts/imgui/CMakeLists.txt
 cp ./backends/imgui_impl_opengl3.cpp .
 cp ./backends/imgui_impl_opengl3.h .
 cp ./backends/imgui_impl_opengl3_loader.h .
