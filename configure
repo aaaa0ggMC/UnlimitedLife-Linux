@@ -7,7 +7,7 @@ if [ -f /etc/arch-release ]; then
     sudo pacman --needed -S cmake rapidjson glfw glew glm stb ninja
 else
   echo "This is not Arch Linux."
-  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb ninja-build
+  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb-dev ninja-build
 fi
 mkdir -p CBuild_CACHE
 mkdir -p CBuild
