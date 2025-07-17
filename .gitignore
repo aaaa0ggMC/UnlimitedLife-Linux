@@ -11,6 +11,8 @@ CBuild/logs/
 CBuild/simp-biliplayer
 CBuild/UnlimitedLife
 CBuild/agetest
+@externals
+CDep/headers/imgui
 
 
 Pacman/

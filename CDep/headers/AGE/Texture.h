@@ -12,6 +12,10 @@ namespace age{
         int width;
         int height;
         int channels;
+
+        //上传属性
+        bool uploaded;
+        unsigned char * bits; //要是uploaded为true,保证为nullptr
     };
 
     class Application;
@@ -24,11 +28,10 @@ namespace age{
         friend class Application;
         //Application * parentApp; 待定
         TextureInfo * textureInfo; ///< 这里我是假设(事实上unordered_map九十的)textureInfo对应的内存地址不会变动
+        std::string_view sid;
 
         ///Forbid User-Define
-        inline Texture(Application * app){
-            parentApp = app;
-        }
+        inline Texture(){}
     public:
         /// @brief bind the texture to the current vbo
         /// @param channel 
@@ -47,7 +50,7 @@ namespace age{
     ///@todo for fun: 搞个 TextureInfoEx提供更加细节的配置什么什么的
 
     struct AGE_API CreateTextureInfo{
-        enum class Source{
+        enum Source{
             FromFile,
             FromBuffer,
             FromVector
@@ -63,12 +66,13 @@ namespace age{
             size_t eleCount; ///< not the size of the buffer!!!
         } buffer;
         struct {
-            std::vector<GLuchar>* data;
+            std::vector<GLchar>* data;
         } vec;
-
         unsigned int channel_desired;
+        bool uploadToOpenGL;
+        ///SamplerSettings
 
-        CreateShaderInfo();
+        CreateTextureInfo();
     };
 }
 

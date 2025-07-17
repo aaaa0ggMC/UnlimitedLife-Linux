@@ -117,7 +117,7 @@ namespace age {
         inline bool hasSuper() const noexcept    { return mods & GLFW_MOD_SUPER; }
 
         /// uses key & scancode
-        const std::string& getKeyCodeString() const;
+        std::string_view  getKeyCodeString() const;
 
     };
 }

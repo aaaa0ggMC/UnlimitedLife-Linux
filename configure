@@ -4,14 +4,39 @@
 # Install build dependencies
 if [ -f /etc/arch-release ]; then
     echo "This is Arch Linux."
-    sudo pacman --needed -S cmake rapidjson glfw glew glm stb
+    sudo pacman --needed -S cmake rapidjson glfw glew glm stb ninja
 else
   echo "This is not Arch Linux."
-  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb
+  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb ninja-build
 fi
+mkdir -p CBuild_CACHE
+mkdir -p CBuild
+# @todo IMGUI编译
+mkdir -p @externals
+cd @externals
+git clone https://github.com/ocornut/imgui.git
+cd imgui
+git branch docking
+cp ./backends/imgui_impl_opengl3.cpp .
+cp ./backends/imgui_impl_opengl3.h .
+cp ./backends/imgui_impl_opengl3_loader.h .
+cp ./backends/imgui_impl_glfw.cpp .
+cp ./backends/imgui_impl_glfw.h .
+cp ../../scripts/imgui/CMakeLists.txt .
+mkdir -p abuild
+cd abuild
+cmake ..
+ninja
+# I dont know what will be built on linux(my linux is not on now),so I just see the action result
+ls
+#copy headers
+mkdir -p ../../../CDep/headers/imgui/
+cd ..
+cp ./backends/imgui_impl_opengl3.h ./backends/imgui_impl_opengl3_loader.h ./backends/imgui_impl_glfw.h ./imconfig.h ./imgui.h ./imgui_internal.h ./imstb_rectpack.h ./imstb_textedit.h ./imstb_truetype.h ../../CDep/headers/imgui 
+cd ..
+cd ..
 
 # Create a build directory if it doesn't exist
-mkdir -p CBuild_CACHE
 cd CBuild_CACHE
 
 # Run CMake to configure the project

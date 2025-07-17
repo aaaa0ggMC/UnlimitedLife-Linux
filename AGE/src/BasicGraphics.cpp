@@ -62,8 +62,8 @@ void VBOManager::markAsFree(uint32_t index){
 }
 
 // 你知道为什么texture在这里吗，因为我不想多写个文件了
-CreateTextureInfo::CreateShaderInfo(){
-    this->source = Source::FromFile;
+CreateTextureInfo::CreateTextureInfo(){
+    this->source = FromFile;
 
     this->file.path = "";
     this->sid = "";
@@ -71,4 +71,5 @@ CreateTextureInfo::CreateShaderInfo(){
     this->buffer.data = nullptr;
     this->vec.data = nullptr;
     this->channel_desired = 4;
+    this->uploadToOpenGL = true;
 }

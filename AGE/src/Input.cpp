@@ -46,7 +46,7 @@ void Input::update(){
     }
 }
 
-const std::string& KeyWrapper::getKeyCodeString() const {
+std::string_view  KeyWrapper::getKeyCodeString() const {
     static const std::unordered_map<int, std::string> keyNameMap = [] {
         std::unordered_map<int, std::string> map;
         // 字母键

@@ -139,15 +139,15 @@ namespace age {
             return ShaderUniform(location,pid);
         }
 
-        ShaderUniform getUniformByName(const std::string & name){
-            return ShaderUniform(glGetUniformLocation(pid,name.c_str()),pid);
+        ShaderUniform getUniformByName(std::string_view  name){
+            return ShaderUniform(glGetUniformLocation(pid,name.data()),pid);
         }
 
         ShaderUniform operator[](GLuint location){
             return getUniformByLocation(location);
         }
 
-        ShaderUniform operator[](const std::string& name){
+        ShaderUniform operator[](std::string_view  name){
             return getUniformByName(name);
         }
 

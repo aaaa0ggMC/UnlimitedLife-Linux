@@ -25,9 +25,11 @@
 #include <GL/glext.h>
 #include <unordered_map>
 #include <string>
+#include <memory_resource>
+#include <unordered_set>
 #include <optional>
 
-//shader begin from -1000 to -19999
+//Graphics begin from -10000 to -19999
 #define AGEE_CONFLICT_SHADER -10000
 #define AGEE_SHADER_LOG -10001
 #define AGEE_SHADER_FAILED_TO_COMPILE -10002
@@ -35,6 +37,7 @@
 #define AGEE_OPENGL_DEBUG_MESSAGE -10004
 #define AGEE_OPENGL_NO_CONTEXT -10005
 #define AGEE_OPENGL_EMPTY_SHADER -10006
+#define AGEE_TEXTURE_LOADED -10007
 
 /// Aaaa0ggmc's Graphics Engine 我的图形引擎
 namespace age{
@@ -57,6 +60,20 @@ namespace age{
         static bool inited_glew;
     };
 
+    struct ConstantStringBuffer{
+        std::pmr::unsynchronized_pool_resource upstreamPool;
+        // 只能分配不能释放，对于短期字符串不适合存储
+        std::pmr::monotonic_buffer_resource poolBuffer { &upstreamPool };
+        std::pmr::polymorphic_allocator<char> allocator { &poolBuffer };
+        std::pmr::unordered_set<std::pmr::string> pool{0, std::hash<std::pmr::string>{}, std::equal_to<std::pmr::string>{}, allocator};
+
+        std::string_view get(std::string_view str){
+            auto [it, inserted] = pool.emplace(std::pmr::string(str, allocator));
+            return *it;
+        }
+    };
+
+
     // FIXED: 解耦这个类，这个类是个superclass,干的事情太多了
     // FIXED: left by aaaa0ggmc: 解耦个pee
     /** @struct Application
@@ -75,10 +92,10 @@ namespace age{
         /// 创建一个窗口
         std::optional<Window*> createWindow(const CreateWindowInfo & info);
         /// 通过SID获取窗口
-        std::optional<Window*> getWindow(const std::string & sid);
+        std::optional<Window*> getWindow(std::string_view sid);
         /// baby模式
-        std::optional<Window*> createWindow(const std::string& sid,
-                                            const std::string & title,
+        std::optional<Window*> createWindow(std::string_view sid,
+                                            std::string_view title,
                                             unsigned int width,
                                             unsigned int height,
                                             int x,int y,WinStyle style,
@@ -86,7 +103,7 @@ namespace age{
         /// 销毁窗口，直接通过指针
         bool destroyWindow(Window * window);
         /// 通过SID销毁窗口
-        bool destroyWindow(const std::string & sid);
+        bool destroyWindow(std::string_view);
 
         //// VAO & VBO ////
         void  createVAOs(const CreateVAOsInfo & info);
@@ -106,27 +123,28 @@ namespace age{
         /// 创建着色器
         [[nodiscard]] Shader createShader(const CreateShaderInfo & info);
         /// baby模式
-        [[nodiscard]] Shader createShaderFromFile(const std::string& sid,
-                                                  const std::string& fvert,
-                                                  const std::string& ffrag = "",
-                                                  const std::string& fgeom = "",
-                                                  const std::string& fcomp = "");
-        [[nodiscard]] Shader createShaderFromSrc(const std::string& sid,
-                                                 const std::string& vert = "",
-                                                 const std::string& frag = "",
-                                                 const std::string& geom = "",
-                                                 const std::string& comp = "");
+        [[nodiscard]] Shader createShaderFromFile(std::string_view  sid,
+                                                  std::string_view  fvert,
+                                                  std::string_view  ffrag = "",
+                                                  std::string_view  fgeom = "",
+                                                  std::string_view  fcomp = "");
+        [[nodiscard]] Shader createShaderFromSrc(std::string_view  sid,
+                                                 std::string_view  vert = "",
+                                                 std::string_view  frag = "",
+                                                 std::string_view  geom = "",
+                                                 std::string_view  comp = "");
         /// 通过sid获取着色器
-        Shader getShader(const std::string & sid);
+        Shader getShader(std::string_view  sid);
         /// 获取着色器整体的log
         void getShaderProgramLog(Shader shader,std::string & logger);
         /// 获取着色器单体的log,用户一般不使用
         void getShaderShaderLog(GLuint shader,std::string & logger);
         /// 删除一个shader，如果一个shader处于bind状态，行为未定义，程序endup前谨慎使用
-        bool destroyShader(const std::string & sid);
+        bool destroyShader(std::string_view  sid);
 
         //// Texture ////
-        Texture& createTexture(const CreateTextureInfo & info);
+        std::optional<Texture*> createTexture(const CreateTextureInfo & info);
+        Texture& uploadTextureToGL(Texture & texure);
         
 
         /// 设置OpenGL版本要求
@@ -161,13 +179,15 @@ namespace age{
 
     private:
         /// 窗口列表
-        std::unordered_map<std::string,Window*> windows;
-        std::unordered_map<std::string,Shader> shaders;
+        std::unordered_map<std::string_view,Window*> windows;
+        std::unordered_map<std::string_view,Shader> shaders;
         /// Application实例数目，当counter减为0时自动释放GLFW
-        ///纹理表
-        std::unordered_map<std::string,Texture> textures;
-        std::unordered_map<std::string,TextureInfo> texturesInfo;
+        /// 纹理表
+        std::unordered_map<std::string_view,Texture*> textures;
+        std::unordered_map<std::string_view,TextureInfo> texturesInfo;
         static unsigned int counter;
+        /// 静态字符串常量池
+        ConstantStringBuffer csbuffer;
     };
 }
 #endif

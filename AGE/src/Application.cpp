@@ -44,7 +44,7 @@ void Application::setGLVersion(unsigned int major,unsigned int minor){
 std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     Window * win = new Window();
     GLInit::GLFW();
-    win->sid = info.sid;
+    win->sid = csbuffer.get(info.sid);
     win->window = glfwCreateWindow(
                     info.width,info.height,info.windowTitle.c_str(),
                     (!info.moniter)?NULL:(*info.moniter),
@@ -53,7 +53,7 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
         delete win;
         return std::nullopt;
     }
-    windows.emplace(info.sid,win);
+    windows.emplace(win->sid,win);
     if(info.x >= 0 && info.y >= 0)glfwSetWindowPos(win->window,info.x,info.y);
     if(!(Window::current))win->makeCurrent();
     win->setFramerateLimit(info.fps);
@@ -76,7 +76,7 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     return {win};
 }
 
-std::optional<Window*> Application::createWindow(const std::string& sid,const std::string & title,unsigned int width,unsigned int height,int x,int y,WinStyle style,float fpsRestrict){
+std::optional<Window*> Application::createWindow(std::string_view sid,std::string_view title,unsigned int width,unsigned int height,int x,int y,WinStyle style,float fpsRestrict){
     CreateWindowInfo wi;
     wi.sid = sid;
     wi.windowTitle = title;
@@ -89,13 +89,13 @@ std::optional<Window*> Application::createWindow(const std::string& sid,const st
     return createWindow(wi);
 }
 
-std::optional<Window*> Application::getWindow(const std::string & sid){
+std::optional<Window*> Application::getWindow(std::string_view sid){
     auto v = windows.find(sid);
     if(v == windows.end())return std::nullopt;
     return {v->second};
 }
 
-bool Application::destroyWindow(const std::string & sid){
+bool Application::destroyWindow(std::string_view sid){
     auto v = windows.find(sid);
     if(v == windows.end())return false;
     Window * win = v->second;
@@ -122,6 +122,17 @@ Application::~Application(){
     for(auto& [sid,shd] : shaders){
         shd.destroy();
     }
+    //New Step: Textures
+    for(auto& [_,tex] : textures){
+        if(tex->texture_id){
+            glDeleteTextures(1,&(tex->texture_id));
+        }
+    }
+    for(auto& [_,info] : texturesInfo){
+        if(!info.uploaded && info.bits){
+            stbi_image_free(info.bits);
+        }
+    }
     //Step2:VAOS
     //std::cout << vaos.vaos.size() << std::endl;
     glDeleteVertexArrays(vaos.vaos.size(),&(vaos.vaos[0]));
@@ -132,7 +143,7 @@ Application::~Application(){
     {
         std::vector<std::string> window_names;
         for(auto& [sid,_] : windows){
-            window_names.push_back(sid);
+            window_names.emplace_back(sid);
         }
 
         for(auto & sid : window_names){
@@ -240,13 +251,22 @@ void Application::getShaderShaderLog(GLuint shader,std::string & logger){
 }
 
 
-Shader Application::createShaderFromFile(const std::string& sid,
-                                          const std::string& fvert,
-                                          const std::string& ffrag,
-                                          const std::string& fgeom,
-                                          const std::string& fcomp){
+Shader Application::createShaderFromFile(std::string_view sid,
+                                          std::string_view cfvert,
+                                          std::string_view cffrag,
+                                          std::string_view cfgeom,
+                                          std::string_view cfcomp){
     std::string vert,frag,geom,comp;
     vert = frag = geom = comp = "";
+
+    std::string fvert = "";
+    fvert += cfvert;
+    std::string ffrag = "";
+    ffrag += cffrag;
+    std::string fgeom = "";
+    fgeom += cfgeom;
+    std::string fcomp = "";
+    fcomp += cfcomp;
 
     if(fvert.compare("")){
         Util::io_readAll(fvert,vert);
@@ -263,11 +283,11 @@ Shader Application::createShaderFromFile(const std::string& sid,
 
     return createShaderFromSrc(sid,vert,frag,geom,comp);
 }
-Shader Application::createShaderFromSrc(const std::string& sid,
-                                         const std::string& vert,
-                                         const std::string& frag,
-                                         const std::string& geom,
-                                         const std::string& comp){
+Shader Application::createShaderFromSrc(std::string_view  sid,
+                                         std::string_view  vert,
+                                         std::string_view  frag,
+                                         std::string_view  geom,
+                                         std::string_view  comp){
     CreateShaderInfo si;
     si.sid = sid;
     si.vertex = vert;
@@ -387,7 +407,7 @@ Shader Application::createShader(const CreateShaderInfo &info){
     if(!created){
         err.pushMessage({AGEE_OPENGL_EMPTY_SHADER,"The shader has no shader subprogram inside."});
     }
-    shaders.emplace(info.sid,shader);
+    shaders.emplace(csbuffer.get(info.sid),shader);
 
 cleanup:
     if(vid)glDeleteShader(vid);
@@ -455,7 +475,7 @@ void GLAPIENTRY Application::glErrDefDebugProc(
     Error::def.pushMessage({AGEE_OPENGL_DEBUG_MESSAGE,buf.c_str()});
 }
 
-Shader Application::getShader(const std::string & sid){
+Shader Application::getShader(std::string_view sid){
     auto iter = shaders.find(sid);
     if(iter != shaders.end()){
         return iter->second;
@@ -463,7 +483,7 @@ Shader Application::getShader(const std::string & sid){
     return Shader::null();
 }
 
-bool Application::destroyShader(const std::string & sid){
+bool Application::destroyShader(std::string_view sid){
     auto sh = shaders.find(sid);
     if(sh != shaders.end()){
         sh->second.destroy();
@@ -473,11 +493,69 @@ bool Application::destroyShader(const std::string & sid){
     return false;
 }
 
-Texture Application::createTexture(const CreateTextureInfo & info){
+std::optional<Texture*> Application::createTexture(const CreateTextureInfo & info){
     if(textures.find(info.sid) != textures.end()){
         Error::def.pushMessage({AGEE_CONFLICT_SID,"Texture SID conflicts!!!"});
+        return std::nullopt;
     }
-    ///...WIP
-    texturesInfo.emplace();
-    stbi_load(info.file.c_str(),)
+    TextureInfo tinfo;
+    const GLchar * buf = info.buffer.data;
+    size_t eleC = info.buffer.eleCount;
+    stbi_uc* bits;
+    
+    switch(info.source){
+    case CreateTextureInfo::FromVector:
+        buf = info.vec.data->data();
+        eleC = info.vec.data->size();
+    case CreateTextureInfo::FromBuffer:
+        if(!buf){
+            Error::def.pushMessage({AGEE_EMPTY_DATA,"Buffer passed to createTexture is empty!"});
+            return std::nullopt;
+        }
+        bits = stbi_load_from_memory((const stbi_uc*)buf,eleC,&tinfo.width,&tinfo.height,&tinfo.channels,info.channel_desired);
+        break;
+    case CreateTextureInfo::FromFile:
+        if(!info.file.path.compare("")){
+            Error::def.pushMessage({AGEE_EMPTY_DATA,"The file path provided is empty!"});
+            return std::nullopt;
+        }
+        bits = stbi_load(info.file.path.c_str(),&tinfo.width,&tinfo.height,&tinfo.channels,info.channel_desired);
+        break;
+    default:{
+            std::string em = "The source enum passed to createTexture is invalid: ";
+            em += std::to_string((int)info.source);
+            Error::def.pushMessage({AGEE_WRONG_ENUM,em.c_str()});
+            break;
+        }
+    }
+    //stbi自动填充，不知道会不会改channels(问了问Chat说不会改，保险点留着)
+    tinfo.channels = (info.channel_desired != 0) ? info.channel_desired : tinfo.channels;
+    tinfo.bits = bits;
+
+    auto sid = csbuffer.get(info.sid);
+    auto tex = textures.emplace(sid,new Texture());
+    auto& tex_info = texturesInfo.emplace(sid,tinfo).first->second;
+    Texture* texture = tex.first->second;
+    texture->sid = sid;
+    texture->textureInfo = &tex_info;
+    tex_info.uploaded = false;
+
+    if(info.uploadToOpenGL){
+        //上传到OpenGL
+        uploadTextureToGL(*texture);
+    }
+
+    return texture;
+}
+
+Texture& Application::uploadTextureToGL(Texture & texture){
+    if(texture.textureInfo->uploaded){
+        Error::def.pushMessage({AGEE_TEXTURE_LOADED,"The texture has already uploaded to OpenGL."});
+        return texture;
+    }else if(!(texture.textureInfo->bits)){
+        Error::def.pushMessage({AGEE_EMPTY_DATA,"The texture data is empty!"});
+        return texture;
+    }
+
+    return texture;
 }

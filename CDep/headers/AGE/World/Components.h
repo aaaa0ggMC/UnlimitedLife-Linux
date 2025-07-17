@@ -1,7 +1,7 @@
 /** @file world/Components.h
  * @brief 提供一些预制的components
  * @author aaaa0ggmc,euuen
- * @date 2025/07/16
+ * @date 2025/07/17
  * @start-date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
@@ -343,7 +343,7 @@ namespace age::world{
         struct AGE_API TestOutput{
             inline void reset(){}
 
-            inline void out(const std::string& data){
+            inline void out(std::string_view  data){
                 std::cout << data << std::endl;
             }
         };

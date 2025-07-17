@@ -102,7 +102,7 @@ namespace age{
         /// 用于处理绑定 Actually,It can be replaced by glfwSetWindowUserPointer & glfwGetWindowUserPointer,however,my impl isnt that bad
         static BinderArray binderArray;
         /// 窗口的SID
-        std::string sid;
+        std::string_view sid;
         /// 限制fps
         alib::g3::RateLimiter fpsLimiter;
         /// 绑定便于访问
