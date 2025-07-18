@@ -38,6 +38,8 @@
 #define AGEE_OPENGL_NO_CONTEXT -10005
 #define AGEE_OPENGL_EMPTY_SHADER -10006
 #define AGEE_TEXTURE_LOADED -10007
+#define AGEE_OPENGL_CREATE_ERROR -10008
+#define AGEE_CANT_FIND_SID -10009
 
 /// Aaaa0ggmc's Graphics Engine 我的图形引擎
 namespace age{
@@ -144,7 +146,18 @@ namespace age{
 
         //// Texture ////
         std::optional<Texture*> createTexture(const CreateTextureInfo & info);
+        /// Will set GL_TEXTURE_2D to 0 after call
         Texture& uploadTextureToGL(Texture & texure);
+        std::optional<Texture*> getTexture(std::string_view sid);
+        bool destroyTexture(std::string_view sid);
+        bool destroyTexture(Texture& tex);
+
+        //// Sampler ////
+        /// 由于sampler属性可以动态调整，所以只需要sid
+        std::optional<Sampler> createSampler(std::string_view sid);
+        bool destroySampler(std::string_view sid);
+        bool destroySampler(Sampler & sampler);
+        std::optional<Sampler> getSampler(std::string_view sid);
         
 
         /// 设置OpenGL版本要求
@@ -185,6 +198,10 @@ namespace age{
         /// 纹理表
         std::unordered_map<std::string_view,Texture*> textures;
         std::unordered_map<std::string_view,TextureInfo> texturesInfo;
+        /// 采样器表
+        std::unordered_map<std::string_view,Sampler> samplers;
+        std::unordered_map<std::string_view,SamplerInfo> samplersInfo;
+
         static unsigned int counter;
         /// 静态字符串常量池
         ConstantStringBuffer csbuffer;

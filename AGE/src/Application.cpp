@@ -133,6 +133,10 @@ Application::~Application(){
             stbi_image_free(info.bits);
         }
     }
+    //Samplers
+    for(auto & [_,samp] : samplers){
+        glDeleteSamplers(1,&samp.sampler_id);
+    }
     //Step2:VAOS
     //std::cout << vaos.vaos.size() << std::endl;
     glDeleteVertexArrays(vaos.vaos.size(),&(vaos.vaos[0]));
@@ -539,6 +543,7 @@ std::optional<Texture*> Application::createTexture(const CreateTextureInfo & inf
     texture->sid = sid;
     texture->textureInfo = &tex_info;
     tex_info.uploaded = false;
+    tex_info.mipmap = info.genMipmap;
 
     if(info.uploadToOpenGL){
         //上传到OpenGL
@@ -556,6 +561,113 @@ Texture& Application::uploadTextureToGL(Texture & texture){
         Error::def.pushMessage({AGEE_EMPTY_DATA,"The texture data is empty!"});
         return texture;
     }
+    glGenTextures(1,&texture.texture_id);
+    if(!texture.texture_id){
+        Error::def.pushMessage({AGEE_OPENGL_CREATE_ERROR,"Cant create a new texture!"});
+        return texture;
+    }
+    texture.textureInfo->uploaded = true;
+    glBindTexture(GL_TEXTURE_2D,texture.texture_id);
 
+    int internalFormat = GL_RGB;
+    switch(texture.textureInfo->channels){
+    case 1:
+        internalFormat = GL_RED;
+        break;
+    case 2:
+        internalFormat = GL_LUMINANCE_ALPHA;
+        break;
+    case 4:
+        internalFormat = GL_RGBA;
+        break;
+    case 3:
+        break;
+    default:
+        Error::def.pushMessage({AGEE_FEATURE_NOT_SUPPORTED,"File with channel count bigger than 4 or lower than 1 is unsupported!"});
+        glBindTexture(GL_TEXTURE_2D,0);
+        return texture;
+    }
+    /// @todo level 和 border还没用上
+    glTexImage2D(GL_TEXTURE_2D,0,internalFormat,texture.textureInfo->width,texture.textureInfo->height,0,internalFormat,GL_UNSIGNED_BYTE,texture.textureInfo->bits);
+    if(texture.textureInfo->mipmap){
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    stbi_image_free(texture.textureInfo->bits);
+    glBindTexture(GL_TEXTURE_2D,0);
     return texture;
+}
+
+std::optional<Sampler> Application::createSampler(std::string_view sid){
+    auto rest = samplers.find(sid);
+    if(rest != samplers.end())return rest->second;
+    Sampler sampler;
+    auto usid = csbuffer.get(sid);
+    sampler.sid = usid;
+    sampler.info = nullptr;
+    glCreateSamplers(1,&sampler.sampler_id);
+    if(!sampler.sampler_id){
+        Error::def.pushMessage({AGEE_OPENGL_CREATE_ERROR,"Failed to create a new sampler!"});
+        return std::nullopt; //空对象
+    }
+    auto samp = samplersInfo.emplace(usid,SamplerInfo()).first->second;
+    sampler.info = &samp;
+    samplers.emplace(usid,sampler);
+    return sampler;
+}
+
+
+bool Application::destroySampler(std::string_view sid){
+    auto it = samplers.find(sid);
+    if(it == samplers.end()){
+        std::string msg = "Cant find an existing sampler named \"";
+        msg += sid;
+        msg += "\"";
+        Error::def.pushMessage({AGEE_CANT_FIND_SID,msg.c_str()});
+        return false;
+    }
+    glDeleteSamplers(1,&(it->second.sampler_id));
+    samplers.erase(it);
+    auto info = samplersInfo.find(sid);
+    if(info != samplersInfo.end())samplersInfo.erase(info);
+    return true;
+}
+
+bool Application::destroySampler(Sampler & sampler){
+    return destroySampler(sampler.sid);
+}
+
+std::optional<Sampler> Application::getSampler(std::string_view sid){
+    auto sp = samplers.find(sid);
+    if(sp == samplers.end()){
+        Error::def.pushMessage({AGEE_CANT_FIND_SID,"Cannot find required sampler!"});
+        return std::nullopt;
+    }
+    return sp->second;
+}
+
+
+std::optional<Texture*> Application::getTexture(std::string_view sid){
+    auto tex = textures.find(sid);
+    if(tex == textures.end()){
+        Error::def.pushMessage({AGEE_CANT_FIND_SID,"Cannot find required texture!"});
+        return std::nullopt;
+    }
+    return tex->second;
+}
+
+bool Application::destroyTexture(std::string_view sid){
+    auto tex = textures.find(sid);
+    if(tex == textures.end()){
+        Error::def.pushMessage({AGEE_CANT_FIND_SID,"Cannot find required texture to delete!"});
+        return false;
+    }
+    glDeleteTextures(1,&(tex->second->texture_id));
+    textures.erase(tex);
+    auto tinfo =  texturesInfo.find(sid);
+    if(tinfo != texturesInfo.end())texturesInfo.erase(tinfo);
+    return true;
+}
+
+bool Application::destroyTexture(Texture& tex){
+    return destroyTexture(tex.sid);
 }

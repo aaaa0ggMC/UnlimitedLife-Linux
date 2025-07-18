@@ -33,7 +33,7 @@ using namespace alib::g3;
 constexpr float cam_speed = 3;
 constexpr glm::vec2 cam_rot = glm::vec2(1,1);
 constexpr float framerate = 120;
-constexpr int vbo_count = 2;
+constexpr int vbo_count = 3;
 constexpr int vao_count = 2;
 constexpr float fpsCountTimeMS = 500;
 
@@ -66,6 +66,10 @@ int main(){
 
     uint64_t frame_count = 0;
 
+    //// Textures & Samplers ////
+    Texture & wall = **app.getTexture("wall");
+    Sampler sampler = *app.getSampler("main");
+
     ////Bindings////
     vaos[0].bind();
     vbos[0].bind();
@@ -76,6 +80,9 @@ int main(){
     vbos[1].bind();
     vaos[1].setAttribute(vbos[1],0,3,GL_FLOAT);
     vaos[1].setAttribStatus(0,true);
+    vbos[2].bind();
+    vaos[1].setAttribute(vbos[2],1,2,GL_FLOAT);
+    vaos[1].setAttribStatus(1,true);
     ////World Objects////
     Object cube (em);
     Object pyramid (em);
@@ -111,6 +118,10 @@ int main(){
     Trigger im_trigger(imgui_clock,10); // 100fps
     ImDrawData * im_cached = nullptr;
     float im_showfps = 0;
+    int im_menu = 0;
+    glm::vec4 im_border_color = glm::vec4(0,0,0,0);
+    const char * im_wrapItems[] = {"Repeat","MirroredRepeat","ClampToEdge","ClampToBorder"};
+    int im_wrapR = 0,im_wrapS = 0,im_wrapT = 0;
 
 
     //launch clock
@@ -136,14 +147,54 @@ int main(){
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
             ImGui::Begin("Controller", nullptr , ImGuiWindowFlags_MenuBar);
-            ImGui::Text("ImGuiFPS: %.2f ", im_io.Framerate);
-            ImGui::Text("FPS: %.2f" , im_showfps);
-            ImGui::DragFloat3("Cube Position",glm::value_ptr(cube.transform().m_position),0.05F);
-            ImGui::DragFloat4("Cube Rotation",glm::value_ptr(cube.transform().m_rotation.get_mutable_unnorm()),0.05F);
-            ImGui::DragFloat3("Pyramid Local Position",glm::value_ptr(pyramid.transform().m_position),0.05F);
-            ImGui::DragFloat4("Pyramid Rotation",glm::value_ptr(pyramid.transform().m_rotation.get_mutable_unnorm()),0.05F);
-            ImGui::DragFloat3("Camera Position",glm::value_ptr(camera.transform().m_position),0.05F);
-            ImGui::DragFloat4("Camera Rotation",glm::value_ptr(camera.transform().m_rotation.get_mutable_unnorm()),0.05F);
+            if(ImGui::BeginMenuBar()){
+                if(ImGui::MenuItem("Inspector")){
+                    im_menu = 0;
+                }
+                if(ImGui::MenuItem("Sampler")){
+                    im_menu = 1;
+                }
+                ImGui::EndMenuBar();
+            }
+            
+
+            switch(im_menu){
+            case 1:{//Sampler Settings
+                static auto wrapFn = [](int id)->SamplerInfo::WrapMethod {
+                    switch(id){
+                    case 1:
+                        return SamplerInfo::WrapMethod::MirroredRepeat;
+                    case 2:
+                        return SamplerInfo::WrapMethod::ClampToEdge;
+                    case 3:
+                        return SamplerInfo::WrapMethod::ClampToBorder;
+                    default:
+                        return SamplerInfo::WrapMethod::Repeat;
+                    }
+                };
+                ImGui::Text("Sampler:");
+                ImGui::DragFloat4("BorderColor",glm::value_ptr(im_border_color),0.05F,0.0F,1.0F);
+                ImGui::ListBox("WrapR(Useless for 2DTexture)",&im_wrapR,im_wrapItems,4);
+                ImGui::ListBox("WrapS",&im_wrapS,im_wrapItems,4);
+                ImGui::ListBox("WrapT",&im_wrapT,im_wrapItems,4);
+
+                //update sampler settings
+                sampler.wrapR(wrapFn(im_wrapR)).wrapS(wrapFn(im_wrapS)).wrapT(wrapFn(im_wrapT));
+                sampler.borderColor(im_border_color);
+                break;
+            }
+            default:
+                ImGui::Text("Main:");
+                ImGui::Text("ImGuiFPS: %.2f ", im_io.Framerate);
+                ImGui::Text("FPS: %.2f" , im_showfps);
+                ImGui::DragFloat3("Cube Position",glm::value_ptr(cube.transform().m_position),0.05F);
+                ImGui::DragFloat4("Cube Rotation",glm::value_ptr(cube.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                ImGui::DragFloat3("Pyramid Local Position",glm::value_ptr(pyramid.transform().m_position),0.05F);
+                ImGui::DragFloat4("Pyramid Rotation",glm::value_ptr(pyramid.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                ImGui::DragFloat3("Camera Position",glm::value_ptr(camera.transform().m_position),0.05F);
+                ImGui::DragFloat4("Camera Rotation",glm::value_ptr(camera.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                break;
+            }
             ImGui::End();
             ImGui::Render();
             //缓存绘制数据
@@ -172,6 +223,8 @@ int main(){
         ////draw phase////
         win->clear();
         shader.bind();
+        sampler.bind(GL_TEXTURE0);
+        wall.bind(GL_TEXTURE0);
 
         //GL statuses//
         glEnable(GL_DEPTH_TEST);
@@ -300,6 +353,23 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     upload_data(app.vbos,app);
     lg.info("DataUpload:OK!");
 
+    lg.info("Create Sampler...");
+    app.createSampler("main");
+    lg.info("CreateSampler:OK!");
+
+    lg.info("CreateTexture Wall");
+    {
+        CreateTextureInfo ci;
+        ci.source = ci.FromFile;
+        ci.file.path = "./test_data/imgs/wall.jpg";
+        ci.sid = "wall";
+        ci.channel_desired = 4;
+        ci.uploadToOpenGL = true;
+        ci.genMipmap = true;
+        app.createTexture(ci);
+    }
+    lg.info("CreateTexture:OK!");
+
     return win;
 }
 
@@ -326,9 +396,16 @@ void upload_data(VBOManager & vbos,Application& app){
 	 -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, // base – left front
 	 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f // base – right back
 	};
+
+    std::vector<float> pyramid_coord = {
+        0,0,1,0,.5,1, 0,0,1,0,.5,1,
+        0,0,1,0,.5,1, 0,0,1,0,.5,1,
+        0,0,1,1,0 ,1, 1,1,0,0,1 ,0
+	};
     
     vbos[0].bufferData<float>(cube_data);
     vbos[1].bufferData<float>(pyramid_data);
+    vbos[2].bufferData<float>(pyramid_coord);
 
     app.checkOpenGLError();
 }

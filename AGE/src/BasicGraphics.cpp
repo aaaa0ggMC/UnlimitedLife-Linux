@@ -72,4 +72,5 @@ CreateTextureInfo::CreateTextureInfo(){
     this->vec.data = nullptr;
     this->channel_desired = 4;
     this->uploadToOpenGL = true;
+    this->genMipmap = false;
 }
