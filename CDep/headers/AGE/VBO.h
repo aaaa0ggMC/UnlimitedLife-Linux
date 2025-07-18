@@ -137,6 +137,10 @@ namespace age {
 
         ///获取
         VBO operator[](unsigned int index);
+
+    private:
+        friend class Application;
+        void alloc(unsigned int size);
     };
 
     struct AGE_API CreateVBOsInfo{

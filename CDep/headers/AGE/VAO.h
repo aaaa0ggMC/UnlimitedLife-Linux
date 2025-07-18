@@ -96,6 +96,10 @@ namespace age {
 
         ///获取
         VAO operator[](unsigned int index);
+
+    private:
+        friend class Application;
+        void alloc(unsigned int size);
     };
 
     struct AGE_API CreateVAOsInfo{

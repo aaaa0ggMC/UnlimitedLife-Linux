@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <AGE/Query.h>
 
 namespace age{
     struct AGE_API TextureInfo{
@@ -47,6 +48,7 @@ namespace age{
         glm::vec4 borderColor;
         MinFilter minFilter;
         MagFilter magFilter;
+        float anisotropicLevel;
 
         inline SamplerInfo(){
             warp_s = warp_r = warp_t = WrapMethod::Repeat;
@@ -106,6 +108,14 @@ namespace age{
         inline Sampler& magFilter(SamplerInfo::MagFilter met){
             info->magFilter = met;
             glSamplerParameteri(sampler_id,GL_TEXTURE_MAG_FILTER,static_cast<GLenum>(met));
+            return *this;
+        }
+
+        inline Sampler& try_anisotropy(float value){
+            auto [support,val] = Queryer().anisotropicFiltering();
+            if(support){
+                glSamplerParameterf(sampler_id,GL_TEXTURE_MAX_ANISOTROPY_EXT,std::min(val,value));
+            }// do nothing if doesnt support
             return *this;
         }
     };

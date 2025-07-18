@@ -256,6 +256,7 @@ namespace age::world{
     ///may cause exception,use it cautiously only when you know that opt mustn't be std::nullopt
     template<class T> inline T* unwrap(std::optional<T*> opt){
         return (*opt); //segment fault may be arisen here
+        // record 2025/07/18 奇了怪了，为什么正常的东西unwarp后也会segmentfault???我直接解引用就没事
     }
 
 

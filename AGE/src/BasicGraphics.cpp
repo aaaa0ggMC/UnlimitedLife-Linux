@@ -20,7 +20,9 @@ VAO VAO::null(){
 }
 
 VAO VAOManager::operator [](unsigned int index){
-    if(index >= vaos.size())return VAO::null();
+    if(index >= vaos.size()){
+        alloc(index);
+    }
     if(vaos[index])return VAO(vaos[index],index);
     else return VAO::null();
 }
@@ -32,6 +34,13 @@ void VAOManager::add(GLuint v){
 void VAOManager::markAsFree(uint32_t index){
     if(index >= vaos.size())return;
     vaos[index] = 0;
+}
+
+void VAOManager::alloc(unsigned int index){
+    if(index < vaos.size())return;
+    size_t oldSize = vaos.size();
+    vaos.resize(index);
+    glGenVertexArrays(index - oldSize,&vaos[oldSize]);
 }
 
 VBO::VBO(GLuint idd,uint32_t index){
@@ -47,9 +56,18 @@ VBO VBO::null(){
 }
 
 VBO VBOManager::operator [](unsigned int index){
-    if(index >= vbos.size())return VBO::null();
+    if(index >= vbos.size()){
+        alloc(index);
+    }
     if(vbos[index])return VBO(vbos[index],index);
     else return VBO::null();
+}
+
+void VBOManager::alloc(unsigned int index){
+    if(index < vbos.size())return;
+    size_t oldSize = vbos.size();
+    vbos.resize(index);
+    glGenBuffers(index - oldSize,&vbos[oldSize]);
 }
 
 void VBOManager::add(GLuint v){

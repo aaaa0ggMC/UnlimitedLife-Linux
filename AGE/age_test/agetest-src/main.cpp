@@ -33,13 +33,17 @@ using namespace alib::g3;
 constexpr float cam_speed = 3;
 constexpr glm::vec2 cam_rot = glm::vec2(1,1);
 constexpr float framerate = 120;
-constexpr int vbo_count = 3;
-constexpr int vao_count = 2;
+constexpr int startup_vbo_count = 2;
+constexpr int startup_vao_count = 2;
 constexpr float fpsCountTimeMS = 500;
 
 void upload_data(VBOManager & vbos,Application &);
 Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Shader & shader,Camera & cam);
 void dealInput(Input & input,glm::vec3& veloDir,Camera & cam,float mul);
+
+// for my poor knowledge reason,these vars must be global
+std::vector<const char *> texture_sids = {"wall","ice"};
+std::vector<const char *> texture_paths = {"./test_data/imgs/wall.jpg","./test_data/imgs/ice.png"};
 
 int main(){
     //Log
@@ -127,6 +131,11 @@ int main(){
     int im_wrapR = 0,im_wrapS = 0,im_wrapT = 0;
     float im_winalpha = 0.8f;
     float im_uialpha = 0.8f;
+    int im_textureID = 0;
+    float im_maxAnisotrpy = Queryer().anisotropicFiltering().second;
+    float im_aniso = 0;
+
+    lg << "Max ANISO" << im_maxAnisotrpy << std::endl;
 
 
     //launch clock
@@ -161,6 +170,9 @@ int main(){
                 if(ImGui::MenuItem("Sampler")){
                     im_menu = 1;
                 }
+                if(ImGui::MenuItem("Texture")){
+                    im_menu = 2;
+                }
                 ImGui::EndMenuBar();
             }
             
@@ -184,12 +196,18 @@ int main(){
                 ImGui::ListBox("WrapR(Useless for 2DTexture)",&im_wrapR,im_wrapItems,4);
                 ImGui::ListBox("WrapS",&im_wrapS,im_wrapItems,4);
                 ImGui::ListBox("WrapT",&im_wrapT,im_wrapItems,4);
+                if(im_maxAnisotrpy)ImGui::DragFloat("Anisotropy",&im_aniso,0.01F,0.0F,im_maxAnisotrpy);
 
                 //update sampler settings
                 sampler.wrapR(wrapFn(im_wrapR)).wrapS(wrapFn(im_wrapS)).wrapT(wrapFn(im_wrapT));
+                if(im_maxAnisotrpy)sampler.try_anisotropy(im_aniso);
                 sampler.borderColor(im_border_color);
                 break;
             }
+            case 2:
+                ImGui::Text("Texture:");
+                ImGui::ListBox("Binding",&im_textureID,texture_sids.data(),texture_sids.size());
+                break;
             default:
                 ImGui::Text("Main:");
                 ImGui::Text("ImGuiFPS: %.2f ", im_io.Framerate);
@@ -237,8 +255,8 @@ int main(){
         win->clear();
         shader.bind();
         sampler.bind(GL_TEXTURE0);
-        wall.bind(GL_TEXTURE0);
-
+        // 动态纹理切换测试
+        unwrap(app.getTexture(texture_sids[im_textureID]))->bind(GL_TEXTURE0);
         //GL statuses//
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -353,11 +371,11 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
 
     //// VAOs & VBOs ////
     lg.info("Creating VAOs & VBOs...");
-    app.createVAOs(vao_count);
+    app.createVAOs(startup_vao_count);
     app.checkOpenGLError();
     lg.info("VAO:OK!");
 
-    app.createVBOs(vbo_count);
+    app.createVBOs(startup_vbo_count);
     app.checkOpenGLError();
     lg.info("VBO:OK!");
 
@@ -374,12 +392,15 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     {
         CreateTextureInfo ci;
         ci.source = ci.FromFile;
-        ci.file.path = "./test_data/imgs/wall.jpg";
-        ci.sid = "wall";
         ci.channel_desired = 4;
         ci.uploadToOpenGL = true;
         ci.genMipmap = true;
-        app.createTexture(ci);
+        for(size_t i = 0;i < texture_sids.size();++i){
+            ci.file.path = texture_paths[i];
+            ci.sid = texture_sids[i];
+            app.createTexture(ci);
+            lg(LOG_INFO) << "Created " << ci.sid << " " << ci.file.path << std::endl;
+        }
     }
     lg.info("CreateTexture:OK!");
 
@@ -418,6 +439,7 @@ void upload_data(VBOManager & vbos,Application& app){
     
     vbos[0].bufferData<float>(cube_data);
     vbos[1].bufferData<float>(pyramid_data);
+    // 基于方便性考虑vao和vbo会自动扩展,分配逻辑也从Application里面迁移到了VBO和VAO本身，Application作为调用方
     vbos[2].bufferData<float>(pyramid_coord);
 
     app.checkOpenGLError();

@@ -163,12 +163,7 @@ Application::~Application(){
 
 void Application::createVAOs(const CreateVAOsInfo & info){
     if(info.count != 0){
-        std::vector<GLuint> values;
-        values.resize(info.count);
-        glGenVertexArrays(info.count,&(values[0]));
-        for(auto v : values){
-            vaos.add(v);
-        }
+        vaos.alloc(info.count + vaos.vaos.size());
     }
 }
 
@@ -182,12 +177,7 @@ void Application::createVBOs(uint32_t count){
 
 void Application::createVBOs(const CreateVBOsInfo & info){
     if(info.count != 0){
-        std::vector<GLuint> values;
-        values.resize(info.count);
-        glGenBuffers(info.count,&(values[0]));
-        for(auto v : values){
-            vbos.add(v);
-        }
+        vbos.alloc(info.count + vbos.vbos.size());
     }
 }
 
