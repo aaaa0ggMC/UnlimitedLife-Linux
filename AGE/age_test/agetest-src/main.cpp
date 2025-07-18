@@ -45,6 +45,9 @@ void dealInput(Input & input,glm::vec3& veloDir,Camera & cam,float mul);
 std::vector<const char *> texture_sids = {"wall","ice"};
 std::vector<const char *> texture_paths = {"./test_data/imgs/wall.jpg","./test_data/imgs/ice.png"};
 
+//// Global States ////
+bool playing = true;
+
 int main(){
     //Log
     Logger logger;
@@ -105,6 +108,8 @@ int main(){
     ////Systems////
     systems::ParentSystem parent_system (em);
     systems::DirtySystem<comps::Transform> marker (em);
+
+    //// States ////
 
     ////IMGUI Settings////
     IMGUI_CHECKVERSION();
@@ -239,12 +244,13 @@ int main(){
 
             
             //由于imgui同步问题，所以数据要dm_mark，但是imgui更新频率大于tick频率，所以要下checkTick里面hhh
-            marker.update();
-
-            //post-input-update
-            cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),1 * p);
-            invPar.transform().rotate(glm::vec3(0.0f,1.0f,1.0f),2 * p);
-            pyramid.transform().rotate(glm::vec3(0.0f,1.0f,0.0f),1.5 * p);
+            if(playing){
+                marker.update();
+                //post-input-update
+                cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),1 * p);
+                invPar.transform().rotate(glm::vec3(0.0f,1.0f,1.0f),2 * p);
+                pyramid.transform().rotate(glm::vec3(0.0f,1.0f,0.0f),1.5 * p);
+            }
             em.update<comps::Transform>(elapse.getOffset(),true);
             parent_system.update();
 
@@ -403,6 +409,14 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
         }
     }
     lg.info("CreateTexture:OK!");
+
+    win->setKeyCallback([](Window&win,KeyWrapper wp){
+        if(wp.getKeyAction() == KeyAction::Release){
+            if(wp.getKeyCode() == KeyCode::P){
+                playing = !playing;
+            }
+        }
+    });
 
     return win;
 }

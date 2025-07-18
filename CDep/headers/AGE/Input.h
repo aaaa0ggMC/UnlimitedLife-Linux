@@ -111,6 +111,10 @@ namespace age {
             return static_cast<KeyCode>(key);
         }
 
+        inline KeyAction getKeyAction() const {
+            return static_cast<KeyAction>(action);
+        }
+
         inline bool hasShift() const noexcept    { return mods & GLFW_MOD_SHIFT; }
         inline bool hasControl() const noexcept  { return mods & GLFW_MOD_CONTROL; }
         inline bool hasAlt() const noexcept      { return mods & GLFW_MOD_ALT; }

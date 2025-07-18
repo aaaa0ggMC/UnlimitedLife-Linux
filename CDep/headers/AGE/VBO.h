@@ -90,14 +90,15 @@ namespace age {
             return index;
         }
 
-        inline void bind(){
+        inline void bind(GLenum target = GL_ARRAY_BUFFER){
             current = this->id;
-            glBindBuffer(GL_ARRAY_BUFFER,id);
+            glBindBuffer(target,id);
         }
 
-        inline static void unbind(){
+        // 为了支持element buffer
+        inline static void unbind(GLenum target = GL_ARRAY_BUFFER){
             current = 0;
-            glBindBuffer(GL_ARRAY_BUFFER,0);
+            glBindBuffer(target,0);
         }
 
         inline static GLuint getCurrent(){

@@ -133,3 +133,9 @@
      RightSuper = GLFW_KEY_RIGHT_SUPER,
      Menu = GLFW_KEY_MENU
  };
+
+enum class KeyAction : int {
+    Release = GLFW_RELEASE,      // 按键被释放
+    Press   = GLFW_PRESS,        // 按键被按下
+    Repeat  = GLFW_REPEAT        // 按键被重复（按住不放）
+};
