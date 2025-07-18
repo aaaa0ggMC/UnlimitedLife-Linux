@@ -21,13 +21,15 @@ void ParentSystem::update(){
         pstack.push(eid);
         while(!pstack.empty()){
             uint64_t child_id = pstack.top();
-
-            if(dealedParent.contains(child_id))continue;
-
+            /*这个似乎是冗余的，测试下来多重parent chain注释这一块不影响
+            if(dealedParent.contains(child_id)){
+                pstack.pop();
+                continue;
+            }*/
             comps::Transform& child = transformPool->data[transformPool->mapper[child_id]];
             uint64_t parent_id = pool->data[pool->mapper[child_id]].parent.id;
             auto iter = pool->mapper.find(parent_id);
-            if(iter != pool->mapper.end()){
+            if(iter != pool->mapper.end() && !dealedParent.contains(parent_id)){
                 pstack.push(parent_id);
                 continue;
             }

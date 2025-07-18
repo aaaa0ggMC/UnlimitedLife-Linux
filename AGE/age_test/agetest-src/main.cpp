@@ -85,15 +85,18 @@ int main(){
     vaos[1].setAttribStatus(1,true);
     ////World Objects////
     Object cube (em);
+    Object invPar (em);
     Object pyramid (em);
 
     ////InitWorld////
     camera.transform().move(1,0,10);
     camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
     cube.transform().move(1,-2,1);
-    pyramid.transform().move(0,0,4);
+    invPar.transform().move(0,0,4);
+    pyramid.transform().move(3,0,0);
 
-    em.addComponent<Parent>(pyramid.getEntity(),cube.getEntity());
+    em.addComponent<Parent>(pyramid.getEntity(),invPar.getEntity());
+    em.addComponent<Parent>(invPar.getEntity(),cube.getEntity());
 
     ////Systems////
     systems::ParentSystem parent_system (em);
@@ -122,6 +125,8 @@ int main(){
     glm::vec4 im_border_color = glm::vec4(0,0,0,0);
     const char * im_wrapItems[] = {"Repeat","MirroredRepeat","ClampToEdge","ClampToBorder"};
     int im_wrapR = 0,im_wrapS = 0,im_wrapT = 0;
+    float im_winalpha = 0.8f;
+    float im_uialpha = 0.8f;
 
 
     //launch clock
@@ -146,6 +151,8 @@ int main(){
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
+            ImGui::SetNextWindowBgAlpha(im_winalpha);
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha,im_uialpha);
             ImGui::Begin("Controller", nullptr , ImGuiWindowFlags_MenuBar);
             if(ImGui::BeginMenuBar()){
                 if(ImGui::MenuItem("Inspector")){
@@ -173,7 +180,7 @@ int main(){
                     }
                 };
                 ImGui::Text("Sampler:");
-                ImGui::DragFloat4("BorderColor",glm::value_ptr(im_border_color),0.05F,0.0F,1.0F);
+                ImGui::DragFloat4("BorderColor",glm::value_ptr(im_border_color),0.01F,0.0F,1.0F);
                 ImGui::ListBox("WrapR(Useless for 2DTexture)",&im_wrapR,im_wrapItems,4);
                 ImGui::ListBox("WrapS",&im_wrapS,im_wrapItems,4);
                 ImGui::ListBox("WrapT",&im_wrapT,im_wrapItems,4);
@@ -187,14 +194,19 @@ int main(){
                 ImGui::Text("Main:");
                 ImGui::Text("ImGuiFPS: %.2f ", im_io.Framerate);
                 ImGui::Text("FPS: %.2f" , im_showfps);
+                ImGui::DragFloat("Window Aplha",&im_winalpha,0.008F,0.0F,1.0F);
+                ImGui::DragFloat("UI Aplha",&im_uialpha,0.008F,0.2F,1.0F);
                 ImGui::DragFloat3("Cube Position",glm::value_ptr(cube.transform().m_position),0.05F);
                 ImGui::DragFloat4("Cube Rotation",glm::value_ptr(cube.transform().m_rotation.get_mutable_unnorm()),0.05F);
-                ImGui::DragFloat3("Pyramid Local Position",glm::value_ptr(pyramid.transform().m_position),0.05F);
-                ImGui::DragFloat4("Pyramid Rotation",glm::value_ptr(pyramid.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                ImGui::DragFloat3("-Invisi Local Position",glm::value_ptr(invPar.transform().m_position),0.05F);
+                ImGui::DragFloat4("-Invisi Rotation",glm::value_ptr(invPar.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                ImGui::DragFloat3("--Pyramid Local Position",glm::value_ptr(pyramid.transform().m_position),0.05F);
+                ImGui::DragFloat4("--Pyramid Rotation",glm::value_ptr(pyramid.transform().m_rotation.get_mutable_unnorm()),0.05F);
                 ImGui::DragFloat3("Camera Position",glm::value_ptr(camera.transform().m_position),0.05F);
                 ImGui::DragFloat4("Camera Rotation",glm::value_ptr(camera.transform().m_rotation.get_mutable_unnorm()),0.05F);
                 break;
             }
+            ImGui::PopStyleVar();
             ImGui::End();
             ImGui::Render();
             //缓存绘制数据
@@ -213,7 +225,8 @@ int main(){
 
             //post-input-update
             cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),1 * p);
-            pyramid.transform().rotate(glm::vec3(0.0f,1.0f,1.0f),2 * p);
+            invPar.transform().rotate(glm::vec3(0.0f,1.0f,1.0f),2 * p);
+            pyramid.transform().rotate(glm::vec3(0.0f,1.0f,0.0f),1.5 * p);
             em.update<comps::Transform>(elapse.getOffset(),true);
             parent_system.update();
 
