@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/17
+ * @date 2025/07/18
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -90,7 +90,7 @@ int main(){
 
     ////Systems////
     systems::ParentSystem parent_system (em);
-    systems::MarkerSystem<comps::Transform> marker (em);
+    systems::DirtySystem<comps::Transform> marker (em);
 
     ////IMGUI Settings////
     IMGUI_CHECKVERSION();

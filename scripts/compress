@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ..
 export name=/tmp/UnlimitedLife-v1.0.0.tar.gz
 tar -czvf $name --exclude="./Pacman" --exclude="./.git" --exclude="./.github"  .
 mv $name ./Pacman

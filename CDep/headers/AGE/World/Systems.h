@@ -3,7 +3,7 @@
  * @author aaaa0ggmc
  * @brief 提供一些预设的System插件
  * @version 0.1
- * @date 2025/07/17
+ * @date 2025/07/18
  * @start-date 2025/7/16
  * @copyright Copyright (c) 2025
  */
@@ -49,11 +49,11 @@ namespace age::world{
         };
 
         /// @brief 直接把一个pool都标记了
-        template<ComponentMarkable T> struct AGE_API MarkerSystem{
+        template<ComponentMarkable T> struct AGE_API DirtySystem{
             ComponentPool<T> * pool;
             EntityManager &em;
 
-            inline MarkerSystem(EntityManager & iem): em{iem}{
+            inline DirtySystem(EntityManager & iem): em{iem}{
                 initPool();    
             }
 
@@ -80,10 +80,10 @@ namespace age::world{
         };
 
         /// @brief 更加通用的Marker
-        struct AGE_API GenericMarkerSystem{
+        struct AGE_API GenericDirtySystem{
             EntityManager &em;
 
-            inline GenericMarkerSystem(EntityManager & iem): em{iem}{}
+            inline GenericDirtySystem(EntityManager & iem): em{iem}{}
 
             template<ComponentMarkable T> inline void update(){
                 auto opool = em.getComponentPool<T>();

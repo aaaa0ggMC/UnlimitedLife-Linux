@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ..
 mkdir CBuild_CACHE
 cd CBuild_CACHE
 

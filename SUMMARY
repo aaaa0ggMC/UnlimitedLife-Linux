@@ -1,0 +1,43 @@
+# VERSION CODES
+2025/1/26
+2025/3/21
+2025/6/11
+2025/7/15  Add Component Requisitions
+2025/7/18
+# END VERSION CODES
+
+# TEST PLATFORMS
+## (1)
+  aaaa0ggmc's old computer (ArchLinux)
+  CPU: AMD A6-9210 RADEON R4, 5 COMPUTE CORES 2C+3G (2) @ 2.40 GHz
+  GPU 1: AMD Radeon R4 Graphics [Integrated]
+  GPU 2: AMD Radeon R5 M330 [Discrete]
+  Memory: 3.18 GiB / 6.72 GiB (47%)
+  Swap: 371.63 MiB / 3.36 GiB (11%)
+  Disk (/): 93.85 GiB / 110.79 GiB (85%) - btrfs
+
+## (2)
+  aaaa0ggmc's new computer (Windows 11)
+  CPU: AMD Ryzen 9 8945HX (32) @ 2.50 GHz
+  GPU 1: AMD Radeon(TM) 610M (481.44 MiB) [Integrated]
+  GPU 2: NVIDIA GeForce RTX 5060 Laptop GPU (7.63 GiB) [Discrete]
+  Memory: 11.84 GiB / 31.30 GiB (38%)
+  Swap: 73.69 MiB / 1.00 GiB (7%)
+  Disk (C:\): 195.74 GiB / 400.00 GiB (49%) - NTFS
+  Disk (D:\): 386.76 GiB / 551.64 GiB (70%) - NTFS
+# END TEST PLATFORMS
+
+
+#Default behaviour is usually opposite to the description.
+# MACROS
+[AGE.AGE_EM_DEBUG]
+where       = "EntityManager"
+description = "开启调试输出"
+additional  = "仅建议调试使用"
+
+[AGE.AGE_NO_COMP_REQUISITIONS]
+where       = "Components"
+description = "关闭依赖检测"
+additional  = "如果你觉得自己代码写得好，依赖关系反而拉低性能可以定义这个宏"
+# END MACROS
+

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+cd ..
 # @todo stb能不能成我不知道
 # Install build dependencies
 if [ -f /etc/arch-release ]; then
