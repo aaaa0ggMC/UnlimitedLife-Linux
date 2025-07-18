@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ..
+# cd .. 工作目录就是 ./
 cd "$(dirname "${BASH_SOURCE[0]}")"
 sh ./configure
 sh ./build

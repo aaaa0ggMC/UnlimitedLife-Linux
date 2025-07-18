@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ..
+# cd .. 工作目录就是 ./
 sh ./compress
 mkdir Pacman
 cd Pacman
