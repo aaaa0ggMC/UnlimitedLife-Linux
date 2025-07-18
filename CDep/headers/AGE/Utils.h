@@ -175,8 +175,8 @@ namespace age{
         std::function<void()> task;
     };
 
-    // @author:里挥发
-    // @brief:事件循环器
+    /// @author:里挥发
+    /// @brief:事件循环器
     class EventLoop {
         public:
         alib::g3::Clock clock;
