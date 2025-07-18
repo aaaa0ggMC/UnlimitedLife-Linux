@@ -22,7 +22,7 @@ if(WIN32)
 target_link_libraries(agetest PRIVATE imgui AGE glfw3.dll glew32.dll opengl32 aaaa0ggmcLib)
 target_compile_definitions(agetest PRIVATE GLFW_DLL)
 else()
-# @TODO 添加linux IMGUI支持
-target_link_libraries(agetest PRIVATE AGE aaaa0ggmcLib glfw GLEW OpenGL)
+# 直接链接
+target_link_libraries(agetest PRIVATE imgui AGE aaaa0ggmcLib glfw GLEW OpenGL) 
 endif()
 

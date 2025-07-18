@@ -28,8 +28,7 @@ mkdir -p abuild
 cd abuild
 cmake .. -G "Unix Makefiles"
 make
-# I dont know what will be built on linux(my linux is not on now),so I just see the action result
-ls
+cp ./libimgui.so ../../../CBuild/
 #copy headers
 mkdir -p ../../../CDep/headers/imgui/
 cd ..
