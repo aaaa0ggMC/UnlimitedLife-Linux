@@ -20,6 +20,10 @@
 #include <vector>
 #include <numbers>
 
+//unsigned char data []= {
+//    #embed "../../src/Application.cpp"
+//};
+
 ////使用IMGUI对帧率的影响：从6000降到3000,imgui大概用了0.1ms来运作（我的电脑）////
 ////限制imgui 100fps更新后，帧率达到6000fps
 #include <imgui/imgui_impl_opengl3.h>
