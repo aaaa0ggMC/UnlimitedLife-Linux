@@ -144,6 +144,10 @@ namespace age{
             glBindTexture(GL_TEXTURE_2D,texture_id);
         }
 
+        inline GLuint getId(){
+            return texture_id;
+        }
+
         //由于Application无法包含否则循环include,所以这里似乎需要抛弃inline
         inline const TextureInfo & getTextureInfo(){
             return *textureInfo;

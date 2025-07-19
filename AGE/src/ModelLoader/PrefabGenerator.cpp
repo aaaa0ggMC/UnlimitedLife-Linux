@@ -1,22 +1,12 @@
 #include <AGE/ModelLoader/PrefabGenerator.h>
 #include <numbers>
 #include <cmath>
+#include <glm/glm.hpp>
 
 using namespace age::model;
 
 void Prefab::sphere(size_t precision,vecf & vertices,veci & indices,vecf & normals,vecf & coords){
-    if(precision == 0){
-        vertices.resize(3);
-        indices.resize(3);
-        normals.resize(3);
-        coords.resize(2);
-
-        vertices[0] = vertices[1] = vertices[2] = 0;
-        normals[0] = normals[1] = normals[2] = 0;
-        coords[0] = coords[1] = 0;
-        indices[0] = indices[1] = indices[2] = 0;
-        return;
-    }
+    if(check(precision,vertices,indices,normals,coords))return;
     size_t vertex_count = (precision+1) * (precision+1);
     size_t index_count = precision * precision * 6;
     //alloc size
@@ -37,6 +27,7 @@ void Prefab::sphere(size_t precision,vecf & vertices,veci & indices,vecf & norma
 
             size_t base = i * (precision + 1) + j;
             vertices[3 * base + 0] = x;vertices[3 * base + 1] = y;vertices[3 * base + 2] = z;
+            // 法向量不要求模吗，虽然这里就是模
             normals[3 * base + 0] = x;normals[3 * base + 1] = y;normals[3 * base + 2] = z;
             coords[2 * base + 0] = (float)j / precision;coords[2 * base + 1] = (float)i / precision;
 
@@ -49,6 +40,60 @@ void Prefab::sphere(size_t precision,vecf & vertices,veci & indices,vecf & norma
                 indices[base + 3] = i * (precision + 1) + j + 1;
                 indices[base + 4] = (i + 1) * (precision + 1) + j + 1;
                 indices[base + 5] = (i + 1) * (precision + 1) + j;
+            }
+        }
+    }
+}
+
+
+void Prefab::torus(size_t precision, float innerRadius, float ringRadius,
+                   vecf &vertices, veci &indices, vecf &normals, vecf &coords) {
+    if (check(precision, vertices, indices, normals, coords)) return;
+
+    size_t vertex_count = (precision + 1) * (precision + 1);
+    size_t index_count = precision * precision * 6;
+
+    vertices.resize(3 * vertex_count);
+    indices.resize(index_count);
+    normals.resize(3 * vertex_count);
+    coords.resize(2 * vertex_count);
+
+    for (size_t i = 0; i <= precision; ++i) {
+        float theta = (float)i / precision * 2.0f * std::numbers::pi;
+        float cosTheta = std::cos(theta);
+        float sinTheta = std::sin(theta);
+
+        for (size_t j = 0; j <= precision; ++j) {
+            float phi = (float)j / precision * 2.0f * std::numbers::pi;
+            float cosPhi = std::cos(phi);
+            float sinPhi = std::sin(phi);
+
+            float x = (innerRadius + ringRadius * cosPhi) * cosTheta;
+            float y = ringRadius * sinPhi;
+            float z = (innerRadius + ringRadius * cosPhi) * sinTheta;
+
+            size_t base = i * (precision + 1) + j;
+
+            vertices[3 * base + 0] = x;
+            vertices[3 * base + 1] = y;
+            vertices[3 * base + 2] = z;
+
+            glm::vec3 normal = glm::normalize(glm::vec3(cosPhi * cosTheta, sinPhi, cosPhi * sinTheta));
+            normals[3 * base + 0] = normal.x;
+            normals[3 * base + 1] = normal.y;
+            normals[3 * base + 2] = normal.z;
+
+            coords[2 * base + 0] = (float)j / precision;
+            coords[2 * base + 1] = (float)i / precision;
+
+            if (i < precision && j < precision) {
+                size_t idx = 6 * (i * precision + j);
+                indices[idx + 0] = base;
+                indices[idx + 1] = base + 1;
+                indices[idx + 2] = base + (precision + 1);
+                indices[idx + 3] = base + 1;
+                indices[idx + 4] = base + (precision + 1) + 1;
+                indices[idx + 5] = base + (precision + 1);
             }
         }
     }

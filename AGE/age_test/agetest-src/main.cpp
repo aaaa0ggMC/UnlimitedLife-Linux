@@ -20,10 +20,6 @@
 #include <vector>
 #include <numbers>
 
-//unsigned char data []= {
-//    #embed "../../src/Application.cpp"
-//};
-
 ////使用IMGUI对帧率的影响：从6000降到3000,imgui大概用了0.1ms来运作（我的电脑）////
 ////限制imgui 100fps更新后，帧率达到6000fps
 #include <imgui/imgui_impl_opengl3.h>
@@ -70,6 +66,7 @@ int main(){
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
     Window * win = setup(logger,lg,app,input,shader,camera);
+    std::unordered_map<std::string_view,ModelData> models;
 
     ////ShaderArgs////
     ShaderUniform mvp = shader["mvp_matrix"];
@@ -163,18 +160,36 @@ int main(){
         GL_LEQUAL, GL_LESS, GL_GREATER, GL_EQUAL,
         GL_GEQUAL, GL_NOTEQUAL, GL_ALWAYS, GL_NEVER
     };
-    
+    std::vector<const char*> im_models = {
+        "sphere",
+        "torus"
+    };
+    int im_model = 0;
+    bool ims_cube,ims_pyramid,ims_model;
+    ims_cube = ims_pyramid = ims_model = true;
+    int im_preview = 256;
+
 
     //// Model Data///
-    ModelData md;
+    auto loadModel = [&]{
+
+        ModelData * mdx = &models["sphere"];
+        model::Prefab::sphere(im_prec,mdx->vertices,mdx->indices,mdx->normals,mdx->coords);
+        vaos[2].bind();
+        mdx->bind(vaos[2],vbos[3],vbos[4],vbos[5]);
+        
+        mdx = &models["torus"];
+        model::Prefab::torus(im_prec,1,0.5,mdx->vertices,mdx->indices,mdx->normals,mdx->coords);
+        vaos[3].bind();
+        mdx->bind(vaos[3],vbos[6],vbos[7],vbos[8]);
+    };
     {
         lg.info("Loading Model...");
         Clock clk;
-        model::Prefab::sphere(im_prec,md.vertices,md.indices,md.normals,md.coords);
-        vaos[2].bind();
-        md.bind(vaos[2],vbos[3],vbos[4],vbos[5]);
+        loadModel();
         lg(LOG_INFO) << "LoadModel:OK! [" << clk.getOffset() << "ms]" << std::endl;
     }
+    ModelData * md = &models[im_models[im_model]];
 
     //launch clock
     elapse.start();
@@ -214,8 +229,11 @@ int main(){
                 if(ImGui::MenuItem("Models")){
                     im_menu = 3;
                 }
-                if(ImGui::MenuItem("GL Settings")){
+                if(ImGui::MenuItem("GL")){
                     im_menu = 4;
+                }
+                if(ImGui::MenuItem("Render")){
+                    im_menu = 5;
                 }
                 ImGui::EndMenuBar();
             }
@@ -250,23 +268,27 @@ int main(){
                 sampler.borderColor(im_border_color);
                 break;
             }
-            case 2:
+            case 2:{
                 ImGui::Text("Texture:");
                 ImGui::ListBox("Binding",&im_textureID,texture_sids.data(),texture_sids.size());
+                ImGui::DragInt("Preview Size (X)",&im_preview,0.5F,0,1024);
+                auto tex = unwrap(app.getTexture(texture_sids[im_textureID]));
+                ImGui::Image((ImTextureID)(intptr_t)tex->getId(), ImVec2(im_preview,im_preview * tex->getTextureInfo().height / (float)tex->getTextureInfo().width));
                 break;
+            }
             case 3:
                 ImGui::Text("Models:");
                 ImGui::DragInt("Sphere Precision",&im_prec,0.1F,0);
+                ImGui::ListBox("ModelSelection",&im_model,im_models.data(),im_models.size(),4);
 
                 if(im_prec != im_prec_old){
                     /// IMGUI的限制有点聪明.... 0就是没有限制是吧
                     if(im_prec < 0)im_prec_old = im_prec = 0;
                     else im_prec_old = im_prec;
                     //reload sphere
-                    model::Prefab::sphere(im_prec,md.vertices,md.indices,md.normals,md.coords);
-                    vaos[2].bind();
-                    md.bind(vaos[2],vbos[3],vbos[4],vbos[5]);
+                    loadModel();
                 }
+                md = &models[im_models[im_model]];
                 break;
             case 4:
                 ImGui::Text("GL Settings:");
@@ -277,6 +299,12 @@ int main(){
                 ImGui::Checkbox("Cull Faces",&im_glcull);
                 ImGui::Checkbox("Depth Test",&im_gldepth);
                 ImGui::ListBox("Depth Func",&im_gldfunc,im_sgldfunc.data(),im_sgldfunc.size(),4);
+                break;
+            case 5:
+                ImGui::Text("Render:");
+                ImGui::Checkbox("Cube",&ims_cube);
+                ImGui::Checkbox("Pyramid",&ims_pyramid);
+                ImGui::Checkbox("Model",&ims_model);
                 break;
             default:
                 ImGui::Text("Main:");
@@ -340,21 +368,27 @@ int main(){
         glPolygonMode(im_dpolyf[im_polyf],im_dpolym[im_polym]);
 
         ///Cube
-        glFrontFace(GL_CW);
-        vaos[0].bind();
-        mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
-        win->drawArray(PrimitiveType::Triangles,0,36,1);
+        if(ims_cube){
+            glFrontFace(GL_CW);
+            vaos[0].bind();
+            mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
+            win->drawArray(PrimitiveType::Triangles,0,36,1);
+        }
 
         ///Pyramid
-        vaos[1].bind();
-        glFrontFace(GL_CCW);
-        mvp.uploadmat4(camera.buildVPMatrix() * pyramid.transform().buildModelMatrix());
-        win->drawArray(PrimitiveType::Triangles,0,36);
+        if(ims_pyramid){
+            vaos[1].bind();
+            glFrontFace(GL_CCW);
+            mvp.uploadmat4(camera.buildVPMatrix() * pyramid.transform().buildModelMatrix());
+            win->drawArray(PrimitiveType::Triangles,0,36);
+        }
 
         ///Try A Circle
-        vaos[2].bind();
-        mvp.uploadmat4(camera.buildVPMatrix() * invPar.transform().buildModelMatrix());
-        win->drawElements(PrimitiveType::Triangles,md.getIndiceCount());
+        if(ims_model){
+            vaos[2 + im_model].bind();
+            mvp.uploadmat4(camera.buildVPMatrix() * invPar.transform().buildModelMatrix());
+            win->drawElements(PrimitiveType::Triangles,md->getIndiceCount());
+        }
         
         //// IMGUI Finish up////
         if(im_cached)ImGui_ImplOpenGL3_RenderDrawData(im_cached);
