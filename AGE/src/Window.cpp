@@ -1,6 +1,5 @@
 #ifdef _WIN32
 #include <windows.h>
-#include <shellscalingapi.h>
 #endif
 
 #include <AGE/Window.h>
@@ -55,13 +54,8 @@ std::pair<int, int> CreateWindowInfo::ScreenPercent(float px, float py, int *x, 
     int sx,sy;
     sx = 1920;
     sy = 1280;
+    float scale = getMonitorScale();
     #if defined(_WIN32)
-        float scale = 1.0f; // 默认 100% 缩放
-        HMONITOR hMonitor = MonitorFromWindow(GetDesktopWindow(), MONITOR_DEFAULTTOPRIMARY);
-        DEVICE_SCALE_FACTOR scaleFactor;
-        if(SUCCEEDED(GetScaleFactorForMonitor(hMonitor, &scaleFactor))){
-            scale = static_cast<float>(scaleFactor) / 100.0f; // 转换为浮点数 (例如 125 → 1.25f)
-        }
         sx = GetSystemMetrics(SM_CXSCREEN) * scale;
         sy = GetSystemMetrics(SM_CYSCREEN) * scale;
     #elif defined(__linux__)

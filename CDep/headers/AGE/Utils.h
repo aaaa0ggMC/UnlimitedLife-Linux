@@ -20,6 +20,7 @@
 ///For windows support
 #ifdef _WIN32
 #include <windows.h>
+#include <shellscalingapi.h>
 #ifndef AGE_API
 #ifdef AGE_BUILD_DLL
     #define AGE_API __declspec(dllexport)
@@ -57,6 +58,8 @@ namespace age{
     template<class T> inline constexpr T deg2rad(const T & in){
         return in * (std::numbers::pi / (T)180);
     }
+
+    float AGE_API getMonitorScale();
 
     struct AGE_API DirtyMarker{
     private:

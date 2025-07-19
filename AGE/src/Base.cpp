@@ -39,3 +39,17 @@ void Error::defTrigger(const ErrorInfopp& data){
 void Error::setLimit(int32_t count){
     limit = count;
 }
+
+float age::getMonitorScale(){
+    #ifdef _WIN32
+        float scale = 1.0f; // 默认 100% 缩放
+        HMONITOR hMonitor = MonitorFromWindow(GetDesktopWindow(), MONITOR_DEFAULTTOPRIMARY);
+        DEVICE_SCALE_FACTOR scaleFactor;
+        if(SUCCEEDED(GetScaleFactorForMonitor(hMonitor, &scaleFactor))){
+            scale = static_cast<float>(scaleFactor) / 100.0f; // 转换为浮点数 (例如 125 → 1.25f)
+        }
+    #elif defined(__linux__)
+        scale = 1.0f;
+    #endif
+    return scale;
+}

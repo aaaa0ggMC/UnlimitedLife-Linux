@@ -123,17 +123,10 @@ int main(){
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(win->getSystemHandle(),true);
     ImGui_ImplOpenGL3_Init("#version 150");
-    ImFont* im_font = im_io.Fonts->AddFontFromFileTTF
-    (
-        "C:\\Windows\\Fonts\\msyh.ttc",
-        30,
-        nullptr,
-        im_io.Fonts->GetGlyphRangesChineseFull()
-    );
-    IM_ASSERT(im_font != nullptr);
     Clock imgui_clock (false);
     Trigger im_trigger(imgui_clock,10); // 100fps
     ImDrawData * im_cached = nullptr;
+    im_io.FontGlobalScale = getMonitorScale() * 1.2;
     float im_showfps = 0;
     int im_menu = 0;
     glm::vec4 im_border_color = glm::vec4(0,0,0,0);
