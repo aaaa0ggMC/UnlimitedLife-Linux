@@ -130,7 +130,7 @@ int main(){
         nullptr,
         im_io.Fonts->GetGlyphRangesChineseFull()
     );
-    IM_ASSERT(font != nullptr);
+    IM_ASSERT(im_font != nullptr);
     Clock imgui_clock (false);
     Trigger im_trigger(imgui_clock,10); // 100fps
     ImDrawData * im_cached = nullptr;
