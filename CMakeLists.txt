@@ -3,7 +3,7 @@ project(UnlimitedLife-Linux)
 
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 26)
 
 if (WIN32)
     add_compile_options(-ftls-model=global-dynamic)
