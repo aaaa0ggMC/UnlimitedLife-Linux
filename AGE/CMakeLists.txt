@@ -1,5 +1,6 @@
 aux_source_directory("./src" AGE-SRC)
-add_library(AGE SHARED ${AGE-SRC})
+aux_source_directory("./src/ModelLoader" MODEL)
+add_library(AGE SHARED ${MODEL} ${AGE-SRC})
 set_target_properties(AGE PROPERTIES LINKER_LANGUAGE CXX)
 
 

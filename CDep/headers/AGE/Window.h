@@ -197,8 +197,13 @@ namespace age{
             glClear(target);
         }
 
-        /// this function uses glDrawArrays when instanceCount == 1
+        [[deprecated("use drawArray instead...")]]
         inline void draw(PrimitiveType type,GLuint startIndex,GLint count,GLuint instanceCount = 1,VAO vao = VAO::null()){
+            drawArray(type,startIndex,count,instanceCount,vao);
+        }
+
+        /// this function uses glDrawArrays when instanceCount == 1
+        inline void drawArray(PrimitiveType type,GLuint startIndex,GLint count,GLuint instanceCount = 1,VAO vao = VAO::null()){
             if(!instanceCount)return;
             std::optional<VAO::ScopedVAO> scp = std::nullopt;
             if(vao.getId() != 0){
@@ -206,6 +211,30 @@ namespace age{
             }
             if(instanceCount == 1)glDrawArrays(static_cast<GLenum>(type),startIndex,count);
             else glDrawArraysInstanced(static_cast<GLenum>(type),startIndex,count,instanceCount);
+        }
+
+        /**
+         * @brief 绘制带索引的元素
+         * @param type 图元类型
+         * @param indice_count 索引数量，输入0并且namedIndices不为空可以让函数自行推导
+         * @param namedIndices 指定indice是什么而非使用 GL_ELEMENT_ARRAY_BUFFER，为空使用GL_ELEMENT_ARRAY_BUFFER
+         */
+        inline void drawElements(PrimitiveType type,size_t indice_count,GLuint instanceCount = 1,const std::vector<int>& namedIndices = {},VAO vao = VAO::null()){
+            if(!instanceCount)return;
+            const int * ptr;
+            size_t count = indice_count;
+            if(namedIndices.size() == 0){
+                ptr = nullptr;
+            }else {
+                ptr = namedIndices.data();
+                if(count)count = namedIndices.size();
+            }
+            std::optional<VAO::ScopedVAO> scp = std::nullopt;
+            if(vao.getId() != 0){
+                scp.emplace(vao);
+            }
+            if(instanceCount == 1)glDrawElements(static_cast<GLenum>(type),count,GL_UNSIGNED_INT,ptr);
+            else glDrawElementsInstanced(static_cast<GLenum>(type),count,GL_UNSIGNED_INT,ptr,instanceCount);
         }
 
         /// true: enable ; false: diable

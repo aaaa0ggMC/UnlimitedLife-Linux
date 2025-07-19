@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/18
+ * @date 2025/07/19
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -10,6 +10,8 @@
 #include <AGE/World/Object.h>
 #include <AGE/Input.h>
 #include <AGE/World/Systems.h>
+#include <AGE/Model.h>
+#include <AGE/ModelLoader/PrefabGenerator.h>
 
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
@@ -33,8 +35,8 @@ using namespace alib::g3;
 constexpr float cam_speed = 3;
 constexpr glm::vec2 cam_rot = glm::vec2(1,1);
 constexpr float framerate = 120;
-constexpr int startup_vbo_count = 2;
-constexpr int startup_vao_count = 2;
+constexpr int startup_vbo_count = 16;
+constexpr int startup_vao_count = 32;
 constexpr float fpsCountTimeMS = 500;
 
 void upload_data(VBOManager & vbos,Application &);
@@ -77,6 +79,7 @@ int main(){
     Texture & wall = **app.getTexture("wall");
     Sampler sampler = *app.getSampler("main");
 
+
     ////Bindings////
     vaos[0].bind();
     vbos[0].bind();
@@ -90,6 +93,7 @@ int main(){
     vbos[2].bind();
     vaos[1].setAttribute(vbos[2],1,2,GL_FLOAT);
     vaos[1].setAttribStatus(1,true);
+
     ////World Objects////
     Object cube (em);
     Object invPar (em);
@@ -139,9 +143,34 @@ int main(){
     int im_textureID = 0;
     float im_maxAnisotrpy = Queryer().anisotropicFiltering().second;
     float im_aniso = 0;
+    int im_prec_old = 48,im_prec = 48;
+    int im_polyf = 0,im_polym = 0;
+    std::vector<const char*> im_spolyf = {"Front","Back","Front And Back"};
+    std::vector<GLenum> im_dpolyf = {GL_FRONT,GL_BACK,GL_FRONT_AND_BACK};
+    std::vector<const char*> im_spolym = {"Fill","Line","Point"};
+    std::vector<GLenum> im_dpolym = {GL_FILL,GL_LINE,GL_POINT};
+    bool im_glcull = true,im_gldepth = true;
+    int im_gldfunc = 0;
+    std::vector<const char*> im_sgldfunc = {
+        "LEqual (≤)", "Less (<)", "Greater (>)", "Equal (=)", 
+        "GEqual (≥)", "NotEqual (!=)", "Always", "Never"
+    };
+    std::vector<GLenum> im_dgldfunc = {
+        GL_LEQUAL, GL_LESS, GL_GREATER, GL_EQUAL,
+        GL_GEQUAL, GL_NOTEQUAL, GL_ALWAYS, GL_NEVER
+    };
+    
 
-    lg << "Max ANISO" << im_maxAnisotrpy << std::endl;
-
+    //// Model Data///
+    ModelData md;
+    {
+        lg.info("Loading Model...");
+        Clock clk;
+        model::Prefab::sphere(im_prec,md.vertices,md.indices,md.normals,md.coords);
+        vaos[2].bind();
+        md.bind(vaos[2],vbos[3],vbos[4],vbos[5]);
+        lg(LOG_INFO) << "LoadModel:OK! [" << clk.getOffset() << "ms]" << std::endl;
+    }
 
     //launch clock
     elapse.start();
@@ -178,6 +207,12 @@ int main(){
                 if(ImGui::MenuItem("Texture")){
                     im_menu = 2;
                 }
+                if(ImGui::MenuItem("Models")){
+                    im_menu = 3;
+                }
+                if(ImGui::MenuItem("GL Settings")){
+                    im_menu = 4;
+                }
                 ImGui::EndMenuBar();
             }
             
@@ -198,9 +233,11 @@ int main(){
                 };
                 ImGui::Text("Sampler:");
                 ImGui::DragFloat4("BorderColor",glm::value_ptr(im_border_color),0.01F,0.0F,1.0F);
-                ImGui::ListBox("WrapR(Useless for 2DTexture)",&im_wrapR,im_wrapItems,4);
-                ImGui::ListBox("WrapS",&im_wrapS,im_wrapItems,4);
-                ImGui::ListBox("WrapT",&im_wrapT,im_wrapItems,4);
+                if(ImGui::CollapsingHeader("Wrap Settings",ImGuiTreeNodeFlags_DefaultOpen)){
+                    ImGui::ListBox("R(Useless for 2DTexture)",&im_wrapR,im_wrapItems,4);
+                    ImGui::ListBox("S",&im_wrapS,im_wrapItems,4);
+                    ImGui::ListBox("T",&im_wrapT,im_wrapItems,4);
+                }
                 if(im_maxAnisotrpy)ImGui::DragFloat("Anisotropy",&im_aniso,0.01F,0.0F,im_maxAnisotrpy);
 
                 //update sampler settings
@@ -213,20 +250,46 @@ int main(){
                 ImGui::Text("Texture:");
                 ImGui::ListBox("Binding",&im_textureID,texture_sids.data(),texture_sids.size());
                 break;
+            case 3:
+                ImGui::Text("Models:");
+                ImGui::DragInt("Sphere Precision",&im_prec,0.1F,0);
+
+                if(im_prec != im_prec_old){
+                    /// IMGUI的限制有点聪明.... 0就是没有限制是吧
+                    if(im_prec < 0)im_prec_old = im_prec = 0;
+                    else im_prec_old = im_prec;
+                    //reload sphere
+                    model::Prefab::sphere(im_prec,md.vertices,md.indices,md.normals,md.coords);
+                    vaos[2].bind();
+                    md.bind(vaos[2],vbos[3],vbos[4],vbos[5]);
+                }
+                break;
+            case 4:
+                ImGui::Text("GL Settings:");
+                if(ImGui::CollapsingHeader("PolygonMode",ImGuiTreeNodeFlags_DefaultOpen)){
+                    ImGui::ListBox("Faces",&im_polyf,im_spolyf.data(),im_spolyf.size());
+                    ImGui::ListBox("Modes",&im_polym,im_spolym.data(),im_spolym.size());
+                }
+                ImGui::Checkbox("Cull Faces",&im_glcull);
+                ImGui::Checkbox("Depth Test",&im_gldepth);
+                ImGui::ListBox("Depth Func",&im_gldfunc,im_sgldfunc.data(),im_sgldfunc.size(),4);
+                break;
             default:
                 ImGui::Text("Main:");
                 ImGui::Text("ImGuiFPS: %.2f ", im_io.Framerate);
                 ImGui::Text("FPS: %.2f" , im_showfps);
                 ImGui::DragFloat("Window Aplha",&im_winalpha,0.008F,0.0F,1.0F);
                 ImGui::DragFloat("UI Aplha",&im_uialpha,0.008F,0.2F,1.0F);
-                ImGui::DragFloat3("Cube Position",glm::value_ptr(cube.transform().m_position),0.05F);
-                ImGui::DragFloat4("Cube Rotation",glm::value_ptr(cube.transform().m_rotation.get_mutable_unnorm()),0.05F);
-                ImGui::DragFloat3("-Invisi Local Position",glm::value_ptr(invPar.transform().m_position),0.05F);
-                ImGui::DragFloat4("-Invisi Rotation",glm::value_ptr(invPar.transform().m_rotation.get_mutable_unnorm()),0.05F);
-                ImGui::DragFloat3("--Pyramid Local Position",glm::value_ptr(pyramid.transform().m_position),0.05F);
-                ImGui::DragFloat4("--Pyramid Rotation",glm::value_ptr(pyramid.transform().m_rotation.get_mutable_unnorm()),0.05F);
-                ImGui::DragFloat3("Camera Position",glm::value_ptr(camera.transform().m_position),0.05F);
-                ImGui::DragFloat4("Camera Rotation",glm::value_ptr(camera.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                if(ImGui::CollapsingHeader("Transforms",ImGuiTreeNodeFlags_DefaultOpen)){
+                    ImGui::DragFloat3("Cube Position",glm::value_ptr(cube.transform().m_position),0.05F);
+                    ImGui::DragFloat4("Cube Rotation",glm::value_ptr(cube.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                    ImGui::DragFloat3("-Invisi Local Position",glm::value_ptr(invPar.transform().m_position),0.05F);
+                    ImGui::DragFloat4("-Invisi Rotation",glm::value_ptr(invPar.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                    ImGui::DragFloat3("--Pyramid Local Position",glm::value_ptr(pyramid.transform().m_position),0.05F);
+                    ImGui::DragFloat4("--Pyramid Rotation",glm::value_ptr(pyramid.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                    ImGui::DragFloat3("Camera Position",glm::value_ptr(camera.transform().m_position),0.05F);
+                    ImGui::DragFloat4("Camera Rotation",glm::value_ptr(camera.transform().m_rotation.get_mutable_unnorm()),0.05F);
+                }
                 break;
             }
             ImGui::PopStyleVar();
@@ -264,21 +327,30 @@ int main(){
         // 动态纹理切换测试
         unwrap(app.getTexture(texture_sids[im_textureID]))->bind(GL_TEXTURE0);
         //GL statuses//
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-        glEnable(GL_CULL_FACE);
+        if(im_gldepth){
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(im_dgldfunc[im_gldfunc]);
+        }else glDisable(GL_DEPTH_TEST);
+        if(im_glcull)glEnable(GL_CULL_FACE);
+        else glDisable(GL_CULL_FACE);
+        glPolygonMode(im_dpolyf[im_polyf],im_dpolym[im_polym]);
 
         ///Cube
-        vaos[0].bind();
         glFrontFace(GL_CW);
+        vaos[0].bind();
         mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
-        win->draw(PrimitiveType::Triangles,0,36);
+        win->drawArray(PrimitiveType::Triangles,0,36,1);
 
         ///Pyramid
         vaos[1].bind();
         glFrontFace(GL_CCW);
         mvp.uploadmat4(camera.buildVPMatrix() * pyramid.transform().buildModelMatrix());
-        win->draw(PrimitiveType::Triangles,0,36);
+        win->drawArray(PrimitiveType::Triangles,0,36);
+
+        ///Try A Circle
+        vaos[2].bind();
+        mvp.uploadmat4(camera.buildVPMatrix() * invPar.transform().buildModelMatrix());
+        win->drawElements(PrimitiveType::Triangles,md.getIndiceCount());
         
         //// IMGUI Finish up////
         if(im_cached)ImGui_ImplOpenGL3_RenderDrawData(im_cached);

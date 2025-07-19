@@ -107,14 +107,21 @@ namespace age {
 
         template<class T> inline VBOStat bufferData(const std::vector<T>& data,GLenum usageHint = GL_STATIC_DRAW){
             ScopedVBO scp(*this);
-            if(data.empty())return {0,0};
+            if(data.empty()){
+                //有时候需要这个逻辑 2025/7/19
+                glBufferData(GL_ARRAY_BUFFER,0,0,usageHint);
+                return {0,0};
+            }
             glBufferData(GL_ARRAY_BUFFER,sizeof(T) * data.size(),data.data(),usageHint);
             return VBOStat{data.size(),sizeof(T)};
         }
 
         template<class T> inline VBOStat bufferData(const T * data,size_t elementCount,GLenum usageHint = GL_STATIC_DRAW){
             ScopedVBO scp(*this);
-            if(data == NULL)return {0,0};
+            if(data == NULL){
+                glBufferData(GL_ARRAY_BUFFER,0,0,usageHint);
+                return {0,0};
+            }
             glBufferData(GL_ARRAY_BUFFER,sizeof(T) * elementCount,data,usageHint);
             return VBOStat{elementCount,sizeof(T)};
         }
