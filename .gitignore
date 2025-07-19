@@ -1,4 +1,5 @@
 # Cmake
+CBuild/Windows/imgui.ini
 CMakeFiles/
 CBuild_CACHE/
 CBuild_CACHE_WIN/
