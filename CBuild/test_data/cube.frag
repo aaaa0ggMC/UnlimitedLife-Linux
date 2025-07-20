@@ -1,9 +1,10 @@
 #version 430 core
 
 out vec4 color;
+layout(binding = 0) uniform sampler2D tex;
 
-in vec3 pc;
+in vec2 coord;
 
 void main(){
-  color = vec4(pc,1.0);
+  color = texture2D(tex,coord);
 }

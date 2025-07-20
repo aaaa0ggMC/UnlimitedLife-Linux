@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/19
+ * @date 2025/07/20
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -12,6 +12,7 @@
 #include <AGE/World/Systems.h>
 #include <AGE/Model.h>
 #include <AGE/ModelLoader/PrefabGenerator.h>
+#include <AGE/ModelLoader/Loader.h>
 
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
@@ -167,14 +168,16 @@ int main(){
     auto loadModel = [&]{
 
         ModelData * mdx = &models["sphere"];
-        model::Prefab::sphere(im_prec,mdx->vertices,mdx->indices,mdx->normals,mdx->coords);
+        model::Prefab::sphere(im_prec,*mdx);
         vaos[2].bind();
         mdx->bind(vaos[2],vbos[3],vbos[4],vbos[5]);
         
         mdx = &models["torus"];
-        model::Prefab::torus(im_prec,1,0.5,mdx->vertices,mdx->indices,mdx->normals,mdx->coords);
+        model::Prefab::torus(im_prec,1,0.5,*mdx);
         vaos[3].bind();
         mdx->bind(vaos[3],vbos[6],vbos[7],vbos[8]);
+
+        model::loadModelFromMemory<model::fmt::Obj>("nihao",*mdx);
     };
     {
         lg.info("Loading Model...");

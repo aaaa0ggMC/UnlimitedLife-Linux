@@ -6,7 +6,6 @@ add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 set(CMAKE_CXX_STANDARD 26)
 
 if (WIN32)
-    add_compile_options(-ftls-model=global-dynamic)
     set(CMAKE_EXE_LINKER_FLAGS "-Wl,--allow-multiple-definition -Wl,--rpath,./") 
 else()
     set(CMAKE_EXE_LINKER_FLAGS "-Wl,--allow-multiple-definition -Wl,--rpath,./")

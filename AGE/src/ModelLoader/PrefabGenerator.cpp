@@ -5,15 +5,15 @@
 
 using namespace age::model;
 
-void Prefab::sphere(size_t precision,vecf & vertices,veci & indices,vecf & normals,vecf & coords){
-    if(check(precision,vertices,indices,normals,coords))return;
+void Prefab::sphere(size_t precision,ModelData & m){
+    if(check(precision,m.vertices,m.indices,m.normals,m.coords))return;
     size_t vertex_count = (precision+1) * (precision+1);
     size_t index_count = precision * precision * 6;
     //alloc size
-    vertices.resize(3 * vertex_count,0);
-    indices.resize(index_count,0);
-    normals.resize(3 * vertex_count,0);
-    coords.resize(2 * vertex_count,0);
+    m.vertices.resize(3 * vertex_count,0);
+    m.indices.resize(index_count,0);
+    m.normals.resize(3 * vertex_count,0);
+    m.coords.resize(2 * vertex_count,0);
     for(size_t i = 0;i <= precision;++i){
         float theta = (float)i / precision * std::numbers::pi;
         // 从下面开始生成
@@ -26,37 +26,38 @@ void Prefab::sphere(size_t precision,vecf & vertices,veci & indices,vecf & norma
             float z = topRadius * std::sin(omega);
 
             size_t base = i * (precision + 1) + j;
-            vertices[3 * base + 0] = x;vertices[3 * base + 1] = y;vertices[3 * base + 2] = z;
+            m.vertices[3 * base + 0] = x;m.vertices[3 * base + 1] = y;m.vertices[3 * base + 2] = z;
             // 法向量不要求模吗，虽然这里就是模
-            normals[3 * base + 0] = x;normals[3 * base + 1] = y;normals[3 * base + 2] = z;
-            coords[2 * base + 0] = (float)j / precision;coords[2 * base + 1] = (float)i / precision;
+            m.normals[3 * base + 0] = x;m.normals[3 * base + 1] = y;m.normals[3 * base + 2] = z;
+            m.coords[2 * base + 0] = (float)j / precision;m.coords[2 * base + 1] = (float)i / precision;
 
             //calculate indices
             if(i != precision && j != precision){
                 base = 6 * (i * precision + j);
-                indices[base + 0] = i * (precision + 1) + j;
-                indices[base + 1] = i * (precision + 1) + j + 1;
-                indices[base + 2] = (i + 1) * (precision + 1) + j;
-                indices[base + 3] = i * (precision + 1) + j + 1;
-                indices[base + 4] = (i + 1) * (precision + 1) + j + 1;
-                indices[base + 5] = (i + 1) * (precision + 1) + j;
+                m.indices[base + 0] = i * (precision + 1) + j;
+                m.indices[base + 1] = i * (precision + 1) + j + 1;
+                m.indices[base + 2] = (i + 1) * (precision + 1) + j;
+                m.indices[base + 3] = i * (precision + 1) + j + 1;
+                m.indices[base + 4] = (i + 1) * (precision + 1) + j + 1;
+                m.indices[base + 5] = (i + 1) * (precision + 1) + j;
             }
         }
     }
+    
+    m.meshes.push_back({0,0,0,0,Material(),"main"});
 }
 
 
-void Prefab::torus(size_t precision, float innerRadius, float ringRadius,
-                   vecf &vertices, veci &indices, vecf &normals, vecf &coords) {
-    if (check(precision, vertices, indices, normals, coords)) return;
+void Prefab::torus(size_t precision, float innerRadius, float ringRadius,ModelData & m) {
+    if (check(precision,m.vertices,m.indices,m.normals,m.coords)) return;
 
     size_t vertex_count = (precision + 1) * (precision + 1);
     size_t index_count = precision * precision * 6;
 
-    vertices.resize(3 * vertex_count);
-    indices.resize(index_count);
-    normals.resize(3 * vertex_count);
-    coords.resize(2 * vertex_count);
+    m.vertices.resize(3 * vertex_count);
+    m.indices.resize(index_count);
+    m.normals.resize(3 * vertex_count);
+    m.coords.resize(2 * vertex_count);
 
     for (size_t i = 0; i <= precision; ++i) {
         float theta = (float)i / precision * 2.0f * std::numbers::pi;
@@ -74,27 +75,29 @@ void Prefab::torus(size_t precision, float innerRadius, float ringRadius,
 
             size_t base = i * (precision + 1) + j;
 
-            vertices[3 * base + 0] = x;
-            vertices[3 * base + 1] = y;
-            vertices[3 * base + 2] = z;
+            m.vertices[3 * base + 0] = x;
+            m.vertices[3 * base + 1] = y;
+            m.vertices[3 * base + 2] = z;
 
             glm::vec3 normal = glm::normalize(glm::vec3(cosPhi * cosTheta, sinPhi, cosPhi * sinTheta));
-            normals[3 * base + 0] = normal.x;
-            normals[3 * base + 1] = normal.y;
-            normals[3 * base + 2] = normal.z;
+            m.normals[3 * base + 0] = normal.x;
+            m.normals[3 * base + 1] = normal.y;
+            m.normals[3 * base + 2] = normal.z;
 
-            coords[2 * base + 0] = (float)j / precision;
-            coords[2 * base + 1] = (float)i / precision;
+            m.coords[2 * base + 0] = (float)j / precision;
+            m.coords[2 * base + 1] = (float)i / precision;
 
             if (i < precision && j < precision) {
                 size_t idx = 6 * (i * precision + j);
-                indices[idx + 0] = base;
-                indices[idx + 1] = base + 1;
-                indices[idx + 2] = base + (precision + 1);
-                indices[idx + 3] = base + 1;
-                indices[idx + 4] = base + (precision + 1) + 1;
-                indices[idx + 5] = base + (precision + 1);
+                m.indices[idx + 0] = base;
+                m.indices[idx + 1] = base + 1;
+                m.indices[idx + 2] = base + (precision + 1);
+                m.indices[idx + 3] = base + 1;
+                m.indices[idx + 4] = base + (precision + 1) + 1;
+                m.indices[idx + 5] = base + (precision + 1);
             }
         }
     }
+
+    m.meshes.push_back({0,0,0,0,Material(),"main"});
 }

@@ -1,8 +1,48 @@
 #include <AGE/Utils.h>
 #include <alib-g3/alogger.h>
+#include <backward.hpp>
+#include <iomanip>
+#include <cxxabi.h>
+#include <regex>
 
 using namespace age;
 
+static const std::string& demangle(const std::string& mangled) {
+    static thread_local std::string demangled_name;  // 每个线程独立存储
+    int status = 0;
+    char* result = abi::__cxa_demangle(mangled.c_str(), nullptr, nullptr, &status);
+    if (result) {
+        demangled_name = result;
+        free(result);
+    } else {
+        demangled_name = mangled;
+    }
+
+    //进行简写处理
+    if(demangled_name.find("std::basic_") != std::string::npos) {
+        demangled_name = std::regex_replace(
+            demangled_name,
+            std::regex("std::basic_string_view<char, std::char_traits<char>\\s*>"),
+            "std::string_view"
+        );
+        demangled_name = std::regex_replace(
+            demangled_name,
+            std::regex("std::basic_string<char, std::char_traits<char>, std::allocator<char>\\s*>"),
+            "std::string"
+        );
+        demangled_name = std::regex_replace(
+            demangled_name,
+            std::regex("std::basic_(i|o|f)?stream<char, std::char_traits<char>\\s*>"),
+            "std::$1stream"
+        );
+        demangled_name = std::regex_replace(
+            demangled_name,
+            std::regex("std::basic_(stringbuf|regex|ios)<char(, std::char_traits<char>)?\\s*>"),
+            "std::$1"
+        );
+    }
+    return demangled_name;
+}
 
 std::pmr::unsynchronized_pool_resource Error::pool;
 std::pmr::polymorphic_allocator<char> Error::alloc (&pool);
@@ -28,12 +68,26 @@ void Error::defTrigger(const ErrorInfopp& data){
     static Logger console_logger;
     static LogFactory lg("AGE",console_logger);
     static std::shared_ptr<lot::Console> console = std::make_shared<lot::Console>();
+    static std::stringstream trace_data;
     [[maybe_unused]] static bool initeOnce = [&]{
         console_logger.appendLogOutputTarget("console",console);
         return true;
     }();
 
-    lg(LOG_ERROR) << "[" << data.code  << "]" << data.message << endlog;
+    backward::StackTrace st;
+    backward::TraceResolver resolver;
+    st.load_here();
+    resolver.load_stacktrace(st);
+    //printer 打印的不太好看，而且没有demangle
+    trace_data.clear();
+    std::string mangled;
+    for(int i = 0;i < st.size();++i){
+        const backward::ResolvedTrace trace = resolver.resolve(st[i]);
+        mangled = "_";
+        mangled += trace.object_function;
+        trace_data << "#" << st[i].idx << " " << demangle(mangled.c_str()) << "(0x" << std::hex << trace.addr << ")\n"; 
+    }
+    lg(LOG_ERROR) << "[" << data.code  << "]" << data.message << "Stacktrace:\n" << trace_data.str() << endlog;
 }
 
 void Error::setLimit(int32_t count){

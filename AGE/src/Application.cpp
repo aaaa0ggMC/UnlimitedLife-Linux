@@ -295,7 +295,7 @@ Shader Application::createShader(const CreateShaderInfo &info){
     GLuint vid = 0, fid = 0,gid = 0,cid = 0;
     GLint compile_status = 0;
     bool errored = false;
-    std::string logv = "";
+    std::string logv;
     bool created = false;
 
     Error & err = Error::def;
@@ -314,9 +314,9 @@ Shader Application::createShader(const CreateShaderInfo &info){
         checkOpenGLError();
         glGetShaderiv(vid,GL_COMPILE_STATUS,&compile_status);
         if(compile_status != 1){
+            logv = "VertexShader:";
             getShaderShaderLog(vid,logv);
             err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
-            logv = "";
             compile_status = 0;
             errored = true;
         }else created = true;
@@ -330,9 +330,9 @@ Shader Application::createShader(const CreateShaderInfo &info){
         checkOpenGLError();
         glGetShaderiv(fid,GL_COMPILE_STATUS,&compile_status);
         if(compile_status != 1){
+            logv = "FragmentShader:";
             getShaderShaderLog(fid,logv);
             err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
-            logv = "";
             compile_status = 0;
             errored = true;
         }else created = true;
@@ -346,9 +346,9 @@ Shader Application::createShader(const CreateShaderInfo &info){
         checkOpenGLError();
         glGetShaderiv(gid,GL_COMPILE_STATUS,&compile_status);
         if(compile_status != 1){
+            logv = "GeometryShader:";
             getShaderShaderLog(gid,logv);
             err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
-            logv = "";
             compile_status = 0;
             errored = true;
         }else created = true;
@@ -365,9 +365,9 @@ Shader Application::createShader(const CreateShaderInfo &info){
             checkOpenGLError();
             glGetShaderiv(cid,GL_COMPILE_STATUS,&compile_status);
             if(compile_status != 1){
+                logv = "ComputeShader:";
                 getShaderShaderLog(cid,logv);
                 err.pushMessage({AGEE_SHADER_FAILED_TO_COMPILE,logv.c_str()});
-                logv = "";
                 compile_status = 0;
                 errored = true;
             }else {
@@ -393,6 +393,7 @@ Shader Application::createShader(const CreateShaderInfo &info){
 
     glGetProgramiv(shader.pid,GL_LINK_STATUS,&compile_status);
     if(compile_status != 1){
+        logv = "ProgramLink:";
         getShaderProgramLog(shader,logv);
         err.pushMessage({AGEE_SHADER_FAILED_TO_LINK,logv.c_str()});
         shader.reset();

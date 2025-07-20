@@ -3,13 +3,14 @@
  * @author aaaa0ggmc
  * @brief 生成模型预设
  * @version 0.1
- * @date 2025/07/19
+ * @date 2025/07/20
  * @start-date 2025/07/19
  * @copyright Copyright (c) 2025
 */
 #ifndef AGE_H_PREFABG
 #define AGE_H_PREFABG
 #include <AGE/Utils.h>
+#include <AGE/Model.h>
 #include <vector>
 
 namespace age::model{
@@ -24,7 +25,7 @@ namespace age::model{
         /// @param normals 法向量
         /// @param coords 纹理坐标
         /// @note 必定会修改四个vector!
-        static void sphere(size_t precision,vecf & vertices,veci & indices,vecf & normals,vecf & coords);
+        static void sphere(size_t precision,ModelData & model);
 
         
         /// @brief 生成一个环
@@ -36,7 +37,7 @@ namespace age::model{
         /// @param innerRadius 环内部的半径
         /// @param ringRadius 环的半径(就是那一个个切片的半径)
         /// @note 必定会修改四个vector!
-        static void torus(size_t precision,float innerRadius,float ringRadius,vecf & vertices,veci & indices,vecf & normals,vecf & coords);
+        static void torus(size_t precision,float innerRadius,float ringRadius,ModelData & model);
 
         /// 复用precision检查逻辑
         static inline bool check(size_t precision,vecf & vertices,veci & indices,vecf & normals,vecf & coords){
