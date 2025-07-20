@@ -4,10 +4,10 @@
 # Install build dependencies
 if [ -f /etc/arch-release ]; then
     echo "This is Arch Linux."
-    sudo pacman --needed -S cmake rapidjson glfw glew glm stb
+    sudo pacman --needed -S cmake rapidjson glfw glew glm stb ninja
 else
   echo "This is not Arch Linux."
-  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb-dev
+  sudo apt-get install build-essential cmake rapidjson-dev libglfw3-dev libglew-dev libglm-dev libstb-dev ninja-build
 fi
 mkdir -p CBuild_CACHE
 mkdir -p CBuild
@@ -40,4 +40,4 @@ cd ..
 cd CBuild_CACHE
 
 # Run CMake to configure the project
-cmake .. -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr
+cmake .. -DCMAKE_BUILD_TYPE=Release -G "Ninja" -DCMAKE_INSTALL_PREFIX=/usr

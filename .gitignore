@@ -12,6 +12,7 @@ CBuild/logs/
 CBuild/simp-biliplayer
 CBuild/UnlimitedLife
 CBuild/agetest
+CBuild/Windows/test_data
 @externals
 CDep/headers/imgui
 
