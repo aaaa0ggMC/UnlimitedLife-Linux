@@ -60,3 +60,4 @@ Doxygen
 *.exe
 *.out
 *.app
+/third_party
