@@ -87,6 +87,7 @@ namespace age {
     public:
         ///VAOS
         std::vector<GLuint> vaos;
+        std::vector<GLuint> freeList;
 
         ///添加项目
         void add(GLuint id);

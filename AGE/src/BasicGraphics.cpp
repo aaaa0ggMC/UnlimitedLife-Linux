@@ -33,7 +33,7 @@ void VAOManager::add(GLuint v){
 
 void VAOManager::markAsFree(uint32_t index){
     if(index >= vaos.size())return;
-    vaos[index] = 0;
+    freeList.emplace_back(index);
 }
 
 void VAOManager::alloc(unsigned int index){

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 加载模型
  * @version 0.1
- * @date 2025/07/20
+ * @date 2025/07/21
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -26,9 +26,13 @@ namespace age::model{
         };
 
         struct AGE_API Stl{
-            static zvoid parse(std::string_view data,ModelData & model);
+            static void parse(std::string_view data,ModelData & model);
         };
     };
+
+    template<AFormat Format> inline void loadModelFromMemory(std::string_view data,ModelData & model){
+        Format::parse(data,model);
+    }
 
     template<AFormat Format> inline void loadModelFromFile(std::string_view filePath,ModelData & model){
         std::string fp = "";
@@ -36,10 +40,6 @@ namespace age::model{
         std::string data = "";
         alib::g3::Util::io_readAll(fp,data);
         loadModelFromMemory<Format>(data,model);
-    }
-
-    template<AFormat Format> inline void loadModelFromMemory(std::string_view data,ModelData & model){
-        Format::parse(data,model);
     }
 }
 

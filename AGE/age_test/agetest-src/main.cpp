@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/20
+ * @date 2025/07/21
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -156,7 +156,8 @@ int main(){
     };
     std::vector<const char*> im_models = {
         "sphere",
-        "torus"
+        "torus",
+        "main.onj"
     };
     int im_model = 0;
     bool ims_cube,ims_pyramid,ims_model;
@@ -177,7 +178,10 @@ int main(){
         vaos[3].bind();
         mdx->bind(vaos[3],vbos[6],vbos[7],vbos[8]);
 
-        model::loadModelFromMemory<model::fmt::Obj>("nihao",*mdx);
+        mdx = &models["main.obj"];
+        model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
+        vaos[4].bind();
+        mdx->bind(vaos[9],vbos[10],vbos[11],vbos[12]);
     };
     {
         lg.info("Loading Model...");
