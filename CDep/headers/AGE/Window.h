@@ -220,6 +220,10 @@ namespace age{
             else glDrawArraysInstanced(static_cast<GLenum>(type),startIndex,count,instanceCount);
         }
 
+        inline void setTitle(std::string_view title){
+            glfwSetWindowTitle(window,title.data());
+        }
+
         template<Drawable T> inline void draw(const T & data,GLuint instanceCount = 1,PrimitiveType type = PrimitiveType::Triangles){
             data.template draw<Window>(*this,instanceCount,type);
         }

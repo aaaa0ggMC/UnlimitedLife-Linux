@@ -45,8 +45,8 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
 void dealInput(Input & input,glm::vec3& veloDir,Camera & cam,float mul);
 
 // for my poor knowledge reason,these vars must be global
-std::vector<const char *> texture_sids = {"wall","ice"};
-std::vector<const char *> texture_paths = {"./test_data/imgs/wall.jpg","./test_data/imgs/ice.png"};
+std::vector<const char *> texture_sids = {"wall","ice","hand"};
+std::vector<const char *> texture_paths = {"./test_data/imgs/wall.jpg","./test_data/imgs/ice.png","./test_data/imgs/hand.jpg"};
 
 //// Global States ////
 bool playing = true;
@@ -168,6 +168,7 @@ int main(){
     float im_glpointsize = 4.0f;
 
 
+    bool im_loadModel = true;
     //// Model Data///
     auto loadModel = [&]{
 
@@ -181,15 +182,19 @@ int main(){
         vaos[3].bind();
         mdx->bind(vaos[3],vbos[6],vbos[7],vbos[8]);
 
-        mdx = &models["main.obj"];
-        model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
-        vaos[4].bind();
-        mdx->bind(vaos[4],vbos[9],vbos[10],vbos[11]);
+        // load only once
+        if(im_loadModel){
+            im_loadModel = false;
+            mdx = &models["main.obj"];
+            model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
+            vaos[4].bind();
+            mdx->bind(vaos[4],vbos[9],vbos[10],vbos[11]);
 
-        mdx = &models["cube"];
-        vaos[5].bind();
-        model::Prefab::cube(1,*mdx);
-        mdx->bind(vaos[5],vbos[12],vbos[13],vbos[14]);
+            mdx = &models["cube"];
+            vaos[5].bind();
+            model::Prefab::cube(1,*mdx);
+            mdx->bind(vaos[5],vbos[12],vbos[13],vbos[14]);
+        }
     };
     {
         lg.info("Loading Model...");
@@ -395,13 +400,14 @@ int main(){
 
         ///Try A Circle
         if(ims_model){
-            mvp.uploadmat4(camera.buildVPMatrix() * root.transform().buildModelMatrix());
+            glFrontFace(GL_CW);
+            mvp.uploadmat4(camera.buildVPMatrix() * invPar.transform().buildModelMatrix());
             win->draw<ModelData>(*md);
         }
         
         if(ims_model){
+            glFrontFace(GL_CW);
             mvp.uploadmat4(camera.buildVPMatrix() * root.transform().buildModelMatrix());
-            vaos[2 + im_model].bind();
             win->draw<ModelData>(*md);
         }
 
@@ -465,7 +471,7 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     {
         CreateWindowInfo ci;
         ci.sid = "TestWindow";
-        ci.windowTitle = "TestAGE";
+        ci.windowTitle = "TestAGE-测试";
         ci.width = 800;
         ci.height = 600;
         ci.x = 100;

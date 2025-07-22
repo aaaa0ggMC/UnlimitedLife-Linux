@@ -1,6 +1,6 @@
 #include <AGE/Utils.h>
 #include <alib-g3/alogger.h>
-#include <backward.hpp>
+#include <stacktrace>
 #include <iomanip>
 #include <cxxabi.h>
 #include <regex>
@@ -73,20 +73,10 @@ void Error::defTrigger(const ErrorInfopp& data){
         console_logger.appendLogOutputTarget("console",console);
         return true;
     }();
-
-    backward::StackTrace st;
-    backward::TraceResolver resolver;
-    st.load_here();
-    resolver.load_stacktrace(st);
-    //printer 打印的不太好看，而且没有demangle
+    
+    
     trace_data.clear();
-    std::string mangled;
-    for(int i = 0;i < st.size();++i){
-        const backward::ResolvedTrace trace = resolver.resolve(st[i]);
-        mangled = "_";
-        mangled += trace.object_function;
-        trace_data << "#" << st[i].idx << " " << demangle(mangled.c_str()) << "(0x" << std::hex << trace.addr << ")\n"; 
-    }
+    trace_data << std::stacktrace::current();
     lg(LOG_ERROR) << "[" << data.code  << "]" << data.message << "Stacktrace:\n" << trace_data.str() << endlog;
 }
 
