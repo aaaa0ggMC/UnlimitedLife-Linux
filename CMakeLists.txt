@@ -20,9 +20,14 @@ else()
     set(build_dir "${CMAKE_SOURCE_DIR}/CBuild/${CMAKE_SYSTEM_NAME}" CACHE PATH "Where to store the built bin.")
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+add_compile_options("-fdebug-prefix-map=${CMAKE_SOURCE_DIR}=UnlimitedLife-Linux")
+endif()
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${build_dir})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${build_dir})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${build_dir})
+add_compile_options(-fno-omit-frame-pointer -g)
 
 include_directories(./CDep/headers)
 include_directories(${custom_include_dir})

@@ -45,7 +45,7 @@ namespace age{
         std::vector<int> indices;
         std::vector<Mesh> meshes;
 
-        /// 利用模板实现不依赖头文件实际上摆明了就是要这个类的上传,属于扩展功能
+        /// 属于扩展功能,一般不建议使用
         /// 需要一个vao
         void bind(
             VAO vao,

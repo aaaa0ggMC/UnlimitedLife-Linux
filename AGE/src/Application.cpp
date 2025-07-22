@@ -62,6 +62,10 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
     //bindings
     glfwSetWindowSizeCallback(win->window,[](GLFWwindow * win,int nw,int nh){
         Window & window = *((Window*)Window::binderArray.get<Window>((intptr_t)win));
+        if(nw == 0 || nh == 0){
+            //aspect ratio = 0,glm will not work
+            return;
+        }
         if(window.m_onResize)window.m_onResize(window,nw,nh);
     });
 

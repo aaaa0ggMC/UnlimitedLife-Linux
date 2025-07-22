@@ -45,8 +45,8 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
 void dealInput(Input & input,glm::vec3& veloDir,Camera & cam,float mul);
 
 // for my poor knowledge reason,these vars must be global
-std::vector<const char *> texture_sids = {"wall","ice","hand"};
-std::vector<const char *> texture_paths = {"./test_data/imgs/wall.jpg","./test_data/imgs/ice.png","./test_data/imgs/hand.jpg"};
+std::vector<const char *> texture_sids = {"wall","ice"};
+std::vector<const char *> texture_paths = {"./test_data/imgs/wall.jpg","./test_data/imgs/ice.png"};
 
 //// Global States ////
 bool playing = true;
@@ -400,13 +400,11 @@ int main(){
 
         ///Try A Circle
         if(ims_model){
-            glFrontFace(GL_CW);
             mvp.uploadmat4(camera.buildVPMatrix() * invPar.transform().buildModelMatrix());
             win->draw<ModelData>(*md);
         }
         
         if(ims_model){
-            glFrontFace(GL_CW);
             mvp.uploadmat4(camera.buildVPMatrix() * root.transform().buildModelMatrix());
             win->draw<ModelData>(*md);
         }

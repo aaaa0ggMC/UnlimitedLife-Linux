@@ -9,11 +9,6 @@ using namespace age::model::fmt;
 using namespace age::model;
 using namespace age;
 
-void Stl::parse(std::string_view data,ModelData & md){
-    
-}
-
-
 struct Verts{
     int vert;
     int coord;
@@ -36,7 +31,7 @@ namespace std{
     };
 }
 
-void Obj::parse(std::string_view data, ModelData& md) {
+void Obj::parse(std::string_view data, ModelData& md,bool flipV) {
     std::vector<glm::vec3> vertDatas;
     std::vector<glm::vec3> normalDatas;
     std::vector<glm::vec2> coordDatas;
@@ -77,7 +72,7 @@ void Obj::parse(std::string_view data, ModelData& md) {
 
         if (vtIndex >= 0) {
             md.coords.push_back(coordDatas[vtIndex].x);
-            md.coords.push_back(1.0f - coordDatas[vtIndex].y); // 翻转V分量
+            md.coords.push_back(flipV?(1.0f - coordDatas[vtIndex].y):coordDatas[vtIndex].y); // 翻转V分量
         } else {
             md.coords.push_back(0.0f);
             md.coords.push_back(0.0f);
@@ -105,7 +100,16 @@ void Obj::parse(std::string_view data, ModelData& md) {
         pos = end + 1;
 
         if (line.empty() || line[0] == '#') continue;
-        else if (line.starts_with("v ")) {
+        else if (line.starts_with("mtllib")) {
+            //待定
+        }else if(line.starts_with("usemtl")){
+            //待定
+        }else if(line.starts_with("s")){
+            // 平滑指数，忽略
+        }else if (line.starts_with("v ")) {
+            glm::vec3& v = vertDatas.emplace_back();
+            sscanf(line.data(), "v %f %f %f", &v.x, &v.y, &v.z);
+        }else if (line.starts_with("v ")) {
             glm::vec3& v = vertDatas.emplace_back();
             sscanf(line.data(), "v %f %f %f", &v.x, &v.y, &v.z);
         } else if (line.starts_with("vn")) {
@@ -167,9 +171,8 @@ void Obj::parse(std::string_view data, ModelData& md) {
             }
         }
     }
+}
 
-    std::cout << md.vertices.size() / 3 << " vertices, "
-              << md.normals.size() / 3 << " normals, "
-              << md.coords.size() / 2 << " coords, "
-              << md.indices.size() << " indices." << std::endl;
+void Stl::parse(std::string_view data,ModelData & md,bool flipV){
+    
 }
