@@ -74,7 +74,7 @@ void Error::defTrigger(const ErrorInfopp& data){
         return true;
     }();
     
-    
+
     trace_data.clear();
     trace_data << std::stacktrace::current();
     lg(LOG_ERROR) << "[" << data.code  << "]" << data.message << "Stacktrace:\n" << trace_data.str() << endlog;
@@ -85,8 +85,8 @@ void Error::setLimit(int32_t count){
 }
 
 float age::getMonitorScale(){
+    float scale = 1.0f; // 默认 100% 缩放
     #ifdef _WIN32
-        float scale = 1.0f; // 默认 100% 缩放
         HMONITOR hMonitor = MonitorFromWindow(GetDesktopWindow(), MONITOR_DEFAULTTOPRIMARY);
         DEVICE_SCALE_FACTOR scaleFactor;
         if(SUCCEEDED(GetScaleFactorForMonitor(hMonitor, &scaleFactor))){
