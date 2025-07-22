@@ -3,7 +3,7 @@
  * @author aaaa0ggmc
  * @brief 生成模型预设
  * @version 0.1
- * @date 2025/07/20
+ * @date 2025/07/22
  * @start-date 2025/07/19
  * @copyright Copyright (c) 2025
 */
@@ -38,6 +38,13 @@ namespace age::model{
         /// @param ringRadius 环的半径(就是那一个个切片的半径)
         /// @note 必定会修改四个vector!
         static void torus(size_t precision,float innerRadius,float ringRadius,ModelData & model);
+
+        /// @brief 生成一个立方体,绕序 CCW
+        static void box(float w,float h,float d,ModelData & model);
+
+        static inline void cube(float length,ModelData & model){
+            box(length,length,length,model);
+        }
 
         /// 复用precision检查逻辑
         static inline bool check(size_t precision,vecf & vertices,veci & indices,vecf & normals,vecf & coords){

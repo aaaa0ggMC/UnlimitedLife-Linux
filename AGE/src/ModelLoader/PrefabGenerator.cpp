@@ -101,3 +101,62 @@ void Prefab::torus(size_t precision, float innerRadius, float ringRadius,ModelDa
 
     m.meshes.push_back({0,0,0,0,Material(),"main"});
 }
+
+void Prefab::box(float w, float h, float d, ModelData & m) {
+    float x = w / 2.0f;
+    float y = h / 2.0f;
+    float z = d / 2.0f;
+
+    // 6个面，每个面4个顶点，共24个顶点
+    m.vertices = {
+        // Front face (z+)
+        -x, -y, z,   x, -y, z,   x, y, z,   -x, y, z,
+        // Back face (z-)
+        x, -y, -z,  -x, -y, -z,  -x, y, -z,   x, y, -z,
+        // Left face (x-)
+        -x, -y, -z, -x, -y, z,  -x, y, z,   -x, y, -z,
+        // Right face (x+)
+        x, -y, z,   x, -y, -z,   x, y, -z,   x, y, z,
+        // Bottom face (y-)
+        -x, -y, -z,  x, -y, -z,  x, -y, z,   -x, -y, z,
+        // Top face (y+)
+        -x, y, z,    x, y, z,    x, y, -z,   -x, y, -z
+    };
+
+    m.normals = {
+        // Front
+        0, 0, 1,  0, 0, 1,  0, 0, 1,  0, 0, 1,
+        // Back
+        0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+        // Left
+        -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+        // Right
+        1, 0, 0,  1, 0, 0,  1, 0, 0,  1, 0, 0,
+        // Bottom
+        0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+        // Top
+        0, 1, 0,  0, 1, 0,  0, 1, 0,  0, 1, 0
+    };
+
+    m.coords = {
+        // 每面使用同一组UV（左下、右下、右上、左上）
+        0, 0, 1, 0, 1, 1, 0, 1, // Front
+        0, 0, 1, 0, 1, 1, 0, 1, // Back
+        0, 0, 1, 0, 1, 1, 0, 1, // Left
+        0, 0, 1, 0, 1, 1, 0, 1, // Right
+        0, 0, 1, 0, 1, 1, 0, 1, // Bottom
+        0, 0, 1, 0, 1, 1, 0, 1  // Top
+    };
+
+    // 每个面用两个三角形，共 12 个三角形
+    m.indices = {
+        0, 1, 2,  0, 2, 3,        // Front
+        4, 5, 6,  4, 6, 7,        // Back
+        8, 9,10,  8,10,11,        // Left
+       12,13,14, 12,14,15,        // Right
+       16,17,18, 16,18,19,        // Bottom
+       20,21,22, 20,22,23         // Top
+    };
+
+    m.meshes.push_back({0, 0, 0, 0, Material(), "main"});
+}

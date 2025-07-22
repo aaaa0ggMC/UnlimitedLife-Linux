@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/21
+ * @date 2025/07/22
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -36,8 +36,8 @@ using namespace alib::g3;
 constexpr float cam_speed = 3;
 constexpr glm::vec2 cam_rot = glm::vec2(1,1);
 constexpr float framerate = 120;
-constexpr int startup_vbo_count = 16;
-constexpr int startup_vao_count = 32;
+constexpr int startup_vbo_count = 32;
+constexpr int startup_vao_count = 16;
 constexpr float fpsCountTimeMS = 500;
 
 void upload_data(VBOManager & vbos,Application &);
@@ -100,11 +100,12 @@ int main(){
     Object cube (em);
     Object invPar (em);
     Object pyramid (em);
+    Object root (em);
 
     ////InitWorld////
     camera.transform().move(1,0,10);
     camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
-    cube.transform().move(1,-2,1);
+    cube.transform().move(1,-6,1);
     invPar.transform().move(0,0,4);
     pyramid.transform().move(3,0,0);
 
@@ -157,12 +158,14 @@ int main(){
     std::vector<const char*> im_models = {
         "sphere",
         "torus",
-        "main.onj"
+        "main.obj", //md 我还以为自己的电脑怎么连4个vao都创建不了结果nm是我打错字了，打成了 main.onj 服了
+        "cube"
     };
     int im_model = 0;
     bool ims_cube,ims_pyramid,ims_model;
     ims_cube = ims_pyramid = ims_model = true;
     int im_preview = 256;
+    float im_glpointsize = 4.0f;
 
 
     //// Model Data///
@@ -181,7 +184,12 @@ int main(){
         mdx = &models["main.obj"];
         model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
         vaos[4].bind();
-        mdx->bind(vaos[9],vbos[10],vbos[11],vbos[12]);
+        mdx->bind(vaos[4],vbos[9],vbos[10],vbos[11]);
+
+        mdx = &models["cube"];
+        vaos[5].bind();
+        model::Prefab::cube(1,*mdx);
+        mdx->bind(vaos[5],vbos[12],vbos[13],vbos[14]);
     };
     {
         lg.info("Loading Model...");
@@ -299,6 +307,7 @@ int main(){
                 ImGui::Checkbox("Cull Faces",&im_glcull);
                 ImGui::Checkbox("Depth Test",&im_gldepth);
                 ImGui::ListBox("Depth Func",&im_gldfunc,im_sgldfunc.data(),im_sgldfunc.size(),4);
+                ImGui::DragFloat("Point Size",&im_glpointsize,0.1F,0.1F,64.0F);
                 break;
             case 5:
                 ImGui::Text("Render:");
@@ -366,6 +375,7 @@ int main(){
         if(im_glcull)glEnable(GL_CULL_FACE);
         else glDisable(GL_CULL_FACE);
         glPolygonMode(im_dpolyf[im_polyf],im_dpolym[im_polym]);
+        glPointSize(im_glpointsize);
 
         ///Cube
         if(ims_cube){
@@ -385,11 +395,16 @@ int main(){
 
         ///Try A Circle
         if(ims_model){
-            vaos[2 + im_model].bind();
-            mvp.uploadmat4(camera.buildVPMatrix() * invPar.transform().buildModelMatrix());
-            win->drawElements(PrimitiveType::Triangles,md->getIndiceCount());
+            mvp.uploadmat4(camera.buildVPMatrix() * root.transform().buildModelMatrix());
+            win->draw<ModelData>(*md);
         }
         
+        if(ims_model){
+            mvp.uploadmat4(camera.buildVPMatrix() * root.transform().buildModelMatrix());
+            vaos[2 + im_model].bind();
+            win->draw<ModelData>(*md);
+        }
+
         //// IMGUI Finish up////
         if(im_cached)ImGui_ImplOpenGL3_RenderDrawData(im_cached);
 

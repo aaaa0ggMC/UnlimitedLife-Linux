@@ -31,6 +31,7 @@
 #include <glm/glm.hpp>
 
 namespace age{
+
     enum class WinStyle: uint32_t {
         FollowGLFW =            0b10000000000000000000000000000000,///< 使用当前GLFW默认设置（位31
         Resizable  =            0b00000000000000000000000000000001,///< 可调整大小（位0）,
@@ -88,6 +89,12 @@ namespace age{
     inline constexpr WinStyle WinStylePresetBorderless = WinStyle::Visible | WinStyle::Focused | WinStyle::Floating;
     inline constexpr WinStyle WinStylePresetUltility = WinStyle::Visible | WinStyle::Decorated | WinStyle::Floating;
     inline constexpr WinStyle WinStylePresetFullScreen = WinStyle::Visible | WinStyle::Maximized | WinStyle::AutoIconify;
+
+
+    class Window;
+    template<class T> concept Drawable = requires(T t,Window & w, GLuint instanceCount, PrimitiveType type){
+        {t.draw(w,instanceCount,type)}; // || 
+    };
 
     /** @struct Window
      * @brief 窗口管理
@@ -211,6 +218,10 @@ namespace age{
             }
             if(instanceCount == 1)glDrawArrays(static_cast<GLenum>(type),startIndex,count);
             else glDrawArraysInstanced(static_cast<GLenum>(type),startIndex,count,instanceCount);
+        }
+
+        template<Drawable T> inline void draw(const T & data,GLuint instanceCount = 1,PrimitiveType type = PrimitiveType::Triangles){
+            data.template draw<Window>(*this,instanceCount,type);
         }
 
         /**
