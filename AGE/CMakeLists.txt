@@ -15,7 +15,7 @@ if(WIN32)
 	target_link_libraries(AGE PRIVATE stdc++exp dbghelp Shcore aaaa0ggmcLib glu32 glfw3.dll glew32.dll opengl32 gdi32 user32 kernel32)
 	target_compile_definitions(AGE PRIVATE GLFW_DLL)
 else()
-	target_link_libraries(AGE PRIVATE dl GLU OpenGL GLEW glfw aaaa0ggmcLib)
+	target_link_libraries(AGE PRIVATE stdc++exp dl GLU OpenGL GLEW glfw aaaa0ggmcLib)
 endif()
 
 target_compile_definitions(AGE PUBLIC AGE_BUILD_DLL)

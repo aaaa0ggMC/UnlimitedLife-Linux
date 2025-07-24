@@ -6,5 +6,5 @@ layout(binding = 0) uniform sampler2D tex;
 in vec2 coord;
 
 void main(){
-  color = texture2D(tex,coord);
+  color = texture(tex,coord);
 }
