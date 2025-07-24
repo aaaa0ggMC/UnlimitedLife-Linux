@@ -42,12 +42,20 @@
 [AGE.AGE_EM_DEBUG]
 where       = "EntityManager"
 description = "开启调试输出"
+worksfor    = "ALL"
 additional  = "仅建议调试使用"
 
 [AGE.AGE_NO_COMP_REQUISITIONS]
 where       = "Components"
+worksfor    = "ALL"
 description = "关闭依赖检测"
 additional  = "如果你觉得自己代码写得好，依赖关系反而拉低性能可以定义这个宏"
+
+[AGE.AGE_ML_DEBUG]
+where       = "ModelLoader"
+description = "模型加载完成后输出日志"
+worksfor    = "AGE only"
+
 # END MACROS
 
 # RESOURCE PROVIDER

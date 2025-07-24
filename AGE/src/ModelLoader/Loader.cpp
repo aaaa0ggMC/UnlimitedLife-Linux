@@ -4,6 +4,8 @@
 #include <glm/glm.hpp>
 #include <alib-g3/autil.h>
 #include <unordered_set>
+#include <bit>
+#include <alib-g3/adata.h>
 
 using namespace age::model::fmt;
 using namespace age::model;
@@ -32,7 +34,7 @@ namespace std{
 }
 
 /// @note in my computer #3, 23ms to load a 9MB obj file in release mode,78ms in debug mode
-void Obj::parse(std::string_view data, ModelData& md,bool flipV){
+void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view fp){
     std::vector<glm::vec3> vertDatas;
     std::vector<glm::vec3> normalDatas;
     std::vector<glm::vec2> coordDatas;
@@ -194,8 +196,300 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV){
             }
         }
     }
+
+#ifdef AGE_ML_DEBUG
+    {
+        std::string out = "\nLoaded OBJ Model:\n";
+        if(!fp.empty()){
+            out += "File Path: " + std::string(fp) + "\n";
+        }
+        out += "Vertices: " + std::to_string(md.vertices.size() / 3) + "\n";
+        out += "Normals: " + std::to_string(md.normals.size() / 3) + "\n";
+        out += "Coords: " + std::to_string(md.coords.size() / 2) + "\n";
+        out += "Indices: " + std::to_string(md.indices.size()) + "\n";
+        out += "Flip V: " + std::string(flipV ? "true" : "false") + "\n";
+        out += "Total Size: " + std::to_string(md.vertices.size() * sizeof(float) +
+                                                md.normals.size() * sizeof(float) +
+                                                md.coords.size() * sizeof(float) +
+                                                md.indices.size() * sizeof(int)) + " bytes\n";  
+        out += "Data Size: " + std::to_string(data.size()) + " bytes\n";
+        out += "Data: \n" + std::string(data.substr(0, 100)) + "...\n";
+        out += "End of OBJ Model";
+        Error::def.pushMessage(
+           {0, out.c_str(), ErrorLevel::Debug}
+        );
+    }
+#endif
 }
 
-void Stl::parse(std::string_view data,ModelData & md,bool flipV){
-    
+void Stl::parse(std::string_view data,ModelData & md,bool flipV,std::string_view fp){
+    char * p = (char*)data.data();
+    // 跳过可能的空格，虽然没这个可能
+    while(*p != '\0'){
+        if(!isspace(*p)){
+            break;
+        }
+        ++p;
+    }
+    if(std::strncmp(p,"solid",5) == 0){
+        // treat it as ascii STL
+#ifdef AGE_ML_DEBUG
+        Error::def.pushMessage(
+            {0, "Detected STL ASCII format", ErrorLevel::Debug}
+        );
+#endif
+        StlAscii::parse(std::string_view(p),md,flipV,fp);
+    }else {
+        // stl-bin
+#ifdef AGE_ML_DEBUG
+        Error::def.pushMessage(
+            {0, "Detected STL Binary format", ErrorLevel::Debug}
+        );
+#endif
+        StlBinary::parse(data,md,flipV,fp);
+    }
+}
+
+template<class T> static T inline endian_cast(const T & f){
+    if constexpr (std::endian::native == std::endian::little){
+        return f;
+    }else{
+        return std::bit_cast<T>(std::byteswap(std::bit_cast<uint32_t>(f)));
+    }
+} 
+
+void StlAscii::parse(std::string_view data,ModelData & md,bool flipV,std::string_view fp){
+    char * p = (char*)data.data();
+    char * endptr = p;
+    while(*p != '\0'){
+        float x = 0, y = 0, z = 0;
+        // 跳过空格
+        while(*p && isspace(*p)) ++p;
+        if(*p == '\0') break; // 到达末尾
+        if(!strncmp(p,"solid",5)){
+            //New Mesh
+            //skip to a new line
+            while(*p && *p != '\n') ++p;
+            if(*p == '\0') break; // 到达末尾
+            ++p; // 跳过换行符
+        }else if(!strncmp(p,"endsolid",6)){
+            //End Mesh
+            //skip to a new line
+            while(*p && *p != '\n') ++p;
+            if(*p == '\0') break; // 到达末尾
+            ++p; // 跳过换行符
+        }else if(!strncmp(p,"facet normal",12)){
+            // 解析法线
+            p += 12; // 跳过"facet normal"
+            x = strtof(p, &endptr); // 跳过空格
+            p = endptr;
+            y = strtof(p, &endptr);
+            p = endptr;
+            z = strtof(p, &endptr);
+            p = endptr;
+            md.normals.push_back(x);
+            md.normals.push_back(y);
+            md.normals.push_back(z);
+        }else if(!strncmp(p,"vertex",6)){
+            // 解析顶点
+            p += 6; // 跳过"vertex"
+            x = strtof(p, &endptr); // 跳过空格
+            p = endptr;
+            y = strtof(p, &endptr);
+            p = endptr;
+            z = strtof(p, &endptr);
+            p = endptr;
+            md.vertices.push_back(x);
+            md.vertices.push_back(y);
+            md.vertices.push_back(z);
+            md.indices.push_back(md.vertices.size() / 3 - 1); // 索引
+        }// 其余的符号忽略
+        //跳转到下一行
+        while(*p && *p != '\n') ++p;
+        if(*p == '\0') break; // 到达末尾
+        ++p; // 跳过换行符
+    }
+#ifdef AGE_ML_DEBUG
+    {
+        std::string out = "\nLoaded STL ASCII Model:\n";
+        if(!fp.empty()){
+            out += "File Path: " + std::string(fp) + "\n";
+        }
+        out += "Vertices: " + std::to_string(md.vertices.size() / 3) + "\n";
+        out += "Normals: " + std::to_string(md.normals.size() / 3) + "\n";
+        out += "Coords: " + std::to_string(md.coords.size() / 2) + "\n";
+        out += "Indices: " + std::to_string(md.indices.size()) + "\n";
+        out += "Flip V: " + std::string(flipV ? "true" : "false") + "\n";
+        out += "Total Size: " + std::to_string(md.vertices.size() * sizeof(float) +
+                                                md.normals.size() * sizeof(float) +
+                                                md.coords.size() * sizeof(float) +
+                                                md.indices.size() * sizeof(int)) + " bytes\n";  
+        out += "Data Size: " + std::to_string(data.size()) + " bytes\n";
+        out += "Data: \n" + std::string(data.substr(0, 100)) + "...\n";
+        out += "End of STL ASCII Model";
+        Error::def.pushMessage(
+           {0, out.c_str(), ErrorLevel::Debug}
+        );
+    }
+#endif
+}
+
+// 对stlbin 使用vert_auto进行优化纯属负优化
+void StlBinary::parse(std::string_view data,ModelData & md,bool flipV,std::string_view fp){
+    if(data.size() < 84){
+        return;
+    }
+    const std::byte * p  = reinterpret_cast<const std::byte*>(data.data());
+    p += 80; // 跳过头部80字节
+    uint32_t triangleCount = endian_cast(*reinterpret_cast<const uint32_t*>(p));
+    p += 4; // 跳过三角形计数
+
+    md.vertices.reserve(triangleCount * 3 * 3);
+    md.normals.reserve(triangleCount * 3 * 3);
+    md.coords.reserve(triangleCount * 3 * 2);
+
+    for(size_t i = 0; i < triangleCount; ++i){
+        float x = 0, y = 0,z =0;
+        //normal
+        x = endian_cast(*reinterpret_cast<const float*>(p));
+        p += sizeof(float);
+        y = endian_cast(*reinterpret_cast<const float*>(p));
+        p += sizeof(float);
+        z = endian_cast(*reinterpret_cast<const float*>(p));
+        p += sizeof(float);
+        md.normals.push_back(x);
+        md.normals.push_back(y);
+        md.normals.push_back(z);
+
+        for(int j = 0; j < 3; ++j){
+            x = endian_cast(*reinterpret_cast<const float*>(p));
+            p += sizeof(float);
+            y = endian_cast(*reinterpret_cast<const float*>(p));
+            p += sizeof(float);
+            z = endian_cast(*reinterpret_cast<const float*>(p));
+            p += sizeof(float);
+            // 顶点
+            md.vertices.push_back(x);
+            md.vertices.push_back(y);
+            md.vertices.push_back(z);
+        }
+
+        md.coords.push_back(0);
+        md.coords.push_back(flipV ? 1.0f : 0.0f); // 默认填充为(0,1)或(0,0)
+        // 索引
+        size_t baseIndex = md.vertices.size() / 3 - 3;
+        md.indices.push_back(baseIndex);
+        md.indices.push_back(baseIndex + 1);
+        md.indices.push_back(baseIndex + 2);
+
+        p += 2; // 跳过属性字节计数（2字节）
+    }
+#ifdef AGE_ML_DEBUG
+    {
+        std::string out = "\nLoaded STL Binary Model:\n";
+        if(!fp.empty()){
+            out += "File Path: " + std::string(fp) + "\n";
+        }
+        out += "Vertices: " + std::to_string(md.vertices.size() / 3) + "\n";
+        out += "Normals: " + std::to_string(md.normals.size() / 3) + "\n";
+        out += "Coords: " + std::to_string(md.coords.size() / 2) + "\n";
+        out += "Indices: " + std::to_string(md.indices.size()) + "\n";
+        out += "Flip V: " + std::string(flipV ? "true" : "false") + "\n";
+        out += "Total Size: " + std::to_string(md.vertices.size() * sizeof(float) +
+                                                md.normals.size() * sizeof(float) +
+                                                md.coords.size() * sizeof(float) +
+                                                md.indices.size() * sizeof(int)) + " bytes\n";  
+        out += "Data Size: " + std::to_string(data.size()) + " bytes\n";
+        out += "End of STL Binary Model";
+        Error::def.pushMessage(
+           {0, out.c_str(), ErrorLevel::Debug}
+        );
+    }
+#endif
+}
+
+void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::string_view filePath){
+    if(data.size() < 6) return; // 数据太小，无法判断
+    if(!filePath.empty() && filePath.find(".") != std::string::npos){ //at least have a signal of file extension
+        //judging suffix
+        if(filePath.ends_with(".obj")){
+#ifdef AGE_ML_DEBUG
+            Error::def.pushMessage(
+                {0, "Detected OBJ format by suffix.", ErrorLevel::Debug}
+            );
+#endif
+            Obj::parse(data, md, flipV, filePath);
+            return;
+        }else if(filePath.ends_with(".stl")){
+#ifdef AGE_ML_DEBUG
+            Error::def.pushMessage(
+                {0, "Detected STL format by suffix.", ErrorLevel::Debug}
+            );
+#endif
+            Stl::parse(data, md, flipV, filePath);
+            return;
+        }else if(filePath.ends_with(".stla")){
+#ifdef AGE_ML_DEBUG
+            Error::def.pushMessage(
+                {0, "Detected STL ASCII format by suffix.", ErrorLevel::Debug}
+            );
+#endif
+            StlAscii::parse(data, md, flipV, filePath);
+            return;
+        }else if(filePath.ends_with(".stlb")){
+#ifdef AGE_ML_DEBUG
+            Error::def.pushMessage(
+                {0, "Detected STL Binary format by suffix.", ErrorLevel::Debug}
+            );
+#endif
+            StlBinary::parse(data, md, flipV, filePath);
+            return;
+        }
+        //try other methods
+    }
+    // sample in a small region
+    std::string_view sample = data.substr(0,data.size() > 1024 ? 1024 : data.size());
+    if(sample.find("solid") != std::string_view::npos || 
+       sample.find("facet normal") != std::string_view::npos){
+#ifdef AGE_ML_DEBUG
+        Error::def.pushMessage(
+            {0, "Detected STL ASCII format by the first 1024 bytes.", ErrorLevel::Debug}
+        );
+#endif
+        StlAscii::parse(data, md, flipV, filePath);
+            return;
+    }else if(sample.find("usemtl") != std::string_view::npos || 
+             sample.find("v ") != std::string_view::npos || 
+             sample.find("vn ") != std::string_view::npos || 
+             sample.find("vt ") != std::string_view::npos){
+#ifdef AGE_ML_DEBUG
+        Error::def.pushMessage(
+            {0, "Detected OBJ format by the first 1024 bytes.", ErrorLevel::Debug}
+        );
+#endif
+        Obj::parse(data, md, flipV, filePath);
+            return;
+    }
+    //try file chunk pattern
+    uint32_t sus_triangleCount = data.data() + 80 < data.data() + data.size() ? 
+        endian_cast(*reinterpret_cast<const uint32_t*>(data.data() + 80)) : 0;
+    constexpr size_t chunk_size = 3 * 4 + 3 * 3 * 4 + 2; // 3 vertices, 1 normal, 2 bytes for attributes
+    if(sus_triangleCount > 0 && data.size() == 84 + sus_triangleCount * chunk_size + 1){ // 1 seemed for '\0'
+        //maybe stl-bin
+#ifdef AGE_ML_DEBUG
+        Error::def.pushMessage(
+            {0, "Detected STL Binary format by file's chunk patterns.", ErrorLevel::Debug}
+        );
+#endif
+        StlBinary::parse(data, md, flipV, filePath);
+        return;
+    }
+
+    std::string s = "Unknown format for model data, cannot parse. Data size: " + std::to_string(data.size());
+    if(!filePath.empty()){
+        s += ", File Path: " + std::string(filePath);
+    }
+    Error::def.pushMessage(
+        {AGEE_FEATURE_NOT_SUPPORTED, s.c_str() , ErrorLevel::Error}
+    );
 }

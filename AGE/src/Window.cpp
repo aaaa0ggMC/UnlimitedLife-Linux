@@ -59,8 +59,8 @@ std::pair<int, int> CreateWindowInfo::ScreenPercent(float px, float py, int *x, 
         sx = GetSystemMetrics(SM_CXSCREEN) * scale;
         sy = GetSystemMetrics(SM_CYSCREEN) * scale;
     #elif defined(__linux__)
-        //@todo linux上我还不知道具体怎么获取屏幕数据，暂定 1920 * 1280
-        Error::def.pushMessage({AGEE_FEATURE_NOT_SUPPORTED,"ScreenPercent is unsupported now for linux platform...So default is 1920*1280"});    
+        glfwInit();
+        glfwGetMonitorWorkarea(glfwGetPrimaryMonitor(), nullptr, nullptr, &sx, &sy);
     #endif //其他平台在其他地方都过不了这里就别想了
     sx *= px;
     sy *= py;

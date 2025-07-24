@@ -12,6 +12,7 @@
 #include <alib-g3/aclock.h>
 #include <thread>
 #include <chrono>
+#include <alib-g3/alogger.h>
 //#include <iostream>
 
 ///对象如VAO,VBO为空
@@ -84,14 +85,25 @@ namespace age{
         }
     };
 
+    enum class ErrorLevel : int32_t {
+        Trace = LOG_TRACE,
+        Debug = LOG_DEBUG,
+        Info = LOG_INFO,
+        Warn = LOG_WARN,
+        Error = LOG_ERROR,
+        Critical = LOG_CRITI
+    };
+
     struct AGE_API ErrorInfo{
         int32_t code;
         const char * message;
+        ErrorLevel level;
     };
 
     struct AGE_API ErrorInfopp{
         int32_t code;
         std::pmr::string message;
+        ErrorLevel level;
     };
     typedef void(*TriggerFunc)(const ErrorInfopp&);
 

@@ -128,7 +128,7 @@ int main(){
     Clock imgui_clock (false);
     Trigger im_trigger(imgui_clock,10); // 100fps
     ImDrawData * im_cached = nullptr;
-    im_io.FontGlobalScale = getMonitorScale() * 1.2;
+    im_io.FontGlobalScale = getMonitorScale() / 1.25;
     float im_showfps = 0;
     int im_menu = 0;
     glm::vec4 im_border_color = glm::vec4(0,0,0,0);
@@ -189,9 +189,10 @@ int main(){
             lg.info("Loading OBJ...");
             Clock clk;
             im_loadModel = false;
-            model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
+            model::loadModelFromFile<model::fmt::AutoDetect>("./test_data/main",*mdx);
+            //model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
             lg(LOG_INFO) << "LoadOBJ:OK! [" << clk.getOffset() << "ms]" << std::endl;
-            
+
             vaos[4].bind();
             mdx->bind(vaos[4],vbos[9],vbos[10],vbos[11]);
 
@@ -481,7 +482,7 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
         ci.y = 100;
         ci.style = WinStylePresetNormal;
         ci.fps = 0;
-        ci.ScreenPercent(0.6,1,&ci.width,&ci.height);
+        ci.ScreenPercent(0.5,1,&ci.width,&ci.height);
         ci.KeepRatio(ci.width,ci.height,800,600);
         ci.ScreenPercent(0.2,0.2,&ci.x,&ci.y);
 

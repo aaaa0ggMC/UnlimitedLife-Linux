@@ -184,6 +184,7 @@ namespace age{
             m_onKey = nullptr;
         }
 
+        /// @note nw,nh will multiply by content scale before calling in Linux system,while keep the same in Windows system
         inline void setWindowSizeCallback(std::function<void(Window&,int nw,int nh)> func){
             m_onResize = func;
         }
@@ -208,6 +209,12 @@ namespace age{
         inline void draw(PrimitiveType type,GLuint startIndex,GLint count,GLuint instanceCount = 1,VAO vao = VAO::null()){
             drawArray(type,startIndex,count,instanceCount,vao);
         }
+
+        inline std::pair<float,float> getContentScale(){
+            float xscale, yscale;
+            glfwGetWindowContentScale(window, &xscale, &yscale);
+            return {xscale, yscale};
+        } 
 
         /// this function uses glDrawArrays when instanceCount == 1
         inline void drawArray(PrimitiveType type,GLuint startIndex,GLint count,GLuint instanceCount = 1,VAO vao = VAO::null()){

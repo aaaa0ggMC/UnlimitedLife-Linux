@@ -66,7 +66,13 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
             //aspect ratio = 0,glm will not work
             return;
         }
+        #ifdef __linux__
+        auto scale = window.getContentScale();
+        if(window.m_onResize)window.m_onResize(window,nw * scale.first,nh * scale.second);
+        #elif defined(_WIN32)
+        // Windows系统下，nw和nh已经是经过content scale处理的
         if(window.m_onResize)window.m_onResize(window,nw,nh);
+        #endif
     });
 
     glfwSetKeyCallback(win->window,[](GLFWwindow * glfwWin,int key,int scancode,int action,int mods){
@@ -77,6 +83,9 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
 
     // no vsync
     glfwSwapInterval(0);
+    #ifdef __linux__
+    glViewport(0, 0, info.width * win->getContentScale().first, info.height * win->getContentScale().second);
+    #endif
     return {win};
 }
 

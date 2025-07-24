@@ -16,17 +16,39 @@
 #include <alib-g3/autil.h>
 
 namespace age::model{
-    template<class T> concept AFormat = requires(std::string_view data,ModelData & model,bool flipV){
-       {T::parse(data,model,flipV)};
+    template<class T> concept AFormat = requires(std::string_view data,ModelData & model,bool flipV,std::string_view path){
+       {T::parse(data,model,flipV,path)};
     };
     
+    // supports some common & easy formats for ModelData
+    // if you want to load model for Model, use other functions(WIP) which uses assimp
     namespace fmt{
         struct AGE_API Obj{
-            static void parse(std::string_view data,ModelData & model,bool flipV = false);
+            static void parse(std::string_view data,ModelData & model,bool flipV = false,std::string_view = "");
         };
 
         struct AGE_API Stl{
-            static void parse(std::string_view data,ModelData & model,bool flipV = false);
+            static void parse(std::string_view data,ModelData & model,bool flipV = false,std::string_view = "");
+        };
+
+        struct AGE_API StlAscii{
+            static void parse(std::string_view data,ModelData & model,bool flipV = false,std::string_view = "");
+        };
+
+        struct AGE_API StlBinary{
+            static void parse(std::string_view data,ModelData & model,bool flipV = false,std::string_view = "");
+        };
+
+        struct AGE_API AutoDetect{
+            static void parse(std::string_view data,ModelData & model,bool flipV = false,std::string_view filePath = "");
+        };
+
+        struct AGE_API Gltf{
+            [[deprecated("GLTF is too complex, it will only be implemented for Model instead of ModelData")]]
+            static void parse(std::string_view data,ModelData & model,bool flipV = false,std::string_view filePath = "");
+
+            // loadScene = -1 means load the scene described in the gltf file to model.currentScene
+            // static void parse(std::string_view data,Model & model,int loadScene = -1,bool flipV = false,std::string_view filePath = "");
         };
     };
 
@@ -39,8 +61,8 @@ namespace age::model{
     /// @note 目前只有 obj 会对翻转处理
     /// @note 类型以模板形式支持
     /// @see age::models::fmt
-    template<AFormat Format> inline void loadModelFromMemory(std::string_view data,ModelData & model,bool flipV = false){
-        Format::parse(data,model,flipV);
+    template<AFormat Format> inline void loadModelFromMemory(std::string_view data,ModelData & model,bool flipV = false,std::string_view filePath = ""){
+        Format::parse(data,model,flipV,filePath);
     }
 
     /// @brief 从文件加载模型
@@ -55,7 +77,7 @@ namespace age::model{
         fp += filePath;
         std::string data = "";
         alib::g3::Util::io_readAll(fp,data);
-        loadModelFromMemory<Format>(data,model,flipV);
+        loadModelFromMemory<Format>(data,model,flipV,filePath);
     }
 }
 
