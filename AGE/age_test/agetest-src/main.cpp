@@ -184,9 +184,14 @@ int main(){
 
         // load only once
         if(im_loadModel){
-            im_loadModel = false;
             mdx = &models["main.obj"];
+
+            lg.info("Loading OBJ...");
+            Clock clk;
+            im_loadModel = false;
             model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
+            lg(LOG_INFO) << "LoadOBJ:OK! [" << clk.getOffset() << "ms]" << std::endl;
+            
             vaos[4].bind();
             mdx->bind(vaos[4],vbos[9],vbos[10],vbos[11]);
 

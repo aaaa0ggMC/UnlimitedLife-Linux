@@ -25,8 +25,17 @@
   Swap: 73.69 MiB / 1.00 GiB (7%)
   Disk (C:\): 195.74 GiB / 400.00 GiB (49%) - NTFS
   Disk (D:\): 386.76 GiB / 551.64 GiB (70%) - NTFS
-# END TEST PLATFORMS
 
+## (3)
+  aaaa0ggmc's new laptop (Arch Linux)
+  CPU: AMD Ryzen 9 8945HX (32) @ 5.46 GHz
+  GPU 1: NVIDIA GeForce RTX 5060 Max-Q / Mobile [Discrete]
+  GPU 2: AMD Radeon 610M [Integrated]
+  Memory: 8.81 GiB / 30.64 GiB (29%)
+  Swap: 0 B / 3.80 GiB (0%)
+  Disk (/): 31.75 GiB / 120.00 GiB (26%) - btrfs
+
+# END TEST PLATFORMS
 
 #Default behaviour is usually opposite to the description.
 # MACROS
