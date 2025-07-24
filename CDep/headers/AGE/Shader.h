@@ -12,19 +12,27 @@
 #include <glm/gtc/type_ptr.hpp>
 
 namespace age {
+    template<class T>
+    inline constexpr bool always_false_v = false;
+    
     /** @struct ShaderUniform
      * @brief Used to upload values
      */
     struct AGE_API ShaderUniform{
     private:
-        GLuint location;
+        // location竟然是glint!!!
+        GLint location;
         GLuint program;
         friend class Shader;
     public:
-        inline GLuint getLocationId(){return location;}
+        inline GLint getLocationId(){return location;}
         inline GLuint getProgramId(){return program;}
 
-        inline ShaderUniform(GLuint locationV,GLuint programV):location{locationV},program{programV}{}
+        inline ShaderUniform(GLint locationV = -1,GLuint programV = 0):location{locationV},program{programV}{}
+
+        inline bool isInvalid(){
+            return location == -1 || program == 0;
+        }
 
         inline void uploadi(GLint v){
             glProgramUniform1i(program,location,v);
@@ -54,20 +62,24 @@ namespace age {
             glProgramUniform4f(program,location,x,y,z,w);
         }
 
+        // aaaa0ggmc说： 操你妈aaaa0ggmc,tmd你怎么不测试这四个函数，搞出了这妥实
+        /* origin : inline void uploadv3(const glm::vec3& v){
+            glProgramUniform3fv(program,location,3,glm::value_ptr(v));
+        }*/
         inline void uploadv1(const glm::vec1& v){
-            glProgramUniform1fv(program,location,1,glm::value_ptr(v));
+            upload1f(v.x);
         }
 
         inline void uploadv2(const glm::vec2& v){
-            glProgramUniform2fv(program,location,2,glm::value_ptr(v));
+            upload2f(v.x,v.y);
         }
 
         inline void uploadv3(const glm::vec3& v){
-            glProgramUniform3fv(program,location,3,glm::value_ptr(v));
+            upload3f(v.x,v.y,v.z);
         }
 
         inline void uploadv4(const glm::vec4& v){
-            glProgramUniform4fv(program,location,4,glm::value_ptr(v));
+            upload4f(v.x,v.y,v.z,v.w);
         }
 
         ///matrix
@@ -100,6 +112,47 @@ namespace age {
         //sampler
         inline void uploadSampler(GLint textureUint){
             glProgramUniform1i(program, location, textureUint);
+        }
+
+        template<class T> inline void upload(const T & val){
+            if constexpr (std::is_same_v<T, GLint>){
+                uploadi(val);
+            }else if constexpr (std::is_same_v<T, GLuint>){
+                uploadui(val);
+            }else if constexpr (std::is_same_v<T, GLboolean>){
+                uploadb(val);
+            }else if constexpr (std::is_same_v<T, GLfloat>){
+                upload1f(val);
+            }else if constexpr (std::is_same_v<T, glm::vec1>){
+                uploadv1(val);
+            }else if constexpr (std::is_same_v<T, glm::vec2>){
+                uploadv2(val);
+            }else if constexpr (std::is_same_v<T, glm::vec3>){
+                uploadv3(val);
+            }else if constexpr (std::is_same_v<T, glm::vec4>){
+                uploadv4(val);
+            }else if constexpr (std::is_same_v<T, glm::mat2>){
+                uploadmat2(val);
+            }else if constexpr (std::is_same_v<T, glm::mat3>){
+                uploadmat3(val);
+            }else if constexpr (std::is_same_v<T, glm::mat4>){
+                uploadmat4(val);
+            }else if constexpr (std::is_same_v<T, std::vector<float>>){
+                uploadarrf(val);
+            }else if constexpr (std::is_same_v<T, std::vector<const float*>>){
+                static_assert(!std::is_same_v<T, const float*>, "You need to pass the array's count when passing const float *");
+            }else {
+                static_assert(always_false_v<T>, "Unsupported type passed to ShaderUniform::upload()");
+            }
+        }
+
+        inline void upload(const float * data,size_t count){
+            uploadarrf(data,count);
+        }
+
+        template<size_t N>
+        inline void upload(const float (&arr)[N]){
+            glProgramUniform1fv(program, location, N, arr);
         }
     };
 
@@ -139,7 +192,7 @@ namespace age {
             return ShaderUniform(location,pid);
         }
 
-        ShaderUniform getUniformByName(std::string_view  name){
+        ShaderUniform getUniformByName(std::string_view name){
             return ShaderUniform(glGetUniformLocation(pid,name.data()),pid);
         }
 
@@ -147,7 +200,7 @@ namespace age {
             return getUniformByLocation(location);
         }
 
-        ShaderUniform operator[](std::string_view  name){
+        ShaderUniform operator[](std::string_view name){
             return getUniformByName(name);
         }
 

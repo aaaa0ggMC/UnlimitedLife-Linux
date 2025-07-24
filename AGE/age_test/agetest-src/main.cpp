@@ -13,6 +13,7 @@
 #include <AGE/Model.h>
 #include <AGE/ModelLoader/PrefabGenerator.h>
 #include <AGE/ModelLoader/Loader.h>
+#include <AGE/Light.h>
 
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
@@ -32,6 +33,7 @@ using namespace age;
 using namespace age::world;
 using namespace age::world::comps;
 using namespace alib::g3;
+using namespace age::light;
 
 constexpr float cam_speed = 3;
 constexpr glm::vec2 cam_rot = glm::vec2(1,1);
@@ -209,6 +211,17 @@ int main(){
         lg(LOG_INFO) << "LoadModel:OK! [" << clk.getOffset() << "ms]" << std::endl;
     }
     ModelData * md = &models[im_models[im_model]];
+
+    ////Lights////
+    {
+        lg.info("Loading lights..");
+        Light light;
+        LightBindings lb;
+        lb.position = createDataUploader<glm::vec3>(uploaders::UniformName<glm::vec3>("dcolor"),shader);
+        lg.info("LoadLight: OK!");
+        createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("dcolor"),shader).upload(glm::vec4(0,1,0,1));
+    }
+
 
     //launch clock
     elapse.start();

@@ -56,6 +56,11 @@ where       = "ModelLoader"
 description = "模型加载完成后输出日志"
 worksfor    = "AGE only"
 
+[AGE.AGE_LIGHT_BUZZ]
+where       = "Light"
+description = "是否开启LightBinding使用错误（比如没有绑定对象而调用）的调试输出"
+worksdor    = "ALL"
+
 # END MACROS
 
 # RESOURCE PROVIDER
