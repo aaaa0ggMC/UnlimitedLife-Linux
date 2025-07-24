@@ -59,7 +59,12 @@ worksfor    = "AGE only"
 [AGE.AGE_LIGHT_BUZZ]
 where       = "Light"
 description = "是否开启LightBinding使用错误（比如没有绑定对象而调用）的调试输出"
-worksdor    = "ALL"
+worksfor    = "ALL"
+
+[AGE.AGE_TRACE_COMPACT]
+where       = "Utils,Base,defTrigger"
+description = "紧凑输出（条目之间没有多一行）"
+worksfor    = "ALL that uses defTrigger"
 
 # END MACROS
 

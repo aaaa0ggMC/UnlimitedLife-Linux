@@ -1,7 +1,8 @@
 /** @file alogger.h
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
-* @date 2025-4-04
+* @last-date 2025/04/04
+* @date 2025/07/24 
 * @version 3.1
 * @copyright Copyright(C)2025
 ********************************
@@ -465,7 +466,6 @@ namespace g3{
         void trace(dstring msg);
         ///log(LOG_WARN,...)
         void warn(dstring msg);
-
         /** @brief 设置是否显示容器名字
          * @param[in] v 是否显示
          * - true 显示

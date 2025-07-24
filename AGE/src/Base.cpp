@@ -8,43 +8,6 @@
 
 using namespace age;
 
-static const std::string& demangle(const std::string& mangled) {
-    static thread_local std::string demangled_name;  // 每个线程独立存储
-    int status = 0;
-    char* result = abi::__cxa_demangle(mangled.c_str(), nullptr, nullptr, &status);
-    if (result) {
-        demangled_name = result;
-        free(result);
-    } else {
-        demangled_name = mangled;
-    }
-
-    //进行简写处理
-    if(demangled_name.find("std::basic_") != std::string::npos) {
-        demangled_name = std::regex_replace(
-            demangled_name,
-            std::regex("std::basic_string_view<char, std::char_traits<char>\\s*>"),
-            "std::string_view"
-        );
-        demangled_name = std::regex_replace(
-            demangled_name,
-            std::regex("std::basic_string<char, std::char_traits<char>, std::allocator<char>\\s*>"),
-            "std::string"
-        );
-        demangled_name = std::regex_replace(
-            demangled_name,
-            std::regex("std::basic_(i|o|f)?stream<char, std::char_traits<char>\\s*>"),
-            "std::$1stream"
-        );
-        demangled_name = std::regex_replace(
-            demangled_name,
-            std::regex("std::basic_(stringbuf|regex|ios)<char(, std::char_traits<char>)?\\s*>"),
-            "std::$1"
-        );
-    }
-    return demangled_name;
-}
-
 std::pmr::unsynchronized_pool_resource Error::pool;
 std::pmr::polymorphic_allocator<char> Error::alloc (&pool);
 Error Error::def;
@@ -64,6 +27,71 @@ void Error::pushMessage(const ErrorInfo& info){
     if(trigger)trigger(infos[infos.size()-1]);
 }
 
+static void fast_replace_all(std::string& s, const std::string& from, const std::string& to) {
+    size_t pos = 0;
+    while ((pos = s.find(from, pos)) != std::string::npos) {
+        s.replace(pos, from.length(), to);
+        pos += to.length();
+    }
+}
+
+static const std::string& simplify_desc(const std::string& s){
+    static std::string ret;
+    ret = s;
+
+    // 快速替换（效率高）
+    fast_replace_all(ret, "glm::vec<4, float, (glm::qualifier)0>", "vec4");
+    fast_replace_all(ret, "glm::vec<3, float, (glm::qualifier)0>", "vec3");
+    fast_replace_all(ret, "glm::vec<2, float, (glm::qualifier)0>", "vec2");
+    fast_replace_all(ret, "glm::vec4", "vec4");
+    fast_replace_all(ret, "age::light::uploaders::", "alu$");
+    fast_replace_all(ret, "age::light::", "al$");
+    fast_replace_all(ret, "age::", "a$");
+    fast_replace_all(ret, "std::basic_string<char>", "std::string");
+    fast_replace_all(ret, "std::function<void (vec4 const&)>", "std::function");
+    fast_replace_all(ret, "std::__invoke_impl", "invoke");
+    fast_replace_all(ret, "std::__invoke_result", "invoke_result");
+    fast_replace_all(ret, "std::_Function_handler", "function_handler");
+
+    // regex 替换（处理可变 lambda / tuple 等）
+    static const std::vector<std::pair<std::regex, std::string>> regex_rules = {
+        {std::regex("\\{lambda\\([^}]*\\)#(\\d+)\\}"), "λ#\\1"},
+        {std::regex("operator\\(\\)<[^>]+>"), "operator()"},
+        {std::regex("decltype\\(auto\\)"), "auto"},
+        {std::regex("std::tuple<[^>]+>"), "tuple<>"},
+        {std::regex("std::integer_sequence<[^>]+>"), "int_seq"},
+        {std::regex("std::__apply_impl<[^>]+>"), "apply_impl"},
+        {std::regex("std::__invoke<[^>]+>"), "invoke"},
+        {std::regex("std::enable_if<[^>]+>"), "enable_if"},
+        {std::regex("std::function<[^>]+>"), "std::function"},
+    };
+
+    for (const auto& [pattern, repl] : regex_rules) {
+        ret = std::regex_replace(ret, pattern, repl);
+    }
+
+    return ret;
+}
+
+static void simplify_stacktrace(const decltype(std::stacktrace::current()) & st) {
+    uint index = 0;
+    for(auto & entry : st){
+        if (entry.source_file().empty() && entry.source_line() == 0)continue;
+        std::cout << "  ";
+        alib::g3::Util::io_printColor((std::to_string(index) + "# "),ACP_RED);
+        alib::g3::Util::io_printColor(simplify_desc(entry.description()),ACP_GRAY);
+        std::cout << " at ";
+        alib::g3::Util::io_printColor(entry.source_file(),ACP_GREEN);
+        std::cout << ":";
+        alib::g3::Util::io_printColor(std::to_string(entry.source_line()),ACP_YELLOW);
+        std::cout << "\n";
+#ifndef AGE_TRACE_COMPACT
+        std::cout << "\n";
+#endif
+        index++;
+    }
+}
+
 void Error::defTrigger(const ErrorInfopp& data){
     using namespace alib::g3;
     static Logger console_logger;
@@ -81,9 +109,8 @@ void Error::defTrigger(const ErrorInfopp& data){
     }
 
     if(serverance == LOG_ERROR || serverance == LOG_CRITI){
-        trace_data.clear();
-        trace_data << std::stacktrace::current();
-        lg(serverance) << "[" << data.code  << "]" << data.message << "Stacktrace:\n" << trace_data.str() << endlog;
+        lg(serverance) << "[" << data.code  << "]" << data.message << "Stacktrace:" << endlog;
+        simplify_stacktrace(std::stacktrace::current());
     }else{
         lg(serverance) << "[" << data.code  << "]" << data.message << endlog;
     }
