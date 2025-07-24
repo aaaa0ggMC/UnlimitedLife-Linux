@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/22
+ * @date 2025/07/24
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -219,7 +219,6 @@ int main(){
         LightBindings lb;
         lb.position = createDataUploader<glm::vec3>(uploaders::UniformName<glm::vec3>("dcolor"),shader);
         lg.info("LoadLight: OK!");
-        createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("dcolor"),shader).upload(glm::vec4(0,1,0,1));
     }
 
 
