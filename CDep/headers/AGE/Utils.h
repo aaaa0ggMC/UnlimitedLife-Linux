@@ -1,3 +1,14 @@
+/**
+ * @file Utils.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 一些工具
+ * @version 0.1
+ * @date 2025/07/25
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/06/11 （左右） 
+ */
 #ifndef AGE_H_BASE
 #define AGE_H_BASE
 
@@ -179,6 +190,48 @@ namespace age{
         NonCopyable() = default;
         NonCopyable(const NonCopyable&) = delete;
         NonCopyable& operator=(const NonCopyable&) = delete;
+    };
+
+    /// please use it for trivially_copyable
+    template<class T> struct DirtyWrapper{
+    private:
+        T data;
+        static_assert(std::is_trivially_copyable_v<T>,"The data wrapped in DirtyWrapper is not trivally copyable!");
+        bool dirty { true };
+    public:
+        inline const T& read() const{
+            return data;
+        }
+
+        inline void write(const T& val){
+            dirty = true;
+            data = val;
+        }
+
+        inline void writeIfChanged(const T & val){
+            if(val != data){
+                write(val);
+            }
+        }
+
+        inline bool isDirty() const{
+            return dirty;
+        }
+
+        inline void clearFlag(){
+            dirty = false;
+        }
+
+        /// @note do not save the reference!!This may cause dirtywrapper goes wrong!
+        /// @note suggested using read() and write()
+        inline T& get(){
+            return data;
+        }
+
+        inline DirtyWrapper& operator=(const T & t){
+            write(t);
+            return *this;
+        }
     };
 
     // @author:里挥发

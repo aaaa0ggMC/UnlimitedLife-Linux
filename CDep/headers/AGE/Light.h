@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 光照支持
  * @version 0.1
- * @date 2025/07/24
+ * @date 2025/07/25
  *
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -13,18 +13,40 @@
 #define AGE_H_LIGHT
 #include <AGE/Utils.h>
 #include <AGE/Shader.h>
-#include <functional>
-#include <tuple>
+#include <AGE/DataUploader.h>
+#include <AGE/Color.h>
 
 namespace age{
     namespace light{
+        struct AGE_API LightBindings{
+            //// DirectionalLights
+            DataUploader<glm::vec3> direction;
 
-        template<class T> struct DataUploader{
-            std::function<void(const T & value)> upload;
+            //// ADS
+            DataUploader<glm::vec4> ambient;
+            DataUploader<glm::vec4> diffuse;
+            DataUploader<glm::vec4> specular;
         };
 
+        /// @brief 方向光
+        struct AGE_API DirectionalLight{
+            DirtyWrapper<glm::vec3> direction;
+            // color has been wrapped with dirtywrapper already
+            Color ambient;
+            Color diffuse;
+            Color specular;
+
+            inline void upload(const LightBindings & binding){
+                binding.direction.safe_upload(direction.read());
+                ambient.uploadRGBA(binding.ambient);
+                diffuse.uploadRGBA(binding.diffuse);
+                specular.uploadRGBA(binding.specular);
+            }
+        };
+
+        /// @brief default uploaders for binding,you can also define you own
         namespace uploaders{
-            template<class T> struct UniformName{
+            template<class T> struct AGE_API UniformName{
                 std::string name;
                 ShaderUniform cached;
 
@@ -57,55 +79,6 @@ namespace age{
 
             };
         }
-
-        // 卧槽，要被c++折磨死了，没想到c++还能玩得这么花，AI还是懂的太多了
-        // 现在我的脑子正在被std::apply,std::move,std::forward,std::bind,Policy,Functor,std::tuple，std::forward_as_tuple强碱
-        template<class T,class Fn,class... Ts> inline DataUploader<T> createDataUploader
-            (Fn&& func,Ts&&... args){
-            DataUploader<T> ret;
-            //using namespace std::placeholders;
-            //ret.upload = std::bind(std::forward<Fn>(func),_1,std::forward<Ts>(args)...);
-            auto params = std::forward_as_tuple(std::forward<Ts>(args)...);
-            ret.upload = [f = std::forward<Fn>(func), param = std::move(params)](const T & val) mutable ->void{
-                std::apply(
-                    [&](auto&... unpacked){
-                        f(val,unpacked...);
-                    },
-                param);
-            };
-            return ret;
-        }
-
-        template<class T = Shader> struct LightBindings{
-        private:
-            T * data {nullptr};
-
-        public:
-            DataUploader<glm::vec3> position;
-
-            inline void bind(T & target){
-                data = &target;
-            }
-
-            inline LightBindings<T> copy(T & t){
-                LightBindings<T> ret;
-                ret.position = position;
-            }
-
-            template<class L> inline void upload(L & l){
-                position.upload(&l.position);
-            }
-        };
-
-        /// @brief Light,a bunch of cpu data
-        struct AGE_API Light{
-            glm::vec3 position;
-            glm::vec3 color;
-
-            template<class T> inline void upload(const LightBindings<T> & binding){
-                binding.upload(*this);
-            }
-        };
     }
 }
 

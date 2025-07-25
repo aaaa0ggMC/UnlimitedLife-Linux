@@ -1,3 +1,14 @@
+/**
+ * @file VAO.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief VAO
+ * @version 0.1
+ * @date 2025/07/25
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/06/13 （左右）
+ */
 #ifndef AGE_H_VAO
 #define AGE_H_VAO
 #include <AGE/Utils.h>

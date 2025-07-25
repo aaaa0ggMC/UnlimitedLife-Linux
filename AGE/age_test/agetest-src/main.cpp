@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/24
+ * @date 2025/07/25
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -14,6 +14,7 @@
 #include <AGE/ModelLoader/PrefabGenerator.h>
 #include <AGE/ModelLoader/Loader.h>
 #include <AGE/Light.h>
+#include <AGE/Color.h>
 
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
@@ -191,7 +192,7 @@ int main(){
             lg.info("Loading OBJ...");
             Clock clk;
             im_loadModel = false;
-            model::loadModelFromFile<model::fmt::AutoDetect>("./test_data/main",*mdx);
+            model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
             //model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
             lg(LOG_INFO) << "LoadOBJ:OK! [" << clk.getOffset() << "ms]" << std::endl;
 
@@ -215,11 +216,12 @@ int main(){
     ////Lights////
     {
         lg.info("Loading lights..");
-        Light light;
+        DirectionalLight light;
         LightBindings lb;
-        lb.position = createDataUploader<glm::vec3>(uploaders::UniformName<glm::vec3>("dcolor"),shader);
+        lb.direction = createDataUploader<glm::vec3>(uploaders::UniformName<glm::vec3>("dcolor"),shader);
         lg.info("LoadLight: OK!");
-        createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("dcolor"),shader).upload(glm::vec4(0,1,0,1));
+        Color col;
+        //createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("dcolor"),shader).upload(glm::vec4(0,1,0,1));
     }
 
 

@@ -1,3 +1,14 @@
+/**
+ * @file Texture.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 纹理
+ * @version 0.1
+ * @date 2025/07/25
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/06/20 （左右） 
+ */
 #ifndef AGE_H_TEXTURE
 #define AGE_H_TEXTURE
 #include <AGE/Utils.h>

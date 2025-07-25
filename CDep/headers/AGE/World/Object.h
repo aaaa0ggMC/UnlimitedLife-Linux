@@ -1,3 +1,14 @@
+/**
+ * @file Object.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 对组件的封装，提供transform
+ * @version 0.1
+ * @date 2025/07/25
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/06/24 
+ */
 #ifndef AGE_H_OBJ
 #define AGE_H_OBJ
 #include <AGE/Utils.h>

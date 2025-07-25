@@ -64,7 +64,20 @@ worksfor    = "ALL"
 [AGE.AGE_TRACE_COMPACT]
 where       = "Utils,Base,defTrigger"
 description = "紧凑输出（条目之间没有多一行）"
-worksfor    = "ALL that uses defTrigger"
+worksfor    = "AGE"
+
+[AGE.AGE_TRACE_SKIP_CPP_NATIVE]
+where       = "Utils,Base"
+description = "是否跳过c++源文件内的模板产生的entry"
+worksfor    = "AGE"
+
+[AGE.AGE_TRACE_SKIP_PROMPT]
+where       = "Utils,Base"
+dependence  = "AGE.AGE_TRACE_SKIP_CPP_NATIVE"
+description = "判断是否为c++源文件的提示词"
+default     = "c++"
+worksfor    = "AGE"
+additional  = "源文件的获取来自 -g 选项，因此只和你的电脑有关，如果项目路径没出现c++那么整体可以正常工作，否则你需要定义一下AGE_TRACE_SKIP_PROMPT"
 
 # END MACROS
 

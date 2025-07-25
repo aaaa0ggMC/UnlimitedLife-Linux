@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 加载模型
  * @version 0.1
- * @date 2025/07/22
+ * @date 2025/07/25
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -76,7 +76,15 @@ namespace age::model{
         std::string fp = "";
         fp += filePath;
         std::string data = "";
-        alib::g3::Util::io_readAll(fp,data);
+        int fsize = alib::g3::Util::io_readAll(fp,data);
+        if(fsize == -1){
+            Error::def.pushMessage({
+                -1,
+                "<-[alib error code]Cannot open file or fetch valid data!",
+                ErrorLevel::Error
+            });
+            return;
+        }
         loadModelFromMemory<Format>(data,model,flipV,filePath);
     }
 }

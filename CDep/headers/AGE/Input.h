@@ -1,3 +1,14 @@
+/**
+ * @file Input.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 输入处理
+ * @version 0.1
+ * @date 2025/07/25
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/06/28 （左右） 
+ */
 #ifndef AGE_H_INPUT
 #define AGE_H_INPUT
 #include <AGE/Utils.h>

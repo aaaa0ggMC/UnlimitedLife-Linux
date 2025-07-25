@@ -1,3 +1,14 @@
+/**
+ * @file EntityManager.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 实体管理器
+ * @version 0.1
+ * @date 2025/07/25
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/06/21 
+ */
 #ifndef AGE_H_EM
 #define AGE_H_EM
 #include <AGE/World/Entity.h>

@@ -1,5 +1,13 @@
-/** @file Shader.h
- * @brief Shader for OpenGL program
+/**
+ * @file Shader.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 着色器
+ * @version 0.1
+ * @date 2025/07/25 （左右）
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/07/25 
  */
 #ifndef AGE_H_SHADER
 #define AGE_H_SHADER

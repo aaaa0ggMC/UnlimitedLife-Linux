@@ -74,11 +74,20 @@ static const std::string& simplify_desc(const std::string& s){
 }
 
 static void simplify_stacktrace(const decltype(std::stacktrace::current()) & st) {
-    uint index = 0;
+    constexpr int skipc = 2;
+    int index = -1;
     for(auto & entry : st){
-        if (entry.source_file().empty() && entry.source_line() == 0)continue;
+        index++;
+        if(index < skipc)continue;
+        if(entry.source_file().empty() && entry.source_line() == 0)continue;
+#ifdef AGE_TRACE_SKIP_CPP_NATIVE
+#ifndef AGE_TRACE_SKIP_PROMPT
+    #define AGE_TRACE_SKIP_PROMPT "c++"
+#endif
+        if(entry.source_file().find(AGE_TRACE_SKIP_PROMPT) != std::string::npos)continue; // skip c++ stacktrace
+#endif
         std::cout << "  ";
-        alib::g3::Util::io_printColor((std::to_string(index) + "# "),ACP_RED);
+        alib::g3::Util::io_printColor((std::to_string(index - skipc) + "# "),ACP_RED);
         alib::g3::Util::io_printColor(simplify_desc(entry.description()),ACP_GRAY);
         std::cout << " at ";
         alib::g3::Util::io_printColor(entry.source_file(),ACP_GREEN);
@@ -88,7 +97,6 @@ static void simplify_stacktrace(const decltype(std::stacktrace::current()) & st)
 #ifndef AGE_TRACE_COMPACT
         std::cout << "\n";
 #endif
-        index++;
     }
 }
 

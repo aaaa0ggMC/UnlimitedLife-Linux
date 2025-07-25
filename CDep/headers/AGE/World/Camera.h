@@ -1,3 +1,14 @@
+/**
+ * @file Camera.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 相机，对组件的一个包装
+ * @version 0.1
+ * @date 2025/07/25
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/06/24 
+ */
 #ifndef AGE_H_CAMERA
 #define AGE_H_CAMERA
 #include "Components.h"

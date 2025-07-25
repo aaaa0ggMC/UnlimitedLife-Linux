@@ -7,7 +7,7 @@ set_target_properties(AGE PROPERTIES LINKER_LANGUAGE CXX)
 # target_compile_options(AGE PUBLIC "-Winline") # 查看内联函数
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_options(AGE PRIVATE "-g" "-O0")
-	target_compile_definitions(AGE PRIVATE AGE_TRACE_COMPACT AGE_ML_DEBUG AGE_LIGHT_BUZZ)
+	target_compile_definitions(AGE PRIVATE AGE_TRACE_SKIP_CPP_NATIVE AGE_TRACE_COMPACT AGE_ML_DEBUG AGE_LIGHT_BUZZ)
 else()
 	target_compile_options(AGE PRIVATE "-g" "-O3")
 endif()
