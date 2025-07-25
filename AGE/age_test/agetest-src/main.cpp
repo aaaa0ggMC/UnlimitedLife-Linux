@@ -71,7 +71,7 @@ int main(){
     VAOManager & vaos = app.vaos;
     VBOManager & vbos = app.vbos;
     Window * win = setup(logger,lg,app,input,shader,camera);
-    std::unordered_map<std::string_view,ModelData> models;
+    std::unordered_map<std::string_view,Model> models;
     ////Clocks////
     Clock elapse (false);
     Clock fpsCounter (false);
@@ -102,13 +102,15 @@ int main(){
     Object invPar (em);
     Object pyramid (em);
     Object root (em);
+    Object plane (em);
 
     ////InitWorld////
     camera.transform().move(1,0,10);
     camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
-    cube.transform().move(1,-6,1);
+    cube.transform().move(1,-3,1);
     invPar.transform().move(0,0,4);
     pyramid.transform().move(3,0,0);
+    plane.transform().move(0,-10,0);
 
     em.addComponent<Parent>(pyramid.getEntity(),invPar.getEntity());
     em.addComponent<Parent>(invPar.getEntity(),cube.getEntity());
@@ -172,35 +174,25 @@ int main(){
     bool im_loadModel = true;
     //// Model Data///
     auto loadModel = [&]{
-
-        ModelData * mdx = &models["sphere"];
+        //stay away from annoying binding point now
+        Model * mdx = &models["sphere"];
         model::Prefab::sphere(im_prec,*mdx);
-        vaos[2].bind();
-        mdx->bind(vaos[2],vbos[3],vbos[4],vbos[5],vbos[15]);
-        
+
         mdx = &models["torus"];
         model::Prefab::torus(im_prec,1,0.5,*mdx);
-        vaos[3].bind();
-        mdx->bind(vaos[3],vbos[6],vbos[7],vbos[8],vbos[16]);
 
         // load only once
         if(im_loadModel){
-            mdx = &models["main.obj"];
-
-            lg.info("Loading OBJ...");
-            Clock clk;
             im_loadModel = false;
+            mdx = &models["main.obj"];
+            lg.info("Loading OBJ...");
+
+            Clock clk;
             model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
-            //model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
             lg(LOG_INFO) << "LoadOBJ:OK! [" << clk.getOffset() << "ms]" << std::endl;
 
-            vaos[4].bind();
-            mdx->bind(vaos[4],vbos[9],vbos[10],vbos[11],vbos[17]);
-
             mdx = &models["cube"];
-            vaos[5].bind();
             model::Prefab::cube(1,*mdx);
-            mdx->bind(vaos[5],vbos[12],vbos[13],vbos[14],vbos[18]);
         }
     };
     {
@@ -209,7 +201,9 @@ int main(){
         loadModel();
         lg(LOG_INFO) << "LoadModel:OK! [" << clk.getOffset() << "ms]" << std::endl;
     }
-    ModelData * md = &models[im_models[im_model]];
+    Model * md = &models[im_models[im_model]];
+    Model m_plane;
+    model::Prefab::box(100,0.2,100,m_plane,32); //重复很多次uv
 
     ////Material///
     material::Material mat;
@@ -433,12 +427,14 @@ int main(){
 
         ///Cube
         if(ims_cube){
-            glFrontFace(GL_CW);
+            glFrontFace(GL_CCW);
+            //glFrontFace(GL_CW);
             vaos[0].bind();
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * cube.transform().buildModelMatrix();
             invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
-            win->drawArray(PrimitiveType::Triangles,0,36,1);
+            win->draw<Model>(models["cube"]);
+            //win->drawArray(PrimitiveType::Triangles,0,36,1);
         }
 
         ///Pyramid
@@ -457,7 +453,7 @@ int main(){
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * invPar.transform().buildModelMatrix();
             invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
-            win->draw<ModelData>(*md);
+            win->draw<Model>(*md);
         }
         
         if(ims_model){
@@ -465,8 +461,16 @@ int main(){
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * root.transform().buildModelMatrix();
             invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
-            win->draw<ModelData>(*md);
+            win->draw<Model>(*md);
         }
+
+        unwrap(app.getTexture("wall"))->bind(GL_TEXTURE0);
+        // bottom
+        glFrontFace(GL_CCW);
+        auto lm = camera.viewer().buildViewMatrix(camera.transform()) * plane.transform().buildModelMatrix();
+        invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
+        mv_matrix.uploadmat4(lm);
+        win->draw<Model>(m_plane);
 
         //// IMGUI Finish up////
         if(im_cached)ImGui_ImplOpenGL3_RenderDrawData(im_cached);
@@ -555,8 +559,8 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
 
     //一定要有window才行
     // @TODO 因为IMGUI太吵了，所以暂时关了
-    app.setGLErrCallbackFunc();
-    app.setGLErrCallback(true);
+    // app.setGLErrCallbackFunc();
+    // app.setGLErrCallback(true);
 
     //// Shader ////
     lg.info("Creating shader...");

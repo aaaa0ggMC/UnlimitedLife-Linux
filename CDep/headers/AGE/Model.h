@@ -44,6 +44,7 @@ namespace age{
         std::vector<float> coords;
         std::vector<int> indices;
         std::vector<Mesh> meshes;
+        /// @todo 保存binding point,因为gltf可能需要
 
         /// 属于扩展功能,一般不建议使用
         /// 需要一个vao
@@ -70,6 +71,83 @@ namespace age{
                 instanceCount,
                 {}, // use GL_ELEMENT_ARRAY_BUFFER
                 bindedVAO
+            );
+        }
+    };
+
+    struct Model{
+    public:
+        struct GraphRes{
+            VAO vao;
+            VBO vbuffer;        
+            VBO ibuffer;
+            VBO vtbuffer;
+            VBO vnbuffer;
+        };
+    private:
+        std::vector<ModelData> scenes; // 这里是为了兼容gltf,如果只是有一个scene那么defaultscene够了
+        std::vector<GraphRes> gdata;
+        int currentModelIndex { -1 };
+    public:
+
+        inline size_t getSceneCount(){
+            return scenes.size();
+        }
+
+        inline std::optional<GraphRes*> getCurrentGraphRes(){
+            if(currentModelIndex < 0)return std::nullopt;
+            return (&gdata[currentModelIndex]);
+        }
+
+        inline std::optional<ModelData*> getCurrentModelData(){
+            if(currentModelIndex < 0)return std::nullopt;
+            return (&scenes[currentModelIndex]);
+        }
+
+        /// call loadXXX functions to add a element into model will break current binding status!!
+        inline void bind(){
+            if(currentModelIndex < 0)return;
+            gdata[currentModelIndex].vao.bind();
+        }
+
+        /// @warning use this after you have created a OpenGL-Context Based Window and have inited GLEW!
+        inline std::pair<ModelData*,GraphRes*> add(){
+            auto& g = gdata.emplace_back();
+            GLuint value[4] = {0};
+            glGenVertexArrays(1,value);
+            g.vao = VAO(value[0],0);
+            value[0] = 0;
+            glGenBuffers(4,value);
+            g.vbuffer = VBO(value[0],0);
+            g.ibuffer = VBO(value[1],0);
+            g.vtbuffer = VBO(value[2],0);
+            g.vnbuffer = VBO(value[3],0);
+            auto& v = scenes.emplace_back();
+            if(scenes.size() == 1){
+                // 第一次默认加载
+                currentModelIndex = 0;
+            }
+            return std::make_pair(&v,&g);
+        }
+
+        inline std::optional<std::pair<ModelData*,GraphRes*>> get(int index){
+            if(index < 0 || index >= scenes.size())return std::nullopt;
+            return {std::make_pair(&scenes[index],&gdata[index])};
+        }
+
+        inline void loadScene(int sceneId){
+            if(sceneId < 0 || sceneId >= scenes.size())return;
+            currentModelIndex = sceneId; // 防止vector扩容访问非法内存，不提供删除scene
+        }
+
+        template<CanDrawElements T> inline void draw(T & window,GLuint instanceCount,PrimitiveType type) const{
+            if(!instanceCount  || currentModelIndex < 0)return;
+            window.drawElements(
+                type,
+                scenes[currentModelIndex].getIndiceCount(),
+                instanceCount,
+                {}, // use GL_ELEMENT_ARRAY_BUFFER
+                gdata[currentModelIndex].vao
             );
         }
     };

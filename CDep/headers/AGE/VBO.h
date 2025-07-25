@@ -67,6 +67,7 @@ namespace age {
     private:
         friend class VBOManager;
         friend class VAO;
+        friend class Model;
         GLuint id;
         uint32_t index;
 

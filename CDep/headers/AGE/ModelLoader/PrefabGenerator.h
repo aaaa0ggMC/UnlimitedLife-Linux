@@ -3,7 +3,7 @@
  * @author aaaa0ggmc
  * @brief 生成模型预设
  * @version 0.1
- * @date 2025/07/22
+ * @date 2025/07/25
  * @start-date 2025/07/19
  * @copyright Copyright (c) 2025
 */
@@ -25,7 +25,20 @@ namespace age::model{
         /// @param normals 法向量
         /// @param coords 纹理坐标
         /// @note 必定会修改四个vector!
-        static void sphere(size_t precision,ModelData & model);
+        static void sphere(size_t precision,ModelData & model,float uvscale = 1);
+        /// @return scene id
+        static inline int sphere(size_t precision,Model & model,float uvscale = 1,
+            int index = 0,GLuint vloc = 0,GLuint vtloc = 1,GLuint vnloc = 2,bool loadTheScene = true){
+            if(precision == 0)return -1;
+            auto v = model.get(index);
+            auto data = (!v)?model.add():(*v);
+            ModelData& md = *data.first;
+            Model::GraphRes& gr = *data.second;
+            sphere(precision,md,uvscale);
+            md.bind(gr.vao,gr.vbuffer,gr.ibuffer,gr.vtbuffer,gr.vnbuffer,vloc,vtloc,vnloc);
+            if(loadTheScene)model.loadScene(model.getSceneCount() - 1);
+            return model.getSceneCount() - 1;
+        }
 
         
         /// @brief 生成一个环
@@ -37,13 +50,53 @@ namespace age::model{
         /// @param innerRadius 环内部的半径
         /// @param ringRadius 环的半径(就是那一个个切片的半径)
         /// @note 必定会修改四个vector!
-        static void torus(size_t precision,float innerRadius,float ringRadius,ModelData & model);
+        static void torus(size_t precision,float innerRadius,float ringRadius,ModelData & model,float uvscale = 1);
+        /// @return scene id
+        static inline int torus(size_t precision,float innerRadius,float ringRadius,Model & model,float uvscale = 1,
+            int index = 0,GLuint vloc = 0,GLuint vtloc = 1,GLuint vnloc = 2,bool loadTheScene = true){
+            if(precision == 0)return -1;
+            auto v = model.get(index);
+            auto data = (!v)?model.add():(*v);
+            ModelData& md = *data.first;
+            Model::GraphRes& gr = *data.second;
+            torus(precision,innerRadius,ringRadius,md,uvscale);
+            md.bind(gr.vao,gr.vbuffer,gr.ibuffer,gr.vtbuffer,gr.vnbuffer,vloc,vtloc,vnloc);
+            if(loadTheScene)model.loadScene(model.getSceneCount() - 1);
+            return model.getSceneCount() - 1;
+        }
 
         /// @brief 生成一个立方体,绕序 CCW
-        static void box(float w,float h,float d,ModelData & model);
+        static void box(float w,float h,float d,ModelData & model,float uvscale = 1);
+        /// @return scene id
+        static inline int box(float w,float h,float d,Model & model,float uvscale = 1,
+            int index = 0,GLuint vloc = 0,GLuint vtloc = 1,GLuint vnloc = 2,bool loadTheScene = true){
+            if(w == 0 && h == 0 && d == 0)return -1;
+            auto v = model.get(index);
+            auto data = (!v)?model.add():(*v);
+            ModelData& md = *data.first;
+            Model::GraphRes& gr = *data.second;
+            box(w,h,d,md,uvscale);
+            md.bind(gr.vao,gr.vbuffer,gr.ibuffer,gr.vtbuffer,gr.vnbuffer,vloc,vtloc,vnloc);
+            if(loadTheScene)model.loadScene(model.getSceneCount() - 1);
+            return model.getSceneCount() - 1;
+        }
 
-        static inline void cube(float length,ModelData & model){
-            box(length,length,length,model);
+        static inline void cube(float length,ModelData & model,float uvscale = 1){
+            if(length == 0)return;
+            box(length,length,length,model,uvscale);
+        }
+        /// @return scene id
+        static inline int cube(float length,Model & model,float uvscale = 1,
+            int index = 0,GLuint vloc = 0,GLuint vtloc = 1,GLuint vnloc = 2,bool loadTheScene = true){
+            if(length == 0)return -1;
+            auto v = model.get(index);
+            auto data = (!v)?model.add():(*v);
+            ModelData& md = *data.first;
+            Model::GraphRes& gr = *data.second;
+            cube(length,md,uvscale);
+            md.bind(gr.vao,gr.vbuffer,gr.ibuffer,gr.vtbuffer,gr.vnbuffer,vloc,vtloc,vnloc);
+            if(loadTheScene)model.loadScene(model.getSceneCount() - 1);
+            return model.getSceneCount() - 1;
         }
 
         /// 复用precision检查逻辑

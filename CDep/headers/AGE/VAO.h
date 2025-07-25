@@ -27,6 +27,7 @@ namespace age {
     struct AGE_API VAO{
     private:
         friend class VAOManager;
+        friend class Model;
         GLuint id;
         uint32_t index;
 

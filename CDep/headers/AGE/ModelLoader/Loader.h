@@ -64,6 +64,19 @@ namespace age::model{
     template<AFormat Format> inline void loadModelFromMemory(std::string_view data,ModelData & model,bool flipV = false,std::string_view filePath = ""){
         Format::parse(data,model,flipV,filePath);
     }
+    /// @return scene id, @todo 这个可以支持GLTF!!!
+    template<AFormat Format> inline int loadModelFromMemory(std::string_view sdata,Model & model,
+        int index,GLuint vloc = 0,GLuint vtloc = 1,GLuint vnloc = 2,bool flipV = false,std::string_view filePath = ""){
+        if(sdata.empty())return -1;
+        auto v = model.get(index);
+        auto data = (!v)?model.add():(*v);
+        ModelData& md = *data.first;
+        Model::GraphRes& gr = *data.second;
+        loadModelFromMemory<Format>(sdata,md,flipV,filePath);
+        md.bind(gr.vao,gr.vbuffer,gr.ibuffer,gr.vtbuffer,gr.vnbuffer,vloc,vtloc,vnloc);
+        //if(loadTheScene)model.loadScene(model.getSceneCount() - 1);
+        return model.getSceneCount() - 1;
+    }
 
     /// @brief 从文件加载模型
     /// @tparam Format
@@ -86,6 +99,23 @@ namespace age::model{
             return;
         }
         loadModelFromMemory<Format>(data,model,flipV,filePath);
+    }
+    /// @return scene id @warning binding point doesnt work for GLTF
+    template<AFormat Format> inline int loadModelFromFile(std::string_view filePath,Model & model,
+        int index = 0,GLuint vloc = 0,GLuint vtloc = 1,GLuint vnloc = 2,bool flipV = false){
+        std::string fp = "";
+        fp += filePath;
+        std::string data = "";
+        int fsize = alib::g3::Util::io_readAll(fp,data);
+        if(fsize == -1){
+            Error::def.pushMessage({
+                -1,
+                "<-[alib error code]Cannot open file or fetch valid data!",
+                ErrorLevel::Error
+            });
+            return -1;
+        }
+        return loadModelFromMemory<Format>(data,model,index,vloc,vtloc,vnloc,flipV,filePath);
     }
 }
 

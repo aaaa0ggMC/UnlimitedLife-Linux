@@ -5,7 +5,7 @@
 
 using namespace age::model;
 
-void Prefab::sphere(size_t precision,ModelData & m){
+void Prefab::sphere(size_t precision,ModelData & m,float uvscale){
     if(check(precision,m.vertices,m.indices,m.normals,m.coords))return;
     size_t vertex_count = (precision+1) * (precision+1);
     size_t index_count = precision * precision * 6;
@@ -29,7 +29,7 @@ void Prefab::sphere(size_t precision,ModelData & m){
             m.vertices[3 * base + 0] = x;m.vertices[3 * base + 1] = y;m.vertices[3 * base + 2] = z;
             // 法向量不要求模吗，虽然这里就是模
             m.normals[3 * base + 0] = x;m.normals[3 * base + 1] = y;m.normals[3 * base + 2] = z;
-            m.coords[2 * base + 0] = (float)j / precision;m.coords[2 * base + 1] = (float)i / precision;
+            m.coords[2 * base + 0] = (float)j / precision * uvscale;m.coords[2 * base + 1] = (float)i / precision * uvscale;
 
             //calculate indices
             if(i != precision && j != precision){
@@ -48,7 +48,7 @@ void Prefab::sphere(size_t precision,ModelData & m){
 }
 
 
-void Prefab::torus(size_t precision, float innerRadius, float ringRadius,ModelData & m) {
+void Prefab::torus(size_t precision, float innerRadius, float ringRadius,ModelData & m,float uvscale){
     if (check(precision,m.vertices,m.indices,m.normals,m.coords)) return;
 
     size_t vertex_count = (precision + 1) * (precision + 1);
@@ -84,8 +84,8 @@ void Prefab::torus(size_t precision, float innerRadius, float ringRadius,ModelDa
             m.normals[3 * base + 1] = normal.y;
             m.normals[3 * base + 2] = normal.z;
 
-            m.coords[2 * base + 0] = (float)j / precision;
-            m.coords[2 * base + 1] = (float)i / precision;
+            m.coords[2 * base + 0] = (float)j / precision * uvscale;
+            m.coords[2 * base + 1] = (float)i / precision * uvscale;
 
             if (i < precision && j < precision) {
                 size_t idx = 6 * (i * precision + j);
@@ -102,7 +102,8 @@ void Prefab::torus(size_t precision, float innerRadius, float ringRadius,ModelDa
     m.meshes.push_back({0,0,0,0,material::Material(),"main"});
 }
 
-void Prefab::box(float w, float h, float d, ModelData & m) {
+void Prefab::box(float w, float h, float d, ModelData & m,float uvscale) {
+    if(w == 0 && h == 0 && d == 0)return;
     float x = w / 2.0f;
     float y = h / 2.0f;
     float z = d / 2.0f;
@@ -140,12 +141,12 @@ void Prefab::box(float w, float h, float d, ModelData & m) {
 
     m.coords = {
         // 每面使用同一组UV（左下、右下、右上、左上）
-        0, 0, 1, 0, 1, 1, 0, 1, // Front
-        0, 0, 1, 0, 1, 1, 0, 1, // Back
-        0, 0, 1, 0, 1, 1, 0, 1, // Left
-        0, 0, 1, 0, 1, 1, 0, 1, // Right
-        0, 0, 1, 0, 1, 1, 0, 1, // Bottom
-        0, 0, 1, 0, 1, 1, 0, 1  // Top
+        0, 0, uvscale, 0, uvscale, uvscale, 0, uvscale, // Front
+        0, 0, uvscale, 0, uvscale, uvscale, 0, uvscale, // Back
+        0, 0, uvscale, 0, uvscale, uvscale, 0, uvscale, // Left
+        0, 0, uvscale, 0, uvscale, uvscale, 0, uvscale, // Right
+        0, 0, uvscale, 0, uvscale, uvscale, 0, uvscale, // Bottom
+        0, 0, uvscale, 0, uvscale, uvscale, 0, uvscale  // Top
     };
 
     // 每个面用两个三角形，共 12 个三角形
