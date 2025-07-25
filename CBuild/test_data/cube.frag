@@ -3,6 +3,7 @@ in vec2 coord;
 in vec3 varyingNormal;
 in vec3 varyingLightDir;
 in vec3 varyingVertPos;
+in vec3 varyingHalfVector;
 out vec4 color;
 
 layout(binding = 0) uniform sampler2D tex;
@@ -29,9 +30,9 @@ void main(){
   vec3 L = normalize(varyingLightDir);
   vec3 N = normalize(varyingNormal);
   vec3 V = normalize(-varyingVertPos);
-  vec3 R = normalize(reflect(-L,N));
+  vec3 H = normalize(varyingHalfVector);
   float cosTheta = dot(L,N);
-  float cosPhi = dot(V,R);
+  float cosPhi = dot(H,N);
 
   vec3 ambient = (gambient * material.ambient + light.ambient * material.ambient).xyz;
   vec3 diffuse = light.diffuse.xyz * material.diffuse.xyz * max(cosTheta,0.0);
