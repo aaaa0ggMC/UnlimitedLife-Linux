@@ -31,10 +31,11 @@
 #include <imgui/imgui_internal.h>
 
 using namespace age;
-using namespace age::world;
-using namespace age::world::comps;
 using namespace alib::g3;
 using namespace age::light;
+using namespace age::world;
+using namespace age::world::comps;
+using namespace age::light::uploaders;
 
 constexpr float cam_speed = 3;
 constexpr glm::vec2 cam_rot = glm::vec2(1,1);
@@ -138,7 +139,7 @@ int main(){
     float im_uialpha = 0.8f;
     int im_textureID = 0;
     float im_maxAnisotrpy = Queryer().anisotropicFiltering().second;
-    float im_aniso = 0;
+    float im_aniso = 2;
     int im_prec_old = 48,im_prec = 48;
     int im_polyf = 0,im_polym = 0;
     std::vector<const char*> im_spolyf = {"Front","Back","Front And Back"};
@@ -220,10 +221,10 @@ int main(){
         mat.specular.fromRGBA(0.6283f,0.5559f,0.3661f,1);
         mat.shininess = 51.2f;
 
-        mb.ambient = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("material.ambient"),shader);
-        mb.diffuse = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("material.diffuse"),shader);
-        mb.specular = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("material.specular"),shader);
-        mb.shininess = createDataUploader<float>(uploaders::UniformName<float>("material.shininess"),shader);
+        mb.ambient = createUniformName<glm::vec4>("material.ambient",shader);
+        mb.diffuse = createUniformName<glm::vec4>("material.diffuse",shader);
+        mb.specular = createUniformName<glm::vec4>("material.specular",shader);
+        mb.shininess = createUniformName<float>("material.shininess",shader);
 
         mat.upload(mb);
     }
@@ -238,10 +239,10 @@ int main(){
         light.specular.fromRGBA(1.0,1.0,1.0,1.0);
         light.position = glm::vec3(0,4,0);
 
-        lb.ambient = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("light.ambient"),shader);
-        lb.diffuse = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("light.diffuse"),shader);
-        lb.specular = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("light.specular"),shader);
-        lb.position = createDataUploader<glm::vec3>(uploaders::UniformName<glm::vec3>("light.position"),shader);
+        lb.ambient = createUniformName<glm::vec4>("light.ambient",shader);
+        lb.diffuse = createUniformName<glm::vec4>("light.diffuse",shader);
+        lb.specular = createUniformName<glm::vec4>("light.specular",shader);
+        lb.position = createUniformName<glm::vec3>("light.position",shader);
 
         light.upload(lb);
         lg.info("LoadLight: OK!");
@@ -249,6 +250,7 @@ int main(){
     shader["gambient"].upload4f(0.7,0.7,0.7,1.0);
     shader["proj_matrix"].uploadmat4(camera.projector().buildProjectionMatrix());
     ShaderUniform mv_matrix = shader["mv_matrix"];
+    ShaderUniform invMV = shader["invMV"];
 
 
     //launch clock
@@ -434,7 +436,7 @@ int main(){
             glFrontFace(GL_CW);
             vaos[0].bind();
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * cube.transform().buildModelMatrix();
-            shader["invMV"].uploadmat4(glm::transpose(glm::inverse(lm)));
+            invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
             win->drawArray(PrimitiveType::Triangles,0,36,1);
         }
@@ -444,22 +446,24 @@ int main(){
             vaos[1].bind();
             glFrontFace(GL_CCW);
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * pyramid.transform().buildModelMatrix();
-            shader["invMV"].uploadmat4(glm::transpose(glm::inverse(lm)));
+            invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
             win->drawArray(PrimitiveType::Triangles,0,36);
         }
 
         ///Try A Circle
         if(ims_model){
+            glFrontFace(GL_CCW);
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * invPar.transform().buildModelMatrix();
-            shader["invMV"].uploadmat4(glm::transpose(glm::inverse(lm)));
+            invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
             win->draw<ModelData>(*md);
         }
         
         if(ims_model){
+            glFrontFace(GL_CCW);
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * root.transform().buildModelMatrix();
-            shader["invMV"].uploadmat4(glm::transpose(glm::inverse(lm)));
+            invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
             win->draw<ModelData>(*md);
         }
@@ -551,8 +555,8 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
 
     //一定要有window才行
     // @TODO 因为IMGUI太吵了，所以暂时关了
-    //app.setGLErrCallbackFunc();
-    //app.setGLErrCallback(true);
+    app.setGLErrCallbackFunc();
+    app.setGLErrCallback(true);
 
     //// Shader ////
     lg.info("Creating shader...");

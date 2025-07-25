@@ -84,7 +84,6 @@ namespace age{
                 }
 
                 inline void operator()(const T & val){
-                    std::cout << "uploaded" << std::endl;
                     if(!cached.isInvalid()){
                         // 利用cache的重载，但是注意，重载类型错误了那么你就完蛋了
                         cached.upload(val);
@@ -104,6 +103,10 @@ namespace age{
                 }
 
             };
+
+            template<class T,class... Args> inline DataUploader<T> createUniformName(const std::string& uname,Args&&... args){
+                return createDataUploader<T>(UniformName<T>(uname),std::forward<Args>(args)...);
+            }
         }
     }
 }
