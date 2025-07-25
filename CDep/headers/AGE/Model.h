@@ -3,7 +3,7 @@
  * @author aaaa0ggmc
  * @brief 提供模型相关的支持，目前不支持Mesh,Mesh要等我再学学
  * @version 0.1
- * @date 2025/07/22
+ * @date 2025/07/25
  * @start-date 2025/07/18
  * @copyright Copyright (c) 2025
 */
@@ -27,7 +27,7 @@ namespace age{
         size_t coord_offset;
         size_t index_offset;
 
-        Material material;
+        material::Material material;
         std::string meshName;
     };
 

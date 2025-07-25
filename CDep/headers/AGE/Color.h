@@ -48,9 +48,29 @@ namespace age{
             this->hsva.write(hsva);
         }
 
+        inline void fromHSVA(float h,float s,float v,float a){
+            this->hsva.write(glm::vec4(h,s,v,a));
+        }
+
+        inline void fromRGBA(float r,float g,float b,float a){
+            fromRGBA(glm::vec4(r,g,b,a));
+        }
+
         static inline Color RGBA(float r,float g,float b,float a){
             Color ret;
             ret.fromRGBA(glm::vec4(r,g,b,a));
+            return ret;
+        }
+
+        static inline Color RGBA(const glm::vec4& c){
+            Color ret;
+            ret.fromRGBA(c);
+            return ret;
+        }
+
+        static inline Color HSVA(const glm::vec4& c){
+            Color ret;
+            ret.fromHSVA(c);
             return ret;
         }
 

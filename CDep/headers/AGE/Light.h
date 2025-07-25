@@ -19,6 +19,9 @@
 namespace age{
     namespace light{
         struct AGE_API LightBindings{
+            //// Position
+            DataUploader<glm::vec3> position;
+
             //// DirectionalLights
             DataUploader<glm::vec3> direction;
 
@@ -37,7 +40,29 @@ namespace age{
             Color specular;
 
             inline void upload(const LightBindings & binding){
-                binding.direction.safe_upload(direction.read());
+                if(direction.isDirty()){
+                    binding.direction.safe_upload(direction.read());
+                    direction.clearFlag();
+                }
+                ambient.uploadRGBA(binding.ambient);
+                diffuse.uploadRGBA(binding.diffuse);
+                specular.uploadRGBA(binding.specular);
+            }
+        };
+
+
+        struct AGE_API PositionalLight{
+            DirtyWrapper<glm::vec3> position;
+            // color has been wrapped with dirtywrapper already
+            Color ambient;
+            Color diffuse;
+            Color specular;
+
+            inline void upload(const LightBindings & binding){
+                if(position.isDirty()){
+                    binding.position.safe_upload(position.read());
+                    position.clearFlag();
+                }
                 ambient.uploadRGBA(binding.ambient);
                 diffuse.uploadRGBA(binding.diffuse);
                 specular.uploadRGBA(binding.specular);
@@ -59,6 +84,7 @@ namespace age{
                 }
 
                 inline void operator()(const T & val){
+                    std::cout << "uploaded" << std::endl;
                     if(!cached.isInvalid()){
                         // 利用cache的重载，但是注意，重载类型错误了那么你就完蛋了
                         cached.upload(val);

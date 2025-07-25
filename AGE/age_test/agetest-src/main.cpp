@@ -71,9 +71,6 @@ int main(){
     VBOManager & vbos = app.vbos;
     Window * win = setup(logger,lg,app,input,shader,camera);
     std::unordered_map<std::string_view,ModelData> models;
-
-    ////ShaderArgs////
-    ShaderUniform mvp = shader["mvp_matrix"];
     ////Clocks////
     Clock elapse (false);
     Clock fpsCounter (false);
@@ -178,12 +175,12 @@ int main(){
         ModelData * mdx = &models["sphere"];
         model::Prefab::sphere(im_prec,*mdx);
         vaos[2].bind();
-        mdx->bind(vaos[2],vbos[3],vbos[4],vbos[5]);
+        mdx->bind(vaos[2],vbos[3],vbos[4],vbos[5],vbos[15]);
         
         mdx = &models["torus"];
         model::Prefab::torus(im_prec,1,0.5,*mdx);
         vaos[3].bind();
-        mdx->bind(vaos[3],vbos[6],vbos[7],vbos[8]);
+        mdx->bind(vaos[3],vbos[6],vbos[7],vbos[8],vbos[16]);
 
         // load only once
         if(im_loadModel){
@@ -197,12 +194,12 @@ int main(){
             lg(LOG_INFO) << "LoadOBJ:OK! [" << clk.getOffset() << "ms]" << std::endl;
 
             vaos[4].bind();
-            mdx->bind(vaos[4],vbos[9],vbos[10],vbos[11]);
+            mdx->bind(vaos[4],vbos[9],vbos[10],vbos[11],vbos[17]);
 
             mdx = &models["cube"];
             vaos[5].bind();
             model::Prefab::cube(1,*mdx);
-            mdx->bind(vaos[5],vbos[12],vbos[13],vbos[14]);
+            mdx->bind(vaos[5],vbos[12],vbos[13],vbos[14],vbos[18]);
         }
     };
     {
@@ -213,16 +210,45 @@ int main(){
     }
     ModelData * md = &models[im_models[im_model]];
 
+    ////Material///
+    material::Material mat;
+    material::MaterialBindings mb;
+    // data bindings
+    {
+        mat.ambient.fromRGBA(0.2473f,0.1995f,0.0745f,1);
+        mat.diffuse.fromRGBA(0.7516f,0.6065f,0.2265f,1);
+        mat.specular.fromRGBA(0.6283f,0.5559f,0.3661f,1);
+        mat.shininess = 51.2f;
+
+        mb.ambient = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("material.ambient"),shader);
+        mb.diffuse = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("material.diffuse"),shader);
+        mb.specular = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("material.specular"),shader);
+        mb.shininess = createDataUploader<float>(uploaders::UniformName<float>("material.shininess"),shader);
+
+        mat.upload(mb);
+    }
+
     ////Lights////
+    PositionalLight light;
+    LightBindings lb;
     {
         lg.info("Loading lights..");
-        DirectionalLight light;
-        LightBindings lb;
-        lb.direction = createDataUploader<glm::vec3>(uploaders::UniformName<glm::vec3>("dcolor"),shader);
+        light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
+        light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
+        light.specular.fromRGBA(1.0,1.0,1.0,1.0);
+        light.position = glm::vec3(0,4,0);
+
+        lb.ambient = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("light.ambient"),shader);
+        lb.diffuse = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("light.diffuse"),shader);
+        lb.specular = createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("light.specular"),shader);
+        lb.position = createDataUploader<glm::vec3>(uploaders::UniformName<glm::vec3>("light.position"),shader);
+
+        light.upload(lb);
         lg.info("LoadLight: OK!");
-        Color col;
-        //createDataUploader<glm::vec4>(uploaders::UniformName<glm::vec4>("dcolor"),shader).upload(glm::vec4(0,1,0,1));
     }
+    shader["gambient"].upload4f(0.7,0.7,0.7,1.0);
+    shader["proj_matrix"].uploadmat4(camera.projector().buildProjectionMatrix());
+    ShaderUniform mv_matrix = shader["mv_matrix"];
 
 
     //launch clock
@@ -407,7 +433,9 @@ int main(){
         if(ims_cube){
             glFrontFace(GL_CW);
             vaos[0].bind();
-            mvp.uploadmat4(camera.buildVPMatrix() * cube.transform().buildModelMatrix());
+            auto lm = camera.viewer().buildViewMatrix(camera.transform()) * cube.transform().buildModelMatrix();
+            shader["invMV"].uploadmat4(glm::transpose(glm::inverse(lm)));
+            mv_matrix.uploadmat4(lm);
             win->drawArray(PrimitiveType::Triangles,0,36,1);
         }
 
@@ -415,18 +443,24 @@ int main(){
         if(ims_pyramid){
             vaos[1].bind();
             glFrontFace(GL_CCW);
-            mvp.uploadmat4(camera.buildVPMatrix() * pyramid.transform().buildModelMatrix());
+            auto lm = camera.viewer().buildViewMatrix(camera.transform()) * pyramid.transform().buildModelMatrix();
+            shader["invMV"].uploadmat4(glm::transpose(glm::inverse(lm)));
+            mv_matrix.uploadmat4(lm);
             win->drawArray(PrimitiveType::Triangles,0,36);
         }
 
         ///Try A Circle
         if(ims_model){
-            mvp.uploadmat4(camera.buildVPMatrix() * invPar.transform().buildModelMatrix());
+            auto lm = camera.viewer().buildViewMatrix(camera.transform()) * invPar.transform().buildModelMatrix();
+            shader["invMV"].uploadmat4(glm::transpose(glm::inverse(lm)));
+            mv_matrix.uploadmat4(lm);
             win->draw<ModelData>(*md);
         }
         
         if(ims_model){
-            mvp.uploadmat4(camera.buildVPMatrix() * root.transform().buildModelMatrix());
+            auto lm = camera.viewer().buildViewMatrix(camera.transform()) * root.transform().buildModelMatrix();
+            shader["invMV"].uploadmat4(glm::transpose(glm::inverse(lm)));
+            mv_matrix.uploadmat4(lm);
             win->draw<ModelData>(*md);
         }
 

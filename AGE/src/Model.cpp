@@ -16,6 +16,7 @@ void ModelData::bind(
     vertBuffer.template bufferData<float>(vertices);
     coordBuffer.template bufferData<float>(coords);
     indiceBuffer.template bufferData<int>(indices);
+    normalBuffer.template bufferData<float>(normals);
 
     if(vertBuffer.getId()){
         vertBuffer.bind();

@@ -44,7 +44,7 @@ void Prefab::sphere(size_t precision,ModelData & m){
         }
     }
     
-    m.meshes.push_back({0,0,0,0,Material(),"main"});
+    m.meshes.push_back({0,0,0,0,material::Material(),"main"});
 }
 
 
@@ -99,7 +99,7 @@ void Prefab::torus(size_t precision, float innerRadius, float ringRadius,ModelDa
         }
     }
 
-    m.meshes.push_back({0,0,0,0,Material(),"main"});
+    m.meshes.push_back({0,0,0,0,material::Material(),"main"});
 }
 
 void Prefab::box(float w, float h, float d, ModelData & m) {
@@ -158,5 +158,5 @@ void Prefab::box(float w, float h, float d, ModelData & m) {
        20,21,22, 20,22,23         // Top
     };
 
-    m.meshes.push_back({0, 0, 0, 0, Material(), "main"});
+    m.meshes.push_back({0, 0, 0, 0, material::Material(), "main"});
 }
