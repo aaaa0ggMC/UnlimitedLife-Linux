@@ -159,25 +159,88 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
             };
             FaceVertex faceVerts[4];
             int vertCount = 0;
+            size_t eleCount = 0;
+            if(line.find("//") != std::string::npos)eleCount = 5;
+            else {
+                eleCount = std::count(line.begin(),line.end(),'/');
+                float feleCount = eleCount / 3;
+                if(feleCount - (int)feleCount > 0.1){//float
+                    eleCount = eleCount / 4;
+                }else eleCount = eleCount / 3;
+            }
 
             p = (char*)line.data() + 2;
             endptr = p;
-            while (*p && vertCount < 4) {
-                FaceVertex fv = {};
-                int vIdx = 0, vtIdx = 0, vnIdx = 0;
+            switch(eleCount){
+            case 0:
+                while (*p && vertCount < 4) {
+                    FaceVertex fv = {};
+                    int vIdx = 0;
 
-                vIdx = strtol(p, &endptr, 10); //strtol默认返回0
-                p = (*endptr == '\0')? endptr : endptr + 1;
-                vtIdx = strtol(p, (&endptr), 10);
-                p = (*endptr == '\0')? endptr : endptr + 1;
-                vnIdx = strtol(p, (&endptr), 10);
-                p = (*endptr == '\0')? endptr : endptr + 1;
+                    vIdx = strtol(p, &endptr, 10); //strtol默认返回0
+                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    
+                    fv.v = vIdx;
+                    fv.vt = -1;
+                    fv.vn = -1;
 
-                fv.v = vIdx;
-                fv.vt = (vtIdx == 0) ? -1 : vtIdx;
-                fv.vn = (vnIdx == 0) ? -1 : vnIdx;
+                    faceVerts[vertCount++] = fv;
+                }
+                break;
+            case 1:
+                while (*p && vertCount < 4) {
+                    FaceVertex fv = {};
+                    int vIdx = 0, vtIdx = 0;
 
-                faceVerts[vertCount++] = fv;
+                    vIdx = strtol(p, &endptr, 10); //strtol默认返回0
+                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    vtIdx = strtol(p, (&endptr), 10);
+                    p = (*endptr == '\0')? endptr : endptr + 1;
+
+                    fv.v = vIdx;
+                    fv.vt = (vtIdx == 0) ? -1 : vtIdx;
+                    fv.vn = -1;
+
+                    faceVerts[vertCount++] = fv;
+                }
+                break;
+            case 2:
+                while (*p && vertCount < 4) {
+                    FaceVertex fv = {};
+                    int vIdx = 0, vtIdx = 0, vnIdx = 0;
+
+                    vIdx = strtol(p, &endptr, 10); //strtol默认返回0
+                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    vtIdx = strtol(p, (&endptr), 10);
+                    if(endptr != p)p = (*endptr == '\0')? endptr : endptr + 1;
+                    vnIdx = strtol(p, (&endptr), 10);
+                    p = (*endptr == '\0')? endptr : endptr + 1;
+
+                    fv.v = vIdx;
+                    fv.vt = (vtIdx == 0) ? -1 : vtIdx;
+                    fv.vn = (vnIdx == 0) ? -1 : vnIdx;
+
+                    faceVerts[vertCount++] = fv;
+                }
+                break;
+            case 5:
+                while (*p && vertCount < 4) {
+                    FaceVertex fv = {};
+                    int vIdx = 0, vnIdx = 0;
+
+                    vIdx = strtol(p, &endptr, 10); //strtol默认返回0
+                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    p++; //跳过一个 /
+                    vnIdx = strtol(p, (&endptr), 10);
+                    p = (*endptr == '\0')? endptr : endptr + 1;
+
+                    fv.v = vIdx;
+                    fv.vt = -1;
+                    fv.vn = (vnIdx == 0) ? -1 : vnIdx;
+
+                    faceVerts[vertCount++] = fv;
+                }
+                break;
             }
 
             if(vertCount == 3){

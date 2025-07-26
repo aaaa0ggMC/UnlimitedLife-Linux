@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/25
+ * @date 2025/07/26
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -107,7 +107,7 @@ int main(){
     ////InitWorld////
     camera.transform().move(1,0,10);
     camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
-    cube.transform().move(1,-3,1);
+    cube.transform().move(1,-3,6);
     invPar.transform().move(0,0,4);
     pyramid.transform().move(3,0,0);
     plane.transform().move(0,-10,0);
@@ -206,21 +206,25 @@ int main(){
     model::Prefab::box(100,0.2,100,m_plane,32); //重复很多次uv
 
     ////Material///
-    material::Material mat;
+    material::Material mat_gold;
+    material::Material mat_jade; 
     material::MaterialBindings mb;
     // data bindings
     {
-        mat.ambient.fromRGBA(0.2473f,0.1995f,0.0745f,1);
-        mat.diffuse.fromRGBA(0.7516f,0.6065f,0.2265f,1);
-        mat.specular.fromRGBA(0.6283f,0.5559f,0.3661f,1);
-        mat.shininess = 51.2f;
+        mat_gold.ambient.fromRGBA(0.2473f,0.1995f,0.0745f,1);
+        mat_gold.diffuse.fromRGBA(0.7516f,0.6065f,0.2265f,1);
+        mat_gold.specular.fromRGBA(0.6283f,0.5559f,0.3661f,1);
+        mat_gold.shininess = 51.2f;
+
+        mat_jade.ambient.fromRGBA(0.135f,0.2225f,0.1575f,0.95f);
+        mat_jade.diffuse.fromRGBA(0.54f,0.89f,0.63f,0.95);
+        mat_jade.specular.fromRGBA(0.3162f,0.3162f,0.3162f,0.95);
+        mat_jade.shininess = 12.8f;
 
         mb.ambient = createUniformName<glm::vec4>("material.ambient",shader);
         mb.diffuse = createUniformName<glm::vec4>("material.diffuse",shader);
         mb.specular = createUniformName<glm::vec4>("material.specular",shader);
         mb.shininess = createUniformName<float>("material.shininess",shader);
-
-        mat.upload(mb);
     }
 
     ////Lights////
@@ -251,7 +255,7 @@ int main(){
     elapse.start();
     fpsCounter.start();
     imgui_clock.start();
-
+    
     //// Main Loop ////
     lg.info("Entering main loop...");
     win->makeCurrent();//enable window
@@ -425,6 +429,8 @@ int main(){
         glPolygonMode(im_dpolyf[im_polyf],im_dpolym[im_polym]);
         glPointSize(im_glpointsize);
 
+        /// 上传黄金材质
+        mat_gold.upload(mb);
         ///Cube
         if(ims_cube){
             glFrontFace(GL_CCW);
@@ -465,6 +471,7 @@ int main(){
         }
 
         unwrap(app.getTexture("wall"))->bind(GL_TEXTURE0);
+        mat_jade.upload(mb);
         // bottom
         glFrontFace(GL_CCW);
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * plane.transform().buildModelMatrix();
