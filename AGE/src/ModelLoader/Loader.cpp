@@ -107,6 +107,11 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
         return ret;
     };
 
+    auto valid = [](char* ch){
+        if(ch && *ch && *ch != '\n')return true;
+        return false;
+    };
+
     size_t pos = 0, len = data.size();
     char * p,* endptr; // 缓存变量
     while(pos < len){
@@ -162,9 +167,12 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
             size_t eleCount = 0;
             if(line.find("//") != std::string::npos)eleCount = 5;
             else {
-                eleCount = std::count(line.begin(),line.end(),'/');
+                auto ps = line.find('#'); // 防止误判注释，虽然我觉得也没有人会去写注释在f后面
+                auto lend = line.begin();
+                lend += (ps == std::string::npos)?line.size():ps;
+                eleCount = std::count(line.begin(),lend,'/');
                 float feleCount = eleCount / 3;
-                if(feleCount - (int)feleCount > 0.1){//float
+                if(feleCount - (int)feleCount > 0.1){ // 小数都是 0.33 0.25起步的，0.1判断绰绰有余了
                     eleCount = eleCount / 4;
                 }else eleCount = eleCount / 3;
             }
@@ -172,13 +180,13 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
             p = (char*)line.data() + 2;
             endptr = p;
             switch(eleCount){
-            case 0:
-                while (*p && vertCount < 4) {
+            case 0: // passed lagrange_test_data/bunny
+                while (valid(p) && vertCount < 4) {
                     FaceVertex fv = {};
                     int vIdx = 0;
 
                     vIdx = strtol(p, &endptr, 10); //strtol默认返回0
-                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    p = (!valid(endptr))? endptr : endptr + 1;
                     
                     fv.v = vIdx;
                     fv.vt = -1;
@@ -187,15 +195,15 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
                     faceVerts[vertCount++] = fv;
                 }
                 break;
-            case 1:
-                while (*p && vertCount < 4) {
+            case 1: // passed lagrange_test_data/avacado(processed bt blender to delete normal infos)
+                while (valid(p) && vertCount < 4) {
                     FaceVertex fv = {};
                     int vIdx = 0, vtIdx = 0;
 
                     vIdx = strtol(p, &endptr, 10); //strtol默认返回0
-                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    p = !valid(endptr)? endptr : endptr + 1;
                     vtIdx = strtol(p, (&endptr), 10);
-                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    p = !valid(endptr)? endptr : endptr + 1;
 
                     fv.v = vIdx;
                     fv.vt = (vtIdx == 0) ? -1 : vtIdx;
@@ -204,17 +212,17 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
                     faceVerts[vertCount++] = fv;
                 }
                 break;
-            case 2:
-                while (*p && vertCount < 4) {
+            case 2:  // passed, lagrange_test_data/avacado
+                while (valid(p) && vertCount < 4) {
                     FaceVertex fv = {};
                     int vIdx = 0, vtIdx = 0, vnIdx = 0;
 
                     vIdx = strtol(p, &endptr, 10); //strtol默认返回0
-                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    p = !valid(endptr)? endptr : endptr + 1;
                     vtIdx = strtol(p, (&endptr), 10);
-                    if(endptr != p)p = (*endptr == '\0')? endptr : endptr + 1;
+                    p = !valid(endptr)? endptr : endptr + 1;
                     vnIdx = strtol(p, (&endptr), 10);
-                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    p = !valid(endptr)? endptr : endptr + 1;
 
                     fv.v = vIdx;
                     fv.vt = (vtIdx == 0) ? -1 : vtIdx;
@@ -223,16 +231,16 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
                     faceVerts[vertCount++] = fv;
                 }
                 break;
-            case 5:
-                while (*p && vertCount < 4) {
+            case 5: // passed, lagrange_test_data/dragon
+                while (valid(p) && vertCount < 4) {
                     FaceVertex fv = {};
                     int vIdx = 0, vnIdx = 0;
 
                     vIdx = strtol(p, &endptr, 10); //strtol默认返回0
-                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    p = !valid(endptr)? endptr : endptr + 1;
                     p++; //跳过一个 /
                     vnIdx = strtol(p, (&endptr), 10);
-                    p = (*endptr == '\0')? endptr : endptr + 1;
+                    p = !valid(endptr)? endptr : endptr + 1;
 
                     fv.v = vIdx;
                     fv.vt = -1;

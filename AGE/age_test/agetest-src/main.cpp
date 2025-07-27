@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/26
+ * @date 2025/07/27
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -465,6 +465,7 @@ int main(){
         if(ims_model){
             glFrontFace(GL_CCW);
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * root.transform().buildModelMatrix();
+            lm = glm::scale(lm,glm::vec3(32,32,32));
             invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
             win->draw<Model>(*md);
