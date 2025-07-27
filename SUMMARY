@@ -35,6 +35,19 @@
   Swap: 0 B / 3.80 GiB (0%)
   Disk (/): 31.75 GiB / 120.00 GiB (26%) - btrfs
 
+## (3).2  @QA Why this config also called (3)?Because I just btrfs send & receive and fully copied the (3) machine to a 512GB
+##             Disk,so basically the system is the same.
+aaaa0ggmc's new laptop (Arch Linux)
+CPU: AMD Ryzen 9 8945HX (32) @ 5.46 GHz
+GPU 1: NVIDIA GeForce RTX 5060 Max-Q / Mobile [Discrete]
+GPU 2: AMD Radeon 610M [Integrated]
+Memory: 12.30 GiB / 30.64 GiB (40%)
+Swap: 4.76 MiB / 40.00 GiB (0%)
+Disk (/): 36.79 GiB / 400.00 GiB (9%) - btrfs
+Disk (/swapper): 768.00 KiB / 35.94 GiB (0%) - exfat
+
+
+
 # END TEST PLATFORMS
 
 #Default behaviour is usually opposite to the description.
