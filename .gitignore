@@ -56,6 +56,14 @@ Doxygen
 *.a
 *.lib
 
+# 3D models
+*.mtl
+*.fbx
+*.ply
+*.stl
+*.stla
+*.stlb
+
 # Executables
 *.exe
 *.out
