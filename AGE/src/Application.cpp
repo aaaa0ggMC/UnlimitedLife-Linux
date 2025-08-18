@@ -510,6 +510,8 @@ std::optional<Texture*> Application::createTexture(const CreateTextureInfo & inf
     const GLchar * buf = info.buffer.data;
     size_t eleC = info.buffer.eleCount;
     stbi_uc* bits;
+
+    tinfo.hasbits = true;
     
     switch(info.source){
     case CreateTextureInfo::FromVector:
@@ -528,6 +530,10 @@ std::optional<Texture*> Application::createTexture(const CreateTextureInfo & inf
             return std::nullopt;
         }
         bits = stbi_load(info.file.path.c_str(),&tinfo.width,&tinfo.height,&tinfo.channels,info.channel_desired);
+        break;
+    case CreateTextureInfo::CreateEmpty:
+        bits = nullptr;
+        tinfo.hasbits = false;
         break;
     default:{
             std::string em = "The source enum passed to createTexture is invalid: ";
@@ -570,9 +576,10 @@ Texture& Application::uploadTextureToGL(Texture & texture){
         Error::def.pushMessage({AGEE_OPENGL_CREATE_ERROR,"Cant create a new texture!"});
         return texture;
     }
+    if(!texture.textureInfo->hasbits)return texture; // 用户自己创建更多的东西
+
     texture.textureInfo->uploaded = true;
     glBindTexture(GL_TEXTURE_2D,texture.texture_id);
-
     int internalFormat = GL_RGB;
     switch(texture.textureInfo->channels){
     case 1:

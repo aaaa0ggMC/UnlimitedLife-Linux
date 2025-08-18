@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 纹理
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/08/18
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -30,6 +30,7 @@ namespace age{
 
         //上传属性
         bool uploaded;
+        bool hasbits;
         unsigned char * bits; //要是uploaded为true,保证为nullptr
     };
 
@@ -171,7 +172,8 @@ namespace age{
         enum Source{
             FromFile,
             FromBuffer,
-            FromVector
+            FromVector,
+            CreateEmpty
         };
 
         std::string sid;

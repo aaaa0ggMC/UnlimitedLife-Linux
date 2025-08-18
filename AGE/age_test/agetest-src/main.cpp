@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/07/27
+ * @date 2025/08/18
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -188,7 +188,7 @@ int main(){
             lg.info("Loading OBJ...");
 
             Clock clk;
-            model::loadModelFromFile<model::fmt::Obj>("./test_data/main.obj",*mdx);
+            model::loadModelFromFile<model::fmt::Obj>("./test_data/main.model",*mdx);
             lg(LOG_INFO) << "LoadOBJ:OK! [" << clk.getOffset() << "ms]" << std::endl;
 
             mdx = &models["cube"];
@@ -465,7 +465,6 @@ int main(){
         if(ims_model){
             glFrontFace(GL_CCW);
             auto lm = camera.viewer().buildViewMatrix(camera.transform()) * root.transform().buildModelMatrix();
-            lm = glm::scale(lm,glm::vec3(32,32,32));
             invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
             win->draw<Model>(*md);
