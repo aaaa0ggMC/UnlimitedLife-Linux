@@ -1,7 +1,7 @@
 /** @file Application.h
  * @brief 应用，类似Vulkan的概念（但是目前用的是OpenGL）
  * @author aaaa0ggmc
- * @date 2025/07/25
+ * @date 2025/08/31
  * @start-date 2025/06/11
  * @version 3.1
  * @copyright copyright(C)2025
@@ -148,7 +148,7 @@ namespace age{
         //// Texture ////
         std::optional<Texture*> createTexture(const CreateTextureInfo & info);
         /// Will set GL_TEXTURE_2D to 0 after call
-        Texture& uploadTextureToGL(Texture & texure);
+        Texture& uploadImageToGL(Texture & texure);
         std::optional<Texture*> getTexture(std::string_view sid);
         bool destroyTexture(std::string_view sid);
         bool destroyTexture(Texture& tex);

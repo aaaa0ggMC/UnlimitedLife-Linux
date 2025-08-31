@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 纹理
  * @version 0.1
- * @date 2025/08/18
+ * @date 2025/08/31
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -138,10 +138,12 @@ namespace age{
     struct AGE_API Texture : public NonCopyable{
     private:
         GLuint texture_id {0};
-        //其实我(Texture)不知道纹理的sid是什么hhh (为了代价更小的拷贝,sid在Application那里集中处理)
+        /// 其实我(Texture)不知道纹理的sid是什么hhh (为了代价更小的拷贝,sid在Application那里集中处理)
         friend class Application;
-        //Application * parentApp; 待定
+        /// Application * parentApp; 待定
         TextureInfo * textureInfo; ///< 这里我是假设(事实上unordered_map九十的)textureInfo对应的内存地址不会变动
+        /// 绑定点信息
+        GLuint binding_point;
 
         ///Forbid User-Define
         inline Texture(){}
@@ -153,11 +155,100 @@ namespace age{
         inline void bind(GLuint channel){
             if(!texture_id)return;
             glActiveTexture(channel);
-            glBindTexture(GL_TEXTURE_2D,texture_id);
+            glBindTexture(binding_point,texture_id);
         }
 
         inline GLuint getId(){
             return texture_id;
+        }
+
+        struct AGE_API TexImageParams{
+            // GLuint m_target;
+            GLint m_level;
+            GLint m_internalformat;
+            GLsizei m_width;
+            GLsizei m_height; //< works for 2D,3D
+            GLsizei m_depth; ///< works only for 3D
+            GLint m_border;
+            GLenum m_format;
+            GLenum m_type;
+            const void* m_data;
+
+            inline TexImageParams& border(GLint a = 0){
+                m_border = a;
+                return *this;
+            }
+
+            inline TexImageParams& type(GLenum a){
+                m_type = a;
+                return *this;
+            }
+
+            inline TexImageParams& format(GLenum a){
+                m_format = a;
+                return *this;
+            }
+
+            /// Specifies a pointer to the image data in memory.
+            inline TexImageParams& data(const void * a){
+                m_data = a;
+                return *this;
+            }
+
+            /*inline TexImageParams& target(GLuint a){
+                m_target = a;
+                return *this;
+            }*/
+
+            inline TexImageParams& level(GLint a){
+                m_level = a;
+                return *this;
+            }
+
+            inline TexImageParams& internalformat(GLint a){
+                m_internalformat = a;
+                return *this;
+            }
+
+            inline TexImageParams& width(GLsizei a){
+                m_width = a;
+                return *this;
+            }
+
+            inline TexImageParams& height(GLsizei a){
+                m_height = a;
+                return *this;
+            }
+
+            inline TexImageParams& depth(GLsizei a){
+                m_depth = a;
+                return *this;
+            }
+
+            /// @brief default values: width=height=depth=0 internalformat=format=GL_RGBA type=GL_UNSIGNED_INT border=level=data=0
+            inline TexImageParams(){
+                width(0).height(0).depth(0);
+                internalformat(GL_RGBA).type(GL_UNSIGNED_BYTE).border(0);
+                level(0).data(0).format(GL_RGBA);
+            }
+        };
+
+        inline void texImage2D(const TexImageParams & data){
+            ScopedGLState<GL_TEXTURE_2D> scope(texture_id);
+            binding_point = GL_TEXTURE_2D;
+            glTexImage2D(GL_TEXTURE_2D,data.m_level,data.m_internalformat,data.m_width,data.m_height,data.m_border,data.m_format,data.m_type,data.m_data);
+        }
+
+        inline void texImage1D(const TexImageParams & data){
+            ScopedGLState<GL_TEXTURE_1D> scope(texture_id);
+            binding_point = GL_TEXTURE_1D;
+            glTexImage1D(GL_TEXTURE_1D,data.m_level,data.m_internalformat,data.m_width,data.m_border,data.m_format,data.m_type,data.m_data);
+        }
+
+        inline void texImage3D(const TexImageParams & data){
+            ScopedGLState<GL_TEXTURE_3D> scope(texture_id);
+            binding_point = GL_TEXTURE_3D;
+            glTexImage3D(GL_TEXTURE_3D,data.m_level,data.m_internalformat,data.m_width,data.m_height,data.m_depth,data.m_border,data.m_format,data.m_type,data.m_data);
         }
 
         //由于Application无法包含否则循环include,所以这里似乎需要抛弃inline
@@ -189,7 +280,7 @@ namespace age{
             std::vector<GLchar>* data;
         } vec;
         unsigned int channel_desired;
-        bool uploadToOpenGL;
+        bool uploadToOpenGL; ///< if this value equals to true,make sure that you are creating an image rather than something eg. shadow map
         bool genMipmap;
         ///SamplerSettings
 

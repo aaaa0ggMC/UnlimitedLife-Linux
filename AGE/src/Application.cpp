@@ -557,13 +557,13 @@ std::optional<Texture*> Application::createTexture(const CreateTextureInfo & inf
 
     if(info.uploadToOpenGL){
         //上传到OpenGL
-        uploadTextureToGL(*texture);
+        uploadImageToGL(*texture);
     }
 
     return texture;
 }
 
-Texture& Application::uploadTextureToGL(Texture & texture){
+Texture& Application::uploadImageToGL(Texture & texture){
     if(texture.textureInfo->uploaded){
         Error::def.pushMessage({AGEE_TEXTURE_LOADED,"The texture has already uploaded to OpenGL."});
         return texture;
@@ -600,8 +600,12 @@ Texture& Application::uploadTextureToGL(Texture & texture){
         glBindTexture(GL_TEXTURE_2D,0);
         return texture;
     }
-    /// @todo level 和 border还没用上
-    glTexImage2D(GL_TEXTURE_2D,0,internalFormat,texture.textureInfo->width,texture.textureInfo->height,0,internalFormat,GL_UNSIGNED_BYTE,texture.textureInfo->bits);
+    texture.texImage2D(
+        Texture::TexImageParams().
+        internalformat(internalFormat).format(internalFormat).
+        width(texture.textureInfo->width).height(texture.textureInfo->height).
+        data(texture.textureInfo->bits)
+    );
     if(texture.textureInfo->mipmap){
         glGenerateMipmap(GL_TEXTURE_2D);
     }

@@ -23,7 +23,7 @@ namespace age{
         friend class Application;
         inline FrameBuffer(){} 
         GLuint framebuffer_id {0};
-        std::optional<Texture*> texture {std::nullopt<Texture*>};
+        std::optional<Texture*> texture {std::nullopt};
     public:
         inline void bind(){
             glBindFramebuffer(GL_FRAMEBUFFER,framebuffer_id);

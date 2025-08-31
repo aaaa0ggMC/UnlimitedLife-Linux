@@ -193,6 +193,10 @@ namespace age{
         /// @TODO Add more mappings
         if constexpr(in == GL_TEXTURE_2D){
             return GL_TEXTURE_BINDING_2D;
+        }else if constexpr(in == GL_TEXTURE_3D){
+            return GL_TEXTURE_BINDING_3D;
+        }else if constexpr(in == GL_TEXTURE_1D){
+            return GL_TEXTURE_BINDING_1D;
         }else{
             static_assert(false,"Feature Not Supported");
             return 0;
@@ -202,6 +206,10 @@ namespace age{
     template<GLuint in> constexpr auto GLObjectToBindingFuncMapper(){
         if constexpr(in == GL_TEXTURE_2D || in == GL_TEXTURE_BINDING_2D){
             return +[](GLuint val){glBindTexture(GL_TEXTURE_2D,val);};
+        }else if constexpr(in == GL_TEXTURE_3D || in == GL_TEXTURE_BINDING_3D){
+            return +[](GLuint val){glBindTexture(GL_TEXTURE_3D,val);};
+        }else if constexpr(in == GL_TEXTURE_1D || in == GL_TEXTURE_BINDING_1D){
+            return +[](GLuint val){glBindTexture(GL_TEXTURE_1D,val);};
         }else{
             static_assert(false,"Feature Not Supported");
             return 0;
@@ -214,11 +222,14 @@ namespace age{
         GLint prev;
         inline ScopedGLState(GLuint newone){
             glGetIntegerv(bd,&prev);
-            bind(newone);
+            //std::cout << "Get " << prev << std::endl;
+            //]]std::cout << "Bind " << newone<< std::endl;
+            if(prev != newone)bind(newone); //少一次bind检测
         }
 
         inline ~ScopedGLState(){
             bind(prev);
+            //std::cout << "Bind " << prev << std::endl;
         }
     };
 
