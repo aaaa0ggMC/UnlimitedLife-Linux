@@ -25,6 +25,8 @@
 #include <chrono>
 #include <functional>
 #include <alib-g3/alogger.h>
+#include <GL/glew.h>
+#include <functional>
 //#include <iostream>
 
 ///对象如VAO,VBO为空
@@ -187,7 +189,40 @@ namespace age{
         static void defTrigger(const ErrorInfopp&);
     };
 
-    struct NonCopyable{
+    template<GLuint in> constexpr auto GLObjectToBindingMapper(){
+        /// @TODO Add more mappings
+        if constexpr(in == GL_TEXTURE_2D){
+            return GL_TEXTURE_BINDING_2D;
+        }else{
+            static_assert(false,"Feature Not Supported");
+            return 0;
+        }
+    }
+
+    template<GLuint in> constexpr auto GLObjectToBindingFuncMapper(){
+        if constexpr(in == GL_TEXTURE_2D || in == GL_TEXTURE_BINDING_2D){
+            return +[](GLuint val){glBindTexture(GL_TEXTURE_2D,val);};
+        }else{
+            static_assert(false,"Feature Not Supported");
+            return 0;
+        }
+    }
+
+    template<GLuint in> struct AGE_API ScopedGLState{
+        constexpr static const GLuint bd = GLObjectToBindingMapper<in>(); 
+        constexpr static const auto bind = GLObjectToBindingFuncMapper<in>();
+        GLint prev;
+        inline ScopedGLState(GLuint newone){
+            glGetIntegerv(bd,&prev);
+            bind(newone);
+        }
+
+        inline ~ScopedGLState(){
+            bind(prev);
+        }
+    };
+
+    struct AGE_API  NonCopyable{
         NonCopyable() = default;
         NonCopyable(const NonCopyable&) = delete;
         NonCopyable& operator=(const NonCopyable&) = delete;

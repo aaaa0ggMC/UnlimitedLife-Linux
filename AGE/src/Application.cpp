@@ -567,9 +567,6 @@ Texture& Application::uploadTextureToGL(Texture & texture){
     if(texture.textureInfo->uploaded){
         Error::def.pushMessage({AGEE_TEXTURE_LOADED,"The texture has already uploaded to OpenGL."});
         return texture;
-    }else if(!(texture.textureInfo->bits)){
-        Error::def.pushMessage({AGEE_EMPTY_DATA,"The texture data is empty!"});
-        return texture;
     }
     glGenTextures(1,&texture.texture_id);
     if(!texture.texture_id){
@@ -577,6 +574,11 @@ Texture& Application::uploadTextureToGL(Texture & texture){
         return texture;
     }
     if(!texture.textureInfo->hasbits)return texture; // 用户自己创建更多的东西
+    //  由于hasbits的加入，这里要往后，逻辑才通顺
+    if(!(texture.textureInfo->bits)){
+        Error::def.pushMessage({AGEE_EMPTY_DATA,"The texture data is empty!"});
+        return texture;
+    }
 
     texture.textureInfo->uploaded = true;
     glBindTexture(GL_TEXTURE_2D,texture.texture_id);
