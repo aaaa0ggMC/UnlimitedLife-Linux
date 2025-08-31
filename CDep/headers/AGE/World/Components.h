@@ -1,7 +1,7 @@
 /** @file world/Components.h
  * @brief 提供一些预制的components
  * @author aaaa0ggmc,euuen
- * @date 2025/07/17
+ * @date 2025/08/31
  * @start-date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
@@ -36,7 +36,6 @@ namespace age::world{
       */
     
     template<size_t index,class... Ts> struct AGE_API TypeAt;
-
     
     template<class T,class... Ts> struct AGE_API TypeAt <0,T,Ts...>{
         using type = T;

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/08/31
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -23,6 +23,7 @@
 #include <alib-g3/aclock.h>
 #include <thread>
 #include <chrono>
+#include <functional>
 #include <alib-g3/alogger.h>
 //#include <iostream>
 
@@ -116,7 +117,7 @@ namespace age{
         std::pmr::string message;
         ErrorLevel level;
     };
-    typedef void(*TriggerFunc)(const ErrorInfopp&);
+    using TriggerFunc = std::function<void(const ErrorInfopp&)>;
 
     struct AGE_API BinderArray{
         std::unordered_map<intptr_t,intptr_t> bindings;
