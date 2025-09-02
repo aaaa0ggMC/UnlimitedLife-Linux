@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/08/18
+ * @date 2025/09/02
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -15,6 +15,7 @@
 #include <AGE/ModelLoader/Loader.h>
 #include <AGE/Light.h>
 #include <AGE/Color.h>
+#include <AGE/Audio.h>
 
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
@@ -251,6 +252,12 @@ int main(){
     ShaderUniform invMV = shader["invMV"];
 
 
+    //// Sounds ////
+    audio::Sound snd1;
+    snd1.loadFromFile("./test_data/test_music.flac");
+    snd1.play();
+
+
     //launch clock
     elapse.start();
     fpsCounter.start();
@@ -294,6 +301,9 @@ int main(){
                 }
                 if(ImGui::MenuItem("Render")){
                     im_menu = 5;
+                }
+                if(ImGui::MenuItem("Music")){
+                    im_menu = 6;
                 }
                 ImGui::EndMenuBar();
             }
@@ -360,6 +370,11 @@ int main(){
                 ImGui::Checkbox("Depth Test",&im_gldepth);
                 ImGui::ListBox("Depth Func",&im_gldfunc,im_sgldfunc.data(),im_sgldfunc.size(),4);
                 ImGui::DragFloat("Point Size",&im_glpointsize,0.1F,0.1F,64.0F);
+                break;
+            case 6:
+                ImGui::Text("Music:");
+                ImGui::Text("Progress: %.2f / %f",snd1.tell().count()/1000.f,snd1.length().count() / 1000.f);
+                ImGui::Text("Status: %s",audio::getStatusText(snd1.getStatus()));
                 break;
             case 5:
                 ImGui::Text("Render:");

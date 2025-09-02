@@ -15,7 +15,7 @@ CBuild/agetest
 CBuild/Windows/test_data
 @externals
 CDep/headers/imgui
-
+CDep/headers/miniaudio.h
 
 Pacman/
 !Pacman/PKGBUILD
