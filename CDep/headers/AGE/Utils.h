@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2025/08/31
+ * @date 2025/09/03
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -15,7 +15,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include <iostream>
 #include <memory_resource>
 #include <numbers>
 #include <optional>

@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/09/02
+ * @date 2025/09/03
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -256,6 +256,7 @@ int main(){
     audio::Sound snd1;
     snd1.loadFromFile("./test_data/test_music.flac");
     snd1.play();
+    snd1.setPitch(1.1);
 
 
     //launch clock
@@ -373,7 +374,7 @@ int main(){
                 break;
             case 6:
                 ImGui::Text("Music:");
-                ImGui::Text("Progress: %.2f / %f",snd1.tell().count()/1000.f,snd1.length().count() / 1000.f);
+                ImGui::Text("Progress: %f / %f",snd1.tell().count()/1000.f,snd1.length().count() / 1000.f);
                 ImGui::Text("Status: %s",audio::getStatusText(snd1.getStatus()));
                 break;
             case 5:

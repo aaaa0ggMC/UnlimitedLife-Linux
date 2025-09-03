@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 输入处理
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/09/03
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -50,7 +50,7 @@ namespace age {
         inline bool hasDoubleTapped(){
             if(double_time_ms <= 0)return false;
             if(status != KeyState::PressedThisTick)return false;
-            std::cout << (this_pressed - last_pressed) << std::endl;
+            // std::cout << (this_pressed - last_pressed) << std::endl;
             if(this_pressed != last_pressed && (this_pressed - last_pressed) <= double_time_ms){
                 return true;
             }

@@ -59,6 +59,32 @@ Sound::Sound(const Sound& in){
     }
 }
 
+Sound& Sound::operator=(Sound&& snd){
+    this->inited = snd.inited;
+    this->volume = snd.volume;
+    this->m_length = snd.m_length;
+    this->sound = snd.sound;
+
+    snd.__trival__init();
+    snd.inited = false;
+    snd.sound = new ma_sound;
+
+    return *this;
+}
+
+glm::vec3 Sound::setPosition(const glm::vec3 & pos){
+    if(!val_eng || !inited)return glm::vec3(0,0,0);
+    glm::vec3 old = getPosition();
+    ma_sound_set_position((ma_sound*)sound,pos.x,pos.y,pos.z);
+    return old;
+}
+
+glm::vec3 Sound::getPosition(){
+    if(!val_eng || !inited)return glm::vec3(0,0,0);
+    auto v = ma_sound_get_position((ma_sound*)sound);
+    return glm::vec3(v.x,v.y,v.z);
+}
+
 Sound& Sound::operator=(const Sound& in){
     if(!val_eng)return *this;
     if(this == &in)return *this; // 谁会干出自赋值这种操作啊
@@ -139,12 +165,12 @@ std::chrono::milliseconds Sound::seek(std::chrono::milliseconds ms){
 std::chrono::milliseconds Sound::lengthDynamicCalc(){
     if(!val_eng || !inited)return std::chrono::milliseconds(0);
     float res = 0;
-    if(ma_sound_get_length_in_seconds((ma_sound*)sound,&res) == MA_SUCCESS)return std::chrono::milliseconds((int)(res * 1000));
+    if(ma_sound_get_length_in_seconds((ma_sound*)sound,&res) == MA_SUCCESS)return std::chrono::milliseconds((int)(res * 1000 / getPitch()));
     return std::chrono::milliseconds(0);
 }
 
 std::chrono::milliseconds Sound::length(){
-    return m_length;
+    return std::chrono::milliseconds((int)(m_length.count() / getPitch()));
 }
 
 bool Sound::isLooping(){
@@ -157,6 +183,18 @@ bool Sound::setLooping(bool loop){
     bool old = isLooping();
     ma_sound_set_looping((ma_sound*)sound,(ma_bool32)loop);
     return old;
+}
+
+float Sound::setPitch(float val){
+    if(!val_eng || !inited)return 0;
+    float old_val = getPitch();
+    ma_sound_set_pitch((ma_sound*)sound,val);
+    return old_val;
+}
+
+float Sound::getPitch(){
+    if(!val_eng || !inited)return 0;
+    return ma_sound_get_pitch((ma_sound*)sound); 
 }
 
 age::audio::Status Sound::getStatus(){
