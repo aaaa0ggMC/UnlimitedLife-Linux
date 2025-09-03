@@ -62,7 +62,7 @@ namespace age::audio{
         std::chrono::milliseconds length();
         std::chrono::milliseconds lengthDynamicCalc();
         std::chrono::milliseconds seek(std::chrono::milliseconds ms);
-        audio::Status getStatus(); 
+        audio::Status getStatus();
         //// Volume ////
         /// suggested range [0,100]
         /// @return old value

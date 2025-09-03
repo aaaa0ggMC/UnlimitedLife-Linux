@@ -60,15 +60,16 @@ Sound::Sound(const Sound& in){
 }
 
 Sound& Sound::operator=(Sound&& snd){
+    __try_reset();
     this->inited = snd.inited;
     this->volume = snd.volume;
     this->m_length = snd.m_length;
+    delete (ma_sound*)this->sound;
     this->sound = snd.sound;
 
     snd.__trival__init();
     snd.inited = false;
     snd.sound = new ma_sound;
-
     return *this;
 }
 

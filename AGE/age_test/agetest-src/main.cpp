@@ -23,6 +23,7 @@
 #include <iostream>
 #include <vector>
 #include <numbers>
+#include <print>
 
 ////使用IMGUI对帧率的影响：从6000降到3000,imgui大概用了0.1ms来运作（我的电脑）////
 ////限制imgui 100fps更新后，帧率达到6000fps
@@ -256,7 +257,6 @@ int main(){
     audio::Sound snd1;
     snd1.loadFromFile("./test_data/test_music.flac");
     snd1.play();
-    snd1.setPitch(1.1);
 
 
     //launch clock
