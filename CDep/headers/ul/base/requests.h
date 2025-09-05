@@ -53,13 +53,13 @@ namespace ul{
             return INT64_MAX; // If the list is empty, return -1.
         }
 
-        inline Request<> * pop() noexcept {
+        template<class... Ts> inline Request<Ts...> * pop() noexcept {
             ScopeLock lock(mtx); // Create a scope lock to ensure thread-safe access to the request list.
             if(!head) return nullptr; // If the list is empty, return nullptr.
             Request<> * rq = head; // Get the head request.
             head = head->next; // Move the head to the next request.
             rq->next = nullptr; // Clear the next pointer of the popped request.
-            return rq; // Return the popped request.
+            return (Request<Ts...>*)rq; // Return the popped request.
         }
 
         template<class... Ts> inline void releaseRequest(Request<Ts...> * rq) noexcept {
