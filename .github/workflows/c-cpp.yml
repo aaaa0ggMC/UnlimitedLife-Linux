@@ -16,6 +16,8 @@ jobs:
       run: sh ./scripts/configure
     - name: build
       run: sh ./scripts/build
+    - name: RunningTests
+      run: cd CBuild_CACHE/ ; ctest
     - uses: actions/upload-artifact@v4
       with:
         name: UnlimitedLife-Linux-Ubuntu
@@ -44,6 +46,9 @@ jobs:
         sh ./scripts/build_win_msys2.sh
         cp /ucrt64/bin/libgcc_s_seh-1.dll CBuild/
         cp /ucrt64/bin/libstdc++-6.dll CBuild/
+    
+    - name: RunningTests
+      run: cd CBuild_CACHE_WIN/ ; ctest
       
     - name: Upload Windows Artifact
       uses: actions/upload-artifact@v4

@@ -37,3 +37,14 @@ add_subdirectory(aaaa0ggmcLib)
 add_subdirectory(UnlimitedLife-src)
 add_subdirectory(AGE)
 add_subdirectory(ULCore)
+
+enable_testing()
+
+aux_source_directory("./GTest" GTest)
+add_executable(ULGTests 
+    ${GTest}
+)
+target_link_libraries(ULGTests gtest gtest_main)
+
+include(GoogleTest)
+gtest_discover_tests(ULGTests)

@@ -17,6 +17,7 @@ CBuild/Windows/test_data
 @externals
 CDep/headers/imgui
 CDep/headers/miniaudio.h
+*/Testing
 
 Pacman/
 !Pacman/PKGBUILD
@@ -71,3 +72,5 @@ Doxygen
 *.out
 *.app
 /third_party
+CBuild/ULGTests
+CBuild/ULCore
