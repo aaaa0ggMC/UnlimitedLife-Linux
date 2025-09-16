@@ -49,6 +49,9 @@ jobs:
     
     - name: RunningTests
       run: cd CBuild_CACHE_WIN/ ; ctest
+
+    - name: Move Artifacts
+      run: sh ./scripts/post_msys.sh
       
     - name: Upload Windows Artifact
       uses: actions/upload-artifact@v4
