@@ -274,6 +274,7 @@ int main(){
             frame_count = 0;
         }
         win->pollEvents();
+
         ////IMGUI////
         //我想imgui 100fps
         if(im_trigger.test(true) || !im_cached){
@@ -415,11 +416,15 @@ int main(){
             dealInput(input,veloDir,camera,p);
 
             if(input.getKeyInfo(KeyCode::M).status == age::KeyState::ReleasedThisTick){
+                static glm::vec2 lastPos = {-114514,-114514};
+                static GLFWimage img = {
+                    1,1,(unsigned char *)"    "
+                };
                 mouse = !mouse;
                 if(mouse){
+                    glfwSetCursor(win->getSystemHandle(),glfwCreateCursor(&img,1,1));
                     win->setInputMode(GLFW_CURSOR,GLFW_CURSOR_DISABLED);
-                    win->setMouseMoveCallback([&camera,&lg](Window& win,double x,double y){
-                        static glm::vec2 lastPos = {-114514,-114514};
+                    win->setMouseMoveCallback([&camera,&lg,&lastPos](Window& win,double x,double y){
                         glm::vec2 curPos = {x,y};
                         if(lastPos.x <= -1000){
                             // init
@@ -428,7 +433,6 @@ int main(){
                             glm::vec2 delta = curPos - lastPos;
 
                             if(delta.x != 0 || delta.y != 0){
-                                lg(LOG_INFO) << "delta:" << delta << endlog;
                                 // 孩子们，我要旋转了
                                 camera.transform().rotate(
                                     glm::angleAxis(delta.x * 0.003f,glm::vec3(0,1,0)) *
@@ -440,8 +444,12 @@ int main(){
                         }
                     });
                 }else{
+                    lastPos = {-114514,-114514};
+                    glfwSetCursor(win->getSystemHandle(),glfwCreateStandardCursor(GLFW_ARROW_CURSOR));
                     win->setInputMode(GLFW_CURSOR,GLFW_CURSOR_NORMAL);
-                    win->setMouseMoveCallback(nullptr);
+                    win->setMouseMoveCallback([](Window&,double x,double y){
+                        ImGui::GetIO().AddMousePosEvent(x,y);
+                    });
                 }
             }
             
