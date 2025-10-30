@@ -160,6 +160,12 @@ namespace age{
             return window;
         }
 
+        inline glm::vec2 getCursorPos(){
+            double x,y;
+            glfwGetCursorPos(window,&x,&y);
+            return {x,y};
+        }
+
         /// 激活窗口的GL上下文
         inline void makeCurrent(){
             current = this;

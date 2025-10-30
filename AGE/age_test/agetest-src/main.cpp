@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/09/03
+ * @date 2025/10/30
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -257,7 +257,6 @@ int main(){
     snd1.loadFromFile("./test_data/test_music.flac");
     snd1.play();
 
-
     //launch clock
     elapse.start();
     fpsCounter.start();
@@ -410,8 +409,27 @@ int main(){
 
         input.update();
         if(input.checkTick()){
+            static glm::vec2 lastPos = {-114514,-114514};
+
             float p = elapse.getOffset() / 1000.0f;
             dealInput(input,veloDir,camera,p);
+
+            glm::vec2 curPos = win->getCursorPos();
+            if(lastPos.x <= -1000){
+                // init
+                lastPos = curPos;
+            }else{
+                glm::vec2 delta = curPos - lastPos;
+
+                if(delta.x != 0 || delta.y != 0){
+                    lg(LOG_INFO) << "delta:" << delta << endlog;
+                    // 孩子们，我要旋转了
+                    camera.transform().rotate(glm::vec3(0,1,0),delta.x * 0.003); // 绕y轴旋转
+                    //camera.transform().rotate(glm::vec3(1,0,0),delta.y * 0.003);
+                }
+
+                lastPos = win->getCursorPos();
+            }
 
             
             //由于imgui同步问题，所以数据要dm_mark，但是imgui更新频率大于tick频率，所以要下checkTick里面hhh
