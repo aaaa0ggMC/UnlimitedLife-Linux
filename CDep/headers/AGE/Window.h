@@ -117,6 +117,7 @@ namespace age{
         /// OnResize
         std::function<void(Window&,int nw,int nh)> m_onResize;
         std::function<void(Window&,age::KeyWrapper wrapper)> m_onKey;
+        std::function<void(Window&,double x,double y)> m_onMouseMove;
 
 
         Window();
@@ -166,6 +167,10 @@ namespace age{
             return {x,y};
         }
 
+        inline void setInputMode(int mode,int value){
+            glfwSetInputMode(window,mode,value);
+        }
+
         /// 激活窗口的GL上下文
         inline void makeCurrent(){
             current = this;
@@ -188,6 +193,17 @@ namespace age{
 
         inline void removeKeyCallback(){
             m_onKey = nullptr;
+        }
+
+        // 由于mousecallback的存在会使得ImGui失效，所以这里的代码略微不同，lambda为动态构造
+        inline void setMouseMoveCallback(std::function<void(Window&,double x,double y)> func){
+            m_onMouseMove = func;
+            if(func){
+                glfwSetCursorPosCallback(window,[](GLFWwindow * glfwWin,double x,double y){
+                    Window & window = *((Window*)Window::binderArray.get<Window>((intptr_t)glfwWin));
+                    if(window.m_onMouseMove)window.m_onMouseMove(window,x,y);
+                });
+            }else glfwSetCursorPosCallback(window,nullptr);
         }
 
         /// @note nw,nh will multiply by content scale before calling in Linux system,while keep the same in Windows system

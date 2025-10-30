@@ -55,6 +55,7 @@ std::vector<const char *> texture_paths = {"./test_data/imgs/wall.jpg","./test_d
 
 //// Global States ////
 bool playing = true;
+bool mouse = false;
 
 int main(){
     //Log
@@ -409,28 +410,40 @@ int main(){
 
         input.update();
         if(input.checkTick()){
-            static glm::vec2 lastPos = {-114514,-114514};
 
             float p = elapse.getOffset() / 1000.0f;
             dealInput(input,veloDir,camera,p);
 
-            glm::vec2 curPos = win->getCursorPos();
-            if(lastPos.x <= -1000){
-                // init
-                lastPos = curPos;
-            }else{
-                glm::vec2 delta = curPos - lastPos;
+            if(input.getKeyInfo(KeyCode::M).status == age::KeyState::ReleasedThisTick){
+                mouse = !mouse;
+                if(mouse){
+                    win->setInputMode(GLFW_CURSOR,GLFW_CURSOR_DISABLED);
+                    win->setMouseMoveCallback([&camera,&lg](Window& win,double x,double y){
+                        static glm::vec2 lastPos = {-114514,-114514};
+                        glm::vec2 curPos = {x,y};
+                        if(lastPos.x <= -1000){
+                            // init
+                            lastPos = curPos;
+                        }else{
+                            glm::vec2 delta = curPos - lastPos;
 
-                if(delta.x != 0 || delta.y != 0){
-                    lg(LOG_INFO) << "delta:" << delta << endlog;
-                    // 孩子们，我要旋转了
-                    camera.transform().rotate(glm::vec3(0,1,0),delta.x * 0.003); // 绕y轴旋转
-                    //camera.transform().rotate(glm::vec3(1,0,0),delta.y * 0.003);
+                            if(delta.x != 0 || delta.y != 0){
+                                lg(LOG_INFO) << "delta:" << delta << endlog;
+                                // 孩子们，我要旋转了
+                                camera.transform().rotate(
+                                    glm::angleAxis(delta.x * 0.003f,glm::vec3(0,1,0)) *
+                                    glm::angleAxis(delta.y * 0.003f,glm::vec3(1,0,0))
+                                ); // 绕y轴旋转
+                            }
+
+                            lastPos = win.getCursorPos();
+                        }
+                    });
+                }else{
+                    win->setInputMode(GLFW_CURSOR,GLFW_CURSOR_NORMAL);
+                    win->setMouseMoveCallback(nullptr);
                 }
-
-                lastPos = win->getCursorPos();
             }
-
             
             //由于imgui同步问题，所以数据要dm_mark，但是imgui更新频率大于tick频率，所以要下checkTick里面hhh
             if(playing){
