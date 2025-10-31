@@ -96,7 +96,8 @@
         "__split_buffer": "cpp",
         "__verbose_abort": "cpp",
         "locale": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "miniaudio.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"

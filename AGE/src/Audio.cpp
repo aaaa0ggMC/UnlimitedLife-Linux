@@ -18,7 +18,7 @@ namespace age{
 }
 
 using namespace age::audio;
-SoundEngineWrapper engine;
+static SoundEngineWrapper engine;
 
 SoundEngineWrapper::SoundEngineWrapper(){
     engine = new ma_engine;

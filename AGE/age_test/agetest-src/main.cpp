@@ -421,7 +421,7 @@ int main(){
                 if(mouse){
                     win->setCursorVisibility(false);
                     win->setInputMode(GLFW_CURSOR,GLFW_CURSOR_DISABLED);
-                    win->setMouseMoveCallback([&camera,&lg,&lastPos](Window& win,double x,double y){
+                    win->setMouseMoveCallback([&camera,&lg](Window& win,double x,double y){
                         glm::vec2 curPos = {x,y};
                         if(lastPos.x <= -1000){
                             // init

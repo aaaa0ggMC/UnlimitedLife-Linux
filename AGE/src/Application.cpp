@@ -152,10 +152,10 @@ Application::~Application(){
     }
     //Step2:VAOS
     //std::cout << vaos.vaos.size() << std::endl;
-    glDeleteVertexArrays(vaos.vaos.size(),&(vaos.vaos[0]));
+    if(vaos.vaos.size())glDeleteVertexArrays(vaos.vaos.size(),&(vaos.vaos[0]));
     //Step3:VBOS
     //std::cout << vbos.vbos.size() << std::endl;
-    glDeleteBuffers(vbos.vbos.size(),&(vbos.vbos[0]));
+    if(vbos.vbos.size())glDeleteBuffers(vbos.vbos.size(),&(vbos.vbos[0]));
     //Stepn:Windows
     {
         std::vector<std::string> window_names;

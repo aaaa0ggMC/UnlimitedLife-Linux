@@ -39,4 +39,20 @@ else()
 target_link_libraries(agetest PRIVATE imgui AGE aaaa0ggmcLib glfw GLEW OpenGL) 
 endif()
 
+aux_source_directory("./age_test/simp-src/" SIMPTEST_SRC)
+add_executable(age_simptest ${SIMPTEST_SRC})
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+target_compile_definitions(age_simptest PRIVATE AGE_TRACE_COMPACT AGE_EM_DEBUG AGE_LIGHT_BUZZ)
+target_compile_options(age_simptest PRIVATE "-g" "-O0")
+else()
+target_compile_options(age_simptest PRIVATE "-g" "-O3")
+endif()
+if(WIN32)
+target_link_libraries(age_simptest PRIVATE imgui AGE glfw3.dll glew32.dll opengl32 aaaa0ggmcLib)
+target_compile_definitions(age_simptest PRIVATE GLFW_DLL)
+else()
+# 直接链接
+target_link_libraries(age_simptest PRIVATE imgui AGE aaaa0ggmcLib glfw GLEW OpenGL) 
+endif()
+
 
