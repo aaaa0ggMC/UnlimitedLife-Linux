@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/10/30
+ * @date 2025/10/31
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -417,12 +417,9 @@ int main(){
 
             if(input.getKeyInfo(KeyCode::M).status == age::KeyState::ReleasedThisTick){
                 static glm::vec2 lastPos = {-114514,-114514};
-                static GLFWimage img = {
-                    1,1,(unsigned char *)"    "
-                };
                 mouse = !mouse;
                 if(mouse){
-                    glfwSetCursor(win->getSystemHandle(),glfwCreateCursor(&img,1,1));
+                    win->setCursorVisibility(false);
                     win->setInputMode(GLFW_CURSOR,GLFW_CURSOR_DISABLED);
                     win->setMouseMoveCallback([&camera,&lg,&lastPos](Window& win,double x,double y){
                         glm::vec2 curPos = {x,y};
@@ -435,8 +432,8 @@ int main(){
                             if(delta.x != 0 || delta.y != 0){
                                 // 孩子们，我要旋转了
                                 camera.transform().rotate(
-                                    glm::angleAxis(delta.x * 0.003f,glm::vec3(0,1,0)) *
-                                    glm::angleAxis(delta.y * 0.003f,glm::vec3(1,0,0))
+                                    glm::angleAxis(delta.x * 0.0024f,glm::vec3(0,1,0)) *
+                                    glm::angleAxis(delta.y * 0.0024f,glm::vec3(1,0,0))
                                 ); // 绕y轴旋转
                             }
 
@@ -445,7 +442,7 @@ int main(){
                     });
                 }else{
                     lastPos = {-114514,-114514};
-                    glfwSetCursor(win->getSystemHandle(),glfwCreateStandardCursor(GLFW_ARROW_CURSOR));
+                    win->setCursorVisibility(true);
                     win->setInputMode(GLFW_CURSOR,GLFW_CURSOR_NORMAL);
                     win->setMouseMoveCallback([](Window&,double x,double y){
                         ImGui::GetIO().AddMousePosEvent(x,y);

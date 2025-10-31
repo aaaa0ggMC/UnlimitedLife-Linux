@@ -96,6 +96,52 @@ namespace age{
         {t.draw(w,instanceCount,type)}; // || 
     };
 
+    /**
+     * @brief 光标管理
+     * @start-date 2025/10/31
+     */
+    struct AGE_API Cursor : public NonCopyable{
+         std::optional<GLFWcursor*> cursor {std::nullopt};
+        
+         inline std::optional<GLFWcursor*> create(const GLFWimage & img,int hotx = 0,int hoty = 0){
+            // GLFW文档里指出glfw会复制数据。
+            auto val = glfwCreateCursor(&img,hotx,hoty);
+            if(val)cursor = {val};
+            else cursor = std::nullopt;
+            return cursor;
+         }
+
+         inline static Cursor* emptyCursor(){
+            static Cursor empty_cursor;
+            [[maybe_unused]] static  bool inited = [&]{
+                std::vector<unsigned char> data = {0,0,0,0};
+                empty_cursor.create(data,1,1);
+                return true;
+            }();
+            return &empty_cursor;
+         }
+
+         inline std::optional<GLFWcursor*> create(std::span<unsigned char> data,int width,int height,int hotx = 0,int hoty = 0){
+            // 数据量不够
+            if(data.size() != width * height * 4)return std::nullopt;
+            GLFWimage img;
+            img.width = width;
+            img.height = height;
+            img.pixels = data.data();
+
+            return create(img,hotx,hoty);
+         }
+
+         ~Cursor(){
+            if(cursor)glfwDestroyCursor(*cursor);
+         }
+
+        inline GLFWcursor* get() const{
+            if(cursor)return *cursor;
+            return nullptr; // GLFW会把cursor变为默认值
+        }
+    };
+
     /** @struct Window
      * @brief 窗口管理
      */
@@ -118,6 +164,9 @@ namespace age{
         std::function<void(Window&,int nw,int nh)> m_onResize;
         std::function<void(Window&,age::KeyWrapper wrapper)> m_onKey;
         std::function<void(Window&,double x,double y)> m_onMouseMove;
+        /// Cursor
+        std::shared_ptr<Cursor> currentCursor;
+        bool cursorVisibility;
 
 
         Window();
@@ -137,6 +186,16 @@ namespace age{
             ScopedWindow(const ScopedWindow&) = delete;
             ScopedWindow& operator=(const ScopedWindow&) = delete;
         };
+
+        inline void m_setCursor(){
+            if(!cursorVisibility){
+                glfwSetCursor(window,Cursor::emptyCursor()->get());
+                return;
+            }
+            if(currentCursor){
+                glfwSetCursor(window,currentCursor.get()->get());
+            }else glfwSetCursor(window,nullptr);
+        }
 
     public:
         /// 设置 interval
@@ -165,6 +224,24 @@ namespace age{
             double x,y;
             glfwGetCursorPos(window,&x,&y);
             return {x,y};
+        }
+
+        inline void setCursor(std::shared_ptr<Cursor> cs){
+            currentCursor = cs;
+            m_setCursor();
+        }
+
+        inline bool getCursorVisibility(){
+            return cursorVisibility;
+        }
+
+        inline void setCursorVisibility(bool visi){
+            cursorVisibility = visi;
+            m_setCursor();
+        }
+
+        inline std::shared_ptr<Cursor> getCursor(){
+            return currentCursor;
         }
 
         inline void setInputMode(int mode,int value){

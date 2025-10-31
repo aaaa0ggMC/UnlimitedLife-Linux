@@ -95,7 +95,8 @@
         "__node_handle": "cpp",
         "__split_buffer": "cpp",
         "__verbose_abort": "cpp",
-        "locale": "cpp"
+        "locale": "cpp",
+        "ios": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"

@@ -24,7 +24,8 @@ CreateWindowInfo::CreateWindowInfo(){
 Window::Window():
 window{nullptr},
 sid{""},
-fpsLimiter{120}{}
+fpsLimiter{120},
+cursorVisibility{true}{}
 
 void Window::setStyle(WinStyle styles,bool enableV){
     if(ws_hasFlag(styles,age::WinStyle::FollowGLFW)){
