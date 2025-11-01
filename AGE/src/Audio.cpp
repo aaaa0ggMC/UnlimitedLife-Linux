@@ -1,27 +1,32 @@
 #include <miniaudio.h>
 #include <AGE/Audio.h>
 
-#define val_eng ((ma_engine*)engine.get())
+#define val_eng (getDefaultEngine())
 namespace age{
     namespace audio{
         struct SoundEngineWrapper{
             SoundEngineWrapper();
             ~SoundEngineWrapper();
 
-            inline void * get(){
+            inline ma_engine* get(){
                 return engine;
             }
         private:
-            void * engine;
+            ma_engine * engine;
         };
     }
 }
 
 using namespace age::audio;
-static SoundEngineWrapper engine;
+// lazy load
+static ma_engine * getDefaultEngine(){
+    static SoundEngineWrapper wrapper;
+    return wrapper.get();
+}
 
 SoundEngineWrapper::SoundEngineWrapper(){
     engine = new ma_engine;
+
     if(ma_engine_init(nullptr,(ma_engine*)engine) != MA_SUCCESS){
         Error::def.pushMessage({AGEE_FEATURE_NOT_SUPPORTED,"Cannot init sound engine!"});
         delete (ma_engine*)engine;
@@ -133,10 +138,13 @@ unsigned int Sound::getVolume(){
     return volume;
 } 
 
+#include <iostream>
 void Sound::play(int volume){
     if(!val_eng || !inited)return;
     if(volume >= 0)setVolume(volume);
-    ma_sound_start((ma_sound*)sound);
+    
+
+    std::cout << ma_sound_start((ma_sound*)sound) << std::endl;
 }
 
 void Sound::stop(){

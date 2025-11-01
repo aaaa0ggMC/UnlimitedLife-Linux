@@ -1,5 +1,7 @@
 aux_source_directory("./miniaudio-src" MINIAUDIO_SRC)
 add_library(miniaudio STATIC ${MINIAUDIO_SRC})
+# 这里指定了miniaudio的优化，是因为-O2优化在我电脑上会使得miniaudio崩溃
+target_compile_options(miniaudio PUBLIC "-O1")
 
 aux_source_directory("./src" AGE-SRC)
 aux_source_directory("./src/ModelLoader" MODEL)
@@ -19,7 +21,6 @@ if(WIN32)
 else()
 	target_link_libraries(AGE PRIVATE stdc++exp miniaudio dl GLU OpenGL GLEW glfw aaaa0ggmcLib)
 endif()
-
 target_compile_definitions(AGE PUBLIC AGE_BUILD_DLL)
 
 aux_source_directory("./age_test/agetest-src/" AGETEST_SRC)
