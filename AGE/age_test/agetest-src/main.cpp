@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/10/31
+ * @date 2025/11/02
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -223,10 +223,10 @@ int main(){
         mat_jade.specular.fromRGBA(0.3162f,0.3162f,0.3162f,0.95);
         mat_jade.shininess = 12.8f;
 
-        mb.ambient = createUniformName<glm::vec4>("material.ambient",shader);
-        mb.diffuse = createUniformName<glm::vec4>("material.diffuse",shader);
-        mb.specular = createUniformName<glm::vec4>("material.specular",shader);
-        mb.shininess = createUniformName<float>("material.shininess",shader);
+        mb.ambient = createUniformName<glm::vec4>(shader,"material.ambient")();
+        mb.diffuse = createUniformName<glm::vec4>(shader,"material.diffuse")();
+        mb.specular = createUniformName<glm::vec4>(shader,"material.specular")();
+        mb.shininess = createUniformName<float>(shader,"material.shininess")();
     }
 
     ////Lights////
@@ -239,10 +239,10 @@ int main(){
         light.specular.fromRGBA(1.0,1.0,1.0,1.0);
         light.position = glm::vec3(0,4,0);
 
-        lb.ambient = createUniformName<glm::vec4>("light.ambient",shader);
-        lb.diffuse = createUniformName<glm::vec4>("light.diffuse",shader);
-        lb.specular = createUniformName<glm::vec4>("light.specular",shader);
-        lb.position = createUniformName<glm::vec3>("light.position",shader);
+        lb.ambient = createUniformName<glm::vec4>(shader,"light.ambient")();
+        lb.diffuse = createUniformName<glm::vec4>(shader,"light.diffuse")();
+        lb.specular = createUniformName<glm::vec4>(shader,"light.specular")();
+        lb.position = createUniformName<glm::vec3>(shader,"light.position")();
 
         light.upload(lb);
         lg.info("LoadLight: OK!");

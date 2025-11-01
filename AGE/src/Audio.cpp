@@ -138,13 +138,10 @@ unsigned int Sound::getVolume(){
     return volume;
 } 
 
-#include <iostream>
 void Sound::play(int volume){
     if(!val_eng || !inited)return;
     if(volume >= 0)setVolume(volume);
-    
-
-    std::cout << ma_sound_start((ma_sound*)sound) << std::endl;
+    ma_sound_start((ma_sound*)sound);
 }
 
 void Sound::stop(){

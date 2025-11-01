@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 光照支持
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/11/02
  *
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -15,9 +15,11 @@
 #include <AGE/Shader.h>
 #include <AGE/DataUploader.h>
 #include <AGE/Color.h>
+#include <type_traits>
 
 namespace age{
     namespace light{
+
         struct AGE_API LightBindings{
             //// Position
             DataUploader<glm::vec3> position;
@@ -33,17 +35,15 @@ namespace age{
 
         /// @brief 方向光
         struct AGE_API DirectionalLight{
-            DirtyWrapper<glm::vec3> direction;
+            glm::vec3 direction;
             // color has been wrapped with dirtywrapper already
             Color ambient;
             Color diffuse;
             Color specular;
 
+            /// 见下面
             inline void upload(const LightBindings & binding){
-                if(direction.isDirty()){
-                    binding.direction.safe_upload(direction.read());
-                    direction.clearFlag();
-                }
+                binding.direction.safe_upload(direction);
                 ambient.uploadRGBA(binding.ambient);
                 diffuse.uploadRGBA(binding.diffuse);
                 specular.uploadRGBA(binding.specular);
@@ -52,17 +52,15 @@ namespace age{
 
 
         struct AGE_API PositionalLight{
-            DirtyWrapper<glm::vec3> position;
+            glm::vec3 position;
             // color has been wrapped with dirtywrapper already
             Color ambient;
             Color diffuse;
             Color specular;
 
+            /// 由于binding是可变的，为了灵活性，这里不应该检测
             inline void upload(const LightBindings & binding){
-                if(position.isDirty()){
-                    binding.position.safe_upload(position.read());
-                    position.clearFlag();
-                }
+                binding.position.safe_upload(position);
                 ambient.uploadRGBA(binding.ambient);
                 diffuse.uploadRGBA(binding.diffuse);
                 specular.uploadRGBA(binding.specular);
@@ -104,8 +102,24 @@ namespace age{
 
             };
 
-            template<class T,class... Args> inline DataUploader<T> createUniformName(const std::string& uname,Args&&... args){
-                return createDataUploader<T>(UniformName<T>(uname),std::forward<Args>(args)...);
+            template<class K,class T>  struct _UploaderBuilder{
+                K target;
+
+                inline _UploaderBuilder(K && t):target(std::move(t)){}
+
+                template<class... Args> DataUploader<T> operator()(Args&&... args){
+                    return createDataUploader<T>(target,std::forward<Args>(args)...);
+                }
+            };
+
+            template<class K,class T,class... Args> inline _UploaderBuilder<K,T> createType(Args&&... args){
+                //static_assert(std::is_constructible_v<K,Args...>,"UploaderType must be constructible with the provided arguments");
+                return _UploaderBuilder<K,T>(K(std::forward<Args>(args)...));
+            }
+
+            template<class T,class... Args> inline _UploaderBuilder<UniformName<T>,T> createUniformName(Args&&... args){
+                //static_assert(std::is_constructible_v<UniformName<T>,Args...>,"UniformName<T> must be constructible with the provided arguments");
+                return createType<UniformName<T>,T>(std::forward<Args>(args)...);
             }
         }
     }

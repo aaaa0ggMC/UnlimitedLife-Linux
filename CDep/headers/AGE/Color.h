@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 颜色处理
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/11/02
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -26,6 +26,11 @@ namespace age{
     public:
         DirtyWrapper<glm::vec4> hsva;
 
+        // 变量数据传递
+        inline bool isDirty(){
+            return hsva.isDirty();
+        }
+
         inline const glm::vec4& getRGBA(){
             if(hsva.isDirty()){
                 rgba = HSVAToRGBA(hsva.read());
@@ -41,7 +46,9 @@ namespace age{
         inline void fromRGBA(const glm::vec4 & rgba){
             this->rgba = rgba;
             hsva.write(RGBAToHSVA(rgba));
-            hsva.clearFlag(); // 因为已经更新了
+            // 虽然RGBA是干净的，但是很可惜，这回导致fromHVSA与fromRGBA dirty属性不一致从而导致upload行为不一致
+            // 这里只好认为还是dirty的
+            // hsva.clearFlag(); // 因为已经更新了
         }
 
         inline void fromHSVA(const glm::vec4 & hsva){

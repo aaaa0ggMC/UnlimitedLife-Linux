@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2025/09/03
+ * @date 2025/11/02
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -244,14 +244,26 @@ namespace age{
         T data;
         static_assert(std::is_trivially_copyable_v<T>,"The data wrapped in DirtyWrapper is not trivally copyable!");
         bool dirty { true };
+        bool * linked {nullptr};
     public:
+
+        inline void setLinkDirty(bool * b_link){
+            linked = b_link;
+        }
+
         inline const T& read() const{
             return data;
         }
 
         inline void write(const T& val){
             dirty = true;
+            if(linked)*linked = true;
             data = val;
+        }
+
+        inline void mark(){
+            dirty = true;
+            if(linked)*linked = true;
         }
 
         inline void writeIfChanged(const T & val){

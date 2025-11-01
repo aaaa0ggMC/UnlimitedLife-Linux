@@ -1,8 +1,11 @@
 #include <AGE/Window.h>
 #include <AGE/Application.h>
+#include <AGE/Light.h>
 
 using namespace alib::g3;
 using namespace age;
+using namespace age::light;
+using namespace age::light::uploaders;
 
 int main(){
     Logger logger;
@@ -35,8 +38,30 @@ int main(){
         }else win = *app.getWindow("SimpTest");
     }
 
+    age::Shader shader = app.createShaderFromFile("main","test_data/cube.vert","test_data/cube.frag");
+    ////Lights////
+    PositionalLight light;
+    LightBindings lb;
+    {
+        lg.info("Loading lights..");
+        light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
+        light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
+        light.specular.fromRGBA(1.0,1.0,1.0,1.0);
+        light.position = glm::vec3(0,4,0);
+        
+        lb.ambient = createUniformName<glm::vec4>(shader,"light.ambient")();
+        lb.diffuse = createUniformName<glm::vec4>(shader,"light.diffuse")();
+        lb.specular = createUniformName<glm::vec4>(shader,"light.specular")();
+        lb.position = createUniformName<glm::vec3>(shader,"light.position")();
+
+        light.upload(lb);
+        lg.info("LoadLight: OK!");
+    }
+
+
     win->makeCurrent();
     while(!win->shouldClose()){
+        shader.bind();
         win->pollEvents();
         
         win->clear();
