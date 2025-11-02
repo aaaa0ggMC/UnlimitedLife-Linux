@@ -44,7 +44,7 @@ aux_source_directory("./GTest" GTest)
 add_executable(ULGTests 
     ${GTest}
 )
-target_link_libraries(ULGTests gtest gtest_main)
+target_link_libraries(ULGTests aaaa0ggmcLib gtest gtest_main)
 
 include(GoogleTest)
 gtest_discover_tests(ULGTests)
