@@ -9,18 +9,26 @@ on:
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
 
     steps:
     - uses: actions/checkout@v4
+    
+    - name: Update Arch Linux and install dependencies
+      run: |
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm base-devel git gcc bash glibc coreutils which
+        
     - name: configure
-      run: sh ./scripts/configure
+      run: bash ./scripts/configure
+      
     - name: build
-      run: sh ./scripts/build
-    - name: RunningTests
-      run: cd CBuild_CACHE/ ; ctest
+      run: bash ./scripts/build
+      
     - uses: actions/upload-artifact@v4
       with:
-        name: UnlimitedLife-Linux-Ubuntu
+        name: UnlimitedLife-ArchLinux
         path: CBuild/
 
   build-windows:
