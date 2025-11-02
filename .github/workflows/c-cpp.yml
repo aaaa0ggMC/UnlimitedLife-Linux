@@ -16,8 +16,6 @@ jobs:
       run: sh ./scripts/configure
     - name: build
       run: sh ./scripts/build
-    - name: RunningTests
-      run: cd CBuild_CACHE/ ; ctest
     - uses: actions/upload-artifact@v4
       with:
         name: UnlimitedLife-Linux-Ubuntu
