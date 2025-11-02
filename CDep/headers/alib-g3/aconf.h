@@ -32,12 +32,13 @@ item2 1 1 1 1;
 */
 #ifndef ACONF_H_INCLUDED
 #define ACONF_H_INCLUDED
-#include <alib-g3/autil.h>
 #include <alib-g3/aconf_det.h>
+#include <alib-g3/autil.h>
 #include <span>
 #include <ranges>
 #include <string.h>
 #include <stdlib.h>
+#include <stack>
 
 namespace alib::g3{
     /**
@@ -185,6 +186,89 @@ namespace alib::g3{
                 if(v){
                     return CastFn::template try_cast<T>(*v);
                 }else return ConfigCastResult<T>{std::nullopt,-1};
+            }
+
+            template<CanDump Dumper> inline void dump(Dumper & appender,size_t indent = 4){
+                using namespace detail;
+                std::string indent_str(indent,' ');
+                std::stack<Node*> tree;
+                int depth = 0;
+                if(this->name.empty()){ // 说明是匿名节点，一般一定为root，一定无value，进行一层遍历
+                    for(auto & node : this->children){
+                        tree.push(&node);
+                    }
+                }else tree.push(this);
+
+                static auto add_str = [](Dumper & dmp,std::string_view sv){
+                    dump_append(dmp,"\"");
+                    for(auto ch : sv){
+                        if(ch == '\n'){
+                            dump_append(dmp,"\\n");
+                        }else if(ch == '\t'){
+                            dump_append(dmp,"\\t");
+                        }else if(ch == '\\'){
+                            dump_append(dmp,"\\\\");
+                        }else if(ch == '\"'){
+                            dump_append(dmp,"\\\"");
+                        }else if(ch =='\''){
+                            dump_append(dmp,"\\\'");
+                        }else dump_append(dmp,std::string_view(&ch,1));
+                    }
+                    dump_append(dmp,"\"");
+                };
+
+                while(!tree.empty()){
+                    Node * top = tree.top();
+
+                    ///这里缩进
+                    for(int i = 0;i < depth;++i){
+                        dump_append(appender,indent_str);
+                    }
+
+                    add_str(appender,top->name);
+
+                    for(auto & value : top->values){
+                        dump_append(appender," ");
+                        add_str(appender,value);
+                    }
+                    dump_append(appender," ");
+
+                    // Add children
+                    if(top->children.size()){
+                        dump_append(appender,"{\n");
+                        for(auto & node : top->children)tree.push(&node);
+                        ++depth;
+                        continue; // 说明目前还是父节点
+                    }
+
+                    tree.pop(); // 目前他没有孩子了
+                    if(tree.empty()){
+                        dump_append(appender,";\n");
+                        break;
+                    }
+                    Node & new_top = *tree.top();
+                    if(new_top.children.size()){
+                        /// 内存差
+                        int off = top - &(new_top.children[0]);
+                        /// 不在对应的vector数据范围内
+                        if(off < 0 && off >= sizeof(Node) * new_top.children.size()){
+                            /// 说明也是平级
+                            dump_append(appender,";\n");
+                        }else{
+                            /// 父节点，开心消消乐
+                            tree.pop();
+                            --depth;
+                            dump_append(appender,";\n");
+                            for(int i = 0;i < depth;++i){
+                                dump_append(appender,indent_str);
+                            }
+                            dump_append(appender,"};\n");
+                        }
+                    }else{
+                        //上一个元素没有子节点，说明应该是平级
+                        dump_append(appender,";\n");
+                    }
+                }
             }
         };
 

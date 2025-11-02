@@ -4,6 +4,12 @@
 #include <limits.h>
 
 namespace alib::g3{
+    /// 一个类是否可以被dump
+    template<class T>
+    concept CanDump = 
+        requires(T & t,std::string_view sv){t += sv;} || 
+        requires(T & t,std::string_view sv){t << sv;};
+
     template<class T>
     struct ConfigCastResult{
         std::optional<T> value {std::nullopt};
@@ -83,6 +89,19 @@ namespace alib::g3{
         size_t offset = endptr ? static_cast<size_t>(endptr - s.data()) : 0;
         return { val, (long long)(offset < s.size() ? offset : static_cast<size_t>(-1)) };
     }
+
+    namespace detail {
+        template<class T>
+        void dump_append(T& target, std::string_view sv){
+            if constexpr(requires{target += sv;}){
+                target += sv;
+            }else if constexpr(requires{target << sv;}){
+                target << sv;
+            }
+        }
+    }
 }
+
+
 
 #endif

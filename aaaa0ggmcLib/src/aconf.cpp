@@ -33,6 +33,7 @@ ConfigLoadResult Config::load(std::string_view data){
         if(in_str){
             if(escape){
                 escape = false;
+                /// @Notice 这里加入新的转义语序需要在Node::dump里面加入对应的转换！
                 switch(ch){
                 case '\\':
                 case '\"':

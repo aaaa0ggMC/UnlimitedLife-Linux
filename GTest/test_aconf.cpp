@@ -72,6 +72,7 @@ root {
     );
 
     cfg.root.print_node(1);
+    cfg.root.dump(std::cout,4);
     std::print("错误信息：{} at {}\n", (int)err.code, err.line);
 
     // 检查一些关键路径
