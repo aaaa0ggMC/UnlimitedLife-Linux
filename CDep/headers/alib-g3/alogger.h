@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/07/24 
+* @date 2025/11/02 
 * @version 3.1
 * @copyright Copyright(C)2025
 ********************************
@@ -27,6 +27,7 @@
 #include <optional>
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
+#include <mutex>
 
 #ifdef __linux__ //你知道为什么abi支持我只在linux才搞吗，因为windows......编译报错了，但是我又希望保留特性
 #ifndef ALIB_DISABLE_TEMPLATES
@@ -137,6 +138,7 @@ namespace g3{
          */
         struct DLL_EXPORT Console : LogOutputTarget{
             const char * neon { NULL };///<内容的颜色（不是头）
+            static std::mutex global_lock; ///< 用于保持多线程下控制台信息绝对不会乱
 
             void setContentColor(const char * color);///<设置内容的颜色
 

@@ -14,6 +14,7 @@ using namespace alib::g3;
 
 Logger * Logger::instance;
 THREAD_LOCAL std::string LogFactory::cachedStr = "";
+std::mutex lot::Console::global_lock;
 
 void Logger::flush(){
     for(auto & [_,target] : targets){
@@ -421,12 +422,15 @@ namespace alib::g3::lot{
 
     void Console::write(int logLevel,const std::string & message,const std::string& timeHeader,const std::string& restContent,int ss){
         LogHeader header = getHeader(logLevel);
-        if(timeHeader.compare(""))std::cout << timeHeader;
-        if(ss & LOG_SHOW_TYPE)Util::io_printColor(header.str,header.color);
-        std::cout << restContent;
-        if(neon != NULL)Util::io_printColor(message,neon);
-        else std::cout << message;
-        std::cout << "\n";
+        {
+            std::lock_guard<std::mutex> lk(global_lock);
+            if(timeHeader.compare(""))std::cout << timeHeader;
+            if(ss & LOG_SHOW_TYPE)Util::io_printColor(header.str,header.color);
+            std::cout << restContent;
+            if(neon != NULL)Util::io_printColor(message,neon);
+            else std::cout << message;
+            std::cout << "\n";
+        }
     }
 
     void Console::flush(){
