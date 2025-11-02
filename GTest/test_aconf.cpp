@@ -1,10 +1,18 @@
 #include <gtest/gtest.h>
 #include <alib-g3/aconf.h>
-#include <print>
 #include <chrono>
+#include <format>
 
 using namespace alib::g3;
 
+inline void print(const std::string& str) {
+    std::cout << str;
+}
+
+template<typename... Args>
+inline void print(const std::format_string<Args...> fmt, Args&&... args) {
+    print(std::format(fmt, std::forward<Args>(args)...));
+}
 
 TEST(aconf, complex_config) {
     Config cfg;
@@ -73,7 +81,7 @@ root {
 
     cfg.root.print_node(1);
     cfg.root.dump(std::cout,4);
-    std::print("错误信息：{} at {}\n", (int)err.code, err.line);
+    print("错误信息：{} at {}\n", (int)err.code, err.line);
 
     // 检查一些关键路径
     EXPECT_EQ(cfg.root.get_node_recursive_value({"root", "server", "ssl", "enable"}), "true");
@@ -114,8 +122,8 @@ root {
     cfg.root.print_node(1);
 
     // 检查错误状态
-    std::print("第一次错误信息：{} at {}\n", (int)err1.code, err1.line);
-    std::print("第二次错误信息：{} at {}\n", (int)err2.code, err2.line);
+    print("第一次错误信息：{} at {}\n", (int)err1.code, err1.line);
+    print("第二次错误信息：{} at {}\n", (int)err2.code, err2.line);
 
     // 验证：两个 worker 都存在
     auto worker1 = cfg.root.get_node_recursive_value({"root", "worker", "role"}, 0);
