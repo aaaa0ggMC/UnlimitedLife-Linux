@@ -93,7 +93,7 @@ namespace alib::g3{
     };
 
     template<CanAccessItem Cont> auto 
-        ref(Cont & cont,uint32_t index){
+        ref(Cont & cont,size_t index){
         assert(index < cont.empty());
         return RefWrapper<Cont>{cont,index};
     }
