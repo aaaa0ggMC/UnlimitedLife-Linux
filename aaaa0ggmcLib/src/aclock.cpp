@@ -6,9 +6,11 @@
 #ifdef _WIN32
 #include <sys/unistd.h>
 #include <sys/time.h>
+#define ALIB_CLOCK_MODEL CLOCK_REALTIME
 #elif __linux__
 #include <time.h>
 #include <unistd.h>
+#define ALIB_CLOCK_MODEL CLOCK_MONOTONIC_RAW
 #endif // __linux__
 
 using namespace alib::g3;
@@ -22,9 +24,9 @@ static inline double timeGetTimeEx(){
     timespec time;
     if(!inited){
         inited = true;
-        clock_gettime(CLOCK_REALTIME,&very_start);
+        clock_gettime(ALIB_CLOCK_MODEL,&very_start);
     }
-    clock_gettime(CLOCK_REALTIME,&time);
+    clock_gettime(ALIB_CLOCK_MODEL,&time);
     return  (time.tv_sec - very_start.tv_sec) * 1000 + _d(time.tv_nsec - very_start.tv_nsec) / 1000000;
 }
 
