@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一个简单的性能计算库，能确保数据大致准确，同时省的我每次都要写差不多的benchmark代码
  * @version 0.1
- * @date 2025/11/08
+ * @date 2025/11/09
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -44,6 +44,7 @@ namespace alib::g3{
 
     /// Repeat结果
     struct BenchmarkResults{
+        std::string m_name;
         /// 结果列表
         std::vector<SingleBenchmarkResult> results;
 
@@ -97,6 +98,7 @@ namespace alib::g3{
 
             std::stringstream ss;
             ss << "\n";
+            ss << m_name << "-----------------------" << "\n";
             ss << std::setw(16) << "TimeCost" << ":" << get_time(sum) << "\n"
                << std::setw(16) << "RunTimes" << ":" << times << "\n"
                << std::setw(16) << "Average"  << ":" << get_time(global_aver) << "\n"
@@ -105,7 +107,13 @@ namespace alib::g3{
                << std::setw(16) << "Stddev"  << ":" << stddev << "\n"
                << std::setw(16) << "CV"  << ":" << cv << "%";
             if(cv > 5.0)ss << "\nHigh variance!This benchmark may be invalid!";
+            ss << "\n--------------------------------";
             return ss.str();
+        }
+
+        BenchmarkResults& name(std::string name){
+            m_name = name;
+            return *this;
         }
     };
 
