@@ -37,7 +37,7 @@ int main(){
             exit(-1);
         }else win = *app.getWindow("SimpTest");
     }
-
+    
     age::Shader shader = app.createShaderFromFile("main","test_data/cube.vert","test_data/cube.frag");
     ////Lights////
     PositionalLight light;
