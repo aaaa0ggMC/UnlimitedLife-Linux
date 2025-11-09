@@ -5,7 +5,8 @@ target_compile_options(miniaudio PUBLIC "-O1")
 
 aux_source_directory("./src" AGE-SRC)
 aux_source_directory("./src/ModelLoader" MODEL)
-add_library(AGE SHARED ${AGE-SRC} ${MODEL})
+aux_source_directory("./src/Audio" AUDIO)
+add_library(AGE SHARED ${AUDIO} ${AGE-SRC} ${MODEL})
 set_target_properties(AGE PROPERTIES LINKER_LANGUAGE CXX)
 # target_compile_options(AGE PUBLIC "-Winline") # 查看内联函数
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -13,6 +13,9 @@
 #include <unordered_map>
 #include <tuple>
 
+#define ADEBUG_INTERNAL_PANIC_ABORT
+#include <alib-g3/adebug.h>
+
 using namespace std;
 using namespace alib::g3;
 
@@ -21,8 +24,16 @@ void test_alogger();
 void test_aclock();
 void test_atranslator();
 
-int main(int argc,const char * argv[])
-{
+int main(int argc,const char * argv[]){
+
+    panic("你好，我panic了");
+
+    panic_if(1,"你好，我真的panic了");
+
+    panicf("这也是panic");
+
+    std::abort();
+
     if(argc < 2){
         char buf[256] = {0};
         const char * args[] = {"",buf};
