@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 不会悬垂的比较安全的容器数据wrapper,Release下单次性能损失为0.3ns
  * @version 0.1
- * @date 2025/11/08
+ * @date 2025/11/09
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -24,9 +24,9 @@ namespace alib::g3{
     /// @tparam Cont 
     template<CanAccessItem Cont> struct RefWrapper{
         using BaseType = Cont::value_type;
-        // 容器的引用，所以你需要保证至少容器是存在的，嵌套容器就可能不太支持了
+        /// 容器的引用，所以你需要保证至少容器是存在的，嵌套容器就可能不太支持了
         Cont & cont;
-        // index
+        /// index
         size_t index;
     
         inline auto& get(){

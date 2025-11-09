@@ -78,7 +78,7 @@ namespace alib::g3{
          * @brief 每个节点
          * @start-date 2025/11/02
          */
-        struct Node{
+        struct DLL_EXPORT Node{
             /// 节点的名字
             std::pmr::string name;
             /// 节点的数组值列表
