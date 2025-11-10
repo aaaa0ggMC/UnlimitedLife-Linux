@@ -11,7 +11,7 @@
 #include <format>
 #include <vector>
 
-using namespace alib::g3;
+using namespace alib::g3::old;
 using namespace std;
 
 #define BLOCK(X)
