@@ -116,7 +116,7 @@ bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & c
     msg.level = level;
     msg.body = std::move(body);
     msg.build_on_producer(clk);
-    
+     
     {
         std::lock_guard<std::mutex> lock(msg_lock);
         messages.emplace_back(std::move(msg));
