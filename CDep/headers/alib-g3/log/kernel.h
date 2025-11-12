@@ -218,10 +218,9 @@ namespace alib::g3{
             return logger.push_message_pmr(level,str,cfg);
         }
         /// @brief 支持多参数的转发，静态版本
-        template<class... Args> inline bool log_fast(int level,const std::format_string<Args...> & fmt,Args&&... args){
-            std::cout << "I was choosed" << std::endl;
+        template<class... Args> inline bool log_fast(int level,const std::format_string<Args...>& fmt,Args&&... args){
             std::pmr::string str (logger.msg_str_alloc);
-            std::format_to(std::back_inserter(str),fmt,args...);
+            std::vformat_to(std::back_inserter(str),fmt.get(),std::make_format_args(args...));
             return logger.push_message_pmr(level,str,cfg);
         }
         /// @brief 支持多参数的转发，适配LogLevel
@@ -229,7 +228,7 @@ namespace alib::g3{
             return log(static_cast<int>(level),fmt,std::forward<Args>(args)...);
         }
         /// @brief 支持多参数的转发，静态版本，适配LogLevel
-        template<class... Args> inline bool log(LogLevel level,const std::format_string<Args...> & fmt,Args&&... args){
+        template<class... Args> inline bool log(LogLevel level,const std::format_string<Args...>& fmt,Args&&... args){
             return log_fast(static_cast<int>(level),fmt,std::forward<Args>(args)...);
         }
         /// @brief 提供已经装载到对应内存的数据，这个时候直接move就行
@@ -269,7 +268,7 @@ namespace alib::g3{
         level_cast = default_level_cast;
     }
 
-    inline const char * LogMsgConfig::default_level_cast(int level_in){
+    inline std::string_view LogMsgConfig::default_level_cast(int level_in){
         switch(level_in){
         case 0:
             return "TRACE";
@@ -311,7 +310,6 @@ namespace alib::g3{
     inline void LogMsg::build_on_consumer(){
         if(cfg->disable_extra_information)return;
         [[maybe_unused]] thread_local bool inited = [&]{
-            stime.reserve(date_str_resize);
             sdate.resize(date_str_resize);
             return false;
         }();
@@ -354,6 +352,7 @@ namespace alib::g3{
         scomposed.append(":");
         
         scomposed += body;
+        scomposed.append("\n");
         generated = true;
 
         return scomposed;

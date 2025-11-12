@@ -30,8 +30,6 @@ namespace alib::g3{
         //// 缓冲 ////
         /// @brief 用于缓冲日期数据
         static thread_local std::string sdate;
-        /// @brief 用于缓冲启动时长数据
-        static thread_local std::string stime;
         /// @brief 用户缓冲最终生成的数据
         static thread_local std::string scomposed;
 
@@ -45,7 +43,7 @@ namespace alib::g3{
         ///        因此必须保证对日志信息主遍历而不是对targets
         void build_on_consumer();
         
-        /// @brief 生成组合数据，懒加载，在无其他日志插入的context中，第一次调用会构造，之后之前返回构造了的 
+        /// @brief 生成组合数据，懒加载，在无其他日志插入的context中，第一次调用会构造，之后之前返回构造了的。注意，最后面有一个换行符，不想要可以截取
         std::string_view gen_composed();
 
         /// @brief 移动构造日志，主要处理为移动构造pmr对象，pmr对象最好保持allocator一致

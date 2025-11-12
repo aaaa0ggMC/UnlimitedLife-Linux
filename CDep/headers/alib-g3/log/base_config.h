@@ -6,7 +6,7 @@ namespace alib::g3{
     /// @brief 日志消息细节控制，用在LogFactory中，控制额外信息的输出
     struct DLL_EXPORT LogMsgConfig{
         /// 可以通过这个形式的函数自定义某个数字对应的level显示
-        using LevelCastFn = const char* (*)(int);
+        using LevelCastFn = std::string_view (*)(int);
 
         /// @brief 是否禁用额外信息生成，一旦为true，下面的额外信息也都没有意义了，默认为false
         bool disable_extra_information;
@@ -26,7 +26,7 @@ namespace alib::g3{
         LevelCastFn level_cast;
 
         /// 默认的level cast,适配LogLevel这个enum
-        static const char * default_level_cast(int level_in);
+        static std::string_view default_level_cast(int level_in);
         
         /// 这个初始化了默认值
         LogMsgConfig();

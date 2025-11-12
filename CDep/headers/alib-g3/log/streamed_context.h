@@ -28,7 +28,7 @@ namespace alib::g3{
     /// @tparam LogFactory 类CRTP写法与LogFactory解耦，理论上只能接上LogFactory
     template<class LogFactory> struct StreamedContext{
         /// @brief 持有的LogFactory对象
-        LogFactory & factory;、
+        LogFactory & factory;
         /// @brief 流式输出内部缓存的字符串，考虑到刚好可以直接转发给Logger，因此每个context一份
         std::pmr::string cache_str;
         /// @brief 日志级别
