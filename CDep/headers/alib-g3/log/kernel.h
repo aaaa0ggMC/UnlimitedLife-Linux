@@ -1,4 +1,4 @@
-/** @file alogger_base.h
+/** @file kernel.h
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
@@ -12,10 +12,11 @@
 <tr><td>2025-04-04 <td>3.1         <th>aaaa0ggmc    <td>添加doc
 <tr><td>2025-04-04 <td>3.1         <th>aaaa0ggmc    <td>完成doc
 <tr><td>2025-11-10 <td>pre-4.0     <th>aaaa0ggmc    <td>准备4.0阶段
+<tr><td>2025-11-12 <td>alpha-4.0   <th>aaaa0ggmc    <td>4.0阶段核心完工，优化ing...
 </table>
 ********************************
 */
-/** @todo Logger添加appendConsole appendFile ...实现简化（不然有点麻烦）
+/**
  * @todo 实现LogManager对log文件（文件夹）进行管理
  */
 #ifndef ALOGGER2_H_INCLUDED
@@ -23,7 +24,7 @@
 #include <alib-g3/autil.h>
 #include <alib-g3/aref.h>
 #include <alib-g3/aclock.h>
-#include <alib-g3/alogger_streamed_context.h>
+#include <alib-g3/log/streamed_context.h>
 
 #include <unordered_map>
 #include <deque>
@@ -37,8 +38,8 @@
 #include <iostream>
 
 namespace alib::g3{
-    constexpr unsigned int semaphore_max_val = 4096;
-    constexpr unsigned int consumer_message_default_count = 64;
+    constexpr unsigned int semaphore_max_val = std::__semaphore_impl::_S_max;
+    constexpr unsigned int consumer_message_default_count = 128;
     constexpr unsigned int date_str_resize = 32;
     constexpr unsigned int compose_str_resize = 1024;
 
@@ -60,6 +61,8 @@ namespace alib::g3{
 
         bool out_header;
         bool out_level;
+
+        bool disable_extra_information;
 
         LevelCastFn level_cast;
 
@@ -88,6 +91,7 @@ namespace alib::g3{
             gen_date = true;
             out_header = true;
             out_level = true;
+            disable_extra_information = false;
 
             level_cast = default_level_cast;
         }
@@ -120,6 +124,7 @@ namespace alib::g3{
         }
 
         inline void build_on_producer(Clock & clk){
+            if(cfg->disable_extra_information)return;
             if(cfg->gen_thread_id){
                 thread_id =
                 static_cast<uint64_t>(
@@ -132,6 +137,7 @@ namespace alib::g3{
         }
 
         inline void build_on_consumer(){
+            if(cfg->disable_extra_information)return;
             [[maybe_unused]] thread_local bool inited = [&]{
                 stime.reserve(date_str_resize);
                 sdate.resize(date_str_resize);
@@ -150,6 +156,7 @@ namespace alib::g3{
         }
 
         inline std::string_view gen_composed(){
+            if(cfg->disable_extra_information){return body;}
             [[maybe_unused]] thread_local bool inited = [&]{
                 scomposed.clear();
                 scomposed.resize(compose_str_resize);
@@ -173,6 +180,7 @@ namespace alib::g3{
                 "[TID%lu]",thread_id);
             scomposed.resize(beg);
             scomposed.append(":");
+            
             scomposed += body;
             generated = true;
 
@@ -254,10 +262,12 @@ namespace alib::g3{
     };
 
     struct DLL_EXPORT LoggerConfig{
-
+    public:
         /// 0 means that the current thread is both producer & consumer
         unsigned int consumer_count;
         unsigned int fetch_message_count_max;
+        unsigned int back_pressure_multiply;
+        bool enable_back_pressure;
 
         static inline LoggerConfig default_cfg(){
             LoggerConfig cfg;
@@ -265,6 +275,8 @@ namespace alib::g3{
             // 默认就是单consumer的形式
             cfg.consumer_count = 1;
             cfg.fetch_message_count_max = consumer_message_default_count;
+            cfg.back_pressure_multiply = 4; 
+            cfg.enable_back_pressure = true;
 
             return cfg;
         }
@@ -291,6 +303,8 @@ namespace alib::g3{
         std::pmr::unsynchronized_pool_resource msg_buf;
         /// 消息池
         std::pmr::deque<LogMsg> messages;
+        /// 消息池大小，减小size()调用啥的
+        std::atomic<int> message_size;
 
         /// 计时器，用来显示从Logger创建以来运行的时间
         Clock clk;
@@ -308,6 +322,9 @@ namespace alib::g3{
 
         /// Header常量池，只增不减，鉴于LogFactory数目很少
         std::vector<std::string> header_pool;
+
+        /// 背压阈值
+        uint64_t back_pressure_threshold;
 
         /// 初始化consumer线程
         void setup_consumer_threads();
@@ -353,6 +370,8 @@ namespace alib::g3{
         ,msg_semaphore(0){
             config = cfg;
             logger_not_on_destroying = true;
+            back_pressure_threshold = cfg.back_pressure_multiply * 
+                        cfg.fetch_message_count_max * cfg.consumer_count;
             setup_consumer_threads();
         }
 

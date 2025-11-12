@@ -1,0 +1,4 @@
+#ifndef ALOG_PREFAB_TARGETS
+#define ALOG_PREFAB_TARGETS
+
+#endif

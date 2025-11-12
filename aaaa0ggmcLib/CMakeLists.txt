@@ -1,4 +1,5 @@
 aux_source_directory("./src" ALIB-SRC)
+
 add_library(aaaa0ggmcLib SHARED ${ALIB-SRC})
 set_target_properties(aaaa0ggmcLib PROPERTIES LINKER_LANGUAGE CXX)
 target_link_options(aaaa0ggmcLib PRIVATE -fPIC)

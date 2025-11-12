@@ -30,12 +30,14 @@ void Logger::consumer_func(){
 }
 
 void Logger::write_messages(std::span<LogMsg> msgs){
-    for(auto & msg : msgs){
-        if(!msg.m_nice_one)continue;
-        for(auto & filter : filters){
-            if(!filter->enabled)continue;
-            msg.m_nice_one = filter->filter(msg);
-            if(!msg.m_nice_one)break;
+    if(!filters.empty()){
+        for(auto & msg : msgs){
+            if(!msg.m_nice_one)continue;
+            for(auto & filter : filters){
+                if(!filter->enabled)continue;
+                msg.m_nice_one = filter->filter(msg);
+                if(!msg.m_nice_one)break;
+            }
         }
     }
     for(size_t i = 0;i < msgs.size();++i){
@@ -80,6 +82,7 @@ size_t Logger::fetch_messages(std::vector<LogMsg> & target){
             target[i] = std::move(msg);
             messages.pop_front();
         }
+        message_size.fetch_sub(fetch_size,std::memory_order::relaxed);
         return fetch_size;
     }
 }
@@ -112,6 +115,7 @@ bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & c
         if(!filter->pre_filter(level,body,cfg))return false;
     }
     LogMsg msg(msg_alloc,cfg);
+    size_t msg_sz = 0;
 
     msg.level = level;
     msg.body = std::move(body);
@@ -120,12 +124,17 @@ bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & c
     {
         std::lock_guard<std::mutex> lock(msg_lock);
         messages.emplace_back(std::move(msg));
+        msg_sz = message_size.fetch_add(1,std::memory_order::relaxed) + 1;
     }
 
-    msg_semaphore.release();
-    // 不存在consumer自己消化
-    /// @TODO 加入back pressure机制，这段代码可以复用
-    if(!config.consumer_count && messages.size() >= config.fetch_message_count_max){
+    bool should_digest = (!config.consumer_count && 
+            msg_sz >= config.fetch_message_count_max)
+            ||
+            (config.enable_back_pressure && (msg_sz >= back_pressure_threshold));
+
+    // 没有线程就别吃了
+    if(config.consumer_count)msg_semaphore.release();
+    if(should_digest){
         static thread_local std::vector<LogMsg> msgs;
         size_t count = fetch_messages(msgs);
         // 没取出一个，说明可能算错了啥的，基本不会发生

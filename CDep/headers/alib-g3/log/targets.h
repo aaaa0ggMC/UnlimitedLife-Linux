@@ -1,3 +1,5 @@
+#ifndef ALOG_PREFAB_TARGETS
+#define ALOG_PREFAB_TARGETS
 #include <alib-g3/alogger_base.h>
 #include <stdio.h>
 
@@ -29,3 +31,4 @@ namespace alib::g3{
     };
 
 };
+#endif
