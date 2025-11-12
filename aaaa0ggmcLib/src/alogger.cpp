@@ -29,7 +29,7 @@ void Logger::consumer_func(){
     }
 }
 
-void Logger::write_messages(std::span<LogMsg> msgs){
+void Logger::write_messages(std::span<LogMsg> msgs,bool autoflush){
     if(!filters.empty()){
         for(auto & msg : msgs){
             if(!msg.m_nice_one)continue;
@@ -50,10 +50,8 @@ void Logger::write_messages(std::span<LogMsg> msgs){
             target->write(t);
         }
     }
-    // flush targets
-    for(auto& target : targets){
-        if(!target->enabled)continue;
-        target->flush();
+    if(autoflush){
+        flush_targets();
     }
 }
 
@@ -87,6 +85,20 @@ size_t Logger::fetch_messages(std::vector<LogMsg> & target){
     }
 }
 
+Logger::Logger(const LoggerConfig & cfg)
+:msg_buf()
+,msg_alloc(&msg_buf)
+,messages(msg_alloc)
+,msg_str_buf()
+,msg_str_alloc(&msg_str_buf)
+,msg_semaphore(0){
+    config = cfg;
+    logger_not_on_destroying = true;
+    back_pressure_threshold = cfg.back_pressure_multiply * 
+                cfg.fetch_message_count_max * cfg.consumer_count;
+    setup_consumer_threads();
+}
+
 Logger::~Logger(){
     logger_not_on_destroying = false;
     // 等待终止线程
@@ -94,7 +106,6 @@ Logger::~Logger(){
         msg_semaphore.release(consumers.size() - i + 1);
         if(consumers[i].joinable())consumers[i].join();
     }
-
     flush();
 }
 
@@ -104,8 +115,9 @@ void Logger::flush(){
         size_t count = fetch_messages(msgs);
         // 似乎出错了啥的
         if(!count)break;
-        write_messages(std::span(msgs).subspan(0,count));
+        write_messages(std::span(msgs).subspan(0,count),false);
     }
+    flush_targets();
 }
 
 bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & cfg){
@@ -120,25 +132,26 @@ bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & c
     msg.level = level;
     msg.body = std::move(body);
     msg.build_on_producer(clk);
-     
-    {
-        std::lock_guard<std::mutex> lock(msg_lock);
-        messages.emplace_back(std::move(msg));
-        msg_sz = message_size.fetch_add(1,std::memory_order::relaxed) + 1;
-    }
+   
+    if(config.consumer_count){ // 异步模式
+        {
+            std::lock_guard<std::mutex> lock(msg_lock);
+            messages.emplace_back(std::move(msg));
+            msg_sz = message_size.fetch_add(1,std::memory_order::relaxed) + 1;
+        }
 
-    bool should_digest = (!config.consumer_count && 
-            msg_sz >= config.fetch_message_count_max)
-            ||
-            (config.enable_back_pressure && (msg_sz >= back_pressure_threshold));
-
-    // 没有线程就别吃了
-    if(config.consumer_count)msg_semaphore.release();
-    if(should_digest){
-        static thread_local std::vector<LogMsg> msgs;
-        size_t count = fetch_messages(msgs);
-        // 没取出一个，说明可能算错了啥的，基本不会发生
-        if(count)write_messages(std::span(msgs).subspan(0,count));
+        bool should_digest = (config.enable_back_pressure && (msg_sz >= back_pressure_threshold));
+        // 没有线程就别吃了
+        msg_semaphore.release();
+        if(should_digest){
+            static thread_local std::vector<LogMsg> msgs;
+            size_t count = fetch_messages(msgs);
+            // 没取出一个，说明可能算错了啥的，基本不会发生
+            if(count)write_messages(std::span(msgs).subspan(0,count));
+        }
+    }else{ // 同步模式
+        // 不自动刷新从而节省性能
+        write_messages(std::span(&msg,1),false);
     }
     return true;
 }

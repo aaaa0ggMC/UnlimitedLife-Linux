@@ -5,10 +5,11 @@
 
 namespace alib::g3{
     namespace lot{
+        /// @brief 预制菜里的控制台输出
         struct DLL_EXPORT Console : public LogTarget{
+            /// @brief 全局锁，防止输出错乱
             static std::mutex console_lock;
-
-            /// @note 如果节约内存修改logmsg也不是不行
+            
             inline void write(
                 LogMsg & msg
             ) override {

@@ -1,0 +1,76 @@
+#ifndef ALOG_MOD_INCLUDED
+#define ALOG_MOD_INCLUDED
+#include <alib-g3/log/base_msg.h>
+
+namespace alib::g3{
+    /// @brief 输出对象
+    struct DLL_EXPORT LogTarget{
+        /// @brief 用于toggle输出，一般不用管
+        bool enabled;
+       
+        /// @brief 默认target就是enabled 
+        inline LogTarget(){
+            enabled = true;
+        }
+        
+        /// @brief 往某个地方写入消息
+        /// @note  如果节约内存修改logmsg也不是不行
+        virtual inline void write(
+            LogMsg & msg
+        ){}
+
+        /// @brief 刷新数据，比如缓冲区啥的
+        virtual inline void flush(){}
+        
+        /// @brief 关闭IO
+        /// @note  析构函数会自动close
+        virtual inline void close(){}
+
+        /// @brief 自动关闭资源
+        virtual ~LogTarget(){
+            flush();
+            close();
+        }
+    };
+
+    /// @brief 日志过滤器，支持日志拒绝，日志修改啥的
+    struct DLL_EXPORT LogFilter{
+        /// @brief 标示是否启用
+        bool enabled;
+        
+        /// @brief 默认启用日志
+        inline LogFilter(){
+            enabled = true;
+        }
+
+        /// @brief  尝试过滤日志，可以修改
+        /// @return true:日志可以被处理，false:日志应该被抛弃
+        virtual inline bool filter(LogMsg & msg){
+            return true;
+        }
+
+        /// @brief  尝试在push message时提前处理日志
+        /// @param level_id     当前的输出级别
+        /// @param raw_message  日志原始body
+        /// @param cfg          当前的配置
+        /// @return true:日志可以被处理，false:日志应该被抛弃
+        virtual inline bool pre_filter(
+            int level_id,
+            std::string_view raw_message,
+            LogMsgConfig & cfg
+        ){
+            return true;
+        }
+
+        /// @brief 关闭过滤器，也许你可以处理一些什么释放啥的，虽然析构也不是不行
+        /// @note  析构函数会自动close
+        virtual inline void close(){}
+ 
+        /// @brief 自动close对象
+        virtual inline ~LogFilter(){
+            close();
+        }
+    };
+}
+
+#endif
