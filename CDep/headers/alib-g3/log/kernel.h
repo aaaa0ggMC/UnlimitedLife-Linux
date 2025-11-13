@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/11/12 
+* @date 2025/11/13 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -21,6 +21,7 @@
  */
 #ifndef ALOGGER2_H_INCLUDED
 #define ALOGGER2_H_INCLUDED
+#include <chrono>
 #include <alib-g3/autil.h>
 #include <alib-g3/aref.h>
 #include <alib-g3/aclock.h>
@@ -41,6 +42,16 @@
 #include <type_traits>
 #include <iostream>
 
+#ifndef CLOCK_MONOTONIC_COARSE
+#ifndef CLOCK_REALTIME_COARSE
+#define ALIB_DEF_CLOCK_SOURCE CLOCK_REALTIME
+#else
+#define ALIB_DEF_CLOCK_SOURCE CLOCK_REALTIME_COARSE
+#endif
+#else 
+#define ALIB_DEF_CLOCK_SOURCE CLOCK_MONOTONIC_COARSE
+#endif 
+
 namespace alib::g3{
     /// @brief 最多可以有多少信号，默认最大值就行
     constexpr unsigned int semaphore_max_val = std::__semaphore_impl::_S_max;
@@ -50,6 +61,8 @@ namespace alib::g3{
     constexpr unsigned int date_str_resize = 32;
     /// @brief 每个组合字符串预留的空间，1024可满足小内容日志，运行时也可以根据raw数据大小扩展
     constexpr unsigned int compose_str_resize = 1024;
+    /// @brief 时钟源，简易能选择的话选择最快的MONOTIC_COARSE
+    constexpr int time_clock_source = ALIB_DEF_CLOCK_SOURCE;
 
     /// @brief 默认的loglevel标识，纯粹方便使用的
     enum class LogLevel : int{
@@ -65,7 +78,7 @@ namespace alib::g3{
     struct DLL_EXPORT Logger{
         using targets_t = std::vector<std::shared_ptr<LogTarget>>;
         using filters_t = std::vector<std::shared_ptr<LogFilter>>;
-    private:
+    public:
         friend class LogFactory;
 
         /// L@brief ogger配置
@@ -92,8 +105,6 @@ namespace alib::g3{
         /// @brief 消息池大小，减小size()调用啥的
         std::atomic<int> message_size;
 
-        /// @brief 计时器，用来显示从Logger创建以来运行的时间
-        Clock clk;
         /// @brief 锁，目前还是相信std::mutex的力量
         std::mutex msg_lock;
         /// @brief 信号量，用来实现异步休眠
@@ -105,6 +116,8 @@ namespace alib::g3{
         uint64_t back_pressure_threshold;
         /// @brief 线程能继续运行的flag
         bool logger_not_on_destroying;
+        /// @brief 缓存的开始时间
+        timespec start_time;
 
         /// @brief 初始化consumer线程
         void setup_consumer_threads();
@@ -214,7 +227,7 @@ namespace alib::g3{
         /// @brief 支持多参数的转发
         template<class... Args> inline bool log(int level,std::string_view fmt,Args&&... args){
             std::pmr::string str (logger.msg_str_alloc);
-            std::vformat_to(std::back_inserter(str),fmt,std::make_format_args(std::forward<Args>(args)...));
+            std::vformat_to(std::back_inserter(str),fmt,std::make_format_args(args...));
             return logger.push_message_pmr(level,str,cfg);
         }
         /// @brief 支持多参数的转发，静态版本
@@ -294,7 +307,7 @@ namespace alib::g3{
         generated = false;
     }
 
-    inline void LogMsg::build_on_producer(Clock & clk){
+    inline void LogMsg::build_on_producer(const timespec & start){
         if(cfg->disable_extra_information)return;
         if(cfg->gen_thread_id){
             thread_id =
@@ -303,31 +316,38 @@ namespace alib::g3{
             );
         }
         if(cfg->gen_time){
-            timestamp = clk.getAllTime();
+            timespec spec;
+            clock_gettime(time_clock_source,&spec);
+            timestamp = (spec.tv_sec - start.tv_sec)*1000 + (spec.tv_nsec - start.tv_nsec)/1'000'000.0;
         }
     }
 
     inline void LogMsg::build_on_consumer(){
         if(cfg->disable_extra_information)return;
-        [[maybe_unused]] thread_local bool inited = [&]{
+        [[maybe_unused]] thread_local static bool inited = [&]{
             sdate.resize(date_str_resize);
             return false;
         }();
         if(cfg->gen_date){
-            sdate.clear();
+            static thread_local time_t old_time = 0;
             time_t rawtime;
-            struct tm ptminfo;
             time(&rawtime);
-            localtime_r(&rawtime,&ptminfo);
-            snprintf(sdate.data(),date_str_resize,"%02d-%02d-%02d %02d:%02d:%02d",
+            if(rawtime != old_time){
+                struct tm ptminfo;
+                localtime_r(&rawtime,&ptminfo);
+                sdate.clear();
+                sdate.resize(date_str_resize);
+                sdate.resize(snprintf(sdate.data(),date_str_resize,"%02d-%02d-%02d %02d:%02d:%02d",
                     ptminfo.tm_year + 1900, ptminfo.tm_mon + 1, ptminfo.tm_mday,
-                    ptminfo.tm_hour, ptminfo.tm_min, ptminfo.tm_sec);
+                    ptminfo.tm_hour, ptminfo.tm_min, ptminfo.tm_sec));
+               old_time = rawtime;
+            }
         }
     }
 
     inline std::string_view LogMsg::gen_composed(){
-        if(cfg->disable_extra_information){return body;}
-        [[maybe_unused]] thread_local bool inited = [&]{
+        if(cfg->disable_extra_information){body.push_back('\n');return body;}
+        [[maybe_unused]] static thread_local bool inited = [&]{
             scomposed.clear();
             scomposed.resize(compose_str_resize);
             return false;
@@ -341,7 +361,7 @@ namespace alib::g3{
         if(cfg->gen_date)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
             "[%s]",sdate.c_str());
         if(cfg->out_level)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
-            "[%s]",cfg->level_cast(level));
+            "[%s]",cfg->level_cast(level).data());
         if(cfg->out_header && header.data() != nullptr && header.size())beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
             "[%s]",header.data());
         if(cfg->gen_time)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,

@@ -1,6 +1,6 @@
 #ifndef ALOG_PREFAB_TARGETS
 #define ALOG_PREFAB_TARGETS
-#include <alib-g3/alogger_base.h>
+#include <alib-g3/log/kernel.h>
 #include <alib-g3/adebug.h>
 #include <stdio.h>
 
@@ -39,7 +39,7 @@ namespace alib::g3{
             inline void write(
                 LogMsg & msg
             ) override {
-                static std::string_view reset_color = "\e[0m"; // 复原颜色
+                static std::string_view c_reset_color = "\e[0m"; // 复原颜色
                 // 在flush中刷新
                 static auto fast_print = [](ConsoleConfig::ColorSchemaFn fn,LogMsg & msg){
                     if(fn){
@@ -52,49 +52,51 @@ namespace alib::g3{
                     return false;
                 };
                 static auto reset_color = [](){
-                    fwrite_unlocked(reset_color.data(),sizeof(decltype(reset_color)::value_type),reset_color.size(),stdout);
+                    fwrite_unlocked(c_reset_color.data(),sizeof(decltype(c_reset_color)::value_type),c_reset_color.size(),stdout);
                 };
                 {
                     std::lock_guard<std::mutex> lock(console_lock);
-                    if(msg.cfg->gen_date){
-                        putchar_unlocked('[');
-                        bool val = fast_print(cfg.date_color_schema,msg);
-                        fwrite_unlocked(msg.sdate.data(),sizeof(decltype(msg.sdate)::value_type),msg.sdate.size(),stdout);
-                        if(val)reset_color();
-                        putchar_unlocked(']');
-                    }
-                    if(msg.cfg->out_level){
-                        putchar_unlocked('[');
-                        bool val = fast_print(cfg.level_color_schema,msg);
-                        auto ls = msg.cfg->level_cast(msg.level);
-                        fwrite_unlocked(ls.data(),sizeof(decltype(ls)::value_type),ls.size(),stdout);
-                        if(val)reset_color();
-                        putchar_unlocked(']');
-                    }
-                    if(msg.cfg->out_header && header.data() != nullptr && header.size()){
-                        putchar_unlocked('[');
-                        bool val = fast_print(cfg.head_color_schema,msg);
-                        fwrite_unlocked(msg.header.data(),sizeof(decltype(msg.header)::value_type),msg.header.size(),stdout);
-                        if(val)reset_color();
-                        putchar_unlocked(']');
-                    }
-                    if(msg.cfg->gen_time){
-                        std::string_view use_color;
-                        if(cfg.time_color_schema && !(use_color = cfg.time_color_schema(msg)).empty()){
-                            printf("[%s%.2lfms%s]",use_color.data(),msg.timestamp,reset_color.data());
-                        }else{
-                            printf("[%.2lfms]",msg.timestamp);
+                    if(!msg.cfg->disable_extra_information){
+                        if(msg.cfg->gen_date){
+                            fwrite_unlocked("[",1,1,stdout);
+                            bool val = fast_print(cfg.date_color_schema,msg);
+                            fwrite_unlocked(msg.sdate.c_str(),sizeof(decltype(msg.sdate)::value_type),msg.sdate.size(),stdout);
+                            if(val)reset_color();
+                            fwrite_unlocked("]",1,1,stdout);
                         }
-                    }
-                    if(msg.cfg->gen_thread_id){
-                        std::string_view use_color;
-                        if(cfg.thread_id_color_schema && !(use_color = cfg.thread_id_color_schema(msg)).empty()){
-                            printf("[%sTID%lu%s]",use_color.data(),msg.thread_id,reset_color.data());
-                        }else{
-                            printf("[TID%lu]",msg.thread_id);
+                        if(msg.cfg->out_level){
+                            fwrite_unlocked("[",1,1,stdout);
+                            bool val = fast_print(cfg.level_color_schema,msg);
+                            auto ls = msg.cfg->level_cast(msg.level);
+                            fwrite_unlocked(ls.data(),sizeof(decltype(ls)::value_type),ls.size(),stdout);
+                            if(val)reset_color();
+                            fwrite_unlocked("]",1,1,stdout);
                         }
+                        if(msg.cfg->out_header && msg.header.data() != nullptr && msg.header.size()){
+                            fwrite_unlocked("[",1,1,stdout);
+                            bool val = fast_print(cfg.head_color_schema,msg);
+                            fwrite_unlocked(msg.header.data(),sizeof(decltype(msg.header)::value_type),msg.header.size(),stdout);
+                            if(val)reset_color();
+                            fwrite_unlocked("]",1,1,stdout);
+                        }
+                        if(msg.cfg->gen_time){
+                            std::string_view use_color;
+                            if(cfg.time_color_schema && !(use_color = cfg.time_color_schema(msg)).empty()){
+                                printf("[%s%.2lfms%s]",use_color.data(),msg.timestamp,c_reset_color.data());
+                            }else{
+                                printf("[%.2lfms]",msg.timestamp);
+                            }
+                        }
+                        if(msg.cfg->gen_thread_id){
+                            std::string_view use_color;
+                            if(cfg.thread_id_color_schema && !(use_color = cfg.thread_id_color_schema(msg)).empty()){
+                                printf("[%sTID%lu%s]",use_color.data(),msg.thread_id,c_reset_color.data());
+                            }else{
+                                printf("[TID%lu]",msg.thread_id);
+                            }
+                        }
+                        putchar_unlocked(':');
                     }
-                    putchar_unlocked(":");
                     fwrite_unlocked(msg.body.data(),sizeof(decltype(msg.body)::value_type),msg.body.size(),stdout);
                     putchar_unlocked('\n');
                 }
@@ -111,19 +113,25 @@ namespace alib::g3{
         struct DLL_EXPORT File : public LogTarget{
             FILE* file {nullptr};
             std::string currently_open;
+            bool need_close {true};
 
             inline void open_file(std::string_view fp){
                 if(file){
-                    fclose(file);
+                    if(need_close)fclose(file);
                     file = nullptr;
                 }
                 currently_open = fp; 
                 file = fopen(currently_open.c_str(),"w");
-                panicf_debug(!file,"Cannot open file {}!",fpath);
+                panicf_debug(!file,"Cannot open file {}!",fp);
             }
 
             inline File(std::string_view fpath){
                 open_file(fpath);
+            }
+
+            inline File(FILE * f){
+                file = f;
+                need_close = false;
             }
 
             inline void write(LogMsg & msg) override{
@@ -136,7 +144,7 @@ namespace alib::g3{
             }
 
             inline void close() override{
-                if(file){
+                if(need_close && file){
                     fclose(file);
                 }
             }
@@ -145,7 +153,7 @@ namespace alib::g3{
 };
 
 //// inline实现 ////
-namespace alib::g3{
+namespace alib::g3::lot{
     inline std::string_view ConsoleConfig::default_level_color_schema(const LogMsg & msg){
         switch(msg.level){
         case 0: // Trace采用灰色

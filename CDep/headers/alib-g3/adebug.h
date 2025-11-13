@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 目标是提供简单可用的错误判断，适合我这种一般不调试的人
  * @version 0.1
- * @date 2025/11/09
+ * @date 2025/11/13
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -134,8 +134,8 @@ namespace alib::g3{
 #ifdef NDEBUG
 /// Note that the expression you input must have no side-effects!
 #define panic_debug(will_be_removed_in_release_mode_cond,ARG)
-#define panicf_debug(will_be_removed_in_release_mode_cond,ARG)
-#define vpanicf_debug(will_be_removed_in_release_mode_cond,ARG)
+#define panicf_debug(will_be_removed_in_release_mode_cond,ARG,...)
+#define vpanicf_debug(will_be_removed_in_release_mode_cond,ARG,...)
 #else
 /// Note that the expression you input must have no side-effects!
 #define panic_debug(will_be_removed_in_release_mode_cond,ARG) panic_if(will_be_removed_in_release_mode_cond,ARG)

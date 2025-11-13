@@ -3,7 +3,6 @@
 using namespace alib::g3;
 
 thread_local std::string LogMsg::sdate;
-thread_local std::string LogMsg::stime;
 thread_local std::string LogMsg::scomposed;
 std::mutex lot::Console::console_lock;
 
@@ -17,6 +16,7 @@ void Logger::setup_consumer_threads(){
 
 void Logger::consumer_func(){
     // 靠fetch message来填充
+    // 由于这个不是thread_local的，因此能保证资源被正确析构，因此不需要clear
     std::vector<LogMsg> messages;
 
     while(logger_not_on_destroying){
@@ -59,11 +59,9 @@ size_t Logger::fetch_messages(std::vector<LogMsg> & target){
     static LogMsgConfig default_fetch_cfg;
     // 一次性拿完
     size_t i = 0;
+    size_t fetch_size;
     // 对target进行扩容
-    while(target.size() < config.fetch_message_count_max){
-        // 这里的deault_fetch_cfg就是个占位符，防止悬垂啥的
-        target.emplace_back(msg_str_alloc,default_fetch_cfg);
-    }
+    target.resize(config.fetch_message_count_max);
     {
         std::lock_guard<std::mutex> lock(msg_lock);
 
@@ -71,7 +69,7 @@ size_t Logger::fetch_messages(std::vector<LogMsg> & target){
         if(!cur_size){
             return 0;
         }
-        size_t fetch_size = config.fetch_message_count_max<cur_size?
+        fetch_size = config.fetch_message_count_max<cur_size?
                                 config.fetch_message_count_max:cur_size;
         for(;i < fetch_size;++i){
             /// @NOTE 加message请往后面加
@@ -81,8 +79,8 @@ size_t Logger::fetch_messages(std::vector<LogMsg> & target){
             messages.pop_front();
         }
         message_size.fetch_sub(fetch_size,std::memory_order::relaxed);
-        return fetch_size;
     }
+    return fetch_size;
 }
 
 Logger::Logger(const LoggerConfig & cfg)
@@ -96,17 +94,18 @@ Logger::Logger(const LoggerConfig & cfg)
     logger_not_on_destroying = true;
     back_pressure_threshold = cfg.back_pressure_multiply * 
                 cfg.fetch_message_count_max * cfg.consumer_count;
+    clock_gettime(time_clock_source,&start_time);
     setup_consumer_threads();
 }
 
 Logger::~Logger(){
+    flush();
     logger_not_on_destroying = false;
     // 等待终止线程
     for(int i = 0;i < consumers.size();++i){
         msg_semaphore.release(consumers.size() - i + 1);
         if(consumers[i].joinable())consumers[i].join();
     }
-    flush();
 }
 
 void Logger::flush(){
@@ -117,6 +116,7 @@ void Logger::flush(){
         if(!count)break;
         write_messages(std::span(msgs).subspan(0,count),false);
     }
+    msgs.clear();
     flush_targets();
 }
 
@@ -131,7 +131,7 @@ bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & c
 
     msg.level = level;
     msg.body = std::move(body);
-    msg.build_on_producer(clk);
+    msg.build_on_producer(start_time);
    
     if(config.consumer_count){ // 异步模式
         {
@@ -139,15 +139,18 @@ bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & c
             messages.emplace_back(std::move(msg));
             msg_sz = message_size.fetch_add(1,std::memory_order::relaxed) + 1;
         }
+        msg_semaphore.release();
 
         bool should_digest = (config.enable_back_pressure && (msg_sz >= back_pressure_threshold));
         // 没有线程就别吃了
-        msg_semaphore.release();
         if(should_digest){
             static thread_local std::vector<LogMsg> msgs;
             size_t count = fetch_messages(msgs);
             // 没取出一个，说明可能算错了啥的，基本不会发生
-            if(count)write_messages(std::span(msgs).subspan(0,count));
+            if(count){
+                write_messages(std::span(msgs).subspan(0,count));
+                msgs.clear();
+            }
         }
     }else{ // 同步模式
         // 不自动刷新从而节省性能
@@ -163,6 +166,3 @@ std::string_view Logger::register_header(std::string_view val){
         return header_pool.emplace_back(val);
     }else return "";
 }
-
-
-void endlog(LogEnd){}

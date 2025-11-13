@@ -35,9 +35,11 @@ namespace alib::g3{
 
         /// @brief 构造核心内容
         LogMsg(const std::pmr::polymorphic_allocator<char> &__a,LogMsgConfig & c);
+        /// @brief 构造空的数据，用于占位
+        LogMsg(){}
         
         /// @brief Producer构造基础信息，如timestamp和tid
-        void build_on_producer(Clock & clk);
+        void build_on_producer(const timespec & start);
         /// @brief Consumer合成字符串存储到当前结构
         /// @note  由于这个函数使用的是static threadlocal的变量 
         ///        因此必须保证对日志信息主遍历而不是对targets
@@ -56,6 +58,10 @@ namespace alib::g3{
         /// @brief  移动构造
         inline LogMsg(LogMsg&& msg){
             move_msg(std::forward<LogMsg>(msg));
+        }
+        /// @brief 调试使用，清除flag
+        inline void clear_gen_flag(){
+            generated = false;
         }
     };
 }

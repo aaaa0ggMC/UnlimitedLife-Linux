@@ -13,7 +13,7 @@ namespace alib::g3{
     struct DLL_EXPORT LogEnd{};
     typedef void (*EndLogFn)(LogEnd);
     /// @brief 流式输出日志终止表示
-    void DLL_EXPORT endlog(LogEnd);
+    inline void DLL_EXPORT endlog(LogEnd){}
     
     /// @brief 基础类型使用std::format，包含嵌套容器（如果你的编译器不支持需要自己实现下面的canforward）
     template<class T> concept GoUniversal = std::formattable<T,char>;
