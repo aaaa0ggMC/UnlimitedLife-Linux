@@ -1,0 +1,334 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/aconf.h 源文件</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(1); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('df/d28/aconf_8h_source.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">aconf.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="../../df/d28/aconf_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#ifndef ACONF_H_INCLUDED</span></div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#define ACONF_H_INCLUDED</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &lt;alib-g3/aconf_det.h&gt;</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="preprocessor">#include &lt;<a class="code" href="../../d5/d6c/alib-g3_2autil_8h.html">alib-g3/autil.h</a>&gt;</span></div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &lt;span&gt;</span></div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#include &lt;ranges&gt;</span></div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="preprocessor">#include &lt;string.h&gt;</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="preprocessor">#include &lt;stdlib.h&gt;</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="preprocessor">#include &lt;stack&gt;</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span> </div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a>{</div>
+<div class="foldopen" id="foldopen00048" data-start="{" data-end="};">
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html">   48</a></span>    <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html">ConfigLoadResult</a>{</div>
+<div class="foldopen" id="foldopen00049" data-start="{" data-end="};">
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cb">   49</a></span>        <span class="keyword">enum</span> <a class="code hl_enumeration" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cb">Code</a> : uint32_t{</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cba2fed0d52430dc57e97e2a4472c5e0559">   50</a></span>            OK = 0, </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cba25ddeb7ef6d6b48b4c2ef1556d54dbab">   51</a></span>            <a class="code hl_enumvalue" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cba25ddeb7ef6d6b48b4c2ef1556d54dbab">EOFTooEarly</a>, </div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cba7d44026cfa275c3810064b71b2643ab6">   53</a></span>            <a class="code hl_enumvalue" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cba7d44026cfa275c3810064b71b2643ab6">EmptyNodeName</a>, </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cbaabf3a48ae2fcafb77ccdaf1e518a46f8">   55</a></span>            <a class="code hl_enumvalue" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cbaabf3a48ae2fcafb77ccdaf1e518a46f8">TooManyBraces</a>,</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            UnclosedString</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cba61c8a4660970f9ca05f29e42f223ba88">   58</a></span>        };</div>
+</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a46c5a558a8ea504cb8d7633cf20e62ab">   60</a></span>        <a class="code hl_enumeration" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cb">Code</a> <a class="code hl_variable" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a46c5a558a8ea504cb8d7633cf20e62ab">code</a>; </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#aa3021fa75d844a178c4aede01b2e1da7">   61</a></span>        <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#aa3021fa75d844a178c4aede01b2e1da7">line</a>; </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a468eb3ee2aa8cf3bae73d60592f7a295">   62</a></span>        <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a468eb3ee2aa8cf3bae73d60592f7a295">col</a>; </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        </div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="}">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#aeedc58b60beea394e93fa33c16254364">   65</a></span>        <a class="code hl_function" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#aeedc58b60beea394e93fa33c16254364">ConfigLoadResult</a>(<a class="code hl_enumeration" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cb">Code</a> c,<span class="keywordtype">int</span> cline = 0,<span class="keywordtype">int</span> ccol = 0){</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            code = c;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            line = cline;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>            col = ccol;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        }</div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    };</div>
+</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="foldopen" id="foldopen00076" data-start="{" data-end="};">
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="../../d8/d7f/structalib_1_1g3_1_1Config.html">   76</a></span>    <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../d8/d7f/structalib_1_1g3_1_1Config.html">Config</a>{</div>
+<div class="foldopen" id="foldopen00081" data-start="{" data-end="};">
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">   81</a></span>        <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Node</a>{</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a55cdec4c5c88e821f1ea572923fec67e">   83</a></span>            std::pmr::string <a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a55cdec4c5c88e821f1ea572923fec67e">name</a>;</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a0bde5bd0c2ef9d6f225d8da869ad0ab7">   85</a></span>            std::vector&lt;std::pmr::string&gt; <a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a0bde5bd0c2ef9d6f225d8da869ad0ab7">values</a>;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac71543a1bbd172cac4c270efe47639b5">   87</a></span>            std::vector&lt;Node&gt; <a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac71543a1bbd172cac4c270efe47639b5">children</a>;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            std::optional&lt;std::reference_wrapper&lt;const Config::Node&gt;&gt; </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                get_node_recursive(<span class="keyword">const</span> std::vector&lt;std::string_view&gt; &amp; location,<span class="keywordtype">size_t</span> expected_index = 0) <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="foldopen" id="foldopen00105" data-start="{" data-end="}">
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ad3caea2da119e5513db0cea9d1c501b3">  105</a></span>            <span class="keyword">inline</span> <span class="keyword">auto</span> <a class="code hl_function" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ad3caea2da119e5513db0cea9d1c501b3">get_child_nodes_view</a>(<span class="keyword">const</span> std::string&amp; name)<span class="keyword"> const</span>{</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>                <span class="keywordflow">return</span> children | std::views::filter([name](<span class="keyword">const</span> <a class="code hl_struct" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Node</a> &amp; node){</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                    <span class="keywordflow">return</span> !strcmp(node.<a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a55cdec4c5c88e821f1ea572923fec67e">name</a>.c_str(),name.c_str());</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>                });</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            }</div>
+</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>            <span class="keyword">inline</span> std::optional&lt;std::string_view&gt; </div>
+<div class="foldopen" id="foldopen00120" data-start="{" data-end="}">
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#af582943ab4691084f8fc5e8572704465">  120</a></span>                <a class="code hl_function" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#af582943ab4691084f8fc5e8572704465">get_node_recursive_value</a>(<span class="keyword">const</span> std::vector&lt;std::string_view&gt; &amp; location,<span class="keywordtype">size_t</span> expected_index = 0,<span class="keywordtype">size_t</span> value_index = 0)<span class="keyword"> const</span>{</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>                <span class="keyword">auto</span> node = get_node_recursive(location,expected_index);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>                <span class="keywordflow">if</span>(node &amp;&amp; node-&gt;get().values.size() &gt; value_index){</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>                    <span class="keywordflow">return</span> node-&gt;get().values[value_index];</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>                }<span class="keywordflow">else</span> <span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>            }</div>
+</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="foldopen" id="foldopen00133" data-start="{" data-end="}">
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#aa11def359ba4a15888d9a3365e33bf98">  133</a></span>            <span class="keyword">inline</span> std::optional&lt;std::string_view&gt; <a class="code hl_function" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#aa11def359ba4a15888d9a3365e33bf98">get_value</a>(<span class="keywordtype">size_t</span> value_index)<span class="keyword"> const</span>{</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>                <span class="keywordflow">if</span>(value_index &gt;= values.size())<span class="keywordflow">return</span> std::nullopt;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>                <span class="keywordflow">return</span> values[value_index];</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>            }</div>
+</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>            <span class="keyword">static</span> <span class="keywordtype">void</span> print_node(<span class="keyword">const</span> <a class="code hl_struct" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Config::Node</a>&amp; node, <span class="keywordtype">int</span> indent = 0);</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a99a00770132fcf703deeb81a8b7e435e">  150</a></span>            <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a99a00770132fcf703deeb81a8b7e435e">print_node</a>(<span class="keywordtype">int</span> indent = 0)<span class="keyword"> const</span>{<a class="code hl_function" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a99a00770132fcf703deeb81a8b7e435e">print_node</a>(*<span class="keyword">this</span>,indent);}</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>            <span class="keyword">template</span>&lt;<span class="keyword">class</span> T,<span class="keyword">class</span> CastFn = DefConfigCaster&gt; <span class="keyword">inline</span> <a class="code hl_struct" href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">ConfigCastResult&lt;T&gt;</a>  </div>
+<div class="foldopen" id="foldopen00162" data-start="{" data-end="}">
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a0a57fc203ce89964cb9e7f57a88ef15f">  162</a></span>                <a class="code hl_function" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a0a57fc203ce89964cb9e7f57a88ef15f">get_value_as</a>(<span class="keywordtype">size_t</span> value_index)<span class="keyword"> </span></div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="keyword">            const</span>{</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>                <span class="keyword">auto</span> v = get_value(value_index);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>                <span class="keywordflow">if</span>(v){</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>                    <span class="keywordflow">return</span> CastFn::template try_cast&lt;T&gt;(*v);</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>                }<span class="keywordflow">else</span> <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">ConfigCastResult&lt;T&gt;</a>{std::nullopt,-1};</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>            }</div>
+</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>            <span class="keyword">template</span>&lt;<span class="keyword">class</span> T,<span class="keyword">class</span> CastFn = DefConfigCaster&gt; <span class="keyword">inline</span> <a class="code hl_struct" href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">ConfigCastResult&lt;T&gt;</a> </div>
+<div class="foldopen" id="foldopen00180" data-start="{" data-end="}">
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a135a1e4a7f535b088eb2ef55a3d7a7a9">  180</a></span>                <a class="code hl_function" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a135a1e4a7f535b088eb2ef55a3d7a7a9">get_node_recursive_value_as</a>(</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>                    <span class="keyword">const</span> std::vector&lt;std::string_view&gt; &amp; location,</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>                    <span class="keywordtype">size_t</span> expected_index = 0,</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>                    <span class="keywordtype">size_t</span> value_index = 0)<span class="keyword"></span></div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="keyword">            const</span>{</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>                <span class="keyword">auto</span> v = get_node_recursive_value(location,expected_index,value_index);</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>                <span class="keywordflow">if</span>(v){</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>                    <span class="keywordflow">return</span> CastFn::template try_cast&lt;T&gt;(*v);</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>                }<span class="keywordflow">else</span> <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">ConfigCastResult&lt;T&gt;</a>{std::nullopt,-1};</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>            }</div>
+</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="foldopen" id="foldopen00191" data-start="{" data-end="}">
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno"><a class="line" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac7e56cc2357a6ec2f65f1dd46b166651">  191</a></span>            <span class="keyword">template</span>&lt;CanDump Dumper&gt; <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac7e56cc2357a6ec2f65f1dd46b166651">dump</a>(Dumper &amp; appender,<span class="keywordtype">size_t</span> indent = 4){</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                <span class="keyword">using namespace </span>detail;</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>                std::string indent_str(indent,<span class="charliteral">&#39; &#39;</span>);</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>                std::stack&lt;Node*&gt; tree;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>                <span class="keywordtype">int</span> depth = 0;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>                <span class="keywordflow">if</span>(this-&gt;name.empty()){ <span class="comment">// 说明是匿名节点，一般一定为root，一定无value，进行一层遍历</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>                    <span class="keywordflow">for</span>(<span class="keyword">auto</span> &amp; node : this-&gt;children){</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>                        tree.push(&amp;node);</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>                    }</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>                }<span class="keywordflow">else</span> tree.push(<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>                <span class="keyword">static</span> <span class="keyword">auto</span> add_str = [](Dumper &amp; dmp,std::string_view sv){</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>                    dump_append(dmp,<span class="stringliteral">&quot;\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>                    <span class="keywordflow">for</span>(<span class="keyword">auto</span> ch : sv){</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>                        <span class="keywordflow">if</span>(ch == <span class="charliteral">&#39;\n&#39;</span>){</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>                            dump_append(dmp,<span class="stringliteral">&quot;\\n&quot;</span>);</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>                        }<span class="keywordflow">else</span> <span class="keywordflow">if</span>(ch == <span class="charliteral">&#39;\t&#39;</span>){</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>                            dump_append(dmp,<span class="stringliteral">&quot;\\t&quot;</span>);</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>                        }<span class="keywordflow">else</span> <span class="keywordflow">if</span>(ch == <span class="charliteral">&#39;\\&#39;</span>){</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>                            dump_append(dmp,<span class="stringliteral">&quot;\\\\&quot;</span>);</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>                        }<span class="keywordflow">else</span> <span class="keywordflow">if</span>(ch == <span class="charliteral">&#39;\&quot;&#39;</span>){</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>                            dump_append(dmp,<span class="stringliteral">&quot;\\\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>                        }<span class="keywordflow">else</span> <span class="keywordflow">if</span>(ch ==<span class="charliteral">&#39;\&#39;&#39;</span>){</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>                            dump_append(dmp,<span class="stringliteral">&quot;\\\&#39;&quot;</span>);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>                        }<span class="keywordflow">else</span> dump_append(dmp,std::string_view(&amp;ch,1));</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>                    }</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>                    dump_append(dmp,<span class="stringliteral">&quot;\&quot;&quot;</span>);</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>                };</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>                <span class="keywordflow">while</span>(!tree.empty()){</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>                    <a class="code hl_struct" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Node</a> * top = tree.top();</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>                    <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0;i &lt; depth;++i){</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>                        dump_append(appender,indent_str);</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>                    }</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>                    add_str(appender,top-&gt;<a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a55cdec4c5c88e821f1ea572923fec67e">name</a>);</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span> </div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>                    <span class="keywordflow">for</span>(<span class="keyword">auto</span> &amp; value : top-&gt;<a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a0bde5bd0c2ef9d6f225d8da869ad0ab7">values</a>){</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>                        dump_append(appender,<span class="stringliteral">&quot; &quot;</span>);</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>                        add_str(appender,value);</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>                    }</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>                    dump_append(appender,<span class="stringliteral">&quot; &quot;</span>);</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>                    <span class="comment">// Add children</span></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>                    <span class="keywordflow">if</span>(top-&gt;<a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac71543a1bbd172cac4c270efe47639b5">children</a>.size()){</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>                        dump_append(appender,<span class="stringliteral">&quot;{\n&quot;</span>);</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>                        <span class="keywordflow">for</span>(<span class="keyword">auto</span> &amp; node : top-&gt;<a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac71543a1bbd172cac4c270efe47639b5">children</a>)tree.push(&amp;node);</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>                        ++depth;</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>                        <span class="keywordflow">continue</span>; <span class="comment">// 说明目前还是父节点</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>                    }</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>                    tree.pop(); <span class="comment">// 目前他没有孩子了</span></div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>                    <span class="keywordflow">if</span>(tree.empty()){</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>                        dump_append(appender,<span class="stringliteral">&quot;;\n&quot;</span>);</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>                        <span class="keywordflow">break</span>;</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>                    }</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>                    <a class="code hl_struct" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Node</a> &amp; new_top = *tree.top();</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>                    <span class="keywordflow">if</span>(new_top.<a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac71543a1bbd172cac4c270efe47639b5">children</a>.size()){</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>                        <span class="keywordtype">int</span> off = top - &amp;(new_top.<a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac71543a1bbd172cac4c270efe47639b5">children</a>[0]);</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>                        <span class="keywordflow">if</span>(off &lt; 0 &amp;&amp; off &gt;= <span class="keyword">sizeof</span>(<a class="code hl_struct" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Node</a>) * new_top.<a class="code hl_variable" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac71543a1bbd172cac4c270efe47639b5">children</a>.size()){</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>                            dump_append(appender,<span class="stringliteral">&quot;;\n&quot;</span>);</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>                        }<span class="keywordflow">else</span>{</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>                            tree.pop();</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>                            --depth;</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>                            dump_append(appender,<span class="stringliteral">&quot;;\n&quot;</span>);</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>                            <span class="keywordflow">for</span>(<span class="keywordtype">int</span> i = 0;i &lt; depth;++i){</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>                                dump_append(appender,indent_str);</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>                            }</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>                            dump_append(appender,<span class="stringliteral">&quot;};\n&quot;</span>);</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>                        }</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>                    }<span class="keywordflow">else</span>{</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>                        <span class="comment">//上一个元素没有子节点，说明应该是平级</span></div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>                        dump_append(appender,<span class="stringliteral">&quot;;\n&quot;</span>);</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>                    }</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>                }</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>            }</div>
+</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>        };</div>
+</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno"><a class="line" href="../../d8/d7f/structalib_1_1g3_1_1Config.html#ae685aaa4a7ff55d8149b7a9a72151a8f">  275</a></span>        <a class="code hl_struct" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Node</a> <a class="code hl_variable" href="../../d8/d7f/structalib_1_1g3_1_1Config.html#ae685aaa4a7ff55d8149b7a9a72151a8f">root</a>; </div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        <a class="code hl_struct" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html">ConfigLoadResult</a> load(std::istream &amp; is);</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno"><a class="line" href="../../d8/d7f/structalib_1_1g3_1_1Config.html#ad00e1d427d9452306d0bc371beb109eb">  280</a></span>        <a class="code hl_struct" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html">ConfigLoadResult</a> <a class="code hl_function" href="../../d8/d7f/structalib_1_1g3_1_1Config.html#ad00e1d427d9452306d0bc371beb109eb">load</a>(std::string_view str);</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>        <span class="keywordtype">void</span> clear();</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        <a class="code hl_struct" href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html">ConfigLoadResult</a> analyse_words(std::span&lt;std::string&gt; tokens,std::span&lt;int&gt; hints);</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    };</div>
+</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>}</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span> </div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aalib-g3_2autil_8h_html"><div class="ttname"><a href="../../d5/d6c/alib-g3_2autil_8h.html">autil.h</a></div><div class="ttdoc">工具库，提供IO、字符串、系统数据等静态函数</div></div>
+<div class="ttc" id="anamespacealib_1_1g3_html"><div class="ttname"><a href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a></div><div class="ttdoc">第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。</div><div class="ttdef"><b>Definition</b> alogger_old.cpp:413</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigCastResult_html"><div class="ttname"><a href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">alib::g3::ConfigCastResult</a></div><div class="ttdef"><b>Definition</b> aconf_det.h:14</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html">alib::g3::ConfigLoadResult</a></div><div class="ttdoc">处理的结果 @start-date 2025/11/02</div><div class="ttdef"><b>Definition</b> aconf.h:48</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html_a07e579fea04115d80f9aff3ffd2b65cb"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cb">alib::g3::ConfigLoadResult::Code</a></div><div class="ttdeci">Code</div><div class="ttdef"><b>Definition</b> aconf.h:49</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html_a07e579fea04115d80f9aff3ffd2b65cba25ddeb7ef6d6b48b4c2ef1556d54dbab"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cba25ddeb7ef6d6b48b4c2ef1556d54dbab">alib::g3::ConfigLoadResult::EOFTooEarly</a></div><div class="ttdeci">@ EOFTooEarly</div><div class="ttdef"><b>Definition</b> aconf.h:51</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html_a07e579fea04115d80f9aff3ffd2b65cba7d44026cfa275c3810064b71b2643ab6"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cba7d44026cfa275c3810064b71b2643ab6">alib::g3::ConfigLoadResult::EmptyNodeName</a></div><div class="ttdeci">@ EmptyNodeName</div><div class="ttdoc">类似这样 &quot;{ ... } ...;&quot; 你的node还没有名字就插入block了，正确的应该是&quot;name {...} ...&quot;</div><div class="ttdef"><b>Definition</b> aconf.h:53</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html_a07e579fea04115d80f9aff3ffd2b65cbaabf3a48ae2fcafb77ccdaf1e518a46f8"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a07e579fea04115d80f9aff3ffd2b65cbaabf3a48ae2fcafb77ccdaf1e518a46f8">alib::g3::ConfigLoadResult::TooManyBraces</a></div><div class="ttdeci">@ TooManyBraces</div><div class="ttdoc">太多 } ; 之类的使得当前的分析树被清空无法进行下一步分析</div><div class="ttdef"><b>Definition</b> aconf.h:55</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html_a468eb3ee2aa8cf3bae73d60592f7a295"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a468eb3ee2aa8cf3bae73d60592f7a295">alib::g3::ConfigLoadResult::col</a></div><div class="ttdeci">int col</div><div class="ttdoc">列号，不方便计算，目前恒为0</div><div class="ttdef"><b>Definition</b> aconf.h:62</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html_a46c5a558a8ea504cb8d7633cf20e62ab"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#a46c5a558a8ea504cb8d7633cf20e62ab">alib::g3::ConfigLoadResult::code</a></div><div class="ttdeci">Code code</div><div class="ttdoc">错误码</div><div class="ttdef"><b>Definition</b> aconf.h:60</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html_aa3021fa75d844a178c4aede01b2e1da7"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#aa3021fa75d844a178c4aede01b2e1da7">alib::g3::ConfigLoadResult::line</a></div><div class="ttdeci">int line</div><div class="ttdoc">出错大致行号，除了unclosed string,一般来讲偏差不大</div><div class="ttdef"><b>Definition</b> aconf.h:61</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1ConfigLoadResult_html_aeedc58b60beea394e93fa33c16254364"><div class="ttname"><a href="../../d2/ded/structalib_1_1g3_1_1ConfigLoadResult.html#aeedc58b60beea394e93fa33c16254364">alib::g3::ConfigLoadResult::ConfigLoadResult</a></div><div class="ttdeci">ConfigLoadResult(Code c, int cline=0, int ccol=0)</div><div class="ttdoc">constructor</div><div class="ttdef"><b>Definition</b> aconf.h:65</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">alib::g3::Config::Node</a></div><div class="ttdoc">每个节点 @start-date 2025/11/02</div><div class="ttdef"><b>Definition</b> aconf.h:81</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_a0a57fc203ce89964cb9e7f57a88ef15f"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a0a57fc203ce89964cb9e7f57a88ef15f">alib::g3::Config::Node::get_value_as</a></div><div class="ttdeci">ConfigCastResult&lt; T &gt; get_value_as(size_t value_index) const</div><div class="ttdoc">获取转换后的数值</div><div class="ttdef"><b>Definition</b> aconf.h:162</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_a0bde5bd0c2ef9d6f225d8da869ad0ab7"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a0bde5bd0c2ef9d6f225d8da869ad0ab7">alib::g3::Config::Node::values</a></div><div class="ttdeci">std::vector&lt; std::pmr::string &gt; values</div><div class="ttdoc">节点的数组值列表</div><div class="ttdef"><b>Definition</b> aconf.h:85</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_a135a1e4a7f535b088eb2ef55a3d7a7a9"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a135a1e4a7f535b088eb2ef55a3d7a7a9">alib::g3::Config::Node::get_node_recursive_value_as</a></div><div class="ttdeci">ConfigCastResult&lt; T &gt; get_node_recursive_value_as(const std::vector&lt; std::string_view &gt; &amp;location, size_t expected_index=0, size_t value_index=0) const</div><div class="ttdoc">获取转换后的数值</div><div class="ttdef"><b>Definition</b> aconf.h:180</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_a55cdec4c5c88e821f1ea572923fec67e"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a55cdec4c5c88e821f1ea572923fec67e">alib::g3::Config::Node::name</a></div><div class="ttdeci">std::pmr::string name</div><div class="ttdoc">节点的名字</div><div class="ttdef"><b>Definition</b> aconf.h:83</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_a99a00770132fcf703deeb81a8b7e435e"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a99a00770132fcf703deeb81a8b7e435e">alib::g3::Config::Node::print_node</a></div><div class="ttdeci">void print_node(int indent=0) const</div><div class="ttdoc">用于测试，打印自身</div><div class="ttdef"><b>Definition</b> aconf.h:150</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_aa11def359ba4a15888d9a3365e33bf98"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#aa11def359ba4a15888d9a3365e33bf98">alib::g3::Config::Node::get_value</a></div><div class="ttdeci">std::optional&lt; std::string_view &gt; get_value(size_t value_index) const</div><div class="ttdoc">获取数组值</div><div class="ttdef"><b>Definition</b> aconf.h:133</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_ac71543a1bbd172cac4c270efe47639b5"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac71543a1bbd172cac4c270efe47639b5">alib::g3::Config::Node::children</a></div><div class="ttdeci">std::vector&lt; Node &gt; children</div><div class="ttdoc">节点的字节点</div><div class="ttdef"><b>Definition</b> aconf.h:87</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_ac7e56cc2357a6ec2f65f1dd46b166651"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac7e56cc2357a6ec2f65f1dd46b166651">alib::g3::Config::Node::dump</a></div><div class="ttdeci">void dump(Dumper &amp;appender, size_t indent=4)</div><div class="ttdef"><b>Definition</b> aconf.h:191</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_ad3caea2da119e5513db0cea9d1c501b3"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ad3caea2da119e5513db0cea9d1c501b3">alib::g3::Config::Node::get_child_nodes_view</a></div><div class="ttdeci">auto get_child_nodes_view(const std::string &amp;name) const</div><div class="ttdoc">获取子节点中所有名字为name的节点</div><div class="ttdef"><b>Definition</b> aconf.h:105</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_1_1Node_html_af582943ab4691084f8fc5e8572704465"><div class="ttname"><a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#af582943ab4691084f8fc5e8572704465">alib::g3::Config::Node::get_node_recursive_value</a></div><div class="ttdeci">std::optional&lt; std::string_view &gt; get_node_recursive_value(const std::vector&lt; std::string_view &gt; &amp;location, size_t expected_index=0, size_t value_index=0) const</div><div class="ttdoc">递归获取对应节点的对应数值</div><div class="ttdef"><b>Definition</b> aconf.h:120</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_html"><div class="ttname"><a href="../../d8/d7f/structalib_1_1g3_1_1Config.html">alib::g3::Config</a></div><div class="ttdoc">简易DSL核心 @start-date 2025/11/02</div><div class="ttdef"><b>Definition</b> aconf.h:76</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_html_ad00e1d427d9452306d0bc371beb109eb"><div class="ttname"><a href="../../d8/d7f/structalib_1_1g3_1_1Config.html#ad00e1d427d9452306d0bc371beb109eb">alib::g3::Config::load</a></div><div class="ttdeci">ConfigLoadResult load(std::string_view str)</div><div class="ttdoc">从字符串中加载，不会清除当前数据</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1Config_html_ae685aaa4a7ff55d8149b7a9a72151a8f"><div class="ttname"><a href="../../d8/d7f/structalib_1_1g3_1_1Config.html#ae685aaa4a7ff55d8149b7a9a72151a8f">alib::g3::Config::root</a></div><div class="ttdeci">Node root</div><div class="ttdoc">根节点，默认为匿名</div><div class="ttdef"><b>Definition</b> aconf.h:275</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../df/d28/aconf_8h.html">aconf.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

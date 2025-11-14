@@ -1,0 +1,420 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/AGE/Texture.h 源文件</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(1); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d9/dbf/Texture_8h_source.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">Texture.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="../../d9/dbf/Texture_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#ifndef AGE_H_TEXTURE</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#define AGE_H_TEXTURE</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="preprocessor">#include &lt;<a class="code" href="../../d9/ded/Utils_8h.html">AGE/Utils.h</a>&gt;</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#include &lt;GL/glew.h&gt;</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#include &lt;glm/glm.hpp&gt;</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;glm/gtc/type_ptr.hpp&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;<a class="code" href="../../dc/d15/Query_8h.html">AGE/Query.h</a>&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d9/d9a/namespaceage.html">age</a>{</div>
+<div class="foldopen" id="foldopen00021" data-start="{" data-end="};">
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="../../d7/d02/structage_1_1TextureInfo.html">   21</a></span>    <span class="keyword">struct </span>AGE_API <a class="code hl_struct" href="../../d7/d02/structage_1_1TextureInfo.html">TextureInfo</a>{</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="../../d7/d02/structage_1_1TextureInfo.html#a908f3b59aa23c48206da4bb489bba2de">   22</a></span>        std::string <a class="code hl_variable" href="../../d7/d02/structage_1_1TextureInfo.html#a908f3b59aa23c48206da4bb489bba2de">filePath</a>; </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        <span class="keywordtype">bool</span> loadedFromMemory;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="comment">//图片属性</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <span class="keywordtype">int</span> width;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>        <span class="keywordtype">int</span> height;</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        <span class="keywordtype">int</span> channels;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keywordtype">bool</span> mipmap;</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        <span class="comment">//上传属性</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <span class="keywordtype">bool</span> uploaded;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        <span class="keywordtype">bool</span> hasbits;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> * bits; <span class="comment">//要是uploaded为true,保证为nullptr</span></div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>    };</div>
+</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00037" data-start="{" data-end="};">
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d7/d60/structage_1_1SamplerInfo.html">   37</a></span>    <span class="keyword">struct </span>AGE_API <a class="code hl_struct" href="../../d7/d60/structage_1_1SamplerInfo.html">SamplerInfo</a>{</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        <span class="keyword">enum class</span> WrapMethod : GLenum {</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>            Repeat = GL_REPEAT,</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            MirroredRepeat = GL_MIRRORED_REPEAT,</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>            ClampToEdge = GL_CLAMP_TO_EDGE,</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>            ClampToBorder = GL_CLAMP_TO_BORDER</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        };</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keyword">enum class</span> MinFilter : GLenum{</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            Nearest = GL_NEAREST,</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            Linear = GL_LINEAR,</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            Nearest_Mipmap_Nearest = GL_NEAREST_MIPMAP_NEAREST,</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>            Nearest_Mipmap_Linear = GL_NEAREST_MIPMAP_LINEAR,</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>            Linear_Mipmap_Nearest = GL_LINEAR_MIPMAP_NEAREST,</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>            Linear_Mipmap_Linear = GL_LINEAR_MIPMAP_LINEAR</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>        };</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>        <span class="keyword">enum class</span> MagFilter : GLenum{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>            Nearest = GL_NEAREST,</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>            Linear = GL_LINEAR</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        };</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>        WrapMethod warp_s;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        WrapMethod warp_r;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>        WrapMethod warp_t;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        glm::vec4 borderColor;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        MinFilter minFilter;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        MagFilter magFilter;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordtype">float</span> anisotropicLevel;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d7/d60/structage_1_1SamplerInfo.html">SamplerInfo</a>(){</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            warp_s = warp_r = warp_t = WrapMethod::Repeat;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            borderColor = glm::vec4(0,0,0,0);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        }</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    };</div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="foldopen" id="foldopen00071" data-start="{" data-end="};">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="../../d8/dc5/structage_1_1Sampler.html">   71</a></span>    <span class="keyword">struct </span>AGE_API <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>{</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="keyword">friend</span> <span class="keyword">class </span>Tetxure;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code hl_struct" href="../../df/db1/classage_1_1Application.html">Application</a>;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        GLuint sampler_id;</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <a class="code hl_struct" href="../../d7/d60/structage_1_1SamplerInfo.html">SamplerInfo</a> * info;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>        <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>(){}</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>        std::string_view sid;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keyword">inline</span> <span class="keywordtype">void</span> bind(GLuint channel){</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            glBindSampler(channel - GL_TEXTURE0,sampler_id);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        }</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        <span class="keyword">inline</span> <span class="keyword">const</span> <a class="code hl_struct" href="../../d7/d60/structage_1_1SamplerInfo.html">SamplerInfo</a>&amp; getInfo(){</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>            <span class="keywordflow">return</span> *info;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        }</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>&amp; wrapS(SamplerInfo::WrapMethod method){</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            info-&gt;warp_s = method;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            glSamplerParameteri(sampler_id,GL_TEXTURE_WRAP_S,<span class="keyword">static_cast&lt;</span>GLenum<span class="keyword">&gt;</span>(method));</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        }</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>&amp; wrapR(SamplerInfo::WrapMethod method){</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            info-&gt;warp_r = method;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            glSamplerParameteri(sampler_id,GL_TEXTURE_WRAP_R,<span class="keyword">static_cast&lt;</span>GLenum<span class="keyword">&gt;</span>(method));</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        }</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>&amp; wrapT(SamplerInfo::WrapMethod method){</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>            info-&gt;warp_t = method;</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>            glSamplerParameteri(sampler_id,GL_TEXTURE_WRAP_T,<span class="keyword">static_cast&lt;</span>GLenum<span class="keyword">&gt;</span>(method));</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        }</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>&amp; borderColor(<span class="keyword">const</span> glm::vec4&amp; color){</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>            info-&gt;borderColor = color;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>            glSamplerParameterfv(sampler_id,GL_TEXTURE_BORDER_COLOR,glm::value_ptr(color));</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        }</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>&amp; minFilter(SamplerInfo::MinFilter met){</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>            info-&gt;minFilter = met;</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>            glSamplerParameteri(sampler_id,GL_TEXTURE_MIN_FILTER,<span class="keyword">static_cast&lt;</span>GLenum<span class="keyword">&gt;</span>(met));</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        }</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span> </div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>&amp; magFilter(SamplerInfo::MagFilter met){</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            info-&gt;magFilter = met;</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>            glSamplerParameteri(sampler_id,GL_TEXTURE_MAG_FILTER,<span class="keyword">static_cast&lt;</span>GLenum<span class="keyword">&gt;</span>(met));</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        }</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/dc5/structage_1_1Sampler.html">Sampler</a>&amp; try_anisotropy(<span class="keywordtype">float</span> value){</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>            <span class="keyword">auto</span> [support,val] = <a class="code hl_struct" href="../../d5/d8f/structage_1_1Queryer.html">Queryer</a>().<a class="code hl_function" href="../../d5/d8f/structage_1_1Queryer.html#a6b22da68a018b2f7cd94072552aa59c1">anisotropicFiltering</a>();</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>            <span class="keywordflow">if</span>(support){</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>                glSamplerParameterf(sampler_id,GL_TEXTURE_MAX_ANISOTROPY_EXT,std::min(val,value));</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>            }<span class="comment">// do nothing if doesnt support</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        }</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    };</div>
+</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    <span class="keyword">class </span><a class="code hl_struct" href="../../df/db1/classage_1_1Application.html">Application</a>;</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="foldopen" id="foldopen00138" data-start="{" data-end="};">
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno"><a class="line" href="../../dc/dfa/structage_1_1Texture.html">  138</a></span>    <span class="keyword">struct </span>AGE_API <a class="code hl_struct" href="../../dc/dfa/structage_1_1Texture.html">Texture</a> : <span class="keyword">public</span> <a class="code hl_struct" href="../../d8/d2a/structage_1_1NonCopyable.html">NonCopyable</a>{</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        GLuint texture_id {0};</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno"><a class="line" href="../../dc/dfa/structage_1_1Texture.html#a23f25bcc02a0e94c2f5a4188496b04d0">  142</a></span>        <span class="keyword">friend</span> <span class="keyword">class </span><a class="code hl_struct" href="../../df/db1/classage_1_1Application.html">Application</a>;</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>        <a class="code hl_struct" href="../../d7/d02/structage_1_1TextureInfo.html">TextureInfo</a> * textureInfo; </div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        GLuint binding_point;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../dc/dfa/structage_1_1Texture.html">Texture</a>(){}</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        std::string_view sid;</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="foldopen" id="foldopen00155" data-start="{" data-end="}">
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno"><a class="line" href="../../dc/dfa/structage_1_1Texture.html#a8e4917bb7816099ff616e33dcaf7711a">  155</a></span>        <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../dc/dfa/structage_1_1Texture.html#a8e4917bb7816099ff616e33dcaf7711a">bind</a>(GLuint channel){</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>            <span class="keywordflow">if</span>(!texture_id)<span class="keywordflow">return</span>;</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>            glActiveTexture(channel);</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>            glBindTexture(binding_point,texture_id);</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        }</div>
+</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        <span class="keyword">inline</span> GLuint getId(){</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>            <span class="keywordflow">return</span> texture_id;</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        }</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="foldopen" id="foldopen00165" data-start="{" data-end="};">
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno"><a class="line" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html">  165</a></span>        <span class="keyword">struct </span>AGE_API <a class="code hl_struct" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html">TexImageParams</a>{</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>            <span class="comment">// GLuint m_target;</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            GLint m_level;</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>            GLint m_internalformat;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>            GLsizei m_width;</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>            GLsizei m_height; <span class="comment">//&lt; works for 2D,3D</span></div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno"><a class="line" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a8619779ce0823930ad11eb42f6e0b601">  171</a></span>            GLsizei <a class="code hl_variable" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a8619779ce0823930ad11eb42f6e0b601">m_depth</a>; </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>            GLint m_border;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>            GLenum m_format;</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>            GLenum m_type;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>            <span class="keyword">const</span> <span class="keywordtype">void</span>* m_data;</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span> </div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>            <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html">TexImageParams</a>&amp; border(GLint a = 0){</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>                m_border = a;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>            }</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span> </div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>            <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html">TexImageParams</a>&amp; type(GLenum a){</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>                m_type = a;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>            }</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span> </div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>            <span class="keyword">inline</span> TexImageParams&amp; format(GLenum a){</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>                m_format = a;</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>            }</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
+<div class="foldopen" id="foldopen00193" data-start="{" data-end="}">
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a0d58418d640179651771f2dae6f26d8e">  193</a></span>            <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html">TexImageParams</a>&amp; <a class="code hl_function" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a0d58418d640179651771f2dae6f26d8e">data</a>(<span class="keyword">const</span> <span class="keywordtype">void</span> * a){</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>                m_data = a;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>            }</div>
+</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>            <span class="comment">/*inline TexImageParams&amp; target(GLuint a){</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="comment">                m_target = a;</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span><span class="comment">                return *this;</span></div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span><span class="comment">            }*/</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span> </div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            <span class="keyword">inline</span> <a class="code hl_struct" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html">TexImageParams</a>&amp; level(GLint a){</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>                m_level = a;</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>            }</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span> </div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            <span class="keyword">inline</span> TexImageParams&amp; internalformat(GLint a){</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>                m_internalformat = a;</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>            }</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>            <span class="keyword">inline</span> TexImageParams&amp; width(GLsizei a){</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>                m_width = a;</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>            }</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>            <span class="keyword">inline</span> TexImageParams&amp; height(GLsizei a){</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>                m_height = a;</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>            }</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span> </div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>            <span class="keyword">inline</span> TexImageParams&amp; depth(GLsizei a){</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>                m_depth = a;</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>            }</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span> </div>
+<div class="foldopen" id="foldopen00229" data-start="{" data-end="}">
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a627912afa3f22299dc1fc4c83f7d56c1">  229</a></span>            <span class="keyword">inline</span> <a class="code hl_function" href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a627912afa3f22299dc1fc4c83f7d56c1">TexImageParams</a>(){</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>                width(0).height(0).depth(0);</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>                internalformat(GL_RGBA).type(GL_UNSIGNED_BYTE).border(0);</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>                level(0).data(0).format(GL_RGBA);</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>            }</div>
+</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        };</div>
+</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span> </div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="keyword">inline</span> <span class="keywordtype">void</span> texImage2D(<span class="keyword">const</span> TexImageParams &amp; data){</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>            <a class="code hl_struct" href="../../dd/df3/structage_1_1ScopedGLState.html">ScopedGLState&lt;GL_TEXTURE_2D&gt;</a> scope(texture_id);</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>            binding_point = GL_TEXTURE_2D;</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>            glTexImage2D(GL_TEXTURE_2D,data.m_level,data.m_internalformat,data.m_width,data.m_height,data.m_border,data.m_format,data.m_type,data.m_data);</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        }</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        <span class="keyword">inline</span> <span class="keywordtype">void</span> texImage1D(<span class="keyword">const</span> TexImageParams &amp; data){</div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>            ScopedGLState&lt;GL_TEXTURE_1D&gt; scope(texture_id);</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>            binding_point = GL_TEXTURE_1D;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>            glTexImage1D(GL_TEXTURE_1D,data.m_level,data.m_internalformat,data.m_width,data.m_border,data.m_format,data.m_type,data.m_data);</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        }</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span> </div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>        <span class="keyword">inline</span> <span class="keywordtype">void</span> texImage3D(<span class="keyword">const</span> TexImageParams &amp; data){</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>            ScopedGLState&lt;GL_TEXTURE_3D&gt; scope(texture_id);</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>            binding_point = GL_TEXTURE_3D;</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>            glTexImage3D(GL_TEXTURE_3D,data.m_level,data.m_internalformat,data.m_width,data.m_height,data.m_depth,data.m_border,data.m_format,data.m_type,data.m_data);</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        }</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        <span class="comment">//由于Application无法包含否则循环include,所以这里似乎需要抛弃inline</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keyword">inline</span> <span class="keyword">const</span> TextureInfo &amp; getTextureInfo(){</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>            <span class="keywordflow">return</span> *textureInfo;</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        }</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    };</div>
+</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span> </div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span> </div>
+<div class="foldopen" id="foldopen00262" data-start="{" data-end="};">
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno"><a class="line" href="../../d0/d54/structage_1_1CreateTextureInfo.html">  262</a></span>    <span class="keyword">struct </span>AGE_API <a class="code hl_struct" href="../../d0/d54/structage_1_1CreateTextureInfo.html">CreateTextureInfo</a>{</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>        <span class="keyword">enum</span> Source{</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>            FromFile,</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>            FromBuffer,</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>            FromVector,</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>            CreateEmpty</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>        };</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span> </div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>        std::string sid;</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>        Source source;</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>        <span class="keyword">struct </span>{ </div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>            std::string path;</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno"><a class="line" href="../../d0/d54/structage_1_1CreateTextureInfo.html#ac4cd30b5da6f78220a1967fea1caec0c">  274</a></span>        } file; </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>            GLchar * data;</div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno"><a class="line" href="../../d0/d54/structage_1_1CreateTextureInfo.html#a70dc61926fc362c3dd355f43c8b7d604">  277</a></span>            <span class="keywordtype">size_t</span> <a class="code hl_variable" href="../../d0/d54/structage_1_1CreateTextureInfo.html#a70dc61926fc362c3dd355f43c8b7d604">eleCount</a>; </div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>        } buffer;</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>        <span class="keyword">struct </span>{</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            std::vector&lt;GLchar&gt;* data;</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>        } vec;</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> channel_desired;</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="../../d0/d54/structage_1_1CreateTextureInfo.html#ae2cd432f8d3ab97852fd8115b64168a0">  283</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d0/d54/structage_1_1CreateTextureInfo.html#ae2cd432f8d3ab97852fd8115b64168a0">uploadToOpenGL</a>; </div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>        <span class="keywordtype">bool</span> genMipmap;</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span> </div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>        <a class="code hl_struct" href="../../d0/d54/structage_1_1CreateTextureInfo.html">CreateTextureInfo</a>();</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    };</div>
+</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>}</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aQuery_8h_html"><div class="ttname"><a href="../../dc/d15/Query_8h.html">Query.h</a></div><div class="ttdoc">获取OpenGL各种信息，glew必须初始化完成才可以使用这个文件的东西</div></div>
+<div class="ttc" id="aUtils_8h_html"><div class="ttname"><a href="../../d9/ded/Utils_8h.html">Utils.h</a></div><div class="ttdoc">一些工具</div></div>
+<div class="ttc" id="aclassage_1_1Application_html"><div class="ttname"><a href="../../df/db1/classage_1_1Application.html">age::Application</a></div><div class="ttdoc">应用程序，尝试支持多窗口</div><div class="ttdef"><b>Definition</b> Application.h:85</div></div>
+<div class="ttc" id="anamespaceage_html"><div class="ttname"><a href="../../d9/d9a/namespaceage.html">age</a></div><div class="ttdoc">Aaaa0ggmc's Graphics Engine 我的图形引擎</div><div class="ttdef"><b>Definition</b> Audio.cpp:5</div></div>
+<div class="ttc" id="astructage_1_1CreateTextureInfo_html"><div class="ttname"><a href="../../d0/d54/structage_1_1CreateTextureInfo.html">age::CreateTextureInfo</a></div><div class="ttdef"><b>Definition</b> Texture.h:262</div></div>
+<div class="ttc" id="astructage_1_1CreateTextureInfo_html_a70dc61926fc362c3dd355f43c8b7d604"><div class="ttname"><a href="../../d0/d54/structage_1_1CreateTextureInfo.html#a70dc61926fc362c3dd355f43c8b7d604">age::CreateTextureInfo::eleCount</a></div><div class="ttdeci">size_t eleCount</div><div class="ttdoc">not the size of the buffer!!!</div><div class="ttdef"><b>Definition</b> Texture.h:277</div></div>
+<div class="ttc" id="astructage_1_1CreateTextureInfo_html_ae2cd432f8d3ab97852fd8115b64168a0"><div class="ttname"><a href="../../d0/d54/structage_1_1CreateTextureInfo.html#ae2cd432f8d3ab97852fd8115b64168a0">age::CreateTextureInfo::uploadToOpenGL</a></div><div class="ttdeci">bool uploadToOpenGL</div><div class="ttdoc">if this value equals to true,make sure that you are creating an image rather than something eg....</div><div class="ttdef"><b>Definition</b> Texture.h:283</div></div>
+<div class="ttc" id="astructage_1_1NonCopyable_html"><div class="ttname"><a href="../../d8/d2a/structage_1_1NonCopyable.html">age::NonCopyable</a></div><div class="ttdef"><b>Definition</b> Utils.h:225</div></div>
+<div class="ttc" id="astructage_1_1Queryer_html"><div class="ttname"><a href="../../d5/d8f/structage_1_1Queryer.html">age::Queryer</a></div><div class="ttdoc">QueryOpenGL State</div><div class="ttdef"><b>Definition</b> Query.h:20</div></div>
+<div class="ttc" id="astructage_1_1Queryer_html_a6b22da68a018b2f7cd94072552aa59c1"><div class="ttname"><a href="../../d5/d8f/structage_1_1Queryer.html#a6b22da68a018b2f7cd94072552aa59c1">age::Queryer::anisotropicFiltering</a></div><div class="ttdeci">std::pair&lt; bool, float &gt; anisotropicFiltering()</div><div class="ttdoc">查看 AF 支持情况</div><div class="ttdef"><b>Definition</b> Query.h:30</div></div>
+<div class="ttc" id="astructage_1_1SamplerInfo_html"><div class="ttname"><a href="../../d7/d60/structage_1_1SamplerInfo.html">age::SamplerInfo</a></div><div class="ttdef"><b>Definition</b> Texture.h:37</div></div>
+<div class="ttc" id="astructage_1_1Sampler_html"><div class="ttname"><a href="../../d8/dc5/structage_1_1Sampler.html">age::Sampler</a></div><div class="ttdef"><b>Definition</b> Texture.h:71</div></div>
+<div class="ttc" id="astructage_1_1ScopedGLState_html"><div class="ttname"><a href="../../dd/df3/structage_1_1ScopedGLState.html">age::ScopedGLState</a></div><div class="ttdef"><b>Definition</b> Utils.h:208</div></div>
+<div class="ttc" id="astructage_1_1TextureInfo_html"><div class="ttname"><a href="../../d7/d02/structage_1_1TextureInfo.html">age::TextureInfo</a></div><div class="ttdef"><b>Definition</b> Texture.h:21</div></div>
+<div class="ttc" id="astructage_1_1TextureInfo_html_a908f3b59aa23c48206da4bb489bba2de"><div class="ttname"><a href="../../d7/d02/structage_1_1TextureInfo.html#a908f3b59aa23c48206da4bb489bba2de">age::TextureInfo::filePath</a></div><div class="ttdeci">std::string filePath</div><div class="ttdoc">empty if loaded from memory</div><div class="ttdef"><b>Definition</b> Texture.h:22</div></div>
+<div class="ttc" id="astructage_1_1Texture_1_1TexImageParams_html"><div class="ttname"><a href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html">age::Texture::TexImageParams</a></div><div class="ttdef"><b>Definition</b> Texture.h:165</div></div>
+<div class="ttc" id="astructage_1_1Texture_1_1TexImageParams_html_a0d58418d640179651771f2dae6f26d8e"><div class="ttname"><a href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a0d58418d640179651771f2dae6f26d8e">age::Texture::TexImageParams::data</a></div><div class="ttdeci">TexImageParams &amp; data(const void *a)</div><div class="ttdoc">Specifies a pointer to the image data in memory.</div><div class="ttdef"><b>Definition</b> Texture.h:193</div></div>
+<div class="ttc" id="astructage_1_1Texture_1_1TexImageParams_html_a627912afa3f22299dc1fc4c83f7d56c1"><div class="ttname"><a href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a627912afa3f22299dc1fc4c83f7d56c1">age::Texture::TexImageParams::TexImageParams</a></div><div class="ttdeci">TexImageParams()</div><div class="ttdoc">default values: width=height=depth=0 internalformat=format=GL_RGBA type=GL_UNSIGNED_INT border=level=...</div><div class="ttdef"><b>Definition</b> Texture.h:229</div></div>
+<div class="ttc" id="astructage_1_1Texture_1_1TexImageParams_html_a8619779ce0823930ad11eb42f6e0b601"><div class="ttname"><a href="../../d8/d07/structage_1_1Texture_1_1TexImageParams.html#a8619779ce0823930ad11eb42f6e0b601">age::Texture::TexImageParams::m_depth</a></div><div class="ttdeci">GLsizei m_depth</div><div class="ttdoc">works only for 3D</div><div class="ttdef"><b>Definition</b> Texture.h:171</div></div>
+<div class="ttc" id="astructage_1_1Texture_html"><div class="ttname"><a href="../../dc/dfa/structage_1_1Texture.html">age::Texture</a></div><div class="ttdef"><b>Definition</b> Texture.h:138</div></div>
+<div class="ttc" id="astructage_1_1Texture_html_a8e4917bb7816099ff616e33dcaf7711a"><div class="ttname"><a href="../../dc/dfa/structage_1_1Texture.html#a8e4917bb7816099ff616e33dcaf7711a">age::Texture::bind</a></div><div class="ttdeci">void bind(GLuint channel)</div><div class="ttdoc">bind the texture to the current vbo</div><div class="ttdef"><b>Definition</b> Texture.h:155</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d5ab41234c9871d1e639839e34892fb3.html">AGE</a></li><li class="navelem"><a class="el" href="../../d9/dbf/Texture_8h.html">Texture.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

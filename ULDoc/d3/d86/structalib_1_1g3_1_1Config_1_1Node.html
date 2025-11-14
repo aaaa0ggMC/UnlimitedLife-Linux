@@ -1,0 +1,563 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: alib::g3::Config::Node结构体 参考</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d3/d86/structalib_1_1g3_1_1Config_1_1Node.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public 成员函数</a> &#124;
+<a href="#pub-static-methods">静态 Public 成员函数</a> &#124;
+<a href="#pub-attribs">Public 属性</a> &#124;
+<a href="../../db/dcc/structalib_1_1g3_1_1Config_1_1Node-members.html">所有成员列表</a>  </div>
+  <div class="headertitle"><div class="title">alib::g3::Config::Node结构体 参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>每个节点 @start-date 2025/11/02  
+ <a href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#details">更多...</a></p>
+
+<p><code>#include &lt;<a class="el" href="../../df/d28/aconf_8h_source.html">aconf.h</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public 成员函数</h2></td></tr>
+<tr class="memitem:af7747cad58dcf800d24ece4efce40050" id="r_af7747cad58dcf800d24ece4efce40050"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::reference_wrapper&lt; const <a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Config::Node</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#af7747cad58dcf800d24ece4efce40050">get_node_recursive</a> (const std::vector&lt; std::string_view &gt; &amp;location, size_t expected_index=0) const</td></tr>
+<tr class="memdesc:af7747cad58dcf800d24ece4efce40050"><td class="mdescLeft">&#160;</td><td class="mdescRight">递归获取对应的node  <br /></td></tr>
+<tr class="separator:af7747cad58dcf800d24ece4efce40050"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3caea2da119e5513db0cea9d1c501b3" id="r_ad3caea2da119e5513db0cea9d1c501b3"><td class="memItemLeft" align="right" valign="top">auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ad3caea2da119e5513db0cea9d1c501b3">get_child_nodes_view</a> (const std::string &amp;<a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a55cdec4c5c88e821f1ea572923fec67e">name</a>) const</td></tr>
+<tr class="memdesc:ad3caea2da119e5513db0cea9d1c501b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取子节点中所有名字为name的节点  <br /></td></tr>
+<tr class="separator:ad3caea2da119e5513db0cea9d1c501b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af582943ab4691084f8fc5e8572704465" id="r_af582943ab4691084f8fc5e8572704465"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string_view &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#af582943ab4691084f8fc5e8572704465">get_node_recursive_value</a> (const std::vector&lt; std::string_view &gt; &amp;location, size_t expected_index=0, size_t value_index=0) const</td></tr>
+<tr class="memdesc:af582943ab4691084f8fc5e8572704465"><td class="mdescLeft">&#160;</td><td class="mdescRight">递归获取对应节点的对应数值  <br /></td></tr>
+<tr class="separator:af582943ab4691084f8fc5e8572704465"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa11def359ba4a15888d9a3365e33bf98" id="r_aa11def359ba4a15888d9a3365e33bf98"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string_view &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#aa11def359ba4a15888d9a3365e33bf98">get_value</a> (size_t value_index) const</td></tr>
+<tr class="memdesc:aa11def359ba4a15888d9a3365e33bf98"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取数组值  <br /></td></tr>
+<tr class="separator:aa11def359ba4a15888d9a3365e33bf98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99a00770132fcf703deeb81a8b7e435e" id="r_a99a00770132fcf703deeb81a8b7e435e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a99a00770132fcf703deeb81a8b7e435e">print_node</a> (int indent=0) const</td></tr>
+<tr class="memdesc:a99a00770132fcf703deeb81a8b7e435e"><td class="mdescLeft">&#160;</td><td class="mdescRight">用于测试，打印自身  <br /></td></tr>
+<tr class="separator:a99a00770132fcf703deeb81a8b7e435e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0a57fc203ce89964cb9e7f57a88ef15f" id="r_a0a57fc203ce89964cb9e7f57a88ef15f"><td class="memTemplParams" colspan="2">template&lt;class T , class CastFn  = DefConfigCaster&gt; </td></tr>
+<tr class="memitem:a0a57fc203ce89964cb9e7f57a88ef15f"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">ConfigCastResult</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a0a57fc203ce89964cb9e7f57a88ef15f">get_value_as</a> (size_t value_index) const</td></tr>
+<tr class="memdesc:a0a57fc203ce89964cb9e7f57a88ef15f"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取转换后的数值  <br /></td></tr>
+<tr class="separator:a0a57fc203ce89964cb9e7f57a88ef15f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a135a1e4a7f535b088eb2ef55a3d7a7a9" id="r_a135a1e4a7f535b088eb2ef55a3d7a7a9"><td class="memTemplParams" colspan="2">template&lt;class T , class CastFn  = DefConfigCaster&gt; </td></tr>
+<tr class="memitem:a135a1e4a7f535b088eb2ef55a3d7a7a9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">ConfigCastResult</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#a135a1e4a7f535b088eb2ef55a3d7a7a9">get_node_recursive_value_as</a> (const std::vector&lt; std::string_view &gt; &amp;location, size_t expected_index=0, size_t value_index=0) const</td></tr>
+<tr class="memdesc:a135a1e4a7f535b088eb2ef55a3d7a7a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">获取转换后的数值  <br /></td></tr>
+<tr class="separator:a135a1e4a7f535b088eb2ef55a3d7a7a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac7e56cc2357a6ec2f65f1dd46b166651" id="r_ac7e56cc2357a6ec2f65f1dd46b166651"><td class="memTemplParams" colspan="2">template&lt;CanDump Dumper&gt; </td></tr>
+<tr class="memitem:ac7e56cc2357a6ec2f65f1dd46b166651"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ac7e56cc2357a6ec2f65f1dd46b166651">dump</a> (Dumper &amp;appender, size_t indent=4)</td></tr>
+<tr class="separator:ac7e56cc2357a6ec2f65f1dd46b166651"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+静态 Public 成员函数</h2></td></tr>
+<tr class="memitem:ae29aaac91b4c22a1fa4d23eaf4589e4c" id="r_ae29aaac91b4c22a1fa4d23eaf4589e4c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#ae29aaac91b4c22a1fa4d23eaf4589e4c">print_node</a> (const <a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Config::Node</a> &amp;node, int indent=0)</td></tr>
+<tr class="memdesc:ae29aaac91b4c22a1fa4d23eaf4589e4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">用于测试，打印节点  <br /></td></tr>
+<tr class="separator:ae29aaac91b4c22a1fa4d23eaf4589e4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public 属性</h2></td></tr>
+<tr class="memitem:a55cdec4c5c88e821f1ea572923fec67e" id="r_a55cdec4c5c88e821f1ea572923fec67e"><td class="memItemLeft" align="right" valign="top"><a id="a55cdec4c5c88e821f1ea572923fec67e" name="a55cdec4c5c88e821f1ea572923fec67e"></a>
+std::pmr::string&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
+<tr class="memdesc:a55cdec4c5c88e821f1ea572923fec67e"><td class="mdescLeft">&#160;</td><td class="mdescRight">节点的名字 <br /></td></tr>
+<tr class="separator:a55cdec4c5c88e821f1ea572923fec67e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bde5bd0c2ef9d6f225d8da869ad0ab7" id="r_a0bde5bd0c2ef9d6f225d8da869ad0ab7"><td class="memItemLeft" align="right" valign="top"><a id="a0bde5bd0c2ef9d6f225d8da869ad0ab7" name="a0bde5bd0c2ef9d6f225d8da869ad0ab7"></a>
+std::vector&lt; std::pmr::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>values</b></td></tr>
+<tr class="memdesc:a0bde5bd0c2ef9d6f225d8da869ad0ab7"><td class="mdescLeft">&#160;</td><td class="mdescRight">节点的数组值列表 <br /></td></tr>
+<tr class="separator:a0bde5bd0c2ef9d6f225d8da869ad0ab7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac71543a1bbd172cac4c270efe47639b5" id="r_ac71543a1bbd172cac4c270efe47639b5"><td class="memItemLeft" align="right" valign="top"><a id="ac71543a1bbd172cac4c270efe47639b5" name="ac71543a1bbd172cac4c270efe47639b5"></a>
+std::vector&lt; <a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Node</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>children</b></td></tr>
+<tr class="memdesc:ac71543a1bbd172cac4c270efe47639b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">节点的字节点 <br /></td></tr>
+<tr class="separator:ac71543a1bbd172cac4c270efe47639b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>每个节点 @start-date 2025/11/02 </p>
+</div><h2 class="groupheader">成员函数说明</h2>
+<a id="ac7e56cc2357a6ec2f65f1dd46b166651" name="ac7e56cc2357a6ec2f65f1dd46b166651"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac7e56cc2357a6ec2f65f1dd46b166651">&#9670;&#160;</a></span>dump()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;CanDump Dumper&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void alib::g3::Config::Node::dump </td>
+          <td>(</td>
+          <td class="paramtype">Dumper &amp;&#160;</td>
+          <td class="paramname"><em>appender</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>indent</em> = <code>4</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>这里缩进</p>
+<p>内存差</p>
+<p>不在对应的vector数据范围内</p>
+<p>说明也是平级</p>
+<p>父节点，开心消消乐</p>
+
+</div>
+</div>
+<a id="ad3caea2da119e5513db0cea9d1c501b3" name="ad3caea2da119e5513db0cea9d1c501b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3caea2da119e5513db0cea9d1c501b3">&#9670;&#160;</a></span>get_child_nodes_view()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">auto alib::g3::Config::Node::get_child_nodes_view </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取子节点中所有名字为name的节点 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>名字 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>节点的ranges view,采用惰性计算，拿来遍历刚刚好 @start-date 2025/11/02 </dd></dl>
+
+</div>
+</div>
+<a id="af7747cad58dcf800d24ece4efce40050" name="af7747cad58dcf800d24ece4efce40050"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7747cad58dcf800d24ece4efce40050">&#9670;&#160;</a></span>get_node_recursive()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::reference_wrapper&lt; const <a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Config::Node</a> &gt; &gt; Config::Node::get_node_recursive </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::string_view &gt; &amp;&#160;</td>
+          <td class="paramname"><em>location</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>expected_index</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>递归获取对应的node </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">location</td><td>具体的递归链条 </td></tr>
+    <tr><td class="paramname">expected_index</td><td>期望第几个，默认第一个，要是期望值大于实际值返回实际值的最大值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>Node的引用，会在一个都没找到时返回std::nullopt @start-date 2025/11/02 </dd></dl>
+
+</div>
+</div>
+<a id="af582943ab4691084f8fc5e8572704465" name="af582943ab4691084f8fc5e8572704465"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af582943ab4691084f8fc5e8572704465">&#9670;&#160;</a></span>get_node_recursive_value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::string_view &gt; alib::g3::Config::Node::get_node_recursive_value </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::string_view &gt; &amp;&#160;</td>
+          <td class="paramname"><em>location</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>expected_index</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>value_index</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>递归获取对应节点的对应数值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">location</td><td>见 <a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#af7747cad58dcf800d24ece4efce40050" title="递归获取对应的node">Node::get_node_recursive</a> </td></tr>
+    <tr><td class="paramname">expected_index</td><td>见 <a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html#af7747cad58dcf800d24ece4efce40050" title="递归获取对应的node">Node::get_node_recursive</a> </td></tr>
+    <tr><td class="paramname">value_index</td><td>索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>字符串数据的view,没有对应索引或者一个node都找不到返回std::nullopt @start-date 2025/11/02 </dd></dl>
+
+</div>
+</div>
+<a id="a135a1e4a7f535b088eb2ef55a3d7a7a9" name="a135a1e4a7f535b088eb2ef55a3d7a7a9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a135a1e4a7f535b088eb2ef55a3d7a7a9">&#9670;&#160;</a></span>get_node_recursive_value_as()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T , class CastFn  = DefConfigCaster&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">ConfigCastResult</a>&lt; T &gt; alib::g3::Config::Node::get_node_recursive_value_as </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::string_view &gt; &amp;&#160;</td>
+          <td class="paramname"><em>location</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>expected_index</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>value_index</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取转换后的数值 </p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>类型 </td></tr>
+    <tr><td class="paramname">CastFn</td><td>转换函数，默认支持int long short bool float double，要求有try_cast(这里没写concept了，算是ducking type) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value_index</td><td>同其他的 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>返回转换结果，nullopt表示转换失败，当不为nullopt但是errpos != -1的时候说明出现了小错误， <br  />
+ 比如 1123nnn (to int)1123表示后面没转换完（当且仅当CastFn默认） @start-date 2025/11/02 </dd></dl>
+
+</div>
+</div>
+<a id="aa11def359ba4a15888d9a3365e33bf98" name="aa11def359ba4a15888d9a3365e33bf98"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa11def359ba4a15888d9a3365e33bf98">&#9670;&#160;</a></span>get_value()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::string_view &gt; alib::g3::Config::Node::get_value </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>value_index</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取数组值 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value_index</td><td>索引 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>没有对应索引返回std::nullopt @start-date 2025/11/02 </dd></dl>
+
+</div>
+</div>
+<a id="a0a57fc203ce89964cb9e7f57a88ef15f" name="a0a57fc203ce89964cb9e7f57a88ef15f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0a57fc203ce89964cb9e7f57a88ef15f">&#9670;&#160;</a></span>get_value_as()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T , class CastFn  = DefConfigCaster&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d7/d6f/structalib_1_1g3_1_1ConfigCastResult.html">ConfigCastResult</a>&lt; T &gt; alib::g3::Config::Node::get_value_as </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>value_index</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>获取转换后的数值 </p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>类型 </td></tr>
+    <tr><td class="paramname">CastFn</td><td>转换函数，默认支持int long short bool float double，要求有try_cast(这里没写concept了，算是ducking type) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">value_index</td><td>同其他的 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>返回转换结果，nullopt表示转换失败，当不为nullopt但是errpos != -1的时候说明出现了小错误， <br  />
+ 比如 1123nnn (to int)1123表示后面没转换完（当且仅当CastFn默认） @start-date 2025/11/02 </dd></dl>
+
+</div>
+</div>
+<a id="ae29aaac91b4c22a1fa4d23eaf4589e4c" name="ae29aaac91b4c22a1fa4d23eaf4589e4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae29aaac91b4c22a1fa4d23eaf4589e4c">&#9670;&#160;</a></span>print_node() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Config::Node::print_node </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Config::Node</a> &amp;&#160;</td>
+          <td class="paramname"><em>node</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indent</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>用于测试，打印节点 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">node</td><td>根节点 </td></tr>
+    <tr><td class="paramname">indent</td><td>缩进 @start-date 2025/11/02 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a99a00770132fcf703deeb81a8b7e435e" name="a99a00770132fcf703deeb81a8b7e435e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99a00770132fcf703deeb81a8b7e435e">&#9670;&#160;</a></span>print_node() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void alib::g3::Config::Node::print_node </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>indent</em> = <code>0</code></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>用于测试，打印自身 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">indent</td><td>缩进 @start-date 2025/11/02 </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<hr/>该结构体的文档由以下文件生成:<ul>
+<li>CDep/headers/alib-g3/<a class="el" href="../../df/d28/aconf_8h_source.html">aconf.h</a></li>
+<li>aaaa0ggmcLib/src/<b>aconf.cpp</b></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dd/d6c/namespacealib.html">alib</a></li><li class="navelem"><a class="el" href="../../d1/d27/namespacealib_1_1g3.html">g3</a></li><li class="navelem"><a class="el" href="../../d8/d7f/structalib_1_1g3_1_1Config.html">Config</a></li><li class="navelem"><a class="el" href="../../d3/d86/structalib_1_1g3_1_1Config_1_1Node.html">Node</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

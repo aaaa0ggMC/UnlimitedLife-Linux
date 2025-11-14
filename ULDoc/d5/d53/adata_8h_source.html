@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/adata.h 源文件</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(1); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d5/d53/adata_8h_source.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">adata.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="../../d5/d53/adata_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">#ifndef ADATA_H_INCLUDED</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#define ADATA_H_INCLUDED</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#include &lt;unordered_map&gt;</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#include &lt;optional&gt;</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;stdarg.h&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;<a class="code" href="../../d5/d6c/alib-g3_2autil_8h.html">alib-g3/autil.h</a>&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../d5/d53/adata_8h.html#a28040e84129d6e7f43b1c25da5055d29">   24</a></span><span class="preprocessor">#define AE_HAS_PARSE_ERROR -1000</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../dd/d6c/namespacealib.html">alib</a>{</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="keyword">namespace </span>g3{</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>    <span class="keyword">using </span>mapping_tp = std::unordered_map&lt;std::string,std::string&gt;;</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html">   33</a></span>    <span class="keyword">class </span>DLL_EXPORT <a class="code hl_struct" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html">Analyser</a>{</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html#a2b602ef2af7790456c9d610cc3cf1032">   35</a></span>        mapping_tp &amp; <a class="code hl_variable" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html#a2b602ef2af7790456c9d610cc3cf1032">mapping</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>        <span class="keyword">virtual</span> <span class="keywordtype">int</span> parseString(dstring data);</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keyword">virtual</span> <span class="keywordtype">void</span> mapDocument();</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keyword">virtual</span> dstring getConst(dstring key);</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        std::string getCopy(dstring key);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keyword">virtual</span> <a class="code hl_struct" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html">~Analyser</a>();</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <a class="code hl_struct" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html">Analyser</a>(mapping_tp &amp; mtp);</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html#ab7449f989ac26455baa66a8d1a576d74">   48</a></span>        <span class="keyword">const</span> <span class="keyword">static</span> std::string <a class="code hl_variable" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html#ab7449f989ac26455baa66a8d1a576d74">empty_ret</a>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    };</div>
+</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="foldopen" id="foldopen00054" data-start="{" data-end="};">
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../d0/de5/classalib_1_1g3_1_1GDoc.html">   54</a></span>    <span class="keyword">class </span>DLL_EXPORT <a class="code hl_struct" href="../../d0/de5/classalib_1_1g3_1_1GDoc.html">GDoc</a>{</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../d0/de5/classalib_1_1g3_1_1GDoc.html#ac905e4594bdc03580992dc159fdd4d93">   57</a></span>        <a class="code hl_struct" href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html">Analyser</a> * <a class="code hl_variable" href="../../d0/de5/classalib_1_1g3_1_1GDoc.html#ac905e4594bdc03580992dc159fdd4d93">analyser</a>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="../../d0/de5/classalib_1_1g3_1_1GDoc.html#a35d11abc8f1afa210eaecd3c841a3165">   58</a></span>        mapping_tp <a class="code hl_variable" href="../../d0/de5/classalib_1_1g3_1_1GDoc.html#a35d11abc8f1afa210eaecd3c841a3165">mapping</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        <a class="code hl_struct" href="../../d0/de5/classalib_1_1g3_1_1GDoc.html">GDoc</a>();</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        <a class="code hl_struct" href="../../d0/de5/classalib_1_1g3_1_1GDoc.html">~GDoc</a>();</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span> </div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        <span class="keywordtype">int</span> read_parseFileJSON(dstring fpath);</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        <span class="keywordtype">int</span> read_parseStringJSON(dstring data);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordtype">int</span> read_parseFileTOML(dstring fpath);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordtype">int</span> read_parseStringTOML(dstring data);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>        <span class="keywordtype">void</span> clearMapping();</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        std::optional&lt;const char *&gt; get(dstring key);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        <span class="keyword">template</span>&lt;<span class="keyword">class</span>... T&gt; <span class="keyword">inline</span> std::optional&lt;const char *&gt; tget(<span class="keyword">const</span> T&amp;... args){</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            std::string keyfn;</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            keyfn.reserve(128);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            ((keyfn += std::string(args) + <span class="stringliteral">&quot;.&quot;</span>), ...);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            <span class="keywordflow">if</span>(keyfn.length() &gt;= 1)keyfn.erase(keyfn.length() - 1);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>            <span class="keywordflow">return</span> get(keyfn);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>        }</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        std::optional&lt;const char*&gt; operator [](dstring key);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    };</div>
+</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>}</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>}</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#endif </span><span class="comment">// ADATA_H_INCLUDED</span></div>
+<div class="ttc" id="aalib-g3_2autil_8h_html"><div class="ttname"><a href="../../d5/d6c/alib-g3_2autil_8h.html">autil.h</a></div><div class="ttdoc">工具库，提供IO、字符串、系统数据等静态函数</div></div>
+<div class="ttc" id="aclassalib_1_1g3_1_1Analyser_html"><div class="ttname"><a href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html">alib::g3::Analyser</a></div><div class="ttdoc">分析器，一般不需要管</div><div class="ttdef"><b>Definition</b> adata.h:33</div></div>
+<div class="ttc" id="aclassalib_1_1g3_1_1Analyser_html_a2b602ef2af7790456c9d610cc3cf1032"><div class="ttname"><a href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html#a2b602ef2af7790456c9d610cc3cf1032">alib::g3::Analyser::mapping</a></div><div class="ttdeci">mapping_tp &amp; mapping</div><div class="ttdef"><b>Definition</b> adata.h:35</div></div>
+<div class="ttc" id="aclassalib_1_1g3_1_1Analyser_html_ab7449f989ac26455baa66a8d1a576d74"><div class="ttname"><a href="../../d6/d9c/classalib_1_1g3_1_1Analyser.html#ab7449f989ac26455baa66a8d1a576d74">alib::g3::Analyser::empty_ret</a></div><div class="ttdeci">static const std::string empty_ret</div><div class="ttdoc">返回空值</div><div class="ttdef"><b>Definition</b> adata.h:48</div></div>
+<div class="ttc" id="aclassalib_1_1g3_1_1GDoc_html"><div class="ttname"><a href="../../d0/de5/classalib_1_1g3_1_1GDoc.html">alib::g3::GDoc</a></div><div class="ttdoc">GenericDocument，通用的文档处理器，支持toml与json(json有点小问题)</div><div class="ttdef"><b>Definition</b> adata.h:54</div></div>
+<div class="ttc" id="aclassalib_1_1g3_1_1GDoc_html_a35d11abc8f1afa210eaecd3c841a3165"><div class="ttname"><a href="../../d0/de5/classalib_1_1g3_1_1GDoc.html#a35d11abc8f1afa210eaecd3c841a3165">alib::g3::GDoc::mapping</a></div><div class="ttdeci">mapping_tp mapping</div><div class="ttdoc">映射</div><div class="ttdef"><b>Definition</b> adata.h:58</div></div>
+<div class="ttc" id="aclassalib_1_1g3_1_1GDoc_html_ac905e4594bdc03580992dc159fdd4d93"><div class="ttname"><a href="../../d0/de5/classalib_1_1g3_1_1GDoc.html#ac905e4594bdc03580992dc159fdd4d93">alib::g3::GDoc::analyser</a></div><div class="ttdeci">Analyser * analyser</div><div class="ttdoc">分析器</div><div class="ttdef"><b>Definition</b> adata.h:57</div></div>
+<div class="ttc" id="anamespacealib_html"><div class="ttname"><a href="../../dd/d6c/namespacealib.html">alib</a></div><div class="ttdoc">aaaa0ggmcLib：一个主要给自己使用的综合库</div><div class="ttdef"><b>Definition</b> alogger_old.cpp:413</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../d5/d53/adata_8h.html">adata.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>
