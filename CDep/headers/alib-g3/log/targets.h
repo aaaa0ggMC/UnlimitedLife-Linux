@@ -26,7 +26,7 @@ namespace alib::g3{
             ColorSchemaFn thread_id_color_schema {nullptr};
             /// @brief 控制台级别颜色方案，存在默认函数
             ColorSchemaFn level_color_schema {default_level_color_schema};
-        };
+        }; 
 
         /// @brief 预制菜里的控制台输出
         struct DLL_EXPORT Console : public LogTarget{
