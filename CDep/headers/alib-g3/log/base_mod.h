@@ -1,6 +1,8 @@
 #ifndef ALOG_MOD_INCLUDED
 #define ALOG_MOD_INCLUDED
 #include <alib-g3/log/base_msg.h>
+#include <concepts>
+#include <type_traits>
 
 namespace alib::g3{
     /// @brief 输出对象
@@ -69,6 +71,39 @@ namespace alib::g3{
         /// @brief 自动close对象
         virtual inline ~LogFilter(){
             close();
+        }
+    };
+
+    template<class T> concept IsLogTarget = std::is_base_of_v<LogTarget,T>;
+
+    /// @brief LogTargetGroup
+    template<IsLogTarget... Ts> struct DLL_EXPORT LogTargetGroup : public LogTarget{
+        using targets_t = std::tuple<Ts...>;
+        targets_t targets;
+
+        LogTargetGroup(targets_t && t):targets(std::move(t)){}
+        LogTargetGroup(Ts&&... args):targets(std::forward<Ts>(args)...){}
+
+        template<size_t N> inline void toggleTarget(bool val = true){
+            std::get<N>(targets).enabled = val;
+        }
+
+        inline void toggleAll(bool val){
+            std::apply([&val](auto &... t){
+                ((t.enabled = val),...);
+            },targets);
+        }
+
+        inline void write(LogMsg & msg) override {
+            std::apply([&msg](auto &... t){
+                ((t.enabled?t.write(msg):void()),...);
+            },targets);
+        }
+
+        inline void flush() override {
+            std::apply([](auto &... t){
+                ((t.enabled?t.flush():void()),...);
+            },targets);
         }
     };
 }
