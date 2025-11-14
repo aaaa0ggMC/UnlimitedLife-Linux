@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/11/02
+ * @date 2025/11/14
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -37,6 +37,7 @@ using namespace age::light;
 using namespace age::world;
 using namespace age::world::comps;
 using namespace age::light::uploaders;
+using enum LogLevel;
 
 constexpr float cam_speed = 3;
 constexpr glm::vec2 cam_rot = glm::vec2(1,1);
@@ -60,7 +61,7 @@ bool mouse = false;
 int main(){
     //Log
     Logger logger;
-    LogFactory lg("AGETest",logger);
+    LogFactory lg(logger,"AGE");
     ////Data////
     glm::vec3 veloDir;
     //Graphics & Input
@@ -83,7 +84,6 @@ int main(){
     //// Textures & Samplers ////
     Texture & wall = **app.getTexture("wall");
     Sampler sampler = *app.getSampler("main");
-
 
     ////Bindings////
     vaos[0].bind();
@@ -187,21 +187,21 @@ int main(){
         if(im_loadModel){
             im_loadModel = false;
             mdx = &models["main.obj"];
-            lg.info("Loading OBJ...");
+            lg.log(Info,"Loading OBJ...");
 
             Clock clk;
             model::loadModelFromFile<model::fmt::Obj>("./test_data/main.model",*mdx);
-            lg(LOG_INFO) << "LoadOBJ:OK! [" << clk.getOffset() << "ms]" << std::endl;
+            lg(Info) << "LoadOBJ:OK! [" << clk.getOffset() << "ms]" << std::endl;
 
             mdx = &models["cube"];
             model::Prefab::cube(1,*mdx);
         }
     };
     {
-        lg.info("Loading Model...");
+        lg.log(Info,"Loading Model...");
         Clock clk;
         loadModel();
-        lg(LOG_INFO) << "LoadModel:OK! [" << clk.getOffset() << "ms]" << std::endl;
+        lg(Info) << "LoadModel:OK! [" << clk.getOffset() << "ms]" << std::endl;
     }
     Model * md = &models[im_models[im_model]];
     Model m_plane;
@@ -233,7 +233,7 @@ int main(){
     PositionalLight light;
     LightBindings lb;
     {
-        lg.info("Loading lights..");
+        lg.log(Info,"Loading lights..");
         light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
         light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
         light.specular.fromRGBA(1.0,1.0,1.0,1.0);
@@ -245,7 +245,7 @@ int main(){
         lb.position = createUniformName<glm::vec3>(shader,"light.position")();
 
         light.upload(lb);
-        lg.info("LoadLight: OK!");
+        lg.log(Info,"LoadLight: OK!");
     }
     shader["gambient"].upload4f(0.7,0.7,0.7,1.0);
     shader["proj_matrix"].uploadmat4(camera.projector().buildProjectionMatrix());
@@ -264,7 +264,7 @@ int main(){
     imgui_clock.start();
     
     //// Main Loop ////
-    lg.info("Entering main loop...");
+    lg.log(Info,"Entering main loop...");
     win->makeCurrent();//enable window
     while(!(win->shouldClose())){
         ++frame_count;
@@ -581,11 +581,11 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     Window * win = nullptr;
 
     //Init logger
-    logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
-    logger.appendLogOutputTarget("file0",std::make_shared<lot::SingleFile>("logs/cube.log"));
+    logger.append_mod<lot::Console>("console");
+    logger.append_mod<lot::File>("file0","logs/cube.log");
 
     //// Window ////
-    lg.info("Creating window...");
+    lg.log(Info,"Creating Window...");
     app.setGLVersion(4,5);
     {
         CreateWindowInfo ci;
@@ -602,13 +602,13 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
         ci.ScreenPercent(0.2,0.2,&ci.x,&ci.y);
 
         if(!app.createWindow(ci)){
-            lg.error("Failed to create window,now exit...");
+            lg.log(LogLevel::Error,"Failed to create window,now exit...");
             exit(-1);
         }else win = *app.getWindow("TestWindow");
     }
     
     input.setWindow(*win);
-    lg.info("CreateWindow:OK!");
+    lg.log(Info,"CreateWindow:OK!");
 
     win->setWindowSizeCallback([&camera](Window & win,int nw,int nh){
         glViewport(0,0,nw,nh);
@@ -621,30 +621,30 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
     // app.setGLErrCallback(true);
 
     //// Shader ////
-    lg.info("Creating shader...");
+    lg.log(Info,"Creating shader...");
     shader = app.createShaderFromFile("main","test_data/cube.vert","test_data/cube.frag");
-    lg.info("CreateShader:OK!");
+    lg.log(Info,"CreateShader:OK!");
 
     //// VAOs & VBOs ////
-    lg.info("Creating VAOs & VBOs...");
+    lg.log(Info,"Creating VAOs & VBOs...");
     app.createVAOs(startup_vao_count);
     app.checkOpenGLError();
-    lg.info("VAO:OK!");
+    lg.log(Info,"VAO:OK!");
 
     app.createVBOs(startup_vbo_count);
     app.checkOpenGLError();
-    lg.info("VBO:OK!");
+    lg.log(Info,"VBO:OK!");
 
     ////VBO data upload////
-    lg.info("Uploading data...");
+    lg.log(Info,"Uploading data...");
     upload_data(app.vbos,app);
-    lg.info("DataUpload:OK!");
+    lg.log(Info,"DataUpload:OK!");
 
-    lg.info("Create Sampler...");
+    lg.log(Info,"Create Sampler...");
     app.createSampler("main");
-    lg.info("CreateSampler:OK!");
+    lg.log(Info,"CreateSampler:OK!");
 
-    lg.info("CreateTexture Wall");
+    lg.log(Info,"CreateTexture Wall");
     {
         CreateTextureInfo ci;
         ci.source = ci.FromFile;
@@ -655,10 +655,10 @@ Window* setup(Logger & logger,LogFactory& lg,Application & app,Input & input,Sha
             ci.file.path = texture_paths[i];
             ci.sid = texture_sids[i];
             app.createTexture(ci);
-            lg(LOG_INFO) << "Created " << ci.sid << " " << ci.file.path << std::endl;
+            lg(Info) << "Created" << ci.sid << " " << ci.file.path << endlog;
         }
     }
-    lg.info("CreateTexture:OK!");
+    lg.log(Info,"CreateTexture:OK!");
 
     win->setKeyCallback([](Window&win,KeyWrapper wp){
         if(wp.getKeyAction() == KeyAction::Release){

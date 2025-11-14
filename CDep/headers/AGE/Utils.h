@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2025/11/02
+ * @date 2025/11/14
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -97,26 +97,16 @@ namespace age{
             dirty = false;
         }
     };
-
-    enum class ErrorLevel : int32_t {
-        Trace = LOG_TRACE,
-        Debug = LOG_DEBUG,
-        Info = LOG_INFO,
-        Warn = LOG_WARN,
-        Error = LOG_ERROR,
-        Critical = LOG_CRITI
-    };
-
     struct AGE_API ErrorInfo{
         int32_t code;
         const char * message;
-        ErrorLevel level;
+        alib::g3::LogLevel level;
     };
 
     struct AGE_API ErrorInfopp{
         int32_t code;
         std::pmr::string message;
-        ErrorLevel level;
+        alib::g3::LogLevel level;
     };
     using TriggerFunc = std::function<void(const ErrorInfopp&)>;
 

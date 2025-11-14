@@ -90,6 +90,7 @@ Logger::Logger(const LoggerConfig & cfg)
 ,msg_str_buf()
 ,msg_str_alloc(&msg_str_buf)
 ,msg_semaphore(0){
+    config_pool.reserve(config_pool_reserve_size);
     config = cfg;
     logger_not_on_destroying = true;
     back_pressure_threshold = cfg.back_pressure_multiply * 
@@ -120,7 +121,7 @@ void Logger::flush(){
     flush_targets();
 }
 
-bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & cfg){
+bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string & body,LogMsgConfig & cfg){
     // pre filter
     for(auto & filter : filters){
         if(!filter->enabled)continue;
@@ -129,6 +130,7 @@ bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & c
     LogMsg msg(msg_alloc,cfg);
     size_t msg_sz = 0;
 
+    msg.header = head;
     msg.level = level;
     msg.body = std::move(body);
     msg.build_on_producer(start_time);
@@ -161,6 +163,7 @@ bool Logger::push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & c
 
 std::string_view Logger::register_header(std::string_view val){
     if(val.compare("")){
+        std::lock_guard<std::mutex> lock(monotic_pool_lock);
         auto it = std::find(header_pool.begin(),header_pool.end(),val);
         if(it != header_pool.end())return *it;
         return header_pool.emplace_back(val);

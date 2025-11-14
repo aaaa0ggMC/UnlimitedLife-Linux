@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 光照支持
  * @version 0.1
- * @date 2025/11/02
+ * @date 2025/11/14
  *
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -89,7 +89,7 @@ namespace age{
                     }
 #ifdef AGE_LIGHT_BUZZ
                     Error::def.pushMessage({
-                        AGEE_EMPTY_DATA,"The cached shader uniform is invalid in UniformName.",ErrorLevel::Error
+                        AGEE_EMPTY_DATA,"The cached shader uniform is invalid in UniformName.",alib::g3::LogLevel::Error
                     });
 #endif
                 }

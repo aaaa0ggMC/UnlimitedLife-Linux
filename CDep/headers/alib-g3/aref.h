@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 不会悬垂的比较安全的容器数据wrapper,Release下单次性能损失为0.3ns
  * @version 0.1
- * @date 2025/11/09
+ * @date 2025/11/14
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  ********************************************************
@@ -95,6 +95,11 @@ namespace alib::g3{
         Cont & cont;
         /// index
         size_t index;
+
+        /// 确认现在是否还存在数据
+        inline bool has_data(){
+            return index < cont.size();
+        }
     
         /// 获取当前的引用
         inline auto& get(){

@@ -10,9 +10,9 @@
 #include <algorithm>
 #include <format>
 #include <vector>
-
-using namespace alib::g3::old;
 using namespace std;
+using namespace alib::g3;
+using enum LogLevel;
 
 #define BLOCK(X)
 
@@ -53,7 +53,7 @@ Config cfg;
 std::string configp;
 const char * homep;
 Logger logger;
-LogFactory lg("BILI",logger);
+LogFactory lg(logger,"BILI");
 std::unordered_map<std::string,MediaGroup> med;
 std::vector<std::string> files;
 
@@ -63,15 +63,15 @@ int main(){
     srand(time(0));
     homep = getenv("HOME");
     configp = std::string(homep) + "/.config/";
-    logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
+    logger.append_mod<lot::Console>("console");
     BLOCK(CheckConfig){
         //检查是否有文件夹
         if(!Util::io_checkExistence(configp + "simp-biliplayer")){
             system((std::string("mkdir '") + configp + "simp-biliplayer'").c_str());
-            lg(LOG_INFO) << "Config directory created: " << configp + "simp-biliplayer" << endlog;
+            lg(Info) << "Config directory created: " << configp + "simp-biliplayer" << endlog;
         }
         configp += "simp-biliplayer/";
-        logger.appendLogOutputTarget("logFile",std::make_shared<lot::SingleFile>(configp + "log"));
+        logger.append_mod<lot::File>("logFile",configp + "log");
 
         //default values
         cfg.player = "mpv";
@@ -93,7 +93,7 @@ int main(){
             }
         }
     }
-    logger.setLogOutputTargetStatus("console",cfg.verbose);
+    logger.get_mod_raw<lot::Console>("console")->toggle(cfg.verbose);
 
     atexit([]{
         std::ofstream ofs(configp + "config.properties");
@@ -293,7 +293,7 @@ int main(){
             system(cmd.c_str());
         }else if(!head.compare("verbose") || !head.compare("v")){
             cfg.verbose = !cfg.verbose;
-            logger.setLogOutputTargetStatus("console",cfg.verbose);
+            logger.get_mod_raw<lot::Console>("console")->toggle(cfg.verbose);
             std::cout << "Verbose:";
             if(cfg.verbose)Util::io_printColor("On",ACP_GREEN);
             else Util::io_printColor("Off",ACP_GRAY);
@@ -405,16 +405,16 @@ void LoadVideos(const std::string& path_in){
         std::vector<std::string> filestmp;
         if(path[path.size()-1] != '/')path += '/';
         Util::io_traverseFilesOnly(path,filestmp,2,path);
-        lg(LOG_INFO) << "File count:" << filestmp.size() << endlog;
+        lg(Info) << "File count:" << filestmp.size() << endlog;
         for(auto & i : filestmp){
             if(i.find("entry.json") != std::string::npos){
-                lg(LOG_DEBUG) << "Discovered entry: " << i << endlog; // 只显示文件名
+                lg(Debug) << "Discovered entry: " << i << endlog; // 只显示文件名
                 files.push_back(i);
             }
         }
     }
 
-    lg(LOG_INFO) << "File size " << files.size() << endlog;
+    lg(Info) << "File size " << files.size() << endlog;
 
     BLOCK(Analyse Videos){
         for(auto & s : files){
@@ -426,7 +426,7 @@ void LoadVideos(const std::string& path_in){
             bool season = false;
             int ecode = doc.read_parseFileJSON(s);
             if(ecode == AE_HAS_PARSE_ERROR){
-                lg(LOG_ERROR) << "JSON parse failure: " << s.substr(s.find_last_of("/")+1) << " (code:" << ecode << ")" << endlog;
+                lg(Error) << "JSON parse failure: " << s.substr(s.find_last_of("/")+1) << " (code:" << ecode << ")" << endlog;
             }
             auto a = doc["media_type"];
             if(!!a){
@@ -524,7 +524,7 @@ void LoadVideos(const std::string& path_in){
                 if(!media.videoName.compare(mdx.videoName))push = false;
             }
             if(!push){
-                lg(LOG_WARN) << "Media conflict: [" << grp->bvid << "] " << mdx.videoName << endlog;
+                lg(Warn) << "Media conflict: [" << grp->bvid << "] " << mdx.videoName << endlog;
                 continue;
             }
             grp->media.push_back(mdx);
@@ -537,7 +537,7 @@ void LoadVideos(const std::string& path_in){
             if(!old){
                 med.emplace(grp->bvid,*grp);
             }
-            lg(LOG_TRACE) << "Media track | BVID:" << grp->bvid
+            lg(Trace) << "Media track | BVID:" << grp->bvid
             << " | Title:" << mdx.videoName
             << " | Type:" << mdx.type
             << (mdx.type == 2 ?

@@ -1,7 +1,8 @@
 #ifndef ALOG_STREAMED_CONTEXT_INCLUDED
 #define ALOG_STREAMED_CONTEXT_INCLUDED
 #include <alib-g3/autil.h>
-#include <source_location>
+#include <alib-g3/log/base_config.h>
+#include <alib-g3/log/manipulator.h>
 
 #ifndef ALIB_DISABLE_GLM_EXTENSIONS
 #include <glm/glm.hpp>
@@ -10,32 +11,6 @@
 #endif
 
 namespace alib::g3{
-    /// @brief 仅用来识别日志终止
-    struct DLL_EXPORT LogEnd{};
-    typedef void (*EndLogFn)(LogEnd);
-    /// @brief 流式输出日志终止表示
-    inline void DLL_EXPORT endlog(LogEnd){}
-
-    struct DLL_EXPORT log_source{
-        /// @brief 缓存的路径
-        std::source_location loc;
-        /// @brief 是否保存完整路径，默认true
-        bool keep_full;
-        
-        log_source(bool kf = true,std::source_location cloc = std::source_location::current()):loc(cloc),keep_full{kf}{}
-
-        template<class T> void write_to_log(T & str){
-            std::string_view p = loc.file_name();
-            if(!keep_full){
-                auto pos = p.find_last_of("/");
-                if(pos != std::string_view::npos && pos+1 < p.size()){
-                    p = p.substr(pos+1);
-                }
-            }
-            std::format_to(std::back_inserter(str),"[{}:{}:{} {}]",p,loc.line(),loc.column(),loc.function_name());
-        }
-    };
-    
     /// @brief 基础类型使用std::format，包含嵌套容器（如果你的编译器不支持需要自己实现下面的canforward）
     template<class T> concept GoUniversal = std::formattable<T,char>;
     /// @brief 对于能够forward的对象进行forward。forward优先级：外部 > 成员函数
@@ -54,6 +29,10 @@ namespace alib::g3{
         std::pmr::string cache_str;
         /// @brief 日志级别
         int level;
+        /// @brief 格式化字符串，用后就清除
+        std::string_view fmt_str;
+        /// @brief 格式化是否是临时的
+        bool fmt_tmp;
 
         // 禁止拷贝，允许移动
         StreamedContext(const StreamedContext&) = delete;
@@ -66,6 +45,8 @@ namespace alib::g3{
         :factory(fac)
         ,cache_str(factory.logger.msg_str_alloc){
             this->level = level;
+            fmt_str = "";
+            fmt_tmp = false;
         }
 
         /// @brief  上传日志
@@ -80,7 +61,15 @@ namespace alib::g3{
         /// @brief 防止<<通用匹配过于通用而设计的
         template<class T>
         StreamedContext&& write(T && t){
-            std::format_to(std::back_inserter(cache_str),"{}",t);
+            if(fmt_str.empty())std::format_to(std::back_inserter(cache_str),"{}",t);
+            else{
+                std::vformat_to(std::back_inserter(cache_str),fmt_str.data(),
+                    std::make_format_args(t)
+                );
+                if(fmt_tmp){
+                    fmt_str = "";
+                }
+            }
             return std::move(*this);
         }
 
@@ -105,6 +94,20 @@ namespace alib::g3{
         /// @brief 支持endlog终止日志
         inline bool operator<<(EndLogFn fn){
             return upload();
+        }
+
+        /// @brief 支持设置格式化，需要保证局部不悬垂（应该没人会在一句话就把数据删除了吧）
+        inline StreamedContext&& operator<<(const log_fmt & fmt){
+            fmt_str = fmt.fmt_str.data();
+            fmt_tmp = false;
+            return std::move(*this);
+        }
+
+        /// @brief 支持设置格式化，需要保证局部不悬垂（应该没人会在一句话就把数据删除了吧）
+        inline StreamedContext&& operator<<(const log_tfmt & fmt){
+            fmt_str = fmt.fmt_str.data();
+            fmt_tmp = true;
+            return std::move(*this);
         }
 
         /// @brief 支持std::endl终止日志

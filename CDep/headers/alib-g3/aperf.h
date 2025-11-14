@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一个简单的性能计算库，能确保数据大致准确，同时省的我每次都要写差不多的benchmark代码
  * @version 0.1
- * @date 2025/11/11
+ * @date 2025/11/14
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -12,7 +12,6 @@
 #ifndef APERF_H_INCLUDED
 #define APERF_H_INCLUDED
 #include <alib-g3/aclock.h>
-#include <memory_resource>
 #include <sstream>
 #include <iomanip>
 #include <cmath>

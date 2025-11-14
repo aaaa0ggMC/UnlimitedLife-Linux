@@ -6,17 +6,18 @@ using namespace alib::g3;
 using namespace age;
 using namespace age::light;
 using namespace age::light::uploaders;
+using enum LogLevel;
 
 int main(){
     Logger logger;
-    LogFactory lg("SIMP",logger);
+    LogFactory lg(logger,"SIMP");
     world::EntityManager entity_manager;
     Application app(entity_manager);
     Window *win;
 
-    logger.appendLogOutputTarget("console",std::make_shared<lot::Console>());
+    logger.append_mod<lot::Console>("console");
 
-    lg.info("Creating window...");
+    lg.log(Info,"Creating window...");
     app.setGLVersion(4,5);
     {
         CreateWindowInfo ci;
@@ -33,7 +34,7 @@ int main(){
         ci.ScreenPercent(0.2,0.2,&ci.x,&ci.y);
 
         if(!app.createWindow(ci)){
-            lg.error("Failed to create window,now exit...");
+            lg.log(LogLevel::Error,"Failed to create window,now exit...");
             exit(-1);
         }else win = *app.getWindow("SimpTest");
     }
@@ -43,7 +44,7 @@ int main(){
     PositionalLight light;
     LightBindings lb;
     {
-        lg.info("Loading lights..");
+        lg.log(Info,"Loading lights..");
         light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
         light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
         light.specular.fromRGBA(1.0,1.0,1.0,1.0);
@@ -55,7 +56,7 @@ int main(){
         lb.position = createUniformName<glm::vec3>(shader,"light.position")();
 
         light.upload(lb);
-        lg.info("LoadLight: OK!");
+        lg.log(Info,"LoadLight: OK!");
     }
 
 
@@ -69,5 +70,5 @@ int main(){
     }
     
     app.destroyWindow(win);
-    lg.info("closing");
+    lg.log(Info,"closing");
 }

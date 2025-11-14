@@ -104,24 +104,17 @@ static void simplify_stacktrace(const decltype(std::stacktrace::current()) & st)
 void Error::defTrigger(const ErrorInfopp& data){
     using namespace alib::g3;
     static Logger console_logger;
-    static LogFactory lg("AGE",console_logger);
-    static std::shared_ptr<lot::Console> console = std::make_shared<lot::Console>();
-    static std::stringstream trace_data;
-    int serverance = static_cast<int>(data.level);
+    static LogFactory lg(console_logger,"AGE");
     [[maybe_unused]] static bool initeOnce = [&]{
-        console_logger.appendLogOutputTarget("console",console);
+        console_logger.append_mod<lot::Console>("console");
         return true;
     }();
-    
-    if(serverance == 0){
-        serverance = LOG_ERROR; // for some code that doesnt init level
-    }
 
-    if(serverance == LOG_ERROR || serverance == LOG_CRITI){
-        lg(serverance) << "[" << data.code  << "]" << data.message << "Stacktrace:" << endlog;
+    if(data.level == LogLevel::Error || data.level == LogLevel::Fatal){
+        lg(data.level) << "[" << data.code  << "]" << data.message << "Stacktrace:" << endlog;
         simplify_stacktrace(std::stacktrace::current());
     }else{
-        lg(serverance) << "[" << data.code  << "]" << data.message << endlog;
+        lg(data.level) << "[" << data.code  << "]" << data.message << endlog;
     }
 }
 

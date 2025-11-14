@@ -60,7 +60,7 @@ namespace alib::g3{
                 }
                 currently_open = fp; 
                 file = fopen(currently_open.c_str(),"w");
-                panicf_if(!file,"Cannot open file {}!",fp);
+                panicf_debug(!file,"Cannot open file {}!",fp);
             }
 
             inline File(std::string_view fpath){
@@ -171,7 +171,7 @@ namespace alib::g3{
                 noneed_update = false;
                 f = fopen(get_current_filepath().data(),"w");
                 // 重置写入量
-                panicf_if(!f,"Cannot open file {}!",get_current_filepath());
+                panicf_debug(!f,"Cannot open file {}!",get_current_filepath());
                 if(!f && config.failed_open_fn){
                     config.failed_open_fn(get_current_filepath(),*this);
                 }else{
@@ -208,10 +208,10 @@ namespace alib::g3{
 namespace alib::g3::lot{
     inline std::string_view ConsoleConfig::default_level_color_schema(const LogMsg & msg){
         switch(msg.level){
-        case 0: // Trace采用灰色
-            return "\e[36m";
-        case 1: // Debug采用白色
+        case 0: // Trace采用白色
             return "\e[37m";
+        case 1: // Debug采用紫色
+            return "\e[35m";
         case 2: // Info采用黄色
             return "\e[33m";
         case 3: // Warn采用蓝色

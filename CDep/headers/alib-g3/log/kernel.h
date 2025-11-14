@@ -63,6 +63,8 @@ namespace alib::g3{
     constexpr unsigned int compose_str_resize = 1024;
     /// @brief 时钟源，简易能选择的话选择最快的MONOTIC_COARSE
     constexpr int time_clock_source = ALIB_DEF_CLOCK_SOURCE;
+    /// @brief 配置池预留大小，目前LogMsg引用配置有一个很小的概率（->0）悬垂，看看能不能处理好
+    constexpr int config_pool_reserve_size = 64;
 
     /// @brief 默认的loglevel标识，纯粹方便使用的
     enum class LogLevel : int{
@@ -93,6 +95,10 @@ namespace alib::g3{
         /// @brief 过滤对象查找池
         std::unordered_map<std::string,RefWrapper<filters_t>> search_filters;
 
+        /// @brief 普通资源池锁，由于处于配置阶段就不这个讲究细分了
+        std::mutex monotic_pool_lock;
+        /// @brief 配置池，同样防止悬垂
+        std::vector<LogMsgConfig> config_pool;
         /// @brief Header常量池，只增不减，鉴于LogFactory数目很少
         std::vector<std::string> header_pool;
         /// @brief 专门给消息池的内存池 
@@ -145,7 +151,7 @@ namespace alib::g3{
         );
 
         /// @brief 内部处理，会直接调用std::move高效交换数据
-        bool push_message_pmr(int level,std::pmr::string & body,LogMsgConfig & cfg);
+        bool push_message_pmr(int level,std::string_view head,std::pmr::string & body,LogMsgConfig & cfg);
     public:
         /// @brief 字符串数据池
         std::pmr::polymorphic_allocator<char> msg_str_alloc;
@@ -164,10 +170,17 @@ namespace alib::g3{
         /// @param autoflush  是否自动在某位刷新targets,如果span比较小就不建议
         /// @note  注意，为了速度，msg可能会被写入！
         void write_messages(std::span<LogMsg> msg,bool autoflush = true);
-        /// @brief  加入一条消息
+        /// @brief  加入一条消息，必须必须保证header不悬垂！！！
         /// @note   这里的话感觉不可避免地涉及一次数据copy
         /// @return 操作是否成功
-        bool push_message(int level,std::string_view body,LogMsgConfig & cfg);
+        bool push_message(int level,std::string_view header,std::string_view body,LogMsgConfig & cfg);
+
+        /// @brief 防止悬垂地获取配置，每次会获取一个新的
+        inline RefWrapper<std::vector<LogMsgConfig>> register_config(){
+            std::lock_guard<std::mutex> lock(monotic_pool_lock);
+            config_pool.emplace_back();
+            return ref(config_pool,config_pool.size()-1);
+        }
 
         /// @brief  添加一个新的mod
         /// @tparam T       继承自LogTarget/LogFilter的类
@@ -188,6 +201,31 @@ namespace alib::g3{
         void clear_target();
         /// @brief 清空所有module，包含targets和filter
         void clear_mod();
+        /// @brief 获取模块，请不要缓存内容！
+        template<IsLogMod T> inline T* get_mod_raw(std::string_view name){
+            if constexpr(IsLogTarget<T>){
+                auto i = search_targets.find(std::string(name));
+                if(i == search_targets.end())return nullptr;
+                return {dynamic_cast<T*>(i->second.get().get())};
+            }else{
+                auto i = search_filters.find(std::string(name));
+                if(i == search_filters.end())return nullptr;
+                return {dynamic_cast<T*>(i->second.get().get())};
+            }
+        }
+        /// @brief 安全获取内容，但是使用比较繁琐，需要先使用has_data确认，然后ret.get()->XX使用
+        template<IsLogMod T> inline auto get_mod_handle(std::string_view name){
+            if constexpr(IsLogTarget<T>){
+                auto i = search_targets.find(std::string(name));
+                if(i == search_targets.end())return ref(targets,UINT32_MAX);
+                return {i->second};
+            }else{
+                auto i = search_filters.find(std::string(name));
+                if(i == search_filters.end())return ref(filters,UINT32_MAX);
+                return {i->second};
+            }
+        }
+
 
         /// @brief 终止线程，清理资源
         ~Logger();
@@ -200,7 +238,7 @@ namespace alib::g3{
         /// @brief 头信息，用来在日志中标识logger的
         std::string_view header;
         /// @brief 配置文件
-        LogMsgConfig cfg;
+        RefWrapper<std::vector<LogMsgConfig>> cfg;
         /// @brief 使用<<时未指定level采用的默认数值
         int default_level;
 
@@ -218,7 +256,7 @@ namespace alib::g3{
 
         /// @brief 信息转发到Logger
         inline bool log(int level,std::string_view message){
-            return logger.push_message(level,message,cfg);
+            return logger.push_message(level,"",message,cfg.get());
         }
         /// @brief 信息转发到Logger，适配LogLevel
         inline bool log(LogLevel level,std::string_view message){
@@ -228,13 +266,13 @@ namespace alib::g3{
         template<class... Args> inline bool log(int level,std::string_view fmt,Args&&... args){
             std::pmr::string str (logger.msg_str_alloc);
             std::vformat_to(std::back_inserter(str),fmt,std::make_format_args(args...));
-            return logger.push_message_pmr(level,str,cfg);
+            return logger.push_message_pmr(level,header,str,cfg.get());
         }
         /// @brief 支持多参数的转发，静态版本
         template<class... Args> inline bool log_fast(int level,const std::format_string<Args...>& fmt,Args&&... args){
             std::pmr::string str (logger.msg_str_alloc);
             std::vformat_to(std::back_inserter(str),fmt.get(),std::make_format_args(args...));
-            return logger.push_message_pmr(level,str,cfg);
+            return logger.push_message_pmr(level,header,str,cfg.get());
         }
         /// @brief 支持多参数的转发，适配LogLevel
         template<class... Args> inline bool log(LogLevel level,std::string_view fmt,Args&&... args){
@@ -247,7 +285,7 @@ namespace alib::g3{
         /// @brief 提供已经装载到对应内存的数据，这个时候直接move就行
         /// @note  pmr_data会失效！
         inline bool log_pmr(int level,std::pmr::string & pmr_data){
-            return logger.push_message_pmr(level,pmr_data,cfg);
+            return logger.push_message_pmr(level,header,pmr_data,cfg.get());
         }
 
         /// @brief 提供流式输出，这里采用默认的level
@@ -426,10 +464,10 @@ namespace alib::g3{
         }
     }
 
-    inline bool Logger::push_message(int level,std::string_view body,LogMsgConfig & cfg){
+    inline bool Logger::push_message(int level,std::string_view header,std::string_view body,LogMsgConfig & cfg){
         std::pmr::string str(msg_str_alloc);
         str.assign(body);
-        return push_message_pmr(level,str,cfg);
+        return push_message_pmr(level,header,str,cfg);
     }
 
     inline void Logger::clear_filter(){
@@ -488,12 +526,12 @@ namespace alib::g3{
         Logger & binded,
         std::string_view aheader,
         int def_level, 
-        const LogMsgConfig cfg
-    ):logger(binded){
+        const LogMsgConfig ocfg
+    ):logger(binded),cfg(binded.register_config()){
         if(aheader.compare("")){
             header = binded.register_header(aheader);
         }else header = "";
-        this->cfg = cfg;
+        cfg = ocfg;
         default_level = def_level;
     }
 }

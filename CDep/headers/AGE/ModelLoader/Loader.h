@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 加载模型
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/11/14
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -94,7 +94,7 @@ namespace age::model{
             Error::def.pushMessage({
                 -1,
                 "<-[alib error code]Cannot open file or fetch valid data!",
-                ErrorLevel::Error
+                alib::g3::LogLevel::Error
             });
             return;
         }
@@ -111,7 +111,7 @@ namespace age::model{
             Error::def.pushMessage({
                 -1,
                 "<-[alib error code]Cannot open file or fetch valid data!",
-                ErrorLevel::Error
+                alib::g3::LogLevel::Error
             });
             return -1;
         }

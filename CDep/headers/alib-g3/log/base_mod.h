@@ -10,6 +10,12 @@ namespace alib::g3{
         /// @brief 用于toggle输出，一般不用管
         bool enabled;
        
+        /// @brief 切换状态
+        LogTarget& toggle(bool val){
+            enabled = val;
+            return *this;
+        }
+
         /// @brief 默认target就是enabled 
         inline LogTarget(){
             enabled = true;
@@ -39,6 +45,12 @@ namespace alib::g3{
     struct DLL_EXPORT LogFilter{
         /// @brief 标示是否启用
         bool enabled;
+
+        /// @brief 切换状态
+        LogFilter& toggle(bool val){
+            enabled = val;
+            return *this;
+        }
         
         /// @brief 默认启用日志
         inline LogFilter(){
@@ -75,6 +87,8 @@ namespace alib::g3{
     };
 
     template<class T> concept IsLogTarget = std::is_base_of_v<LogTarget,T>;
+    template<class T> concept IsLogFilter = std::is_base_of_v<LogFilter,T>;
+    template<class T> concept IsLogMod = IsLogTarget<T> || IsLogFilter<T>;
 
     /// @brief LogTargetGroup
     template<IsLogTarget... Ts> struct DLL_EXPORT LogTargetGroup : public LogTarget{
