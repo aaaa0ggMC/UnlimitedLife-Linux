@@ -39,7 +39,7 @@ namespace alib::g3{
         unsigned int consumer_count;
         /// @brief fetch_message一次性能取出信息的最大值，默认为 consumer_message_default_count
         unsigned int fetch_message_count_max;
-        /// @brief 是否开启背压模式，默认为true，如果为false，下面的内容失效
+        /// @brief 是否开启背压模式，默认为false（背压会出现消息不同步），如果为false，下面的内容失效
         bool enable_back_pressure;
         /// @brief 背压模式的阈值，阈值 = 下面的倍率 * 一次性能取出最大值 * 消费者数量，默认为 4
         /// @note  其实背压下相当于主线程也变成了一个消费者，每次push_message执行一次fetch

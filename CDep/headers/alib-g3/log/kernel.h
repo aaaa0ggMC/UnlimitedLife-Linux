@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/11/13 
+* @date 2025/11/14 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -394,7 +394,7 @@ namespace alib::g3{
         consumer_count = 1;
         fetch_message_count_max = consumer_message_default_count;
         back_pressure_multiply = 4; 
-        enable_back_pressure = true;
+        enable_back_pressure = false;
     }
 
     template<CanAccessItem T> inline bool Logger::safe_remove_mod(

@@ -1,6 +1,7 @@
 #ifndef ALOG_STREAMED_CONTEXT_INCLUDED
 #define ALOG_STREAMED_CONTEXT_INCLUDED
 #include <alib-g3/autil.h>
+#include <source_location>
 
 #ifndef ALIB_DISABLE_GLM_EXTENSIONS
 #include <glm/glm.hpp>
@@ -14,6 +15,26 @@ namespace alib::g3{
     typedef void (*EndLogFn)(LogEnd);
     /// @brief 流式输出日志终止表示
     inline void DLL_EXPORT endlog(LogEnd){}
+
+    struct DLL_EXPORT log_source{
+        /// @brief 缓存的路径
+        std::source_location loc;
+        /// @brief 是否保存完整路径，默认true
+        bool keep_full;
+        
+        log_source(bool kf = true,std::source_location cloc = std::source_location::current()):loc(cloc),keep_full{kf}{}
+
+        template<class T> void write_to_log(T & str){
+            std::string_view p = loc.file_name();
+            if(!keep_full){
+                auto pos = p.find_last_of("/");
+                if(pos != std::string_view::npos && pos+1 < p.size()){
+                    p = p.substr(pos+1);
+                }
+            }
+            std::format_to(std::back_inserter(str),"[{}:{}:{} {}]",p,loc.line(),loc.column(),loc.function_name());
+        }
+    };
     
     /// @brief 基础类型使用std::format，包含嵌套容器（如果你的编译器不支持需要自己实现下面的canforward）
     template<class T> concept GoUniversal = std::formattable<T,char>;
@@ -33,6 +54,12 @@ namespace alib::g3{
         std::pmr::string cache_str;
         /// @brief 日志级别
         int level;
+
+        // 禁止拷贝，允许移动
+        StreamedContext(const StreamedContext&) = delete;
+        StreamedContext& operator=(const StreamedContext&) = delete;
+        StreamedContext(StreamedContext&&) = default;
+        StreamedContext& operator=(StreamedContext&&) = default;
 
         /// @brief 初始化字符串用的内存池以及level
         inline StreamedContext(int level,LogFactory & fac)

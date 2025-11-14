@@ -122,6 +122,11 @@ namespace fs = std::filesystem;
 #define AE_SUCCESS 0
 #define AE_FAILED -1
 
+// yes,now you can use the go grammar
+#define CAT(a,b) a##b
+#define CAT_2(a,b) CAT(a,b)
+#define defer alib::g3::defer_t CAT_2(defer,__COUNTER__) = [&] noexcept  
+
 ///aaaa0ggmcLib：一个主要给自己使用的综合库
 namespace alib {
 ///第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。
@@ -133,7 +138,21 @@ using dstring = const std::string&;
 using mem_bytes = __int64;
 #elif __linux__
 using mem_bytes = __int64_t;
-#endif // _WIN32
+#endif // _WIN32 
+
+/// @brief 类似Go语言的退出处理
+template<class T> struct defer_t{
+    T defer_func;
+    inline defer_t(T functor):defer_func(std::move(functor)){}
+    inline ~defer_t() noexcept{defer_func();}
+
+    defer_t(const defer_t &) = delete;
+    defer_t(defer_t &&) = delete;
+
+    defer_t& operator=(const defer_t&) = delete;
+    defer_t& operator=(defer_t&&) = delete;
+};
+
 
 ///用于高效转换为字符串，预计比std::to_string更加迅速(需不定义宏 ALIB_DISABLE_CPP20)，但是会动态占用内存
 namespace ext_toString{
