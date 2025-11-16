@@ -245,30 +245,30 @@ namespace alib::g3::lot{
         };
         {
             std::lock_guard<std::mutex> lock(console_lock);
-            if(!msg.cfg->disable_extra_information){
-                if(msg.cfg->gen_date){
+            if(!msg.cfg.disable_extra_information){
+                if(msg.cfg.gen_date){
                     fwrite_unlocked("[",1,1,stdout);
                     bool val = fast_print(cfg.date_color_schema,msg);
                     fwrite_unlocked(msg.sdate.c_str(),sizeof(decltype(msg.sdate)::value_type),msg.sdate.size(),stdout);
                     if(val)reset_color();
                     fwrite_unlocked("]",1,1,stdout);
                 }
-                if(msg.cfg->out_level){
+                if(msg.cfg.out_level && msg.cfg.level_cast){
                     fwrite_unlocked("[",1,1,stdout);
                     bool val = fast_print(cfg.level_color_schema,msg);
-                    auto ls = msg.cfg->level_cast(msg.level);
+                    auto ls = msg.cfg.level_cast(msg.level);
                     fwrite_unlocked(ls.data(),sizeof(decltype(ls)::value_type),ls.size(),stdout);
                     if(val)reset_color();
                     fwrite_unlocked("]",1,1,stdout);
                 }
-                if(msg.cfg->out_header && msg.header.data() != nullptr && msg.header.size()){
+                if(msg.cfg.out_header && msg.header.data() != nullptr && msg.header.size()){
                     fwrite_unlocked("[",1,1,stdout);
                     bool val = fast_print(cfg.head_color_schema,msg);
                     fwrite_unlocked(msg.header.data(),sizeof(decltype(msg.header)::value_type),msg.header.size(),stdout);
                     if(val)reset_color();
                     fwrite_unlocked("]",1,1,stdout);
                 }
-                if(msg.cfg->gen_time){
+                if(msg.cfg.gen_time){
                     std::string_view use_color;
                     if(cfg.time_color_schema && !(use_color = cfg.time_color_schema(msg)).empty()){
                         printf("[%s%.2lfms%s]",use_color.data(),msg.timestamp,c_reset_color.data());
@@ -276,7 +276,7 @@ namespace alib::g3::lot{
                         printf("[%.2lfms]",msg.timestamp);
                     }
                 }
-                if(msg.cfg->gen_thread_id){
+                if(msg.cfg.gen_thread_id){
                     std::string_view use_color;
                     if(cfg.thread_id_color_schema && !(use_color = cfg.thread_id_color_schema(msg)).empty()){
                         printf("[%sTID%lu%s]",use_color.data(),msg.thread_id,c_reset_color.data());

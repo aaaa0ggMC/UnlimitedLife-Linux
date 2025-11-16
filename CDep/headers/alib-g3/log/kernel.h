@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/11/14 
+* @date 2025/11/16 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -97,8 +97,6 @@ namespace alib::g3{
 
         /// @brief 普通资源池锁，由于处于配置阶段就不这个讲究细分了
         std::mutex monotic_pool_lock;
-        /// @brief 配置池，同样防止悬垂
-        std::vector<LogMsgConfig> config_pool;
         /// @brief Header常量池，只增不减，鉴于LogFactory数目很少
         std::vector<std::string> header_pool;
         /// @brief 专门给消息池的内存池 
@@ -151,7 +149,7 @@ namespace alib::g3{
         );
 
         /// @brief 内部处理，会直接调用std::move高效交换数据
-        bool push_message_pmr(int level,std::string_view head,std::pmr::string & body,LogMsgConfig & cfg);
+        bool push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg);
     public:
         /// @brief 字符串数据池
         std::pmr::polymorphic_allocator<char> msg_str_alloc;
@@ -174,14 +172,6 @@ namespace alib::g3{
         /// @note   这里的话感觉不可避免地涉及一次数据copy
         /// @return 操作是否成功
         bool push_message(int level,std::string_view header,std::string_view body,LogMsgConfig & cfg);
-
-        /// @brief 防止悬垂地获取配置，每次会获取一个新的
-        inline RefWrapper<std::vector<LogMsgConfig>> register_config(){
-            std::lock_guard<std::mutex> lock(monotic_pool_lock);
-            config_pool.emplace_back();
-            return ref(config_pool,config_pool.size()-1);
-        }
-
         /// @brief  添加一个新的mod
         /// @tparam T       继承自LogTarget/LogFilter的类
         /// @param name     该module的名字
@@ -235,28 +225,39 @@ namespace alib::g3{
     struct DLL_EXPORT LogFactory{
         /// @brief 绑定的Logger对象
         Logger& logger;
-        /// @brief 头信息，用来在日志中标识logger的
-        std::string_view header;
-        /// @brief 配置文件
-        RefWrapper<std::vector<LogMsgConfig>> cfg;
-        /// @brief 使用<<时未指定level采用的默认数值
-        int default_level;
+        /// @brief LogFactory配置
+        LogFactoryConfig cfg;
+
 
         /// @brief 初始化logger
         /// @param binded     绑定到的日志核心
-        /// @param aheader    头信息
-        /// @param def_level  默认输出级别
-        /// @param cfg        对应配置文件
+        /// @param cfg        对应配置
         LogFactory(
             Logger & binded,
-            std::string_view aheader = "",
-            int def_level = 0, 
-            const LogMsgConfig cfg = LogMsgConfig()
+            const LogFactoryConfig& = LogFactoryConfig() 
         );
+
+        /// @brief 初始化logger，简单版本
+        /// @param binded               绑定到的日志核心
+        /// @param header               消息头，不依赖传入因此不会悬垂,默认""
+        /// @param def_level            默认日志级别，用于<<，默认0
+        /// @param level_should_keep    快速过滤选项，默认为空
+        /// @param cfg                  消息配置
+        inline LogFactory(
+            Logger & binded,
+            std::string_view header = "",
+            int def_level = 0,
+            LogFactoryConfig::LevelKeepFn level_should_keep = nullptr,
+            const LogMsgConfig& msg = LogMsgConfig()
+        ):logger(binded){
+            cfg = LogFactoryConfig(header,def_level,level_should_keep,msg);
+            if(cfg.header.compare(""))cfg.header = binded.register_header(cfg.header);
+        }
 
         /// @brief 信息转发到Logger
         inline bool log(int level,std::string_view message){
-            return logger.push_message(level,"",message,cfg.get());
+            if(cfg.level_should_keep && !cfg.level_should_keep(level))return false;
+            return logger.push_message(level,"",message,cfg.msg);
         }
         /// @brief 信息转发到Logger，适配LogLevel
         inline bool log(LogLevel level,std::string_view message){
@@ -264,15 +265,19 @@ namespace alib::g3{
         }
         /// @brief 支持多参数的转发
         template<class... Args> inline bool log(int level,std::string_view fmt,Args&&... args){
+            if(cfg.level_should_keep && !cfg.level_should_keep(level))return false;
+            
             std::pmr::string str (logger.msg_str_alloc);
             std::vformat_to(std::back_inserter(str),fmt,std::make_format_args(args...));
-            return logger.push_message_pmr(level,header,str,cfg.get());
+            return logger.push_message_pmr(level,cfg.header,str,cfg.msg);
         }
         /// @brief 支持多参数的转发，静态版本
         template<class... Args> inline bool log_fast(int level,const std::format_string<Args...>& fmt,Args&&... args){
+            if(cfg.level_should_keep && !cfg.level_should_keep(level))return false;
+            
             std::pmr::string str (logger.msg_str_alloc);
             std::vformat_to(std::back_inserter(str),fmt.get(),std::make_format_args(args...));
-            return logger.push_message_pmr(level,header,str,cfg.get());
+            return logger.push_message_pmr(level,cfg.header,str,cfg.msg);
         }
         /// @brief 支持多参数的转发，适配LogLevel
         template<class... Args> inline bool log(LogLevel level,std::string_view fmt,Args&&... args){
@@ -284,25 +289,31 @@ namespace alib::g3{
         }
         /// @brief 提供已经装载到对应内存的数据，这个时候直接move就行
         /// @note  pmr_data会失效！
-        inline bool log_pmr(int level,std::pmr::string & pmr_data){
-            return logger.push_message_pmr(level,header,pmr_data,cfg.get());
+        inline bool log_pmr(int level,std::pmr::string & pmr_data,const LogMsgConfig & mcfg){
+            if(cfg.level_should_keep && !cfg.level_should_keep(level))return false;
+            
+            return logger.push_message_pmr(level,cfg.header,pmr_data,mcfg);
         }
 
         /// @brief 提供流式输出，这里采用默认的level
         inline StreamedContext<LogFactory> operator()(){
-            return StreamedContext<LogFactory>(default_level,*this);
+            bool valid = !cfg.level_should_keep || cfg.level_should_keep(cfg.def_level);
+            return StreamedContext<LogFactory>(cfg.def_level,*this,valid);
         }
         /// @brief 提供流式输出
         inline StreamedContext<LogFactory> operator()(int spec_level){
-            return StreamedContext<LogFactory>(spec_level,*this);
+            bool valid = !cfg.level_should_keep || cfg.level_should_keep(cfg.def_level);
+            return StreamedContext<LogFactory>(spec_level,*this,valid);
         }
         /// @brief 提供流式输出，适配LogLevel
         inline StreamedContext<LogFactory> operator()(LogLevel spec_level){
-            return StreamedContext<LogFactory>(static_cast<int>(spec_level),*this);
+            bool valid = !cfg.level_should_keep || cfg.level_should_keep(cfg.def_level);
+            return StreamedContext<LogFactory>(static_cast<int>(spec_level),*this,valid);
         }
         /// @brief 提供流式输出，采用默认的level,这里构造了亡值链，通过RVO减少一次copy
         template<class T> inline StreamedContext<LogFactory> operator<<(T && t){
-            return StreamedContext<LogFactory>(default_level,*this) << t;
+            bool valid = !cfg.level_should_keep || cfg.level_should_keep(cfg.def_level);
+            return StreamedContext<LogFactory>(cfg.def_level,*this,valid) << t;
         } 
     };
 };
@@ -338,22 +349,22 @@ namespace alib::g3{
         }
     }
 
-    inline LogMsg::LogMsg(const std::pmr::polymorphic_allocator<char> &__a,LogMsgConfig & c)
+    inline LogMsg::LogMsg(const std::pmr::polymorphic_allocator<char> &__a,const LogMsgConfig & c)
     :body(__a)
-    ,cfg(&c){
+    ,cfg(c){
         m_nice_one = true;
         generated = false;
     }
 
     inline void LogMsg::build_on_producer(const timespec & start){
-        if(cfg->disable_extra_information)return;
-        if(cfg->gen_thread_id){
+        if(cfg.disable_extra_information)return;
+        if(cfg.gen_thread_id){
             thread_id =
             static_cast<uint64_t>(
                 std::hash<std::thread::id>{}(std::this_thread::get_id())
             );
         }
-        if(cfg->gen_time){
+        if(cfg.gen_time){
             timespec spec;
             clock_gettime(time_clock_source,&spec);
             timestamp = (spec.tv_sec - start.tv_sec)*1000 + (spec.tv_nsec - start.tv_nsec)/1'000'000.0;
@@ -361,12 +372,12 @@ namespace alib::g3{
     }
 
     inline void LogMsg::build_on_consumer(){
-        if(cfg->disable_extra_information)return;
+        if(cfg.disable_extra_information)return;
         [[maybe_unused]] thread_local static bool inited = [&]{
             sdate.resize(date_str_resize);
             return false;
         }();
-        if(cfg->gen_date){
+        if(cfg.gen_date){
             static thread_local time_t old_time = 0;
             time_t rawtime;
             time(&rawtime);
@@ -384,7 +395,7 @@ namespace alib::g3{
     }
 
     inline std::string_view LogMsg::gen_composed(){
-        if(cfg->disable_extra_information){body.push_back('\n');return body;}
+        if(cfg.disable_extra_information){body.push_back('\n');return body;}
         [[maybe_unused]] static thread_local bool inited = [&]{
             scomposed.clear();
             scomposed.resize(compose_str_resize);
@@ -396,15 +407,15 @@ namespace alib::g3{
 
         scomposed.clear();
         scomposed.resize(scomposed.capacity());
-        if(cfg->gen_date)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
+        if(cfg.gen_date)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
             "[%s]",sdate.c_str());
-        if(cfg->out_level)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
-            "[%s]",cfg->level_cast(level).data());
-        if(cfg->out_header && header.data() != nullptr && header.size())beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
+        if(cfg.out_level && cfg.level_cast)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
+            "[%s]",cfg.level_cast(level).data());
+        if(cfg.out_header && header.data() != nullptr && header.size())beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
             "[%s]",header.data());
-        if(cfg->gen_time)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
+        if(cfg.gen_time)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
             "[%.2lfms]",timestamp);
-        if(cfg->gen_thread_id)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
+        if(cfg.gen_thread_id)beg += snprintf(scomposed.data() + beg,scomposed.size() - beg,
             "[TID%lu]",thread_id);
         scomposed.resize(beg);
         scomposed.append(":");
@@ -524,15 +535,24 @@ namespace alib::g3{
 
     inline LogFactory::LogFactory(
         Logger & binded,
-        std::string_view aheader,
-        int def_level, 
-        const LogMsgConfig ocfg
-    ):logger(binded),cfg(binded.register_config()){
-        if(aheader.compare("")){
-            header = binded.register_header(aheader);
-        }else header = "";
-        cfg = ocfg;
-        default_level = def_level;
+        const LogFactoryConfig & icfg
+    ):logger(binded){
+        cfg = icfg;
+        if(cfg.header.compare("")){
+            cfg.header = binded.register_header(cfg.header);
+        }
+    }
+
+    inline LogFactoryConfig::LogFactoryConfig(
+        std::string_view iheader,
+        int idef_level,
+        LogFactoryConfig::LevelKeepFn ilevel_should_keep,
+        const LogMsgConfig& msg_cfg
+    ){
+        header = iheader;
+        def_level = idef_level;
+        level_should_keep = ilevel_should_keep;
+        msg = msg_cfg;
     }
 }
 

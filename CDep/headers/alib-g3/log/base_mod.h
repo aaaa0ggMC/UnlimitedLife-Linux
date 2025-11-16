@@ -71,7 +71,7 @@ namespace alib::g3{
         virtual inline bool pre_filter(
             int level_id,
             std::string_view raw_message,
-            LogMsgConfig & cfg
+            const LogMsgConfig & cfg
         ){
             return true;
         }

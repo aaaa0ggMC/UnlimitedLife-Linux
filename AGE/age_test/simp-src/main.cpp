@@ -10,7 +10,7 @@ using enum LogLevel;
 
 int main(){
     Logger logger;
-    LogFactory lg(logger,"SIMP");
+    LogFactory lg(logger,LogFactoryConfig("SIMP"));
     world::EntityManager entity_manager;
     Application app(entity_manager);
     Window *win;

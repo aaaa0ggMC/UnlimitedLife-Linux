@@ -47,6 +47,66 @@ namespace alib::g3{
 
         log_tfmt(std::string_view s = ""):fmt_str(s){}
     };
+
+    /// @brief 单条日志设置是否展示header
+    struct log_header{
+        /// @brief 将在manipulate中设置
+        const bool val;
+
+        inline log_header(bool ival = true):val(ival){}
+
+        inline void manipulate(LogMsgConfig & cfg) const{
+            cfg.out_header = val;
+        }
+    };
+
+    /// @brief 单条日志设置是否展示level
+    struct log_level{
+        /// @brief 将在manipulate中设置
+        const bool val;
+
+        inline log_level(bool ival = true):val(ival){}
+
+        inline void manipulate(LogMsgConfig & cfg) const{
+            cfg.out_level = val;
+        }
+    };
+
+    /// @brief 单条日志设置是否展示date
+    struct log_date{
+        /// @brief 将在manipulate中设置
+        const bool val;
+
+        inline log_date(bool ival = true):val(ival){}
+
+        inline void manipulate(LogMsgConfig & cfg) const{
+            cfg.gen_date = val;
+        }
+    };
+
+    /// @brief 单条日志设置是否展示level
+    struct log_time{
+        /// @brief 将在manipulate中设置
+        const bool val;
+
+        inline log_time(bool ival = true):val(ival){}
+
+        inline void manipulate(LogMsgConfig & cfg) const{
+            cfg.gen_time = val;
+        }
+    };
+
+    /// @brief 单条日志设置是否展示thread_id
+    struct log_tid{
+        /// @brief 将在manipulate中设置
+        const bool val;
+
+        inline log_tid(bool ival = true):val(ival){}
+
+        inline void manipulate(LogMsgConfig & cfg) const{
+            cfg.gen_thread_id = val;
+        }
+    };
 }
 
 #endif

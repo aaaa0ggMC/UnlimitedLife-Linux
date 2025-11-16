@@ -53,7 +53,7 @@ Config cfg;
 std::string configp;
 const char * homep;
 Logger logger;
-LogFactory lg(logger,"BILI");
+LogFactory lg(logger,LogFactoryConfig("BILI"));
 std::unordered_map<std::string,MediaGroup> med;
 std::vector<std::string> files;
 

@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/11/14
+ * @date 2025/11/16
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -61,7 +61,7 @@ bool mouse = false;
 int main(){
     //Log
     Logger logger;
-    LogFactory lg(logger,"AGE");
+    LogFactory lg(logger,LogFactoryConfig("AGE"));
     ////Data////
     glm::vec3 veloDir;
     //Graphics & Input

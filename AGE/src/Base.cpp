@@ -104,7 +104,7 @@ static void simplify_stacktrace(const decltype(std::stacktrace::current()) & st)
 void Error::defTrigger(const ErrorInfopp& data){
     using namespace alib::g3;
     static Logger console_logger;
-    static LogFactory lg(console_logger,"AGE");
+    static LogFactory lg(console_logger,LogFactoryConfig("AGE"));
     [[maybe_unused]] static bool initeOnce = [&]{
         console_logger.append_mod<lot::Console>("console");
         return true;

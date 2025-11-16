@@ -19,6 +19,10 @@ namespace alib::g3{
     } || requires(T && t,std::pmr::string & target){
         write_to_log(target,t);
     };
+    /// @brief LogMsgConfig的操作器，满足这个接口就可以直接处理信息了
+    template<class T> concept CanManipulate = requires(T && t,LogMsgConfig & c){
+        t.manipulate(c);
+    };
 
     /// @brief 流式输出核心
     /// @tparam LogFactory 类CRTP写法与LogFactory解耦，理论上只能接上LogFactory
@@ -29,10 +33,14 @@ namespace alib::g3{
         std::pmr::string cache_str;
         /// @brief 日志级别
         int level;
+        /// @brief 当前Context是否是启用的，如果Level不满足LogFactory需求其会被标记为invalid，进而不组合&上传日志
+        bool context_valid;
         /// @brief 格式化字符串，用后就清除
         std::string_view fmt_str;
         /// @brief 格式化是否是临时的
         bool fmt_tmp;
+        /// @brief 配置信息
+        LogMsgConfig msg_cfg;
 
         // 禁止拷贝，允许移动
         StreamedContext(const StreamedContext&) = delete;
@@ -41,12 +49,14 @@ namespace alib::g3{
         StreamedContext& operator=(StreamedContext&&) = default;
 
         /// @brief 初始化字符串用的内存池以及level
-        inline StreamedContext(int level,LogFactory & fac)
+        inline StreamedContext(int level,LogFactory & fac,bool valid = true)
         :factory(fac)
-        ,cache_str(factory.logger.msg_str_alloc){
+        ,cache_str(factory.logger.msg_str_alloc)
+        ,msg_cfg(fac.cfg.msg){
             this->level = level;
             fmt_str = "";
             fmt_tmp = false;
+            context_valid = valid;
         }
 
         /// @brief  上传日志
@@ -54,13 +64,14 @@ namespace alib::g3{
         /// @note   StreamedContext设计出来就是用于局部构造的，因此upload后就失效了
         inline bool upload(){
             // 拒绝上传空的日志
-            if(!cache_str.empty())return factory.log_pmr(level,cache_str);
+            if(context_valid && !cache_str.empty())return factory.log_pmr(level,cache_str,msg_cfg);
             return false;
         }
 
         /// @brief 防止<<通用匹配过于通用而设计的
         template<class T>
         StreamedContext&& write(T && t){
+            if(!context_valid)return std::move(*this);
             if(fmt_str.empty())std::format_to(std::back_inserter(cache_str),"{}",t);
             else{
                 std::vformat_to(std::back_inserter(cache_str),fmt_str.data(),
@@ -73,6 +84,14 @@ namespace alib::g3{
             return std::move(*this);
         }
 
+        /// @brief 注入式的manipulator
+        template<CanManipulate T>
+        StreamedContext&& operator<<(T && t){
+            if(!context_valid)return std::move(*this);
+            t.manipulate(msg_cfg);
+            return std::move(*this);
+        }
+
         /// @brief 格式化基础类型
         template<GoUniversal T>
         StreamedContext&& operator<<(T && t){
@@ -82,6 +101,7 @@ namespace alib::g3{
         /// @brief 格式化可转发类型
         template<CanForward T>
         StreamedContext&& operator<<(T && t){
+            if(!context_valid)return std::move(*this);
             // 是的，孩子们，你可以通过这个实现非侵入式的覆写了
             if constexpr(requires(T&&t,std::pmr::string&val){write_to_log(val,t);}){
                 write_to_log(cache_str,t);
@@ -98,6 +118,7 @@ namespace alib::g3{
 
         /// @brief 支持设置格式化，需要保证局部不悬垂（应该没人会在一句话就把数据删除了吧）
         inline StreamedContext&& operator<<(const log_fmt & fmt){
+            if(!context_valid)return std::move(*this);
             fmt_str = fmt.fmt_str.data();
             fmt_tmp = false;
             return std::move(*this);
@@ -105,6 +126,7 @@ namespace alib::g3{
 
         /// @brief 支持设置格式化，需要保证局部不悬垂（应该没人会在一句话就把数据删除了吧）
         inline StreamedContext&& operator<<(const log_tfmt & fmt){
+            if(!context_valid)return std::move(*this);
             fmt_str = fmt.fmt_str.data();
             fmt_tmp = true;
             return std::move(*this);
@@ -119,12 +141,14 @@ namespace alib::g3{
         /// @brief 格式化glm的向量
         template<int N,class T,enum glm::qualifier Q> 
             inline StreamedContext&& operator<<(const glm::vec<N,T,Q> & v){
+            if(!context_valid)return std::move(*this);
             std::span<const T,N> value(glm::value_ptr(v),N);
             return (*this) << value;
         }
         /// @brief 格式化glm的矩阵
         template<int M,int N,class T,enum glm::qualifier Q> 
             inline StreamedContext&& operator<<(const glm::mat<M,N,T,Q> & v){
+            if(!context_valid)return std::move(*this);
             std::span<const T,N> data (glm::value_ptr(v),M*N);
             cache_str.append("{");
             for(int m = 0;m < M;++m){
@@ -137,6 +161,7 @@ namespace alib::g3{
         /// @brief 格式化glm的四元数
         template<class T,enum glm::qualifier Q> 
             inline StreamedContext&& operator<<(const glm::qua<T,Q> & v){
+            if(!context_valid)return std::move(*this);
             std::span<const T,4> data (glm::value_ptr(v),4);
             return (*this) << data;
         }

@@ -89,9 +89,8 @@ Logger::Logger(const LoggerConfig & cfg)
 ,messages(msg_alloc)
 ,msg_str_buf()
 ,msg_str_alloc(&msg_str_buf)
-,msg_semaphore(0){
-    config_pool.reserve(config_pool_reserve_size);
-    config = cfg;
+,msg_semaphore(0)
+,config(cfg){
     logger_not_on_destroying = true;
     back_pressure_threshold = cfg.back_pressure_multiply * 
                 cfg.fetch_message_count_max * cfg.consumer_count;
@@ -121,7 +120,7 @@ void Logger::flush(){
     flush_targets();
 }
 
-bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string & body,LogMsgConfig & cfg){
+bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg){
     // pre filter
     for(auto & filter : filters){
         if(!filter->enabled)continue;

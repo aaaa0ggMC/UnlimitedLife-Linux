@@ -57,7 +57,7 @@ void test_atranslator(){
     Logger logger;
     LogMsgConfig cfg;
     cfg.disable_extra_information = true;
-    LogFactory lgf(logger,"Output",2,cfg);
+    LogFactory lgf(logger,LogFactoryConfig("Output",2,nullptr,cfg));
 
     logger.append_mod<lot::Console>("console");
 

@@ -16,8 +16,8 @@ namespace alib::g3{
         std::string_view header;
         /// @brief 最终合成的日志主要部分
         std::pmr::string body;
-        /// @brief 日志指向的配置，需要保证指向始终可用
-        LogMsgConfig * cfg;
+        /// @brief 日志指向的配置，目前觉得使用指针会带来安全风险，因此尝试一下const结构体
+        LogMsgConfig cfg;
         /// @brief 这条日志的级别
         int level;
         
@@ -34,7 +34,7 @@ namespace alib::g3{
         static thread_local std::string scomposed;
 
         /// @brief 构造核心内容
-        LogMsg(const std::pmr::polymorphic_allocator<char> &__a,LogMsgConfig & c);
+        LogMsg(const std::pmr::polymorphic_allocator<char> &__a,const LogMsgConfig & c);
         /// @brief 构造空的数据，用于占位
         LogMsg(){}
         
