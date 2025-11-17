@@ -103,9 +103,9 @@ Logger::Logger(const LoggerConfig & cfg)
 }
 
 Logger::~Logger(){
-    // flush();
     logger_not_on_destroying = false;
     msg_semaphore.release(consumers.size() * 10);
+    flush();
 }
 
 void Logger::flush(){
