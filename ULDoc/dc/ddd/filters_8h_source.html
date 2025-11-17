@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/log/filters.h 源文件</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(1); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('dc/ddd/filters_8h_source.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">filters.h</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef ALOG2_PREFAB_TARGETS</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define ALOG2_PREFAB_TARGETS</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;<a class="code" href="../../d0/daa/kernel_8h.html">alib-g3/log/kernel.h</a>&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;<a class="code" href="../../dc/dc1/adebug_8h.html">alib-g3/adebug.h</a>&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;functional&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">namespace </span>alib::g3::lof{</div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
+<div class="foldopen" id="foldopen00009" data-start="{" data-end="};">
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html">    9</a></span>    <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html">CustomLevelBlocker</a> : <span class="keyword">public</span> <a class="code hl_struct" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html">LogFilter</a>{</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a3fe4675dd3d508c302e63e03f67dca43">   11</a></span>        <span class="keyword">using </span><a class="code hl_typedef" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a3fe4675dd3d508c302e63e03f67dca43">CustomFN</a> = std::function&lt;bool(<span class="keywordtype">int</span>)&gt;;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a3102164653b3526b783e63a494ef303b">   14</a></span>        <a class="code hl_typedef" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a3fe4675dd3d508c302e63e03f67dca43">CustomFN</a> <a class="code hl_variable" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a3102164653b3526b783e63a494ef303b">should_keep</a>;</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
+<div class="foldopen" id="foldopen00017" data-start="{" data-end="}">
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a7f37649aaedb7989885c1e623ec56bf9">   17</a></span>        <a class="code hl_function" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a7f37649aaedb7989885c1e623ec56bf9">CustomLevelBlocker</a>(<a class="code hl_typedef" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a3fe4675dd3d508c302e63e03f67dca43">CustomFN</a> ishould_keep){</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>            <a class="code hl_define" href="../../dc/dc1/adebug_8h.html#a16dd79cf648082dbdb02f286b1b212e9">panic_debug</a>(should_keep != <span class="keyword">nullptr</span>,<span class="stringliteral">&quot;The function you passed shouldn&#39;t be null!&quot;</span>);</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>            <span class="keywordflow">if</span>(ishould_keep)should_keep = ishould_keep;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>            <span class="keywordflow">else</span>{</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>                <span class="comment">// 搞一个默认函数，并且禁用当前Filter</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>                should_keep = [](int){<span class="keywordflow">return</span> <span class="keyword">true</span>;};</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>                toggle(<span class="keyword">false</span>);</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>            }</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        }</div>
+</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="foldopen" id="foldopen00027" data-start="{" data-end="}">
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a0b6f8d59667e42cbde384a8618ec87b1">   27</a></span>        <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a0b6f8d59667e42cbde384a8618ec87b1">pre_filter</a>(</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>            <span class="keywordtype">int</span> level,</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>            std::string_view raw_message,</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>            <span class="keyword">const</span> <a class="code hl_struct" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">LogMsgConfig</a> &amp; cfg)<span class="keyword"> override</span></div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="keyword">        </span>{</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>            <span class="keywordflow">return</span> should_keep(level);</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>        }</div>
+</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    };</div>
+</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>}</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aadebug_8h_html"><div class="ttname"><a href="../../dc/dc1/adebug_8h.html">adebug.h</a></div><div class="ttdoc">目标是提供简单可用的错误判断，适合我这种一般不调试的人</div></div>
+<div class="ttc" id="aadebug_8h_html_a16dd79cf648082dbdb02f286b1b212e9"><div class="ttname"><a href="../../dc/dc1/adebug_8h.html#a16dd79cf648082dbdb02f286b1b212e9">panic_debug</a></div><div class="ttdeci">#define panic_debug(will_be_removed_in_release_mode_cond, ARG)</div><div class="ttdoc">Note that the expression you input must have no side-effects!</div><div class="ttdef"><b>Definition</b> adebug.h:141</div></div>
+<div class="ttc" id="akernel_8h_html"><div class="ttname"><a href="../../d0/daa/kernel_8h.html">kernel.h</a></div><div class="ttdoc">与日志有关的函数库</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html">alib::g3::LogFilter</a></div><div class="ttdoc">日志过滤器，支持日志拒绝，日志修改啥的</div><div class="ttdef"><b>Definition</b> base_mod.h:45</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">alib::g3::LogMsgConfig</a></div><div class="ttdoc">日志消息细节控制，用在LogFactory中，控制额外信息的输出</div><div class="ttdef"><b>Definition</b> base_config.h:7</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1lof_1_1CustomLevelBlocker_html"><div class="ttname"><a href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html">alib::g3::lof::CustomLevelBlocker</a></div><div class="ttdef"><b>Definition</b> filters.h:9</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1lof_1_1CustomLevelBlocker_html_a0b6f8d59667e42cbde384a8618ec87b1"><div class="ttname"><a href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a0b6f8d59667e42cbde384a8618ec87b1">alib::g3::lof::CustomLevelBlocker::pre_filter</a></div><div class="ttdeci">bool pre_filter(int level, std::string_view raw_message, const LogMsgConfig &amp;cfg) override</div><div class="ttdoc">尝试在push message时提前处理日志</div><div class="ttdef"><b>Definition</b> filters.h:27</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1lof_1_1CustomLevelBlocker_html_a3102164653b3526b783e63a494ef303b"><div class="ttname"><a href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a3102164653b3526b783e63a494ef303b">alib::g3::lof::CustomLevelBlocker::should_keep</a></div><div class="ttdeci">CustomFN should_keep</div><div class="ttdoc">用户定义的</div><div class="ttdef"><b>Definition</b> filters.h:14</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1lof_1_1CustomLevelBlocker_html_a3fe4675dd3d508c302e63e03f67dca43"><div class="ttname"><a href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a3fe4675dd3d508c302e63e03f67dca43">alib::g3::lof::CustomLevelBlocker::CustomFN</a></div><div class="ttdeci">std::function&lt; bool(int)&gt; CustomFN</div><div class="ttdoc">用户自定义的判断函数</div><div class="ttdef"><b>Definition</b> filters.h:11</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1lof_1_1CustomLevelBlocker_html_a7f37649aaedb7989885c1e623ec56bf9"><div class="ttname"><a href="../../db/d51/structalib_1_1g3_1_1lof_1_1CustomLevelBlocker.html#a7f37649aaedb7989885c1e623ec56bf9">alib::g3::lof::CustomLevelBlocker::CustomLevelBlocker</a></div><div class="ttdeci">CustomLevelBlocker(CustomFN ishould_keep)</div><div class="ttdoc">初始化，理论上要求传入的不能为NULL</div><div class="ttdef"><b>Definition</b> filters.h:17</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../dir_be216c816632aa4955947bd3cb1065c9.html">log</a></li><li class="navelem"><b>filters.h</b></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

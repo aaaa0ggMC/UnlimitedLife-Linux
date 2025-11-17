@@ -1,0 +1,377 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/aref.h 源文件</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(1); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d0/de9/aref_8h_source.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">aref.h</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="../../d0/de9/aref_8h.html">浏览该文件的文档.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span> </div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span><span class="preprocessor">#ifndef AREF_H_INCLUDED</span></div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span><span class="preprocessor">#define AREF_H_INCLUDED</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span><span class="preprocessor">#include &lt;concepts&gt;</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="preprocessor">#include &lt;type_traits&gt;</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#include &lt;cassert&gt;</span></div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a>{</div>
+<div class="foldopen" id="foldopen00072" data-start="{" data-end="}">
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="../../d0/d44/conceptalib_1_1g3_1_1CanAccessItem.html">   72</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt; <span class="keyword">concept </span><a class="code hl_concept" href="../../d0/d44/conceptalib_1_1g3_1_1CanAccessItem.html">CanAccessItem</a> = <span class="keyword">requires</span>(T&amp;t){</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        { t[0] } -&gt; std::same_as&lt;typename T::reference&gt;;</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        t.size();</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        t.empty();</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>        <span class="keyword">typename</span> T::value_type;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        <span class="keyword">typename</span> T::reference;</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    };</div>
+</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span> </div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno"><a class="line" href="../../d3/d7d/conceptalib_1_1g3_1_1IsNumber.html">   80</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt; <span class="keyword">concept </span><a class="code hl_concept" href="../../d3/d7d/conceptalib_1_1g3_1_1IsNumber.html">IsNumber</a> =</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>        std::is_same_v&lt;T,size_t&gt; ||</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        std::is_same_v&lt;T,int&gt; ||</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>        std::is_same_v&lt;T,long&gt; ||</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>        std::is_same_v&lt;T,unsigned int&gt; ||</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        std::is_same_v&lt;T,unsigned long&gt; ||</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        std::is_same_v&lt;T,short&gt; ||</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        std::is_same_v&lt;T,unsigned short&gt;;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="foldopen" id="foldopen00092" data-start="{" data-end="};">
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html">   92</a></span>    <span class="keyword">template</span>&lt;CanAccessItem Cont&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html">RefWrapper</a>{</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        <span class="keyword">using </span>BaseType = <span class="keyword">typename</span> Cont::value_type;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a7cc9b38c33a547e940fa48fe75fbae64">   95</a></span>        Cont &amp; <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a7cc9b38c33a547e940fa48fe75fbae64">cont</a>;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">   97</a></span>        <span class="keywordtype">size_t</span> <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
+<div class="foldopen" id="foldopen00100" data-start="{" data-end="}">
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5a528abcdea96a8348c1fece8dfac11a">  100</a></span>        <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5a528abcdea96a8348c1fece8dfac11a">has_data</a>(){</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> &lt; <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a7cc9b38c33a547e940fa48fe75fbae64">cont</a>.size();</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        }</div>
+</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    </div>
+<div class="foldopen" id="foldopen00105" data-start="{" data-end="}">
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#adaad8b1dbdc1597f6d5d629af001dec4">  105</a></span>        <span class="keyword">inline</span> <span class="keyword">auto</span>&amp; <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#adaad8b1dbdc1597f6d5d629af001dec4">get</a>(){</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            <span class="comment">// debug下防止shrink</span></div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            assert(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> &lt; <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a7cc9b38c33a547e940fa48fe75fbae64">cont</a>.size());</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            <span class="keywordflow">return</span> <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a7cc9b38c33a547e940fa48fe75fbae64">cont</a>[<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a>];</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        }</div>
+</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="foldopen" id="foldopen00112" data-start="{" data-end="}">
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#aefcedcc8b0097190f8947ba0667c6311">  112</a></span>        <span class="keyword">inline</span> <span class="keyword">auto</span>* <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#aefcedcc8b0097190f8947ba0667c6311">operator-&gt;</a>(){</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>            <span class="keywordflow">return</span> &amp;(<a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#adaad8b1dbdc1597f6d5d629af001dec4">get</a>());</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        }</div>
+</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> </div>
+<div class="foldopen" id="foldopen00117" data-start="{" data-end="}">
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a44c4e78e19a0c823ec6c073c35080e42">  117</a></span>        <span class="keyword">template</span>&lt;<span class="keyword">class</span> U&gt; <span class="keyword">inline</span> <span class="keyword">auto</span> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a44c4e78e19a0c823ec6c073c35080e42">operator=</a>(U&amp;&amp; val) </div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>            -&gt; <span class="keyword">decltype</span>(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a7cc9b38c33a547e940fa48fe75fbae64">cont</a>[<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a>] = std::forward&lt;U&gt;(val))</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        {</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#adaad8b1dbdc1597f6d5d629af001dec4">get</a>() = std::forward&lt;U&gt;(val);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        }</div>
+</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span> </div>
+<div class="foldopen" id="foldopen00124" data-start="{" data-end="}">
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ae1af6de813107da95a7962461e8b4cca">  124</a></span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html">RefWrapper&lt;Cont&gt;</a> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ae1af6de813107da95a7962461e8b4cca">operator+</a>(<span class="keywordtype">int</span> offset){</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>            <span class="keyword">auto</span> t = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>            t.set_index(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> + offset);</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>            <span class="keywordflow">return</span> t;</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>        }</div>
+</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="foldopen" id="foldopen00131" data-start="{" data-end="}">
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab21316be0b8418982e6f0cbbfddf2c61">  131</a></span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html">RefWrapper&lt;Cont&gt;</a> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab21316be0b8418982e6f0cbbfddf2c61">operator-</a>(<span class="keywordtype">int</span> offset){</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>            <span class="keyword">auto</span> t = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>            t.set_index(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> - offset);</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>            <span class="keywordflow">return</span> t;</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        }</div>
+</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html">RefWrapper&lt;Cont&gt;</a>&amp; operator+=(<span class="keywordtype">int</span> offset){</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">set_index</a>(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> + offset);</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        }</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span> </div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        <span class="keyword">inline</span> RefWrapper&lt;Cont&gt;&amp; operator-=(<span class="keywordtype">int</span> offset){</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">set_index</a>(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> - offset);</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        }</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <span class="keyword">inline</span> RefWrapper&lt;Cont&gt;&amp; operator++(){</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">set_index</a>(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> + 1);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        }</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keyword">inline</span> RefWrapper&lt;Cont&gt;&amp; operator--(){</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">set_index</a>(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> - 1);</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        }</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        <span class="keyword">inline</span> RefWrapper&lt;Cont&gt; operator++(<span class="keywordtype">int</span>){</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>            <span class="keyword">auto</span> ret = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>            <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">set_index</a>(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> + 1);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>            <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        }</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        </div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        <span class="keyword">inline</span> RefWrapper&lt;Cont&gt; operator--(<span class="keywordtype">int</span>){</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>            <span class="keyword">auto</span> ret = *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>            <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">set_index</a>(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> - 1);</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>            <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        }</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span> </div>
+<div class="foldopen" id="foldopen00166" data-start="{" data-end="}">
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">  166</a></span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html">RefWrapper&lt;Cont&gt;</a>&amp; <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">set_index</a>(<span class="keywordtype">size_t</span> <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a>){</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            assert(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a> &lt; <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a7cc9b38c33a547e940fa48fe75fbae64">cont</a>.size());</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>            this-&gt;index = <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a>;</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        }</div>
+</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="foldopen" id="foldopen00173" data-start="{" data-end="}">
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno"><a class="line" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a4a39bf81eeef06732700ebceaa3a94c0">  173</a></span>        <span class="keyword">inline</span> <span class="keyword">auto</span>&amp; <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a4a39bf81eeef06732700ebceaa3a94c0">operator()</a>(<span class="keywordtype">size_t</span> <a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a>){</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">set_index</a>(<a class="code hl_variable" href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">index</a>);</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>        }</div>
+</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    };</div>
+</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span> </div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>    <span class="keyword">template</span>&lt;CanAccessItem Cont&gt; <span class="keyword">auto</span> </div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>        ref(Cont &amp; cont,<span class="keywordtype">size_t</span> index){</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>        assert(index &lt; cont.size());</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        <span class="keywordflow">return</span> RefWrapper&lt;Cont&gt;{cont,index};</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    }</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
+<div class="foldopen" id="foldopen00193" data-start="{" data-end="};">
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html">  193</a></span>    <span class="keyword">template</span>&lt;CanAccessItem Cont,<span class="keywordtype">size_t</span> N&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html">MultiRefWrapper</a>{</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        <span class="keyword">using </span>value_type = Cont::value_type;</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">  196</a></span>        Cont &amp; <a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">cont</a>;</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">  198</a></span>        std::array&lt;size_t,N&gt; <a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>;</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    <span class="keyword">private</span>:</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>        <span class="keyword">template</span>&lt;CanAccessItem ICont,<span class="keywordtype">size_t</span> Depth = 0&gt; </div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            <span class="keyword">auto</span>&amp; get_raw(ICont &amp; ucont){</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>            assert(<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>[Depth] &lt; ucont.size());</div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>            <span class="comment">// 到达索引最内层，由于set_indices已经保证层数匹配</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>            <span class="keywordflow">if</span> <span class="keyword">constexpr</span>(Depth == N-1){</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>                <span class="keywordflow">return</span> ucont[<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>[Depth]];</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>            }<span class="keywordflow">else</span> <span class="keywordflow">return</span> get_raw&lt;typename ICont::value_type,Depth+1&gt;(ucont[<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>[Depth]]); </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>        }</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>        </div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        <span class="keyword">template</span>&lt;CanAccessItem ICont,<span class="keywordtype">size_t</span> Index = 0,IsNumber Arg&gt; <span class="keywordtype">void</span> </div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>            set_indices_raw(ICont&amp; c,Arg&amp;&amp; index){ </div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>            assert(index &lt; c.size());</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>            <a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>[Index] = std::forward&lt;Arg&gt;(index);   </div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        }</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span> </div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        <span class="keyword">template</span>&lt;CanAccessItem ICont,<span class="keywordtype">size_t</span> Index = 0,IsNumber Arg,IsNumber... Args&gt; <span class="keywordtype">void</span> </div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>            set_indices_raw(ICont &amp; c,Arg&amp;&amp; index,Args&amp;&amp;... iss){</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>            <span class="comment">// 说明此时有附加参数但是没有对应层数</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>            <span class="keyword">static_assert</span>(CanAccessItem&lt;typename ICont::value_type&gt;,<span class="stringliteral">&quot;Too many indices! Your ref is too deep for the container!&quot;</span>);</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>            assert(index &lt; c.size());</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>            <a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>[Index] = std::forward&lt;Arg&gt;(index);</div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>            set_indices_raw&lt;<span class="keyword">typename</span> ICont::value_type,Index+1,Args...&gt;(c[index],std::forward&lt;Args&gt;(iss)...); <span class="comment">// 递归检测</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>        }</div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>        </div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="keyword">template</span>&lt;<span class="keywordtype">size_t</span> N2&gt; MultiRefWrapper(MultiRefWrapper&lt;Cont,N2&gt; &amp; c1):<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">cont</a>(c1.<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">cont</a>){</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>            <span class="keyword">static_assert</span>(N2 &gt;= N,<span class="stringliteral">&quot;Cannot lowercast the container!&quot;</span>);</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>            std::copy(c1.indices.begin(),c1.indices.end(),<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>.begin());</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>        }</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        <span class="keyword">template</span>&lt;<span class="keywordtype">size_t</span> dummy&gt; MultiRefWrapper(MultiRefWrapper&lt;Cont,dummy&gt; &amp; c1,<span class="keywordtype">size_t</span> index):<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">cont</a>(c1.<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">cont</a>){</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>            <span class="keyword">static_assert</span>(N == dummy+1,<span class="stringliteral">&quot;Cannot uppercast the container!&quot;</span>);</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>            std::copy(c1.indices.begin(),c1.indices.end(),<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>.begin());</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>            </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>            assert(index &lt; c1.get().size());</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>            <a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>[N-1] = index;</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        }</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
+<div class="foldopen" id="foldopen00243" data-start="{" data-end="}">
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#aee5fc50bd19d87ee46f9315455a0a5de">  243</a></span>        <span class="keyword">template</span>&lt;<a class="code hl_concept" href="../../d3/d7d/conceptalib_1_1g3_1_1IsNumber.html">IsNumber</a>... Args&gt; <span class="keyword">inline</span> <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#aee5fc50bd19d87ee46f9315455a0a5de">MultiRefWrapper</a>(Cont &amp; c,Args&amp;&amp;... val):<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">cont</a>(c){</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>            <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a0c6284110b490dc6b8cdb755cb157ea8">set_indices</a>(std::forward&lt;Args&gt;(val)...);</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>        }</div>
+</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
+<div class="foldopen" id="foldopen00248" data-start="{" data-end="}">
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a263e3b576cfb8951ed934ef712abd9b6">  248</a></span>        <span class="keyword">inline</span> <span class="keyword">auto</span>&amp; <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a263e3b576cfb8951ed934ef712abd9b6">get</a>(){</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>            <span class="keywordflow">return</span> get_raw&lt;Cont,0&gt;(<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">cont</a>);</div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        }</div>
+</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        <span class="keyword">template</span>&lt;<a class="code hl_concept" href="../../d3/d7d/conceptalib_1_1g3_1_1IsNumber.html">IsNumber</a>... Args&gt; <span class="keyword">inline</span> <span class="keywordtype">void</span> </div>
+<div class="foldopen" id="foldopen00254" data-start="{" data-end="}">
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a0c6284110b490dc6b8cdb755cb157ea8">  254</a></span>            <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a0c6284110b490dc6b8cdb755cb157ea8">set_indices</a>(Args&amp;&amp;... iss){</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>            set_indices_raw&lt;Cont,0,Args...&gt;(<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">cont</a>,std::forward&lt;Args&gt;(iss)...); <span class="comment">// 递归检测</span></div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        }</div>
+</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span> </div>
+<div class="foldopen" id="foldopen00259" data-start="{" data-end="}">
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a67a19873f583e13076f4dd2babca9c86">  259</a></span>        <span class="keyword">inline</span> <span class="keyword">auto</span>* <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a67a19873f583e13076f4dd2babca9c86">operator-&gt;</a>(){</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>            <span class="keywordflow">return</span> &amp;<a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a263e3b576cfb8951ed934ef712abd9b6">get</a>();</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        }</div>
+</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span> </div>
+<div class="foldopen" id="foldopen00264" data-start="{" data-end="}">
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a5ad353432bda082a80936b8d20712b27">  264</a></span>        <span class="keyword">inline</span> <span class="keyword">auto</span> <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a5ad353432bda082a80936b8d20712b27">operator()</a>(){</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>            <span class="keyword">static_assert</span>(N != 1,<span class="stringliteral">&quot;You have reached to the root of the container!&quot;</span>);</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>            <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html">MultiRefWrapper</a>&lt;Cont,N-1&gt;(*this);</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>        }</div>
+</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="foldopen" id="foldopen00270" data-start="{" data-end="}">
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a8f67928a790b7f49103111d099292faf">  270</a></span>        <span class="keyword">inline</span> <span class="keyword">auto</span> <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a8f67928a790b7f49103111d099292faf">operator()</a>(<span class="keywordtype">size_t</span> index){</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>            <a class="code hl_struct" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html">MultiRefWrapper&lt;Cont,N&gt;</a> ret(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>            ret.<a class="code hl_variable" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">indices</a>[N-1] = index;</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>            <span class="comment">// 安全检测在get里面做</span></div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>            <span class="keywordflow">return</span> ret;</div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>        }</div>
+</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="foldopen" id="foldopen00278" data-start="{" data-end="}">
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4dc41da2b9be8f03f6069ceb83d46e84">  278</a></span>        <span class="keyword">inline</span> <span class="keyword">auto</span> <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4dc41da2b9be8f03f6069ceb83d46e84">operator[]</a>(<span class="keywordtype">size_t</span> index){</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>            <span class="keyword">static_assert</span>(<a class="code hl_concept" href="../../d0/d44/conceptalib_1_1g3_1_1CanAccessItem.html">CanAccessItem&lt;value_type&gt;</a>,<span class="stringliteral">&quot;Too many indices! Your ref is too deep for the container!&quot;</span>);</div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>            <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html">MultiRefWrapper&lt;Cont,N+1&gt;</a>(*<span class="keyword">this</span>,index);</div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>        }</div>
+</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span> </div>
+<div class="foldopen" id="foldopen00284" data-start="{" data-end="}">
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno"><a class="line" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a5716b7946e8ce276c0338c2f8367e2a1">  284</a></span>        <span class="keyword">template</span>&lt;<span class="keyword">class</span> U&gt; <span class="keyword">inline</span> <span class="keyword">auto</span> <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a5716b7946e8ce276c0338c2f8367e2a1">operator=</a>(U&amp;&amp; val) </div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>            -&gt; <span class="keyword">decltype</span>(<a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a263e3b576cfb8951ed934ef712abd9b6">get</a>() = std::forward&lt;U&gt;(val))</div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        {</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a263e3b576cfb8951ed934ef712abd9b6">get</a>() = std::forward&lt;U&gt;(val);</div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        }</div>
+</div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    };</div>
+</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>    <span class="keyword">template</span>&lt;CanAccessItem Cont,IsNumber... Args&gt; <span class="keyword">auto</span></div>
+<div class="foldopen" id="foldopen00293" data-start="{" data-end="}">
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno"><a class="line" href="../../d1/d27/namespacealib_1_1g3.html#a71c3ee33ed6ba884d5193efcb6ae6dc9">  293</a></span>        <a class="code hl_function" href="../../d1/d27/namespacealib_1_1g3.html#a71c3ee33ed6ba884d5193efcb6ae6dc9">refs</a>(Cont &amp; cont,Args&amp;&amp;... indices){</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        <span class="keywordflow">return</span> <a class="code hl_struct" href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html">MultiRefWrapper</a>&lt;Cont,<span class="keyword">sizeof</span>...(Args)&gt;(cont,std::forward&lt;Args&gt;(indices)...);</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    }</div>
+</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>}</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aconceptalib_1_1g3_1_1CanAccessItem_html"><div class="ttname"><a href="../../d0/d44/conceptalib_1_1g3_1_1CanAccessItem.html">alib::g3::CanAccessItem</a></div><div class="ttdef"><b>Definition</b> aref.h:72</div></div>
+<div class="ttc" id="aconceptalib_1_1g3_1_1IsNumber_html"><div class="ttname"><a href="../../d3/d7d/conceptalib_1_1g3_1_1IsNumber.html">alib::g3::IsNumber</a></div><div class="ttdef"><b>Definition</b> aref.h:80</div></div>
+<div class="ttc" id="anamespacealib_1_1g3_html"><div class="ttname"><a href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a></div><div class="ttdoc">第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。</div><div class="ttdef"><b>Definition</b> alogger_old.cpp:413</div></div>
+<div class="ttc" id="anamespacealib_1_1g3_html_a71c3ee33ed6ba884d5193efcb6ae6dc9"><div class="ttname"><a href="../../d1/d27/namespacealib_1_1g3.html#a71c3ee33ed6ba884d5193efcb6ae6dc9">alib::g3::refs</a></div><div class="ttdeci">auto refs(Cont &amp;cont, Args &amp;&amp;... indices)</div><div class="ttdoc">获取多层container的引用</div><div class="ttdef"><b>Definition</b> aref.h:293</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html">alib::g3::MultiRefWrapper</a></div><div class="ttdoc">多层引用容器。</div><div class="ttdef"><b>Definition</b> aref.h:193</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a0c6284110b490dc6b8cdb755cb157ea8"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a0c6284110b490dc6b8cdb755cb157ea8">alib::g3::MultiRefWrapper::set_indices</a></div><div class="ttdeci">void set_indices(Args &amp;&amp;... iss)</div><div class="ttdoc">设置索引</div><div class="ttdef"><b>Definition</b> aref.h:254</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a263e3b576cfb8951ed934ef712abd9b6"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a263e3b576cfb8951ed934ef712abd9b6">alib::g3::MultiRefWrapper::get</a></div><div class="ttdeci">auto &amp; get()</div><div class="ttdoc">获取内存对象</div><div class="ttdef"><b>Definition</b> aref.h:248</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a48caa771d968cb6e81418999ab30a8a8"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a48caa771d968cb6e81418999ab30a8a8">alib::g3::MultiRefWrapper::indices</a></div><div class="ttdeci">std::array&lt; size_t, N &gt; indices</div><div class="ttdoc">存储索引的数组</div><div class="ttdef"><b>Definition</b> aref.h:198</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a4d334b80cdd94769e891e14766cd9227"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4d334b80cdd94769e891e14766cd9227">alib::g3::MultiRefWrapper::cont</a></div><div class="ttdeci">Cont &amp; cont</div><div class="ttdoc">底层容器，需要保证不悬垂</div><div class="ttdef"><b>Definition</b> aref.h:196</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a4dc41da2b9be8f03f6069ceb83d46e84"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a4dc41da2b9be8f03f6069ceb83d46e84">alib::g3::MultiRefWrapper::operator[]</a></div><div class="ttdeci">auto operator[](size_t index)</div><div class="ttdoc">往下走一层</div><div class="ttdef"><b>Definition</b> aref.h:278</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a5716b7946e8ce276c0338c2f8367e2a1"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a5716b7946e8ce276c0338c2f8367e2a1">alib::g3::MultiRefWrapper::operator=</a></div><div class="ttdeci">auto operator=(U &amp;&amp;val) -&gt; decltype(get()=std::forward&lt; U &gt;(val))</div><div class="ttdoc">尝试调用引用的赋值</div><div class="ttdef"><b>Definition</b> aref.h:284</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a5ad353432bda082a80936b8d20712b27"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a5ad353432bda082a80936b8d20712b27">alib::g3::MultiRefWrapper::operator()</a></div><div class="ttdeci">auto operator()()</div><div class="ttdoc">往上面走一层</div><div class="ttdef"><b>Definition</b> aref.h:264</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a67a19873f583e13076f4dd2babca9c86"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a67a19873f583e13076f4dd2babca9c86">alib::g3::MultiRefWrapper::operator-&gt;</a></div><div class="ttdeci">auto * operator-&gt;()</div><div class="ttdoc">获取当前对象</div><div class="ttdef"><b>Definition</b> aref.h:259</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_a8f67928a790b7f49103111d099292faf"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#a8f67928a790b7f49103111d099292faf">alib::g3::MultiRefWrapper::operator()</a></div><div class="ttdeci">auto operator()(size_t index)</div><div class="ttdoc">设置当前层索引</div><div class="ttdef"><b>Definition</b> aref.h:270</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1MultiRefWrapper_html_aee5fc50bd19d87ee46f9315455a0a5de"><div class="ttname"><a href="../../d3/d49/structalib_1_1g3_1_1MultiRefWrapper.html#aee5fc50bd19d87ee46f9315455a0a5de">alib::g3::MultiRefWrapper::MultiRefWrapper</a></div><div class="ttdeci">MultiRefWrapper(Cont &amp;c, Args &amp;&amp;... val)</div><div class="ttdoc">构造引用对象</div><div class="ttdef"><b>Definition</b> aref.h:243</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html">alib::g3::RefWrapper</a></div><div class="ttdoc">通过持有index从而保证一定的安全性，Release优化后仅仅多出0.3ns(5.7Ghz电脑)的解引用时长</div><div class="ttdef"><b>Definition</b> aref.h:92</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_a44c4e78e19a0c823ec6c073c35080e42"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a44c4e78e19a0c823ec6c073c35080e42">alib::g3::RefWrapper::operator=</a></div><div class="ttdeci">auto operator=(U &amp;&amp;val) -&gt; decltype(cont[index]=std::forward&lt; U &gt;(val))</div><div class="ttdoc">尝试调用引用的赋值</div><div class="ttdef"><b>Definition</b> aref.h:117</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_a4a39bf81eeef06732700ebceaa3a94c0"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a4a39bf81eeef06732700ebceaa3a94c0">alib::g3::RefWrapper::operator()</a></div><div class="ttdeci">auto &amp; operator()(size_t index)</div><div class="ttdoc">手动设置</div><div class="ttdef"><b>Definition</b> aref.h:173</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_a5a528abcdea96a8348c1fece8dfac11a"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5a528abcdea96a8348c1fece8dfac11a">alib::g3::RefWrapper::has_data</a></div><div class="ttdeci">bool has_data()</div><div class="ttdoc">确认现在是否还存在数据</div><div class="ttdef"><b>Definition</b> aref.h:100</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_a5c1aaac90c2ff91f2c103adcd813462c"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a5c1aaac90c2ff91f2c103adcd813462c">alib::g3::RefWrapper::index</a></div><div class="ttdeci">size_t index</div><div class="ttdoc">index</div><div class="ttdef"><b>Definition</b> aref.h:97</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_a7cc9b38c33a547e940fa48fe75fbae64"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#a7cc9b38c33a547e940fa48fe75fbae64">alib::g3::RefWrapper::cont</a></div><div class="ttdeci">Cont &amp; cont</div><div class="ttdoc">容器的引用，所以你需要保证至少容器是存在的，嵌套容器就可能不太支持了</div><div class="ttdef"><b>Definition</b> aref.h:95</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_ab10cc1c9a065974a06d971423dc705e8"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab10cc1c9a065974a06d971423dc705e8">alib::g3::RefWrapper::set_index</a></div><div class="ttdeci">RefWrapper&lt; Cont &gt; &amp; set_index(size_t index)</div><div class="ttdoc">手动设置index</div><div class="ttdef"><b>Definition</b> aref.h:166</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_ab21316be0b8418982e6f0cbbfddf2c61"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ab21316be0b8418982e6f0cbbfddf2c61">alib::g3::RefWrapper::operator-</a></div><div class="ttdeci">RefWrapper&lt; Cont &gt; operator-(int offset)</div><div class="ttdoc">减少index</div><div class="ttdef"><b>Definition</b> aref.h:131</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_adaad8b1dbdc1597f6d5d629af001dec4"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#adaad8b1dbdc1597f6d5d629af001dec4">alib::g3::RefWrapper::get</a></div><div class="ttdeci">auto &amp; get()</div><div class="ttdoc">获取当前的引用</div><div class="ttdef"><b>Definition</b> aref.h:105</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_ae1af6de813107da95a7962461e8b4cca"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#ae1af6de813107da95a7962461e8b4cca">alib::g3::RefWrapper::operator+</a></div><div class="ttdeci">RefWrapper&lt; Cont &gt; operator+(int offset)</div><div class="ttdoc">增加index</div><div class="ttdef"><b>Definition</b> aref.h:124</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1RefWrapper_html_aefcedcc8b0097190f8947ba0667c6311"><div class="ttname"><a href="../../d7/d20/structalib_1_1g3_1_1RefWrapper.html#aefcedcc8b0097190f8947ba0667c6311">alib::g3::RefWrapper::operator-&gt;</a></div><div class="ttdeci">auto * operator-&gt;()</div><div class="ttdoc">访问应用内部</div><div class="ttdef"><b>Definition</b> aref.h:112</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../d0/de9/aref_8h.html">aref.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

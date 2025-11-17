@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/log/streamed_context.h 源文件</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(1); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('db/dbe/streamed__context_8h_source.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">streamed_context.h</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef ALOG_STREAMED_CONTEXT_INCLUDED</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define ALOG_STREAMED_CONTEXT_INCLUDED</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;<a class="code" href="../../d5/d6c/alib-g3_2autil_8h.html">alib-g3/autil.h</a>&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;alib-g3/log/base_config.h&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;alib-g3/log/manipulator.h&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">#ifndef ALIB_DISABLE_GLM_EXTENSIONS</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;glm/glm.hpp&gt;</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="preprocessor">#include &lt;glm/matrix.hpp&gt;</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">#include &lt;glm/gtc/type_ptr.hpp&gt;</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a>{</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="../../d6/dc3/conceptalib_1_1g3_1_1GoUniversal.html">   15</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt; <span class="keyword">concept </span><a class="code hl_concept" href="../../d6/dc3/conceptalib_1_1g3_1_1GoUniversal.html">GoUniversal</a> = std::formattable&lt;T,char&gt;;</div>
+<div class="foldopen" id="foldopen00017" data-start="{" data-end="}">
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="../../d6/df9/conceptalib_1_1g3_1_1CanForward.html">   17</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt; <span class="keyword">concept </span><a class="code hl_concept" href="../../d6/df9/conceptalib_1_1g3_1_1CanForward.html">CanForward</a> = <span class="keyword">requires</span>(T &amp;&amp; t,std::pmr::string &amp; target){</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>        t.write_to_log(target);</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    } || <span class="keyword">requires</span>(T &amp;&amp; t,std::pmr::string &amp; target){</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span>        write_to_log(target,t);</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    };</div>
+</div>
+<div class="foldopen" id="foldopen00023" data-start="{" data-end="}">
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="../../d2/dc9/conceptalib_1_1g3_1_1CanManipulate.html">   23</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt; <span class="keyword">concept </span><a class="code hl_concept" href="../../d2/dc9/conceptalib_1_1g3_1_1CanManipulate.html">CanManipulate</a> = <span class="keyword">requires</span>(T &amp;&amp; t,LogMsgConfig &amp; c){</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        t.manipulate(c);</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>    };</div>
+</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="foldopen" id="foldopen00029" data-start="{" data-end="};">
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">   29</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> LogFactory&gt; <span class="keyword">struct </span><a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>{</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a88daaee974afa09a7e05b94a7829ebe7">   31</a></span>        <a class="code hl_struct" href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html">LogFactory</a> &amp; <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a88daaee974afa09a7e05b94a7829ebe7">factory</a>;</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">   33</a></span>        std::pmr::string <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>;</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#acb78452e29020f76120dcad82cc0ca42">   35</a></span>        <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#acb78452e29020f76120dcad82cc0ca42">level</a>;</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">   37</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>;</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">   39</a></span>        std::string_view <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">fmt_str</a>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad35a9aada130aa990b949f3b7ff4a79d">   41</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad35a9aada130aa990b949f3b7ff4a79d">fmt_tmp</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a77e59186009b7a52c7da6157dff61187">   43</a></span>        <a class="code hl_struct" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">LogMsgConfig</a> <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a77e59186009b7a52c7da6157dff61187">msg_cfg</a>;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="comment">// 禁止拷贝，允许移动</span></div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp; operator=(<span class="keyword">const</span> <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>(<a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp; operator=(<a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
+<div class="foldopen" id="foldopen00052" data-start="{" data-end="}">
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a90576a2971722dd69aa9419c8e8a8428">   52</a></span>        <span class="keyword">inline</span> <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a90576a2971722dd69aa9419c8e8a8428">StreamedContext</a>(<span class="keywordtype">int</span> <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#acb78452e29020f76120dcad82cc0ca42">level</a>,<a class="code hl_struct" href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html">LogFactory</a> &amp; fac,<span class="keywordtype">bool</span> valid = <span class="keyword">true</span>)</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        :<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a88daaee974afa09a7e05b94a7829ebe7">factory</a>(fac)</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        ,<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a88daaee974afa09a7e05b94a7829ebe7">factory</a>.logger.msg_str_alloc)</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        ,<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a77e59186009b7a52c7da6157dff61187">msg_cfg</a>(fac.cfg.msg){</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>            this-&gt;level = <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#acb78452e29020f76120dcad82cc0ca42">level</a>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">fmt_str</a> = <span class="stringliteral">&quot;&quot;</span>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad35a9aada130aa990b949f3b7ff4a79d">fmt_tmp</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a> = valid;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>        }</div>
+</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="foldopen" id="foldopen00065" data-start="{" data-end="}">
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aeef78f74025147b0f6f97b27e9ee93ca">   65</a></span>        <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aeef78f74025147b0f6f97b27e9ee93ca">upload</a>(){</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            <span class="comment">// 拒绝上传空的日志</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a> &amp;&amp; !<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>.empty())<span class="keywordflow">return</span> <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a88daaee974afa09a7e05b94a7829ebe7">factory</a>.<a class="code hl_function" href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html#a984ab8afda501dd68f801c207e03124d">log_pmr</a>(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#acb78452e29020f76120dcad82cc0ca42">level</a>,<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>,<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a77e59186009b7a52c7da6157dff61187">msg_cfg</a>);</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        }</div>
+</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>        <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;</div>
+<div class="foldopen" id="foldopen00073" data-start="{" data-end="}">
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a796307b8734a6c076ca9f7f44098ebf8">   73</a></span>        <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a796307b8734a6c076ca9f7f44098ebf8">write</a>(T &amp;&amp; t){</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            <span class="keywordflow">if</span>(!<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>)<span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">fmt_str</a>.empty())std::format_to(std::back_inserter(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>),<span class="stringliteral">&quot;{}&quot;</span>,t);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <span class="keywordflow">else</span>{</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>                std::vformat_to(std::back_inserter(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>),<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">fmt_str</a>.data(),</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>                    std::make_format_args(t)</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>                );</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>                <span class="keywordflow">if</span>(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad35a9aada130aa990b949f3b7ff4a79d">fmt_tmp</a>){</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>                    <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">fmt_str</a> = <span class="stringliteral">&quot;&quot;</span>;</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>                }</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            }</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>            <span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>        }</div>
+</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        <span class="keyword">template</span>&lt;CanManipulate T&gt;</div>
+<div class="foldopen" id="foldopen00089" data-start="{" data-end="}">
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a63539cd388fa1e8fcd6a5bb00458e46b">   89</a></span>        <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a63539cd388fa1e8fcd6a5bb00458e46b">operator&lt;&lt;</a>(T &amp;&amp; t){</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>            <span class="keywordflow">if</span>(!<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>)<span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>            t.manipulate(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a77e59186009b7a52c7da6157dff61187">msg_cfg</a>);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            <span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>        }</div>
+</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        <span class="keyword">template</span>&lt;GoUniversal T&gt;</div>
+<div class="foldopen" id="foldopen00097" data-start="{" data-end="}">
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a63539cd388fa1e8fcd6a5bb00458e46b">   97</a></span>        <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a63539cd388fa1e8fcd6a5bb00458e46b">operator&lt;&lt;</a>(T &amp;&amp; t){</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>            <span class="keywordflow">return</span> write&lt;T&gt;(std::forward&lt;T&gt;(t));</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        }</div>
+</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        <span class="keyword">template</span>&lt;CanForward T&gt;</div>
+<div class="foldopen" id="foldopen00103" data-start="{" data-end="}">
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a63539cd388fa1e8fcd6a5bb00458e46b">  103</a></span>        <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a63539cd388fa1e8fcd6a5bb00458e46b">operator&lt;&lt;</a>(T &amp;&amp; t){</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>            <span class="keywordflow">if</span>(!<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>)<span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>            <span class="comment">// 是的，孩子们，你可以通过这个实现非侵入式的覆写了</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            <span class="keywordflow">if</span> <span class="keyword">constexpr</span>(<span class="keyword">requires</span>(T&amp;&amp;t,std::pmr::string&amp;val){write_to_log(val,t);}){</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                write_to_log(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>,t);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            }<span class="keywordflow">else</span>{</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>                t.write_to_log(<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>            }</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>            <span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>        }</div>
+</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="foldopen" id="foldopen00115" data-start="{" data-end="}">
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a12bfeb7d8c109b9541a98443584bfc5d">  115</a></span>        <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a12bfeb7d8c109b9541a98443584bfc5d">operator&lt;&lt;</a>(EndLogFn fn){</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aeef78f74025147b0f6f97b27e9ee93ca">upload</a>();</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        }</div>
+</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span> </div>
+<div class="foldopen" id="foldopen00120" data-start="{" data-end="}">
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a85330fa99863af9404949584070528b0">  120</a></span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a85330fa99863af9404949584070528b0">operator&lt;&lt;</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../de/d2a/structalib_1_1g3_1_1log__fmt.html">log_fmt</a> &amp; fmt){</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            <span class="keywordflow">if</span>(!<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>)<span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">fmt_str</a> = fmt.<a class="code hl_variable" href="../../de/d2a/structalib_1_1g3_1_1log__fmt.html#a74b6c24ce470dafa5977f046be896120">fmt_str</a>.data();</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad35a9aada130aa990b949f3b7ff4a79d">fmt_tmp</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>            <span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        }</div>
+</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="foldopen" id="foldopen00128" data-start="{" data-end="}">
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a32444a8b8cf2af92930dfd0adf217eaa">  128</a></span>        <span class="keyword">inline</span> <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a32444a8b8cf2af92930dfd0adf217eaa">operator&lt;&lt;</a>(<span class="keyword">const</span> <a class="code hl_struct" href="../../d1/da3/structalib_1_1g3_1_1log__tfmt.html">log_tfmt</a> &amp; fmt){</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>            <span class="keywordflow">if</span>(!<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>)<span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">fmt_str</a> = fmt.<a class="code hl_variable" href="../../d1/da3/structalib_1_1g3_1_1log__tfmt.html#a340ba4095aa2494d38c3e546c08086b8">fmt_str</a>.data();</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad35a9aada130aa990b949f3b7ff4a79d">fmt_tmp</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>            <span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        }</div>
+</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span> </div>
+<div class="foldopen" id="foldopen00136" data-start="{" data-end="}">
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad339e31b8ca99935ab3151ce1bceabf1">  136</a></span>        <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad339e31b8ca99935ab3151ce1bceabf1">operator&lt;&lt;</a>(std::ostream&amp; (*manip)(std::ostream&amp;)){</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>            <span class="keywordflow">return</span> <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aeef78f74025147b0f6f97b27e9ee93ca">upload</a>();</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        }</div>
+</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span> </div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span><span class="preprocessor">        #ifndef ALIB_DISABLE_GLM_EXTENSIONS</span></div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="keyword">template</span>&lt;<span class="keywordtype">int</span> N,<span class="keyword">class</span> T,enum glm::qualifier Q&gt; </div>
+<div class="foldopen" id="foldopen00143" data-start="{" data-end="}">
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#adc6e08141edb8c70ec77fc1922beb70e">  143</a></span>            <span class="keyword">inline</span> <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#adc6e08141edb8c70ec77fc1922beb70e">operator&lt;&lt;</a>(<span class="keyword">const</span> glm::vec&lt;N,T,Q&gt; &amp; v){</div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>            <span class="keywordflow">if</span>(!<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>)<span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>            std::span&lt;const T,N&gt; value(glm::value_ptr(v),N);</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>            <span class="keywordflow">return</span> (*<span class="keyword">this</span>) &lt;&lt; value;</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        }</div>
+</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <span class="keyword">template</span>&lt;<span class="keywordtype">int</span> M,<span class="keywordtype">int</span> N,<span class="keyword">class</span> T,enum glm::qualifier Q&gt; </div>
+<div class="foldopen" id="foldopen00150" data-start="{" data-end="}">
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#abfc5396a849c4c1845fe69f66302f2cd">  150</a></span>            <span class="keyword">inline</span> <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#abfc5396a849c4c1845fe69f66302f2cd">operator&lt;&lt;</a>(<span class="keyword">const</span> glm::mat&lt;M,N,T,Q&gt; &amp; v){</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>            <span class="keywordflow">if</span>(!<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>)<span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>            std::span&lt;const T,N&gt; data (glm::value_ptr(v),M*N);</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>.append(<span class="stringliteral">&quot;{&quot;</span>);</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>            <span class="keywordflow">for</span>(<span class="keywordtype">int</span> m = 0;m &lt; M;++m){</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>                (*this) &lt;&lt; data.subspan(m*N,N);</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>                <span class="keywordflow">if</span>(m+1 != M)<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>.append(<span class="stringliteral">&quot; , &quot;</span>);</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>            }</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>            <a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">cache_str</a>.append(<span class="stringliteral">&quot;}&quot;</span>);</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>            <span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        }</div>
+</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="keyword">template</span>&lt;<span class="keyword">class</span> T,enum glm::qualifier Q&gt; </div>
+<div class="foldopen" id="foldopen00163" data-start="{" data-end="}">
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno"><a class="line" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#adc67f562e7079f774fd9a944f4508eef">  163</a></span>            <span class="keyword">inline</span> <a class="code hl_struct" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">StreamedContext</a>&amp;&amp; <a class="code hl_function" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#adc67f562e7079f774fd9a944f4508eef">operator&lt;&lt;</a>(<span class="keyword">const</span> glm::qua&lt;T,Q&gt; &amp; v){</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>            <span class="keywordflow">if</span>(!<a class="code hl_variable" href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">context_valid</a>)<span class="keywordflow">return</span> std::move(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>            std::span&lt;const T,4&gt; data (glm::value_ptr(v),4);</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>            <span class="keywordflow">return</span> (*<span class="keyword">this</span>) &lt;&lt; data;</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>        }</div>
+</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span><span class="preprocessor">        #endif</span></div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    };</div>
+</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>}</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aalib-g3_2autil_8h_html"><div class="ttname"><a href="../../d5/d6c/alib-g3_2autil_8h.html">autil.h</a></div><div class="ttdoc">工具库，提供IO、字符串、系统数据等静态函数</div></div>
+<div class="ttc" id="aconceptalib_1_1g3_1_1CanForward_html"><div class="ttname"><a href="../../d6/df9/conceptalib_1_1g3_1_1CanForward.html">alib::g3::CanForward</a></div><div class="ttdoc">对于能够forward的对象进行forward。forward优先级：外部 &gt; 成员函数</div><div class="ttdef"><b>Definition</b> streamed_context.h:17</div></div>
+<div class="ttc" id="aconceptalib_1_1g3_1_1CanManipulate_html"><div class="ttname"><a href="../../d2/dc9/conceptalib_1_1g3_1_1CanManipulate.html">alib::g3::CanManipulate</a></div><div class="ttdoc">LogMsgConfig的操作器，满足这个接口就可以直接处理信息了</div><div class="ttdef"><b>Definition</b> streamed_context.h:23</div></div>
+<div class="ttc" id="aconceptalib_1_1g3_1_1GoUniversal_html"><div class="ttname"><a href="../../d6/dc3/conceptalib_1_1g3_1_1GoUniversal.html">alib::g3::GoUniversal</a></div><div class="ttdoc">基础类型使用std::format，包含嵌套容器（如果你的编译器不支持需要自己实现下面的canforward）</div><div class="ttdef"><b>Definition</b> streamed_context.h:15</div></div>
+<div class="ttc" id="anamespacealib_1_1g3_html"><div class="ttname"><a href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a></div><div class="ttdoc">第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。</div><div class="ttdef"><b>Definition</b> alogger_old.cpp:413</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactory_html"><div class="ttname"><a href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html">alib::g3::LogFactory</a></div><div class="ttdoc">提供对日志的快捷输出</div><div class="ttdef"><b>Definition</b> kernel.h:233</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactory_html_a984ab8afda501dd68f801c207e03124d"><div class="ttname"><a href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html#a984ab8afda501dd68f801c207e03124d">alib::g3::LogFactory::log_pmr</a></div><div class="ttdeci">bool log_pmr(int level, std::pmr::string &amp;pmr_data, const LogMsgConfig &amp;mcfg)</div><div class="ttdoc">提供已经装载到对应内存的数据，这个时候直接move就行</div><div class="ttdef"><b>Definition</b> kernel.h:300</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">alib::g3::LogMsgConfig</a></div><div class="ttdoc">日志消息细节控制，用在LogFactory中，控制额外信息的输出</div><div class="ttdef"><b>Definition</b> base_config.h:7</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html">alib::g3::StreamedContext</a></div><div class="ttdoc">流式输出核心</div><div class="ttdef"><b>Definition</b> streamed_context.h:29</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a12bfeb7d8c109b9541a98443584bfc5d"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a12bfeb7d8c109b9541a98443584bfc5d">alib::g3::StreamedContext::operator&lt;&lt;</a></div><div class="ttdeci">bool operator&lt;&lt;(EndLogFn fn)</div><div class="ttdoc">支持endlog终止日志</div><div class="ttdef"><b>Definition</b> streamed_context.h:115</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a32444a8b8cf2af92930dfd0adf217eaa"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a32444a8b8cf2af92930dfd0adf217eaa">alib::g3::StreamedContext::operator&lt;&lt;</a></div><div class="ttdeci">StreamedContext &amp;&amp; operator&lt;&lt;(const log_tfmt &amp;fmt)</div><div class="ttdoc">支持设置格式化，需要保证局部不悬垂（应该没人会在一句话就把数据删除了吧）</div><div class="ttdef"><b>Definition</b> streamed_context.h:128</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a63539cd388fa1e8fcd6a5bb00458e46b"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a63539cd388fa1e8fcd6a5bb00458e46b">alib::g3::StreamedContext::operator&lt;&lt;</a></div><div class="ttdeci">StreamedContext &amp;&amp; operator&lt;&lt;(T &amp;&amp;t)</div><div class="ttdoc">注入式的manipulator</div><div class="ttdef"><b>Definition</b> streamed_context.h:89</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a71a8dfdfce80271f31e26b82e67238da"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a71a8dfdfce80271f31e26b82e67238da">alib::g3::StreamedContext::fmt_str</a></div><div class="ttdeci">std::string_view fmt_str</div><div class="ttdoc">格式化字符串，用后就清除</div><div class="ttdef"><b>Definition</b> streamed_context.h:39</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a77e59186009b7a52c7da6157dff61187"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a77e59186009b7a52c7da6157dff61187">alib::g3::StreamedContext::msg_cfg</a></div><div class="ttdeci">LogMsgConfig msg_cfg</div><div class="ttdoc">配置信息</div><div class="ttdef"><b>Definition</b> streamed_context.h:43</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a796307b8734a6c076ca9f7f44098ebf8"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a796307b8734a6c076ca9f7f44098ebf8">alib::g3::StreamedContext::write</a></div><div class="ttdeci">StreamedContext &amp;&amp; write(T &amp;&amp;t)</div><div class="ttdoc">防止&lt;&lt;通用匹配过于通用而设计的</div><div class="ttdef"><b>Definition</b> streamed_context.h:73</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a85330fa99863af9404949584070528b0"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a85330fa99863af9404949584070528b0">alib::g3::StreamedContext::operator&lt;&lt;</a></div><div class="ttdeci">StreamedContext &amp;&amp; operator&lt;&lt;(const log_fmt &amp;fmt)</div><div class="ttdoc">支持设置格式化，需要保证局部不悬垂（应该没人会在一句话就把数据删除了吧）</div><div class="ttdef"><b>Definition</b> streamed_context.h:120</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a88daaee974afa09a7e05b94a7829ebe7"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a88daaee974afa09a7e05b94a7829ebe7">alib::g3::StreamedContext::factory</a></div><div class="ttdeci">LogFactory &amp; factory</div><div class="ttdoc">持有的LogFactory对象</div><div class="ttdef"><b>Definition</b> streamed_context.h:31</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_a90576a2971722dd69aa9419c8e8a8428"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#a90576a2971722dd69aa9419c8e8a8428">alib::g3::StreamedContext::StreamedContext</a></div><div class="ttdeci">StreamedContext(int level, LogFactory &amp;fac, bool valid=true)</div><div class="ttdoc">初始化字符串用的内存池以及level</div><div class="ttdef"><b>Definition</b> streamed_context.h:52</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_abfc5396a849c4c1845fe69f66302f2cd"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#abfc5396a849c4c1845fe69f66302f2cd">alib::g3::StreamedContext::operator&lt;&lt;</a></div><div class="ttdeci">StreamedContext &amp;&amp; operator&lt;&lt;(const glm::mat&lt; M, N, T, Q &gt; &amp;v)</div><div class="ttdoc">格式化glm的矩阵</div><div class="ttdef"><b>Definition</b> streamed_context.h:150</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_ac5e78c2862c249a25415d2b46c456bf3"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ac5e78c2862c249a25415d2b46c456bf3">alib::g3::StreamedContext::context_valid</a></div><div class="ttdeci">bool context_valid</div><div class="ttdoc">当前Context是否是启用的，如果Level不满足LogFactory需求其会被标记为invalid，进而不组合&amp;上传日志</div><div class="ttdef"><b>Definition</b> streamed_context.h:37</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_acb78452e29020f76120dcad82cc0ca42"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#acb78452e29020f76120dcad82cc0ca42">alib::g3::StreamedContext::level</a></div><div class="ttdeci">int level</div><div class="ttdoc">日志级别</div><div class="ttdef"><b>Definition</b> streamed_context.h:35</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_ad339e31b8ca99935ab3151ce1bceabf1"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad339e31b8ca99935ab3151ce1bceabf1">alib::g3::StreamedContext::operator&lt;&lt;</a></div><div class="ttdeci">bool operator&lt;&lt;(std::ostream &amp;(*manip)(std::ostream &amp;))</div><div class="ttdoc">支持std::endl终止日志</div><div class="ttdef"><b>Definition</b> streamed_context.h:136</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_ad35a9aada130aa990b949f3b7ff4a79d"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#ad35a9aada130aa990b949f3b7ff4a79d">alib::g3::StreamedContext::fmt_tmp</a></div><div class="ttdeci">bool fmt_tmp</div><div class="ttdoc">格式化是否是临时的</div><div class="ttdef"><b>Definition</b> streamed_context.h:41</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_adc67f562e7079f774fd9a944f4508eef"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#adc67f562e7079f774fd9a944f4508eef">alib::g3::StreamedContext::operator&lt;&lt;</a></div><div class="ttdeci">StreamedContext &amp;&amp; operator&lt;&lt;(const glm::qua&lt; T, Q &gt; &amp;v)</div><div class="ttdoc">格式化glm的四元数</div><div class="ttdef"><b>Definition</b> streamed_context.h:163</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_adc6e08141edb8c70ec77fc1922beb70e"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#adc6e08141edb8c70ec77fc1922beb70e">alib::g3::StreamedContext::operator&lt;&lt;</a></div><div class="ttdeci">StreamedContext &amp;&amp; operator&lt;&lt;(const glm::vec&lt; N, T, Q &gt; &amp;v)</div><div class="ttdoc">格式化glm的向量</div><div class="ttdef"><b>Definition</b> streamed_context.h:143</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_aec148a2d8a31b3465f88961624f8aa0d"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aec148a2d8a31b3465f88961624f8aa0d">alib::g3::StreamedContext::cache_str</a></div><div class="ttdeci">std::pmr::string cache_str</div><div class="ttdoc">流式输出内部缓存的字符串，考虑到刚好可以直接转发给Logger，因此每个context一份</div><div class="ttdef"><b>Definition</b> streamed_context.h:33</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1StreamedContext_html_aeef78f74025147b0f6f97b27e9ee93ca"><div class="ttname"><a href="../../d5/d56/structalib_1_1g3_1_1StreamedContext.html#aeef78f74025147b0f6f97b27e9ee93ca">alib::g3::StreamedContext::upload</a></div><div class="ttdeci">bool upload()</div><div class="ttdoc">上传日志</div><div class="ttdef"><b>Definition</b> streamed_context.h:65</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1log__fmt_html"><div class="ttname"><a href="../../de/d2a/structalib_1_1g3_1_1log__fmt.html">alib::g3::log_fmt</a></div><div class="ttdoc">format标识，nullptr清空fmt，长期保持</div><div class="ttdef"><b>Definition</b> manipulator.h:35</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1log__fmt_html_a74b6c24ce470dafa5977f046be896120"><div class="ttname"><a href="../../de/d2a/structalib_1_1g3_1_1log__fmt.html#a74b6c24ce470dafa5977f046be896120">alib::g3::log_fmt::fmt_str</a></div><div class="ttdeci">std::string_view fmt_str</div><div class="ttdoc">格式化字符串</div><div class="ttdef"><b>Definition</b> manipulator.h:37</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1log__tfmt_html"><div class="ttname"><a href="../../d1/da3/structalib_1_1g3_1_1log__tfmt.html">alib::g3::log_tfmt</a></div><div class="ttdoc">临时的format标志，最好只用来输出基础数据类型</div><div class="ttdef"><b>Definition</b> manipulator.h:44</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1log__tfmt_html_a340ba4095aa2494d38c3e546c08086b8"><div class="ttname"><a href="../../d1/da3/structalib_1_1g3_1_1log__tfmt.html#a340ba4095aa2494d38c3e546c08086b8">alib::g3::log_tfmt::fmt_str</a></div><div class="ttdeci">std::string_view fmt_str</div><div class="ttdoc">格式化字符串</div><div class="ttdef"><b>Definition</b> manipulator.h:46</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../dir_be216c816632aa4955947bd3cb1065c9.html">log</a></li><li class="navelem"><b>streamed_context.h</b></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

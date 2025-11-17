@@ -1,0 +1,516 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: Util中与字符串有关的函数</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d7/d42/group__autil__data__string.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">Util中与字符串有关的函数</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>包含逆转义，字符串trim,分割，转码（Linux上没用），大小转化等等  
+<a href="#details">更多...</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:ga6747d834d09cfd46a3c0c89347e35d31" id="r_ga6747d834d09cfd46a3c0c89347e35d31"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#ga6747d834d09cfd46a3c0c89347e35d31">alib::g3::Util::str_unescape</a> (dstring in)</td></tr>
+<tr class="memdesc:ga6747d834d09cfd46a3c0c89347e35d31"><td class="mdescLeft">&#160;</td><td class="mdescRight">逆转义字符串  <br /></td></tr>
+<tr class="separator:ga6747d834d09cfd46a3c0c89347e35d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga824f3d98e69724a0f55e0363cd908b46" id="r_ga824f3d98e69724a0f55e0363cd908b46"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#ga824f3d98e69724a0f55e0363cd908b46">alib::g3::Util::str_trim_nrt</a> (std::string &amp;str)</td></tr>
+<tr class="memdesc:ga824f3d98e69724a0f55e0363cd908b46"><td class="mdescLeft">&#160;</td><td class="mdescRight">删除字符串收尾的空白字符  <br /></td></tr>
+<tr class="separator:ga824f3d98e69724a0f55e0363cd908b46"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga96bdee0cef5c02793634e2a78640e0ac" id="r_ga96bdee0cef5c02793634e2a78640e0ac"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#ga96bdee0cef5c02793634e2a78640e0ac">alib::g3::Util::str_trim_rt</a> (std::string &amp;str)</td></tr>
+<tr class="memdesc:ga96bdee0cef5c02793634e2a78640e0ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">删除字符串收尾的空白字符(返回一个copy)  <br /></td></tr>
+<tr class="separator:ga96bdee0cef5c02793634e2a78640e0ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0053ab9da492042f6faee4be8f9a9399" id="r_ga0053ab9da492042f6faee4be8f9a9399"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#ga0053ab9da492042f6faee4be8f9a9399">alib::g3::Util::str_split</a> (dstring source, const char separator, std::vector&lt; std::string &gt; &amp;restorer)</td></tr>
+<tr class="memdesc:ga0053ab9da492042f6faee4be8f9a9399"><td class="mdescLeft">&#160;</td><td class="mdescRight">分割字符串  <br /></td></tr>
+<tr class="separator:ga0053ab9da492042f6faee4be8f9a9399"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae0ff2fef82fdd2348c80b6e2c1435a04" id="r_gae0ff2fef82fdd2348c80b6e2c1435a04"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#gae0ff2fef82fdd2348c80b6e2c1435a04">alib::g3::Util::str_split</a> (dstring source, dstring separatorString, std::vector&lt; std::string &gt; &amp;restorer)</td></tr>
+<tr class="memdesc:gae0ff2fef82fdd2348c80b6e2c1435a04"><td class="mdescLeft">&#160;</td><td class="mdescRight">分割字符串++  <br /></td></tr>
+<tr class="separator:gae0ff2fef82fdd2348c80b6e2c1435a04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6d5ce559e29d03f7564a91232399f048" id="r_ga6d5ce559e29d03f7564a91232399f048"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#ga6d5ce559e29d03f7564a91232399f048">alib::g3::Util::str_encAnsiToUTF8</a> (dstring strAnsi)</td></tr>
+<tr class="memdesc:ga6d5ce559e29d03f7564a91232399f048"><td class="mdescLeft">&#160;</td><td class="mdescRight">转码  <br /></td></tr>
+<tr class="separator:ga6d5ce559e29d03f7564a91232399f048"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae18a9817ec98028af87437734e449e40" id="r_gae18a9817ec98028af87437734e449e40"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#gae18a9817ec98028af87437734e449e40">alib::g3::Util::str_encUTF8ToAnsi</a> (dstring strUTF8)</td></tr>
+<tr class="memdesc:gae18a9817ec98028af87437734e449e40"><td class="mdescLeft">&#160;</td><td class="mdescRight">转码  <br /></td></tr>
+<tr class="separator:gae18a9817ec98028af87437734e449e40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga24a4b75c8ce0adc182592cc5d00c7e77" id="r_ga24a4b75c8ce0adc182592cc5d00c7e77"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#ga24a4b75c8ce0adc182592cc5d00c7e77">alib::g3::Util::str_toUpper</a> (dstring in)</td></tr>
+<tr class="memdesc:ga24a4b75c8ce0adc182592cc5d00c7e77"><td class="mdescLeft">&#160;</td><td class="mdescRight">把字符串的所有字符全部转化为大写字符（如果可以的话）  <br /></td></tr>
+<tr class="separator:ga24a4b75c8ce0adc182592cc5d00c7e77"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadece390ae4e7c733894746ca580b6d26" id="r_gadece390ae4e7c733894746ca580b6d26"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/d42/group__autil__data__string.html#gadece390ae4e7c733894746ca580b6d26">alib::g3::Util::str_toLower</a> (dstring in)</td></tr>
+<tr class="memdesc:gadece390ae4e7c733894746ca580b6d26"><td class="mdescLeft">&#160;</td><td class="mdescRight">把字符串的所有字符全部转化为小写字符（如果可以的话）  <br /></td></tr>
+<tr class="separator:gadece390ae4e7c733894746ca580b6d26"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<p>包含逆转义，字符串trim,分割，转码（Linux上没用），大小转化等等 </p>
+<h2 class="groupheader">函数说明</h2>
+<a id="ga6d5ce559e29d03f7564a91232399f048" name="ga6d5ce559e29d03f7564a91232399f048"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6d5ce559e29d03f7564a91232399f048">&#9670;&#160;</a></span>str_encAnsiToUTF8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string Util::str_encAnsiToUTF8 </td>
+          <td>(</td>
+          <td class="paramtype">dstring&#160;</td>
+          <td class="paramname"><em>strAnsi</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>转码 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">strAnsi</td><td>本机编码字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>utf8字符串 </dd></dl>
+<dl class="section note"><dt>注解</dt><dd>Linux上面直接返回原本的字符串 </dd></dl>
+<p>WARNING!!!!!!unsupported!PleaseGuaranteeUTF-8</p>
+
+</div>
+</div>
+<a id="gae18a9817ec98028af87437734e449e40" name="gae18a9817ec98028af87437734e449e40"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae18a9817ec98028af87437734e449e40">&#9670;&#160;</a></span>str_encUTF8ToAnsi()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string Util::str_encUTF8ToAnsi </td>
+          <td>(</td>
+          <td class="paramtype">dstring&#160;</td>
+          <td class="paramname"><em>strUTF8</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>转码 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">strUTF8</td><td>utf8字符串 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>本机编码字符串 </dd></dl>
+<dl class="section note"><dt>注解</dt><dd>Linux上面直接返回原本的字符串 </dd></dl>
+<p>ANSI UnSupportted!!!</p>
+
+</div>
+</div>
+<a id="ga0053ab9da492042f6faee4be8f9a9399" name="ga0053ab9da492042f6faee4be8f9a9399"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0053ab9da492042f6faee4be8f9a9399">&#9670;&#160;</a></span>str_split() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Util::str_split </td>
+          <td>(</td>
+          <td class="paramtype">dstring&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char&#160;</td>
+          <td class="paramname"><em>separator</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::string &gt; &amp;&#160;</td>
+          <td class="paramname"><em>restorer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>分割字符串 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">source</td><td>源字符串 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">separator</td><td>分割字符 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">restorer</td><td>push_back对象</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>例子:</dt><dd><div class="fragment"><div class="line"><a class="code hl_struct" href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html">LogFactory</a> lgf;</div>
+<div class="line"><a class="code hl_function" href="../../d7/d42/group__autil__data__string.html#ga0053ab9da492042f6faee4be8f9a9399">Util::str_split</a>(<span class="stringliteral">&quot;hello123,123,meow&quot;</span>,<span class="charliteral">&#39;,&#39;</span>,data);</div>
+<div class="line">lgf &lt;&lt; data &lt;&lt; <a class="code hl_function" href="../../d1/d27/namespacealib_1_1g3.html#afd71af66a340546760ea177f349ed979">endlog</a>;</div>
+<div class="ttc" id="agroup__autil__data__string_html_ga0053ab9da492042f6faee4be8f9a9399"><div class="ttname"><a href="../../d7/d42/group__autil__data__string.html#ga0053ab9da492042f6faee4be8f9a9399">alib::g3::Util::str_split</a></div><div class="ttdeci">static void str_split(dstring source, const char separator, std::vector&lt; std::string &gt; &amp;restorer)</div><div class="ttdoc">分割字符串</div><div class="ttdef"><b>Definition</b> autil.cpp:332</div></div>
+<div class="ttc" id="anamespacealib_1_1g3_html_afd71af66a340546760ea177f349ed979"><div class="ttname"><a href="../../d1/d27/namespacealib_1_1g3.html#afd71af66a340546760ea177f349ed979">alib::g3::endlog</a></div><div class="ttdeci">void DLL_EXPORT endlog(LogEnd)</div><div class="ttdoc">流式输出日志终止表示</div><div class="ttdef"><b>Definition</b> manipulator.h:11</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactory_html"><div class="ttname"><a href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html">alib::g3::LogFactory</a></div><div class="ttdoc">提供对日志的快捷输出</div><div class="ttdef"><b>Definition</b> kernel.h:233</div></div>
+</div><!-- fragment --> <em>结果</em> <br  />
+<div class="fragment"><div class="line">[<span class="stringliteral">&quot;hello123&quot;</span>,<span class="stringliteral">&quot;123&quot;</span>,<span class="stringliteral">&quot;meow&quot;</span>]</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gae0ff2fef82fdd2348c80b6e2c1435a04" name="gae0ff2fef82fdd2348c80b6e2c1435a04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae0ff2fef82fdd2348c80b6e2c1435a04">&#9670;&#160;</a></span>str_split() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Util::str_split </td>
+          <td>(</td>
+          <td class="paramtype">dstring&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">dstring&#160;</td>
+          <td class="paramname"><em>separatorString</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::string &gt; &amp;&#160;</td>
+          <td class="paramname"><em>restorer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>分割字符串++ </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">source</td><td>源字符串 </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">separatorString</td><td>分割的字符串 </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">restorer</td><td>push_back对象</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section user"><dt>例子:</dt><dd><div class="fragment"><div class="line"><a class="code hl_struct" href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html">LogFactory</a> lgf;</div>
+<div class="line"><a class="code hl_function" href="../../d7/d42/group__autil__data__string.html#ga0053ab9da492042f6faee4be8f9a9399">Util::str_split</a>(<span class="stringliteral">&quot;hello123,123,meow&quot;</span>,<span class="stringliteral">&quot;123&quot;</span>,data);</div>
+<div class="line">lgf &lt;&lt; data &lt;&lt; <a class="code hl_function" href="../../d1/d27/namespacealib_1_1g3.html#afd71af66a340546760ea177f349ed979">endlog</a>;</div>
+</div><!-- fragment --> <em>结果</em> <br  />
+<div class="fragment"><div class="line">[<span class="stringliteral">&quot;hello&quot;</span>,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot;,&quot;</span>,<span class="stringliteral">&quot;meow&quot;</span>]</div>
+</div><!-- fragment --> </dd></dl>
+
+</div>
+</div>
+<a id="gadece390ae4e7c733894746ca580b6d26" name="gadece390ae4e7c733894746ca580b6d26"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gadece390ae4e7c733894746ca580b6d26">&#9670;&#160;</a></span>str_toLower()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string Util::str_toLower </td>
+          <td>(</td>
+          <td class="paramtype">dstring&#160;</td>
+          <td class="paramname"><em>in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>把字符串的所有字符全部转化为小写字符（如果可以的话） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">in</td><td>输入 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>输出 </dd></dl>
+
+</div>
+</div>
+<a id="ga24a4b75c8ce0adc182592cc5d00c7e77" name="ga24a4b75c8ce0adc182592cc5d00c7e77"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga24a4b75c8ce0adc182592cc5d00c7e77">&#9670;&#160;</a></span>str_toUpper()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string Util::str_toUpper </td>
+          <td>(</td>
+          <td class="paramtype">dstring&#160;</td>
+          <td class="paramname"><em>in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>把字符串的所有字符全部转化为大写字符（如果可以的话） </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">in</td><td>输入 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>输出 </dd></dl>
+
+</div>
+</div>
+<a id="ga824f3d98e69724a0f55e0363cd908b46" name="ga824f3d98e69724a0f55e0363cd908b46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga824f3d98e69724a0f55e0363cd908b46">&#9670;&#160;</a></span>str_trim_nrt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Util::str_trim_nrt </td>
+          <td>(</td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>str</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>删除字符串收尾的空白字符 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">str</td><td>输入的字符串,会被处理 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>注解</dt><dd>支持删除的空白字符： "\\f\\v\\r\\t\\n " </dd></dl>
+
+</div>
+</div>
+<a id="ga96bdee0cef5c02793634e2a78640e0ac" name="ga96bdee0cef5c02793634e2a78640e0ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga96bdee0cef5c02793634e2a78640e0ac">&#9670;&#160;</a></span>str_trim_rt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string Util::str_trim_rt </td>
+          <td>(</td>
+          <td class="paramtype">std::string &amp;&#160;</td>
+          <td class="paramname"><em>str</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>删除字符串收尾的空白字符(返回一个copy) </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">str</td><td>输入的字符串，会被处理 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>注解</dt><dd>支持删除的空白字符： "\\f\\v\\r\\t\\n " </dd></dl>
+<dl class="section return"><dt>返回</dt><dd>一个copy </dd></dl>
+
+</div>
+</div>
+<a id="ga6747d834d09cfd46a3c0c89347e35d31" name="ga6747d834d09cfd46a3c0c89347e35d31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6747d834d09cfd46a3c0c89347e35d31">&#9670;&#160;</a></span>str_unescape()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string Util::str_unescape </td>
+          <td>(</td>
+          <td class="paramtype">dstring&#160;</td>
+          <td class="paramname"><em>in</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>逆转义字符串 </p>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">in</td><td>输入数值 </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>返回</dt><dd>结果 </dd></dl>
+<dl class="section note"><dt>注解</dt><dd>支持的转义语序: \n \\ \v \t \r \a (alarm) \f \b \0 \? \" <br  />
+ 其他的直接原样不变 </dd></dl>
+<dl class="section user"><dt></dt><dd><em>这个函数的年龄已经两年了......(2025/3/30)</em> </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

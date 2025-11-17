@@ -1,0 +1,239 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/log/kernel.h 文件参考</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d0/daa/kernel_8h.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#enum-members">枚举</a> &#124;
+<a href="#var-members">变量</a>  </div>
+  <div class="headertitle"><div class="title">kernel.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>与日志有关的函数库  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;chrono&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d5/d6c/alib-g3_2autil_8h_source.html">alib-g3/autil.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d0/de9/aref_8h_source.html">alib-g3/aref.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d6/dd9/aclock_8h_source.html">alib-g3/aclock.h</a>&gt;</code><br />
+<code>#include &lt;alib-g3/log/streamed_context.h&gt;</code><br />
+<code>#include &lt;alib-g3/log/base_config.h&gt;</code><br />
+<code>#include &lt;alib-g3/log/base_msg.h&gt;</code><br />
+<code>#include &lt;alib-g3/log/base_mod.h&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;deque&gt;</code><br />
+<code>#include &lt;thread&gt;</code><br />
+<code>#include &lt;mutex&gt;</code><br />
+<code>#include &lt;semaphore&gt;</code><br />
+<code>#include &lt;memory_resource&gt;</code><br />
+<code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;span&gt;</code><br />
+<code>#include &lt;type_traits&gt;</code><br />
+<code>#include &lt;iostream&gt;</code><br />
+</div>
+<p><a href="../../d0/daa/kernel_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d98/structalib_1_1g3_1_1Logger.html">alib::g3::Logger</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">日志核心，负责日志队列维护、转发  <a href="../../d4/d98/structalib_1_1g3_1_1Logger.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html">alib::g3::LogFactory</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">提供对日志的快捷输出  <a href="../../d2/d69/structalib_1_1g3_1_1LogFactory.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:dd/d6c/namespacealib" id="r_dd/d6c/namespacealib"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d6c/namespacealib.html">alib</a></td></tr>
+<tr class="memdesc:dd/d6c/namespacealib"><td class="mdescLeft">&#160;</td><td class="mdescRight">aaaa0ggmcLib：一个主要给自己使用的综合库 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d1/d27/namespacealib_1_1g3" id="r_d1/d27/namespacealib_1_1g3"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a></td></tr>
+<tr class="memdesc:d1/d27/namespacealib_1_1g3"><td class="mdescLeft">&#160;</td><td class="mdescRight">第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:ad85a1673de24e63499ec05c1dbd63487" id="r_ad85a1673de24e63499ec05c1dbd63487"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/daa/kernel_8h.html#ad85a1673de24e63499ec05c1dbd63487">__internal_alib_localtime</a>&#160;&#160;&#160;localtime_s</td></tr>
+<tr class="separator:ad85a1673de24e63499ec05c1dbd63487"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06e562b06780bcfd13e20734fe658b39" id="r_a06e562b06780bcfd13e20734fe658b39"><td class="memItemLeft" align="right" valign="top"><a id="a06e562b06780bcfd13e20734fe658b39" name="a06e562b06780bcfd13e20734fe658b39"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>ALIB_DEF_CLOCK_SOURCE</b>&#160;&#160;&#160;CLOCK_REALTIME</td></tr>
+<tr class="separator:a06e562b06780bcfd13e20734fe658b39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+枚举</h2></td></tr>
+<tr class="memitem:a87e3a6538c70283c5c83ddefa061b033" id="r_a87e3a6538c70283c5c83ddefa061b033"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d27/namespacealib_1_1g3.html#a87e3a6538c70283c5c83ddefa061b033">alib::g3::LogLevel</a> : int { <br />
+&#160;&#160;<a class="el" href="../../d1/d27/namespacealib_1_1g3.html#a87e3a6538c70283c5c83ddefa061b033add4ec0ac4e58f7c32a01244ae91150b1">alib::g3::Trace</a> = 0
+, <a class="el" href="../../d1/d27/namespacealib_1_1g3.html#a87e3a6538c70283c5c83ddefa061b033aa603905470e2a5b8c13e96b579ef0dba">alib::g3::Debug</a> = 1
+, <a class="el" href="../../d1/d27/namespacealib_1_1g3.html#a87e3a6538c70283c5c83ddefa061b033a4059b0251f66a18cb56f544728796875">alib::g3::Info</a> = 2
+, <a class="el" href="../../d1/d27/namespacealib_1_1g3.html#a87e3a6538c70283c5c83ddefa061b033a56525ae64d370c0b448ac0d60710ef17">alib::g3::Warn</a> = 3
+, <br />
+&#160;&#160;<a class="el" href="../../d1/d27/namespacealib_1_1g3.html#a87e3a6538c70283c5c83ddefa061b033a902b0d55fddef6f8d651fe1035b7d4bd">alib::g3::Error</a> = 4
+, <a class="el" href="../../d1/d27/namespacealib_1_1g3.html#a87e3a6538c70283c5c83ddefa061b033a882384ec38ce8d9582b57e70861730e4">alib::g3::Fatal</a> = 5
+<br />
+ }</td></tr>
+<tr class="memdesc:a87e3a6538c70283c5c83ddefa061b033"><td class="mdescLeft">&#160;</td><td class="mdescRight">默认的loglevel标识，纯粹方便使用的  <a href="../../d1/d27/namespacealib_1_1g3.html#a87e3a6538c70283c5c83ddefa061b033">更多...</a><br /></td></tr>
+<tr class="separator:a87e3a6538c70283c5c83ddefa061b033"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+变量</h2></td></tr>
+<tr class="memitem:a4b7acd0425b0ff99f06ea2309b0214b4" id="r_a4b7acd0425b0ff99f06ea2309b0214b4"><td class="memItemLeft" align="right" valign="top"><a id="a4b7acd0425b0ff99f06ea2309b0214b4" name="a4b7acd0425b0ff99f06ea2309b0214b4"></a>
+constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>alib::g3::semaphore_max_val</b> = std::__semaphore_impl::_S_max</td></tr>
+<tr class="memdesc:a4b7acd0425b0ff99f06ea2309b0214b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">最多可以有多少信号，默认最大值就行 <br /></td></tr>
+<tr class="separator:a4b7acd0425b0ff99f06ea2309b0214b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8d3491bbafbd1d8e75ca20d86404283" id="r_aa8d3491bbafbd1d8e75ca20d86404283"><td class="memItemLeft" align="right" valign="top"><a id="aa8d3491bbafbd1d8e75ca20d86404283" name="aa8d3491bbafbd1d8e75ca20d86404283"></a>
+constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>alib::g3::consumer_message_default_count</b> = 128</td></tr>
+<tr class="memdesc:aa8d3491bbafbd1d8e75ca20d86404283"><td class="mdescLeft">&#160;</td><td class="mdescRight">Consumer构建的时候预留多少msg槽位（运行时可对齐到fetch_max_size的） <br /></td></tr>
+<tr class="separator:aa8d3491bbafbd1d8e75ca20d86404283"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed2c3a17127a4eb7934ab6413403a224" id="r_aed2c3a17127a4eb7934ab6413403a224"><td class="memItemLeft" align="right" valign="top"><a id="aed2c3a17127a4eb7934ab6413403a224" name="aed2c3a17127a4eb7934ab6413403a224"></a>
+constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>alib::g3::date_str_resize</b> = 32</td></tr>
+<tr class="memdesc:aed2c3a17127a4eb7934ab6413403a224"><td class="mdescLeft">&#160;</td><td class="mdescRight">日期字符串预留的空间，一般格式化没问题的 <br /></td></tr>
+<tr class="separator:aed2c3a17127a4eb7934ab6413403a224"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe9d30864be1be49f051a75205d9885e" id="r_afe9d30864be1be49f051a75205d9885e"><td class="memItemLeft" align="right" valign="top"><a id="afe9d30864be1be49f051a75205d9885e" name="afe9d30864be1be49f051a75205d9885e"></a>
+constexpr unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>alib::g3::compose_str_resize</b> = 1024</td></tr>
+<tr class="memdesc:afe9d30864be1be49f051a75205d9885e"><td class="mdescLeft">&#160;</td><td class="mdescRight">每个组合字符串预留的空间，1024可满足小内容日志，运行时也可以根据raw数据大小扩展 <br /></td></tr>
+<tr class="separator:afe9d30864be1be49f051a75205d9885e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28d42b4f8e8e1d67c20c7f517d68e6a7" id="r_a28d42b4f8e8e1d67c20c7f517d68e6a7"><td class="memItemLeft" align="right" valign="top"><a id="a28d42b4f8e8e1d67c20c7f517d68e6a7" name="a28d42b4f8e8e1d67c20c7f517d68e6a7"></a>
+constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>alib::g3::time_clock_source</b> = ALIB_DEF_CLOCK_SOURCE</td></tr>
+<tr class="memdesc:a28d42b4f8e8e1d67c20c7f517d68e6a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">时钟源，简易能选择的话选择最快的MONOTIC_COARSE <br /></td></tr>
+<tr class="separator:a28d42b4f8e8e1d67c20c7f517d68e6a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfef9ad84f0d182e75aebda76a7fdc13" id="r_acfef9ad84f0d182e75aebda76a7fdc13"><td class="memItemLeft" align="right" valign="top"><a id="acfef9ad84f0d182e75aebda76a7fdc13" name="acfef9ad84f0d182e75aebda76a7fdc13"></a>
+constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>alib::g3::config_pool_reserve_size</b> = 64</td></tr>
+<tr class="memdesc:acfef9ad84f0d182e75aebda76a7fdc13"><td class="mdescLeft">&#160;</td><td class="mdescRight">配置池预留大小，目前LogMsg引用配置有一个很小的概率（-&gt;0）悬垂，看看能不能处理好 <br /></td></tr>
+<tr class="separator:acfef9ad84f0d182e75aebda76a7fdc13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>与日志有关的函数库 </p>
+<dl class="section author"><dt>作者</dt><dd>aaaa0ggmc @last-date 2025/04/04 </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2025/11/17 </dd></dl>
+<dl class="section version"><dt>版本</dt><dd>pre-4.0 </dd></dl>
+<dl class="section copyright"><dt>版权所有</dt><dd>Copyright(C)2025</dd></dl>
+<dl class="section user"><dt>修改日志:</dt><dd><table class="doxtable">
+<tr>
+<th>时间 </th><th>版本 </th><th>作者 </th><th>介绍 </th></tr>
+<tr>
+<td>2025-04-04 </td><td>3.1 </td><th>aaaa0ggmc </th><td>添加doc </td></tr>
+<tr>
+<td>2025-04-04 </td><td>3.1 </td><th>aaaa0ggmc </th><td>完成doc </td></tr>
+<tr>
+<td>2025-11-10 </td><td>pre-4.0 </td><th>aaaa0ggmc </th><td>准备4.0阶段 </td></tr>
+<tr>
+<td>2025-11-12 </td><td>alpha-4.0 </td><th>aaaa0ggmc </th><td>4.0阶段核心完工，优化ing... </td></tr>
+</table>
+</dd></dl>
+</div><h2 class="groupheader">宏定义说明</h2>
+<a id="ad85a1673de24e63499ec05c1dbd63487" name="ad85a1673de24e63499ec05c1dbd63487"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad85a1673de24e63499ec05c1dbd63487">&#9670;&#160;</a></span>__internal_alib_localtime</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __internal_alib_localtime&#160;&#160;&#160;localtime_s</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000018">待办事项:</a></b></dt><dd>实现LogManager对log文件（文件夹）进行管理 </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../dir_be216c816632aa4955947bd3cb1065c9.html">log</a></li><li class="navelem"><a class="el" href="../../d0/daa/kernel_8h.html">kernel.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

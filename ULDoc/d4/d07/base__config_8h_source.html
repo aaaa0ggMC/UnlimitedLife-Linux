@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/log/base_config.h 源文件</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(1); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d4/d07/base__config_8h_source.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">base_config.h</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef ALOG_BASECONFIG_INCLUDED</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define ALOG_BASECONFIG_INCLUDED</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;<a class="code" href="../../d5/d6c/alib-g3_2autil_8h.html">alib-g3/autil.h</a>&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a>{</div>
+<div class="foldopen" id="foldopen00007" data-start="{" data-end="};">
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">    7</a></span>    <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">LogMsgConfig</a>{</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#affec5e8e323097bbaa0552851720e98f">    9</a></span>        <span class="keyword">using </span><a class="code hl_typedef" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#affec5e8e323097bbaa0552851720e98f">LevelCastFn</a> = std::string_view (*)(int);</div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a90533893f517d9c295327d26f9d92bcc">   12</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a90533893f517d9c295327d26f9d92bcc">disable_extra_information</a>;</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a67ae3427a677b8c8f6ad933c8121f037">   15</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a67ae3427a677b8c8f6ad933c8121f037">gen_thread_id</a>; </div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a53569bb4390d73b2cd6505eb0f08b7a3">   17</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a53569bb4390d73b2cd6505eb0f08b7a3">gen_time</a>;</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a4fc4e8047952f50149850313648e3261">   19</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a4fc4e8047952f50149850313648e3261">gen_date</a>;</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#aa6e66b3df14ac3dd23985e24f0bc1bfc">   22</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#aa6e66b3df14ac3dd23985e24f0bc1bfc">out_header</a>;</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a34b0feee729dbe98466f6e2acd0c010a">   24</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a34b0feee729dbe98466f6e2acd0c010a">out_level</a>;</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a27f972d9fab774c494a2ff199c44e8ef">   26</a></span>        <a class="code hl_typedef" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#affec5e8e323097bbaa0552851720e98f">LevelCastFn</a> <a class="code hl_variable" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a27f972d9fab774c494a2ff199c44e8ef">level_cast</a>;</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span> </div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>        <span class="keyword">static</span> std::string_view default_level_cast(<span class="keywordtype">int</span> level_in);</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        </div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        <a class="code hl_struct" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">LogMsgConfig</a>();</div>
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span>    };</div>
+</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span> </div>
+<div class="foldopen" id="foldopen00036" data-start="{" data-end="};">
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html">   36</a></span>    <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html">LoggerConfig</a>{</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>    <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a95c27af44013e2cf4d2e2d9fa42681b4">   39</a></span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a95c27af44013e2cf4d2e2d9fa42681b4">consumer_count</a>;</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a52020a69b094a5f306cd94ca41d13563">   41</a></span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a52020a69b094a5f306cd94ca41d13563">fetch_message_count_max</a>;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a58958133c7a4052b73218d198ec5c51c">   43</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a58958133c7a4052b73218d198ec5c51c">enable_back_pressure</a>;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a20507fcdf4b780991d549d60f442bb9e">   46</a></span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a20507fcdf4b780991d549d60f442bb9e">back_pressure_multiply</a>;</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <a class="code hl_struct" href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html">LoggerConfig</a>();</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    };</div>
+</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="foldopen" id="foldopen00053" data-start="{" data-end="};">
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html">   53</a></span>    <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html">LogFactoryConfig</a>{</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#adfd3979df6071ab0f89ccec3d5e1a9a7">   57</a></span>        <span class="keyword">using </span><a class="code hl_typedef" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#adfd3979df6071ab0f89ccec3d5e1a9a7">LevelKeepFn</a> = bool(*)(int);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a865383b902f39d57fbf0e815fb87886a">   60</a></span>        <span class="keywordtype">int</span> <a class="code hl_variable" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a865383b902f39d57fbf0e815fb87886a">def_level</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a5cf6caf0fedc0d6b80eee268f437f58a">   62</a></span>        <a class="code hl_typedef" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#adfd3979df6071ab0f89ccec3d5e1a9a7">LevelKeepFn</a> <a class="code hl_variable" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a5cf6caf0fedc0d6b80eee268f437f58a">level_should_keep</a>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#ac277a2e7cdf8046565911987259022f8">   64</a></span>        std::string_view <a class="code hl_variable" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#ac277a2e7cdf8046565911987259022f8">header</a>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno"><a class="line" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a67d229b7b23167e5a4ea8238e248c094">   66</a></span>        <a class="code hl_struct" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">LogMsgConfig</a> <a class="code hl_variable" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a67d229b7b23167e5a4ea8238e248c094">msg</a>;</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        <a class="code hl_struct" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html">LogFactoryConfig</a>(</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            std::string_view iheader = <span class="stringliteral">&quot;&quot;</span>,</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>            <span class="keywordtype">int</span> idef_level = 0,</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <a class="code hl_typedef" href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#adfd3979df6071ab0f89ccec3d5e1a9a7">LevelKeepFn</a> ilevel_should_keep = <span class="keyword">nullptr</span>,</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>            <span class="keyword">const</span> <a class="code hl_struct" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">LogMsgConfig</a> &amp; msg_cfg = <a class="code hl_struct" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">LogMsgConfig</a>()</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        );</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    };</div>
+</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>}</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aalib-g3_2autil_8h_html"><div class="ttname"><a href="../../d5/d6c/alib-g3_2autil_8h.html">autil.h</a></div><div class="ttdoc">工具库，提供IO、字符串、系统数据等静态函数</div></div>
+<div class="ttc" id="anamespacealib_1_1g3_html"><div class="ttname"><a href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a></div><div class="ttdoc">第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。</div><div class="ttdef"><b>Definition</b> alogger_old.cpp:413</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactoryConfig_html"><div class="ttname"><a href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html">alib::g3::LogFactoryConfig</a></div><div class="ttdoc">LogFactory配置</div><div class="ttdef"><b>Definition</b> base_config.h:53</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactoryConfig_html_a5cf6caf0fedc0d6b80eee268f437f58a"><div class="ttname"><a href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a5cf6caf0fedc0d6b80eee268f437f58a">alib::g3::LogFactoryConfig::level_should_keep</a></div><div class="ttdeci">LevelKeepFn level_should_keep</div><div class="ttdoc">用来提前剪枝的函数，默认为空</div><div class="ttdef"><b>Definition</b> base_config.h:62</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactoryConfig_html_a67d229b7b23167e5a4ea8238e248c094"><div class="ttname"><a href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a67d229b7b23167e5a4ea8238e248c094">alib::g3::LogFactoryConfig::msg</a></div><div class="ttdeci">LogMsgConfig msg</div><div class="ttdoc">默认的消息配置信息</div><div class="ttdef"><b>Definition</b> base_config.h:66</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactoryConfig_html_a865383b902f39d57fbf0e815fb87886a"><div class="ttname"><a href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#a865383b902f39d57fbf0e815fb87886a">alib::g3::LogFactoryConfig::def_level</a></div><div class="ttdeci">int def_level</div><div class="ttdoc">默认选择的level数值</div><div class="ttdef"><b>Definition</b> base_config.h:60</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactoryConfig_html_ac277a2e7cdf8046565911987259022f8"><div class="ttname"><a href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#ac277a2e7cdf8046565911987259022f8">alib::g3::LogFactoryConfig::header</a></div><div class="ttdeci">std::string_view header</div><div class="ttdoc">缓存的header，LogFactory回对这个再处理，使用Logger::register_header来防止悬垂</div><div class="ttdef"><b>Definition</b> base_config.h:64</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFactoryConfig_html_adfd3979df6071ab0f89ccec3d5e1a9a7"><div class="ttname"><a href="../../d2/d63/structalib_1_1g3_1_1LogFactoryConfig.html#adfd3979df6071ab0f89ccec3d5e1a9a7">alib::g3::LogFactoryConfig::LevelKeepFn</a></div><div class="ttdeci">bool(*)(int) LevelKeepFn</div><div class="ttdoc">这个用于在LogFactory阶段就直接pass掉调用，从而进一步剪枝叶</div><div class="ttdef"><b>Definition</b> base_config.h:57</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">alib::g3::LogMsgConfig</a></div><div class="ttdoc">日志消息细节控制，用在LogFactory中，控制额外信息的输出</div><div class="ttdef"><b>Definition</b> base_config.h:7</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html_a27f972d9fab774c494a2ff199c44e8ef"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a27f972d9fab774c494a2ff199c44e8ef">alib::g3::LogMsgConfig::level_cast</a></div><div class="ttdeci">LevelCastFn level_cast</div><div class="ttdoc">用来转换level的函数，默认为 default_level_cast</div><div class="ttdef"><b>Definition</b> base_config.h:26</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html_a34b0feee729dbe98466f6e2acd0c010a"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a34b0feee729dbe98466f6e2acd0c010a">alib::g3::LogMsgConfig::out_level</a></div><div class="ttdeci">bool out_level</div><div class="ttdoc">是否输出当前日志级别，默认为 true</div><div class="ttdef"><b>Definition</b> base_config.h:24</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html_a4fc4e8047952f50149850313648e3261"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a4fc4e8047952f50149850313648e3261">alib::g3::LogMsgConfig::gen_date</a></div><div class="ttdeci">bool gen_date</div><div class="ttdoc">是否生成当前日期,eg [25-10-1 09:02:02]，默认为true</div><div class="ttdef"><b>Definition</b> base_config.h:19</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html_a53569bb4390d73b2cd6505eb0f08b7a3"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a53569bb4390d73b2cd6505eb0f08b7a3">alib::g3::LogMsgConfig::gen_time</a></div><div class="ttdeci">bool gen_time</div><div class="ttdoc">是否生成运行时间,eg [999.12ms]，默认为true</div><div class="ttdef"><b>Definition</b> base_config.h:17</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html_a67ae3427a677b8c8f6ad933c8121f037"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a67ae3427a677b8c8f6ad933c8121f037">alib::g3::LogMsgConfig::gen_thread_id</a></div><div class="ttdeci">bool gen_thread_id</div><div class="ttdoc">是否生成线程id,eg [TID424325]，默认为false</div><div class="ttdef"><b>Definition</b> base_config.h:15</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html_a90533893f517d9c295327d26f9d92bcc"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#a90533893f517d9c295327d26f9d92bcc">alib::g3::LogMsgConfig::disable_extra_information</a></div><div class="ttdeci">bool disable_extra_information</div><div class="ttdoc">是否禁用额外信息生成，一旦为true，下面的额外信息也都没有意义了，默认为false</div><div class="ttdef"><b>Definition</b> base_config.h:12</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html_aa6e66b3df14ac3dd23985e24f0bc1bfc"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#aa6e66b3df14ac3dd23985e24f0bc1bfc">alib::g3::LogMsgConfig::out_header</a></div><div class="ttdeci">bool out_header</div><div class="ttdoc">是否输出LogFactory的&quot;head&quot;,eg &quot;Test&quot;，默认为 true</div><div class="ttdef"><b>Definition</b> base_config.h:22</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html_affec5e8e323097bbaa0552851720e98f"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html#affec5e8e323097bbaa0552851720e98f">alib::g3::LogMsgConfig::LevelCastFn</a></div><div class="ttdeci">std::string_view(*)(int) LevelCastFn</div><div class="ttdoc">可以通过这个形式的函数自定义某个数字对应的level显示</div><div class="ttdef"><b>Definition</b> base_config.h:9</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LoggerConfig_html"><div class="ttname"><a href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html">alib::g3::LoggerConfig</a></div><div class="ttdoc">Logger的配置文件</div><div class="ttdef"><b>Definition</b> base_config.h:36</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LoggerConfig_html_a20507fcdf4b780991d549d60f442bb9e"><div class="ttname"><a href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a20507fcdf4b780991d549d60f442bb9e">alib::g3::LoggerConfig::back_pressure_multiply</a></div><div class="ttdeci">unsigned int back_pressure_multiply</div><div class="ttdoc">背压模式的阈值，阈值 = 下面的倍率 * 一次性能取出最大值 * 消费者数量，默认为 4</div><div class="ttdef"><b>Definition</b> base_config.h:46</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LoggerConfig_html_a52020a69b094a5f306cd94ca41d13563"><div class="ttname"><a href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a52020a69b094a5f306cd94ca41d13563">alib::g3::LoggerConfig::fetch_message_count_max</a></div><div class="ttdeci">unsigned int fetch_message_count_max</div><div class="ttdoc">fetch_message一次性能取出信息的最大值，默认为 consumer_message_default_count</div><div class="ttdef"><b>Definition</b> base_config.h:41</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LoggerConfig_html_a58958133c7a4052b73218d198ec5c51c"><div class="ttname"><a href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a58958133c7a4052b73218d198ec5c51c">alib::g3::LoggerConfig::enable_back_pressure</a></div><div class="ttdeci">bool enable_back_pressure</div><div class="ttdoc">是否开启背压模式，默认为false（背压会出现消息不同步），如果为false，下面的内容失效</div><div class="ttdef"><b>Definition</b> base_config.h:43</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LoggerConfig_html_a95c27af44013e2cf4d2e2d9fa42681b4"><div class="ttname"><a href="../../d0/d74/structalib_1_1g3_1_1LoggerConfig.html#a95c27af44013e2cf4d2e2d9fa42681b4">alib::g3::LoggerConfig::consumer_count</a></div><div class="ttdeci">unsigned int consumer_count</div><div class="ttdoc">Consumer线程数量，0表示启动sync模式，否则为async，默认为1</div><div class="ttdef"><b>Definition</b> base_config.h:39</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../dir_be216c816632aa4955947bd3cb1065c9.html">log</a></li><li class="navelem"><b>base_config.h</b></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

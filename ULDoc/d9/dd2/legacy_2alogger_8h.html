@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/legacy/alogger.h 文件参考</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d9/dd2/legacy_2alogger_8h.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#define-members">宏定义</a> &#124;
+<a href="#typedef-members">类型定义</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">alogger.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>与日志有关的函数库  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;memory&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;fstream&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;map&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d6/dd9/aclock_8h_source.html">alib-g3/aclock.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d5/d6c/alib-g3_2autil_8h_source.html">alib-g3/autil.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d0/de9/aref_8h_source.html">alib-g3/aref.h</a>&gt;</code><br />
+<code>#include &lt;mutex&gt;</code><br />
+<code>#include &lt;glm/glm.hpp&gt;</code><br />
+<code>#include &lt;glm/ext/quaternion_common.hpp&gt;</code><br />
+</div>
+<p><a href="../../d9/dd2/legacy_2alogger_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d20/structalib_1_1g3_1_1old_1_1LogHeader.html">alib::g3::old::LogHeader</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log类别信息  <a href="../../d5/d20/structalib_1_1g3_1_1old_1_1LogHeader.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d24/structalib_1_1g3_1_1old_1_1CriticalLock.html">alib::g3::old::CriticalLock</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">锁，windows上使用CriticalSection,Linux上使用 recursive mutex  <a href="../../de/d24/structalib_1_1g3_1_1old_1_1CriticalLock.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d1f/structalib_1_1g3_1_1old_1_1LogOutputTarget.html">alib::g3::old::LogOutputTarget</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">一个基类，用于描述日志文件的输出去向，一些预设在 alib::g3::lot 这个命名空间里面  <a href="../../dd/d1f/structalib_1_1g3_1_1old_1_1LogOutputTarget.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d37/structalib_1_1g3_1_1old_1_1lot_1_1Console.html">alib::g3::old::lot::Console</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">输出到控制台  <a href="../../de/d37/structalib_1_1g3_1_1old_1_1lot_1_1Console.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/d0e/structalib_1_1g3_1_1old_1_1lot_1_1SingleFile.html">alib::g3::old::lot::SingleFile</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">输出到单个文件  <a href="../../da/d0e/structalib_1_1g3_1_1old_1_1lot_1_1SingleFile.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d9c/structalib_1_1g3_1_1old_1_1lot_1_1SplittedFiles.html">alib::g3::old::lot::SplittedFiles</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">分割文件（到一定大小后自动分割）  <a href="../../de/d9c/structalib_1_1g3_1_1old_1_1lot_1_1SplittedFiles.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/df0/structalib_1_1g3_1_1old_1_1LogFilter.html">alib::g3::old::LogFilter</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">一个基类，日志过滤器，用于处理到来的日志信息  <a href="../../db/df0/structalib_1_1g3_1_1old_1_1LogFilter.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d32/structalib_1_1g3_1_1old_1_1lgf_1_1LogLevel.html">alib::g3::old::lgf::LogLevel</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">对于不想要的LogLevel进行抛弃，实现了pre_filter  <a href="../../d1/d32/structalib_1_1g3_1_1old_1_1lgf_1_1LogLevel.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/d2a/structalib_1_1g3_1_1old_1_1lgf_1_1KeywordsBlocker.html">alib::g3::old::lgf::KeywordsBlocker</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">对于出现敏感词的消息直接拒绝  <a href="../../d8/d2a/structalib_1_1g3_1_1old_1_1lgf_1_1KeywordsBlocker.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/db5/structalib_1_1g3_1_1old_1_1lgf_1_1KeywordsReplacerMono.html">alib::g3::old::lgf::KeywordsReplacerMono</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">对于关键词用某个关键词进行替换，有两种模式 <br  />
+ <a href="../../db/db5/structalib_1_1g3_1_1old_1_1lgf_1_1KeywordsReplacerMono.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d6a/classalib_1_1g3_1_1old_1_1Logger.html">alib::g3::old::Logger</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">日志核心类  <a href="../../df/d6a/classalib_1_1g3_1_1old_1_1Logger.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dee/structalib_1_1g3_1_1old_1_1LogEnd.html">alib::g3::old::LogEnd</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">用于匹配LogFactory，没用实际作用  <a href="../../db/dee/structalib_1_1g3_1_1old_1_1LogEnd.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d53/classalib_1_1g3_1_1old_1_1LogFactory.html">alib::g3::old::LogFactory</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">用于生成log的类，支持 &lt;&lt;  <a href="../../df/d53/classalib_1_1g3_1_1old_1_1LogFactory.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/d54/structalib_1_1g3_1_1old_1_1LogFactory_1_1tuple__show.html">alib::g3::old::LogFactory::tuple_show&lt; Tuple, N &gt;</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/df4/structalib_1_1g3_1_1old_1_1LogFactory_1_1tuple__show_3_01Tuple_00_011_01_4.html">alib::g3::old::LogFactory::tuple_show&lt; Tuple, 1 &gt;</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">最后一层匹配  <a href="../../d6/df4/structalib_1_1g3_1_1old_1_1LogFactory_1_1tuple__show_3_01Tuple_00_011_01_4.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:dd/d6c/namespacealib" id="r_dd/d6c/namespacealib"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d6c/namespacealib.html">alib</a></td></tr>
+<tr class="memdesc:dd/d6c/namespacealib"><td class="mdescLeft">&#160;</td><td class="mdescRight">aaaa0ggmcLib：一个主要给自己使用的综合库 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d1/d27/namespacealib_1_1g3" id="r_d1/d27/namespacealib_1_1g3"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a></td></tr>
+<tr class="memdesc:d1/d27/namespacealib_1_1g3"><td class="mdescLeft">&#160;</td><td class="mdescRight">第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d7/df0/namespacealib_1_1g3_1_1old_1_1lot" id="r_d7/df0/namespacealib_1_1g3_1_1old_1_1lot"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/df0/namespacealib_1_1g3_1_1old_1_1lot.html">alib::g3::old::lot</a></td></tr>
+<tr class="memdesc:d7/df0/namespacealib_1_1g3_1_1old_1_1lot"><td class="mdescLeft">&#160;</td><td class="mdescRight">一些LogOutputTarget预设 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d3/db0/namespacealib_1_1g3_1_1old_1_1lgf" id="r_d3/db0/namespacealib_1_1g3_1_1old_1_1lgf"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/db0/namespacealib_1_1g3_1_1old_1_1lgf.html">alib::g3::old::lgf</a></td></tr>
+<tr class="memdesc:d3/db0/namespacealib_1_1g3_1_1old_1_1lgf"><td class="mdescLeft">&#160;</td><td class="mdescRight">一些LogFilter预设 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:af7abc145380f1916838e42f9272aa0f6" id="r_af7abc145380f1916838e42f9272aa0f6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#af7abc145380f1916838e42f9272aa0f6">LOG_TRACE</a>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memdesc:af7abc145380f1916838e42f9272aa0f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">简简单单的输出  <br /></td></tr>
+<tr class="separator:af7abc145380f1916838e42f9272aa0f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ff63e8955665c4a58b1598f2b07c51a" id="r_a6ff63e8955665c4a58b1598f2b07c51a"><td class="memItemLeft" align="right" valign="top"><a id="a6ff63e8955665c4a58b1598f2b07c51a" name="a6ff63e8955665c4a58b1598f2b07c51a"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_DEBUG</b>&#160;&#160;&#160;0x00000010</td></tr>
+<tr class="memdesc:a6ff63e8955665c4a58b1598f2b07c51a"><td class="mdescLeft">&#160;</td><td class="mdescRight">调试信息 <br /></td></tr>
+<tr class="separator:a6ff63e8955665c4a58b1598f2b07c51a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb4f36db01bd128c7afeac5889dac311" id="r_aeb4f36db01bd128c7afeac5889dac311"><td class="memItemLeft" align="right" valign="top"><a id="aeb4f36db01bd128c7afeac5889dac311" name="aeb4f36db01bd128c7afeac5889dac311"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_INFO</b>&#160;&#160;&#160;0x00000100</td></tr>
+<tr class="memdesc:aeb4f36db01bd128c7afeac5889dac311"><td class="mdescLeft">&#160;</td><td class="mdescRight">比较重要的信息 <br /></td></tr>
+<tr class="separator:aeb4f36db01bd128c7afeac5889dac311"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea3f57d6dcc5b4ac957e2679e87dde27" id="r_aea3f57d6dcc5b4ac957e2679e87dde27"><td class="memItemLeft" align="right" valign="top"><a id="aea3f57d6dcc5b4ac957e2679e87dde27" name="aea3f57d6dcc5b4ac957e2679e87dde27"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_WARN</b>&#160;&#160;&#160;0x00001000</td></tr>
+<tr class="memdesc:aea3f57d6dcc5b4ac957e2679e87dde27"><td class="mdescLeft">&#160;</td><td class="mdescRight">警告信息 <br /></td></tr>
+<tr class="separator:aea3f57d6dcc5b4ac957e2679e87dde27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aced66975c154ea0e2a8ec3bc818b4e08" id="r_aced66975c154ea0e2a8ec3bc818b4e08"><td class="memItemLeft" align="right" valign="top"><a id="aced66975c154ea0e2a8ec3bc818b4e08" name="aced66975c154ea0e2a8ec3bc818b4e08"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_ERROR</b>&#160;&#160;&#160;0x00010000</td></tr>
+<tr class="memdesc:aced66975c154ea0e2a8ec3bc818b4e08"><td class="mdescLeft">&#160;</td><td class="mdescRight">错误信息 <br /></td></tr>
+<tr class="separator:aced66975c154ea0e2a8ec3bc818b4e08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a419473084b6fdced7f4b1a2fda7b0103" id="r_a419473084b6fdced7f4b1a2fda7b0103"><td class="memItemLeft" align="right" valign="top"><a id="a419473084b6fdced7f4b1a2fda7b0103" name="a419473084b6fdced7f4b1a2fda7b0103"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_CRITI</b>&#160;&#160;&#160;0x00100000</td></tr>
+<tr class="memdesc:a419473084b6fdced7f4b1a2fda7b0103"><td class="mdescLeft">&#160;</td><td class="mdescRight">致命错误 <br /></td></tr>
+<tr class="separator:a419473084b6fdced7f4b1a2fda7b0103"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8bd3e9913d9068e20ef061a58672967" id="r_aa8bd3e9913d9068e20ef061a58672967"><td class="memItemLeft" align="right" valign="top"><a id="aa8bd3e9913d9068e20ef061a58672967" name="aa8bd3e9913d9068e20ef061a58672967"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_OFF</b>&#160;&#160;&#160;0x01000000</td></tr>
+<tr class="memdesc:aa8bd3e9913d9068e20ef061a58672967"><td class="mdescLeft">&#160;</td><td class="mdescRight">不要输出 <br /></td></tr>
+<tr class="separator:aa8bd3e9913d9068e20ef061a58672967"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d8afe7309e26d4648ea05c6ad64edbc" id="r_a5d8afe7309e26d4648ea05c6ad64edbc"><td class="memItemLeft" align="right" valign="top"><a id="a5d8afe7309e26d4648ea05c6ad64edbc" name="a5d8afe7309e26d4648ea05c6ad64edbc"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_FULL</b>&#160;&#160;&#160;(<a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#af7abc145380f1916838e42f9272aa0f6">LOG_TRACE</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a6ff63e8955665c4a58b1598f2b07c51a">LOG_DEBUG</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#aeb4f36db01bd128c7afeac5889dac311">LOG_INFO</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#aea3f57d6dcc5b4ac957e2679e87dde27">LOG_WARN</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#aced66975c154ea0e2a8ec3bc818b4e08">LOG_ERROR</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a419473084b6fdced7f4b1a2fda7b0103">LOG_CRITI</a>)</td></tr>
+<tr class="memdesc:a5d8afe7309e26d4648ea05c6ad64edbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">完全版本 <br /></td></tr>
+<tr class="separator:a5d8afe7309e26d4648ea05c6ad64edbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ed9a7e90b14e90e6fae431a30e9d08c" id="r_a9ed9a7e90b14e90e6fae431a30e9d08c"><td class="memItemLeft" align="right" valign="top"><a id="a9ed9a7e90b14e90e6fae431a30e9d08c" name="a9ed9a7e90b14e90e6fae431a30e9d08c"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_RELE</b>&#160;&#160;&#160;(<a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#aeb4f36db01bd128c7afeac5889dac311">LOG_INFO</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#aced66975c154ea0e2a8ec3bc818b4e08">LOG_ERROR</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a419473084b6fdced7f4b1a2fda7b0103">LOG_CRITI</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#aea3f57d6dcc5b4ac957e2679e87dde27">LOG_WARN</a>)</td></tr>
+<tr class="memdesc:a9ed9a7e90b14e90e6fae431a30e9d08c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Release级别日志 <br /></td></tr>
+<tr class="separator:a9ed9a7e90b14e90e6fae431a30e9d08c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0f4497f3f34e613428fbe5497cb3645" id="r_ab0f4497f3f34e613428fbe5497cb3645"><td class="memItemLeft" align="right" valign="top"><a id="ab0f4497f3f34e613428fbe5497cb3645" name="ab0f4497f3f34e613428fbe5497cb3645"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_TIME</b>&#160;&#160;&#160;0x00000001</td></tr>
+<tr class="memdesc:ab0f4497f3f34e613428fbe5497cb3645"><td class="mdescLeft">&#160;</td><td class="mdescRight">时间，格式 [yyyy-mm-dd hh:mm:ss] <br /></td></tr>
+<tr class="separator:ab0f4497f3f34e613428fbe5497cb3645"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2db7e45b63894904859b0637bf1c017b" id="r_a2db7e45b63894904859b0637bf1c017b"><td class="memItemLeft" align="right" valign="top"><a id="a2db7e45b63894904859b0637bf1c017b" name="a2db7e45b63894904859b0637bf1c017b"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_TYPE</b>&#160;&#160;&#160;0x00000010</td></tr>
+<tr class="memdesc:a2db7e45b63894904859b0637bf1c017b"><td class="mdescLeft">&#160;</td><td class="mdescRight">显示日志级别 <br /></td></tr>
+<tr class="separator:a2db7e45b63894904859b0637bf1c017b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a220b28b927530d1613e9b9cc933dca9c" id="r_a220b28b927530d1613e9b9cc933dca9c"><td class="memItemLeft" align="right" valign="top"><a id="a220b28b927530d1613e9b9cc933dca9c" name="a220b28b927530d1613e9b9cc933dca9c"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_ELAP</b>&#160;&#160;&#160;0x00000100</td></tr>
+<tr class="memdesc:a220b28b927530d1613e9b9cc933dca9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">显示日志的offset <br /></td></tr>
+<tr class="separator:a220b28b927530d1613e9b9cc933dca9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9fc4e230d3667228dd6ce1af0d912fe" id="r_ac9fc4e230d3667228dd6ce1af0d912fe"><td class="memItemLeft" align="right" valign="top"><a id="ac9fc4e230d3667228dd6ce1af0d912fe" name="ac9fc4e230d3667228dd6ce1af0d912fe"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_THID</b>&#160;&#160;&#160;0x00001000</td></tr>
+<tr class="memdesc:ac9fc4e230d3667228dd6ce1af0d912fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">显示线程id <br /></td></tr>
+<tr class="separator:ac9fc4e230d3667228dd6ce1af0d912fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5bf279ca6618e83f35bdfc53aa0867a7" id="r_a5bf279ca6618e83f35bdfc53aa0867a7"><td class="memItemLeft" align="right" valign="top"><a id="a5bf279ca6618e83f35bdfc53aa0867a7" name="a5bf279ca6618e83f35bdfc53aa0867a7"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_HEAD</b>&#160;&#160;&#160;0x00010000</td></tr>
+<tr class="memdesc:a5bf279ca6618e83f35bdfc53aa0867a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">显示头信息(一般用于只是来源)，比如 ALIB4 <br /></td></tr>
+<tr class="separator:a5bf279ca6618e83f35bdfc53aa0867a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1238fb2399439206936725050001045" id="r_ab1238fb2399439206936725050001045"><td class="memItemLeft" align="right" valign="top"><a id="ab1238fb2399439206936725050001045" name="ab1238fb2399439206936725050001045"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_PROC</b>&#160;&#160;&#160;0x00100000</td></tr>
+<tr class="memdesc:ab1238fb2399439206936725050001045"><td class="mdescLeft">&#160;</td><td class="mdescRight">进程id <br /></td></tr>
+<tr class="separator:ab1238fb2399439206936725050001045"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6ad2e0fddd7cd175018c059ced0c67c4" id="r_a6ad2e0fddd7cd175018c059ced0c67c4"><td class="memItemLeft" align="right" valign="top"><a id="a6ad2e0fddd7cd175018c059ced0c67c4" name="a6ad2e0fddd7cd175018c059ced0c67c4"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_NONE</b>&#160;&#160;&#160;0x00000000</td></tr>
+<tr class="memdesc:a6ad2e0fddd7cd175018c059ced0c67c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">占位符，什么也不显示 <br /></td></tr>
+<tr class="separator:a6ad2e0fddd7cd175018c059ced0c67c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a104bac282cfa500aed02a208223982b3" id="r_a104bac282cfa500aed02a208223982b3"><td class="memItemLeft" align="right" valign="top"><a id="a104bac282cfa500aed02a208223982b3" name="a104bac282cfa500aed02a208223982b3"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_BASIC</b>&#160;&#160;&#160;(<a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#ab0f4497f3f34e613428fbe5497cb3645">LOG_SHOW_TIME</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a2db7e45b63894904859b0637bf1c017b">LOG_SHOW_TYPE</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a220b28b927530d1613e9b9cc933dca9c">LOG_SHOW_ELAP</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a5bf279ca6618e83f35bdfc53aa0867a7">LOG_SHOW_HEAD</a>)</td></tr>
+<tr class="memdesc:a104bac282cfa500aed02a208223982b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">基本显示 <br /></td></tr>
+<tr class="separator:a104bac282cfa500aed02a208223982b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e5efb579eb8975e658267bf5b68beb6" id="r_a4e5efb579eb8975e658267bf5b68beb6"><td class="memItemLeft" align="right" valign="top"><a id="a4e5efb579eb8975e658267bf5b68beb6" name="a4e5efb579eb8975e658267bf5b68beb6"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>LOG_SHOW_FULL</b>&#160;&#160;&#160;(<a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a104bac282cfa500aed02a208223982b3">LOG_SHOW_BASIC</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#ac9fc4e230d3667228dd6ce1af0d912fe">LOG_SHOW_THID</a> | <a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#ab1238fb2399439206936725050001045">LOG_SHOW_PROC</a>)</td></tr>
+<tr class="memdesc:a4e5efb579eb8975e658267bf5b68beb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">全部显示 <br /></td></tr>
+<tr class="separator:a4e5efb579eb8975e658267bf5b68beb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a93916b30c0f5b8ea1a5b855da4a376" id="r_a5a93916b30c0f5b8ea1a5b855da4a376"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a5a93916b30c0f5b8ea1a5b855da4a376">VALUE_FIX</a>(TESTV)</td></tr>
+<tr class="separator:a5a93916b30c0f5b8ea1a5b855da4a376"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
+类型定义</h2></td></tr>
+<tr class="memitem:aa541c8d2abb4161a5b9487f612941585" id="r_aa541c8d2abb4161a5b9487f612941585"><td class="memItemLeft" align="right" valign="top"><a id="aa541c8d2abb4161a5b9487f612941585" name="aa541c8d2abb4161a5b9487f612941585"></a>
+typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>alib::g3::old::EndLogFn</b>) (<a class="el" href="../../db/dee/structalib_1_1g3_1_1old_1_1LogEnd.html">LogEnd</a>)</td></tr>
+<tr class="memdesc:aa541c8d2abb4161a5b9487f612941585"><td class="mdescLeft">&#160;</td><td class="mdescRight">用于匹配 <br /></td></tr>
+<tr class="separator:aa541c8d2abb4161a5b9487f612941585"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a110c1e45fd26b2d15fc9ca21c36e81b5" id="r_a110c1e45fd26b2d15fc9ca21c36e81b5"><td class="memItemLeft" align="right" valign="top"><a id="a110c1e45fd26b2d15fc9ca21c36e81b5" name="a110c1e45fd26b2d15fc9ca21c36e81b5"></a>
+<a class="el" href="../../d5/d20/structalib_1_1g3_1_1old_1_1LogHeader.html">LogHeader</a>&#160;</td><td class="memItemRight" valign="bottom"><b>alib::g3::old::lot::getHeader</b> (int level)</td></tr>
+<tr class="memdesc:a110c1e45fd26b2d15fc9ca21c36e81b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">用于获取header信息 <br /></td></tr>
+<tr class="separator:a110c1e45fd26b2d15fc9ca21c36e81b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bf9740871a2600f9c42ca18d5c4383a" id="r_a2bf9740871a2600f9c42ca18d5c4383a"><td class="memItemLeft" align="right" valign="top">void DLL_EXPORT&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/dd2/legacy_2alogger_8h.html#a2bf9740871a2600f9c42ca18d5c4383a">alib::g3::old::endlog</a> (<a class="el" href="../../db/dee/structalib_1_1g3_1_1old_1_1LogEnd.html">LogEnd</a>)</td></tr>
+<tr class="memdesc:a2bf9740871a2600f9c42ca18d5c4383a"><td class="mdescLeft">&#160;</td><td class="mdescRight">用于表示日志结尾  <br /></td></tr>
+<tr class="separator:a2bf9740871a2600f9c42ca18d5c4383a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>与日志有关的函数库 </p>
+<dl class="section author"><dt>作者</dt><dd>aaaa0ggmc @last-date 2025/04/04 </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2025/11/14 </dd></dl>
+<dl class="section version"><dt>版本</dt><dd>3.1 </dd></dl>
+<dl class="section copyright"><dt>版权所有</dt><dd>Copyright(C)2025</dd></dl>
+<dl class="section user"><dt>修改日志:</dt><dd><table class="doxtable">
+<tr>
+<th>时间 </th><th>版本 </th><th>作者 </th><th>介绍 </th></tr>
+<tr>
+<td>2025-4-04 </td><td>3.1 </td><th>aaaa0ggmc </th><td>添加doc </td></tr>
+<tr>
+<td>2025-4-04 </td><td>3.1 </td><th>aaaa0ggmc </th><td>完成doc </td></tr>
+</table>
+</dd></dl>
+</div><h2 class="groupheader">宏定义说明</h2>
+<a id="af7abc145380f1916838e42f9272aa0f6" name="af7abc145380f1916838e42f9272aa0f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7abc145380f1916838e42f9272aa0f6">&#9670;&#160;</a></span>LOG_TRACE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LOG_TRACE&#160;&#160;&#160;0x00000001</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>简简单单的输出 </p>
+<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000012">待办事项:</a></b></dt><dd><p class="startdd">Logger添加appendConsole appendFile ...实现简化（不然有点麻烦） </p>
+<p class="enddd">实现LogManager对log文件（文件夹）进行管理 </p>
+</dd></dl>
+
+</div>
+</div>
+<a id="a5a93916b30c0f5b8ea1a5b855da4a376" name="a5a93916b30c0f5b8ea1a5b855da4a376"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a93916b30c0f5b8ea1a5b855da4a376">&#9670;&#160;</a></span>VALUE_FIX</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define VALUE_FIX</td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname">TESTV</td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>值:</b><div class="fragment"><div class="line">                {<span class="comment">/*有没有const修饰一样---似乎又不行了*/</span>\</div>
+<div class="line">                    if(<span class="keyword">typeid</span>(TESTV) == <span class="keyword">typeid</span>(std::string) || <span class="keyword">typeid</span>(TESTV) == <span class="keyword">typeid</span>(<span class="keywordtype">char</span> *) || <span class="keyword">typeid</span>(TESTV) == <span class="keyword">typeid</span>(<span class="keyword">const</span> <span class="keywordtype">char</span> *)){\</div>
+<div class="line">                        cachedStr += <span class="stringliteral">&quot;\&quot;&quot;</span>;\</div>
+<div class="line">                    }<span class="keywordflow">else</span> <span class="keywordflow">if</span>(<span class="keyword">typeid</span>(TESTV) == <span class="keyword">typeid</span>(<span class="keywordtype">char</span>)){\</div>
+<div class="line">                        cachedStr += <span class="stringliteral">&quot;\&#39;&quot;</span>;\</div>
+<div class="line">                    }\</div>
+<div class="line">                }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">函数说明</h2>
+<a id="a2bf9740871a2600f9c42ca18d5c4383a" name="a2bf9740871a2600f9c42ca18d5c4383a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2bf9740871a2600f9c42ca18d5c4383a">&#9670;&#160;</a></span>endlog()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void alib::g3::old::endlog </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="../../db/dee/structalib_1_1g3_1_1old_1_1LogEnd.html">LogEnd</a>&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>用于表示日志结尾 </p>
+<dl class="section user"><dt>例子:</dt><dd><div class="fragment"><div class="line">LogFactory lg...<span class="comment">//省略</span></div>
+<div class="line">lg &lt;&lt; <span class="stringliteral">&quot;你好&quot;</span> &lt;&lt; endlog &lt;&lt; <span class="stringliteral">&quot;哈哈&quot;</span>;</div>
+<div class="line">lg &lt;&lt; endlog;</div>
+<div class="line">lg &lt;&lt; endlog;</div>
+</div><!-- fragment --> 上面的代码产生了三段日志，前两段有信息最后一段空的 </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../dir_7c5c00878bc4eeb371b11dfa0bf73723.html">legacy</a></li><li class="navelem"><a class="el" href="../../d9/dd2/legacy_2alogger_8h.html">alogger.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

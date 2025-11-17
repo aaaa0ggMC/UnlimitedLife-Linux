@@ -1,0 +1,452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/AGE/ModelLoader/Loader.h 文件参考</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('dc/d0b/Loader_8h.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#concepts">概念</a> &#124;
+<a href="#func-members">函数</a>  </div>
+  <div class="headertitle"><div class="title">Loader.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>加载模型  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &lt;<a class="el" href="../../d9/ded/Utils_8h_source.html">AGE/Utils.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d3/d5a/Model_8h_source.html">AGE/Model.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d5/d6c/alib-g3_2autil_8h_source.html">alib-g3/autil.h</a>&gt;</code><br />
+</div>
+<p><a href="../../dc/d0b/Loader_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/de0/structage_1_1model_1_1fmt_1_1Obj.html">age::model::fmt::Obj</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/db8/structage_1_1model_1_1fmt_1_1Stl.html">age::model::fmt::Stl</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d37/structage_1_1model_1_1fmt_1_1StlAscii.html">age::model::fmt::StlAscii</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d48/structage_1_1model_1_1fmt_1_1StlBinary.html">age::model::fmt::StlBinary</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/dc7/structage_1_1model_1_1fmt_1_1AutoDetect.html">age::model::fmt::AutoDetect</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/dc0/structage_1_1model_1_1fmt_1_1Gltf.html">age::model::fmt::Gltf</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:d9/d9a/namespaceage" id="r_d9/d9a/namespaceage"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d9a/namespaceage.html">age</a></td></tr>
+<tr class="memdesc:d9/d9a/namespaceage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Aaaa0ggmc's Graphics Engine 我的图形引擎 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="concepts" name="concepts"></a>
+概念</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">concept &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d87/conceptage_1_1model_1_1AFormat.html">age::model::AFormat</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+函数</h2></td></tr>
+<tr class="memitem:a95d07a20a8e72227a1cd483f9b8f7060" id="r_a95d07a20a8e72227a1cd483f9b8f7060"><td class="memTemplParams" colspan="2">template&lt;AFormat Format&gt; </td></tr>
+<tr class="memitem:a95d07a20a8e72227a1cd483f9b8f7060"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d0b/Loader_8h.html#a95d07a20a8e72227a1cd483f9b8f7060">age::model::loadModelFromMemory</a> (std::string_view data, <a class="el" href="../../d5/db6/structage_1_1ModelData.html">ModelData</a> &amp;model, bool flipV=false, std::string_view filePath=&quot;&quot;)</td></tr>
+<tr class="memdesc:a95d07a20a8e72227a1cd483f9b8f7060"><td class="mdescLeft">&#160;</td><td class="mdescRight">从内存中加载模型  <br /></td></tr>
+<tr class="separator:a95d07a20a8e72227a1cd483f9b8f7060"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa88db6f180874aaad361c3cab233ebc2" id="r_aa88db6f180874aaad361c3cab233ebc2"><td class="memTemplParams" colspan="2">template&lt;AFormat Format&gt; </td></tr>
+<tr class="memitem:aa88db6f180874aaad361c3cab233ebc2"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d0b/Loader_8h.html#aa88db6f180874aaad361c3cab233ebc2">age::model::loadModelFromMemory</a> (std::string_view sdata, <a class="el" href="../../d1/d55/structage_1_1Model.html">Model</a> &amp;model, int index, GLuint vloc=0, GLuint vtloc=1, GLuint vnloc=2, bool flipV=false, std::string_view filePath=&quot;&quot;)</td></tr>
+<tr class="separator:aa88db6f180874aaad361c3cab233ebc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e661e3fc895e64dbfe12b744710cadb" id="r_a6e661e3fc895e64dbfe12b744710cadb"><td class="memTemplParams" colspan="2">template&lt;AFormat Format&gt; </td></tr>
+<tr class="memitem:a6e661e3fc895e64dbfe12b744710cadb"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d0b/Loader_8h.html#a6e661e3fc895e64dbfe12b744710cadb">age::model::loadModelFromFile</a> (std::string_view filePath, <a class="el" href="../../d5/db6/structage_1_1ModelData.html">ModelData</a> &amp;model, bool flipV=false)</td></tr>
+<tr class="memdesc:a6e661e3fc895e64dbfe12b744710cadb"><td class="mdescLeft">&#160;</td><td class="mdescRight">从文件加载模型  <br /></td></tr>
+<tr class="separator:a6e661e3fc895e64dbfe12b744710cadb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28d177e568a46b0f3abe2c74db061752" id="r_a28d177e568a46b0f3abe2c74db061752"><td class="memTemplParams" colspan="2">template&lt;AFormat Format&gt; </td></tr>
+<tr class="memitem:a28d177e568a46b0f3abe2c74db061752"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d0b/Loader_8h.html#a28d177e568a46b0f3abe2c74db061752">age::model::loadModelFromFile</a> (std::string_view filePath, <a class="el" href="../../d1/d55/structage_1_1Model.html">Model</a> &amp;model, int index=0, GLuint vloc=0, GLuint vtloc=1, GLuint vnloc=2, bool flipV=false)</td></tr>
+<tr class="separator:a28d177e568a46b0f3abe2c74db061752"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>加载模型 </p>
+<dl class="section author"><dt>作者</dt><dd>aaaa0ggmc (<a href="#" onclick="location.href='mai'+'lto:'+'lov'+'el'+'inu'+'x@'+'ysl'+'wd'+'.eu'+'.o'+'rg'; return false;">lovel<span class="obfuscator">.nosp@m.</span>inux<span class="obfuscator">.nosp@m.</span>@yslw<span class="obfuscator">.nosp@m.</span>d.eu<span class="obfuscator">.nosp@m.</span>.org</a>) </dd></dl>
+<dl class="section version"><dt>版本</dt><dd>0.1 </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2025/11/14</dd></dl>
+<dl class="section copyright"><dt>版权所有</dt><dd>Copyright(c)2025 aaaa0ggmc</dd></dl>
+<p>@start-date 2025/07/20 </p>
+</div><h2 class="groupheader">函数说明</h2>
+<a id="a28d177e568a46b0f3abe2c74db061752" name="a28d177e568a46b0f3abe2c74db061752"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a28d177e568a46b0f3abe2c74db061752">&#9670;&#160;</a></span>loadModelFromFile() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;AFormat Format&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int age::model::loadModelFromFile </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>filePath</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d1/d55/structage_1_1Model.html">Model</a> &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>index</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">GLuint&#160;</td>
+          <td class="paramname"><em>vloc</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">GLuint&#160;</td>
+          <td class="paramname"><em>vtloc</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">GLuint&#160;</td>
+          <td class="paramname"><em>vnloc</em> = <code>2</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>flipV</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>返回</dt><dd>scene id </dd></dl>
+<dl class="section warning"><dt>警告</dt><dd>binding point doesnt work for GLTF </dd></dl>
+
+</div>
+</div>
+<a id="a6e661e3fc895e64dbfe12b744710cadb" name="a6e661e3fc895e64dbfe12b744710cadb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e661e3fc895e64dbfe12b744710cadb">&#9670;&#160;</a></span>loadModelFromFile() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;AFormat Format&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void age::model::loadModelFromFile </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>filePath</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d5/db6/structage_1_1ModelData.html">ModelData</a> &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>flipV</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从文件加载模型 </p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Format</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filePath</td><td>文件路径 </td></tr>
+    <tr><td class="paramname">model</td><td>模型输出 </td></tr>
+    <tr><td class="paramname">flipV</td><td>是否反转v分量（默认false） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>注解</dt><dd>反转v分量是为了兼容OpenGL的纹理，一般来讲blender导出的不要翻转，其余的可能要翻转 </dd>
+<dd>
+目前只有 obj 会对翻转处理 </dd></dl>
+
+</div>
+</div>
+<a id="a95d07a20a8e72227a1cd483f9b8f7060" name="a95d07a20a8e72227a1cd483f9b8f7060"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95d07a20a8e72227a1cd483f9b8f7060">&#9670;&#160;</a></span>loadModelFromMemory() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;AFormat Format&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void age::model::loadModelFromMemory </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d5/db6/structage_1_1ModelData.html">ModelData</a> &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>flipV</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>filePath</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>从内存中加载模型 </p>
+<dl class="tparams"><dt>模板参数</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Format</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>参数</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>内存数据 </td></tr>
+    <tr><td class="paramname">model</td><td>模型输出 </td></tr>
+    <tr><td class="paramname">flipV</td><td>是否反转v分量（默认false） </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>注解</dt><dd>反转v分量是为了兼容OpenGL的纹理，一般来讲blender导出的不要翻转，其余的可能要翻转 </dd>
+<dd>
+目前只有 obj 会对翻转处理 </dd>
+<dd>
+类型以模板形式支持 </dd></dl>
+<dl class="section see"><dt>参见</dt><dd>age::models::fmt </dd></dl>
+
+</div>
+</div>
+<a id="aa88db6f180874aaad361c3cab233ebc2" name="aa88db6f180874aaad361c3cab233ebc2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa88db6f180874aaad361c3cab233ebc2">&#9670;&#160;</a></span>loadModelFromMemory() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;AFormat Format&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int age::model::loadModelFromMemory </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>sdata</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="../../d1/d55/structage_1_1Model.html">Model</a> &amp;&#160;</td>
+          <td class="paramname"><em>model</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">GLuint&#160;</td>
+          <td class="paramname"><em>vloc</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">GLuint&#160;</td>
+          <td class="paramname"><em>vtloc</em> = <code>1</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">GLuint&#160;</td>
+          <td class="paramname"><em>vnloc</em> = <code>2</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>flipV</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string_view&#160;</td>
+          <td class="paramname"><em>filePath</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>返回</dt><dd>scene id, </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="../../dd/da0/todo.html#_todo000004">待办事项:</a></b></dt><dd>这个可以支持GLTF!!! </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d5ab41234c9871d1e639839e34892fb3.html">AGE</a></li><li class="navelem"><a class="el" href="../../dir_1583cf041440a907a70d5ce84f76d82f.html">ModelLoader</a></li><li class="navelem"><a class="el" href="../../dc/d0b/Loader_8h.html">Loader.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

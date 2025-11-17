@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/AGE/Application.h 文件参考</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d4/d1c/Application_8h.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">类</a> &#124;
+<a href="#namespaces">命名空间</a> &#124;
+<a href="#define-members">宏定义</a>  </div>
+  <div class="headertitle"><div class="title">Application.h 文件参考</div></div>
+</div><!--header-->
+<div class="contents">
+
+<p>应用，类似Vulkan的概念（但是目前用的是OpenGL）  
+<a href="#details">更多...</a></p>
+<div class="textblock"><code>#include &quot;<a class="el" href="../../d3/ded/Window_8h_source.html">Window.h</a>&quot;</code><br />
+<code>#include &lt;<a class="el" href="../../de/d7f/VAO_8h_source.html">AGE/VAO.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../df/d8b/VBO_8h_source.html">AGE/VBO.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d2/dac/Shader_8h_source.html">AGE/Shader.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../da/d37/EntityManager_8h_source.html">AGE/World/EntityManager.h</a>&gt;</code><br />
+<code>#include &lt;<a class="el" href="../../d9/dbf/Texture_8h_source.html">AGE/Texture.h</a>&gt;</code><br />
+<code>#include &lt;GL/glext.h&gt;</code><br />
+<code>#include &lt;unordered_map&gt;</code><br />
+<code>#include &lt;string&gt;</code><br />
+<code>#include &lt;memory_resource&gt;</code><br />
+<code>#include &lt;unordered_set&gt;</code><br />
+<code>#include &lt;optional&gt;</code><br />
+</div>
+<p><a href="../../d4/d1c/Application_8h_source.html">浏览源代码.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+类</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/df9/structage_1_1GLInit.html">age::GLInit</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">初始化OpenGL  <a href="../../d7/df9/structage_1_1GLInit.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/d0f/structage_1_1ConstantStringBuffer.html">age::ConstantStringBuffer</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/db1/classage_1_1Application.html">age::Application</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">应用程序，尝试支持多窗口  <a href="../../df/db1/classage_1_1Application.html#details">更多...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+命名空间</h2></td></tr>
+<tr class="memitem:d9/d9a/namespaceage" id="r_d9/d9a/namespaceage"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d9a/namespaceage.html">age</a></td></tr>
+<tr class="memdesc:d9/d9a/namespaceage"><td class="mdescLeft">&#160;</td><td class="mdescRight">Aaaa0ggmc's Graphics Engine 我的图形引擎 <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
+宏定义</h2></td></tr>
+<tr class="memitem:a8d7d8335a9456a5d8f7dc8124d2760ce" id="r_a8d7d8335a9456a5d8f7dc8124d2760ce"><td class="memItemLeft" align="right" valign="top"><a id="a8d7d8335a9456a5d8f7dc8124d2760ce" name="a8d7d8335a9456a5d8f7dc8124d2760ce"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_CONFLICT_SHADER</b>&#160;&#160;&#160;-10000</td></tr>
+<tr class="separator:a8d7d8335a9456a5d8f7dc8124d2760ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5300144b994afc99a5d1ee25a866477" id="r_ad5300144b994afc99a5d1ee25a866477"><td class="memItemLeft" align="right" valign="top"><a id="ad5300144b994afc99a5d1ee25a866477" name="ad5300144b994afc99a5d1ee25a866477"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_SHADER_LOG</b>&#160;&#160;&#160;-10001</td></tr>
+<tr class="separator:ad5300144b994afc99a5d1ee25a866477"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a94a7c13c0eac6c451e407454866c252c" id="r_a94a7c13c0eac6c451e407454866c252c"><td class="memItemLeft" align="right" valign="top"><a id="a94a7c13c0eac6c451e407454866c252c" name="a94a7c13c0eac6c451e407454866c252c"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_SHADER_FAILED_TO_COMPILE</b>&#160;&#160;&#160;-10002</td></tr>
+<tr class="separator:a94a7c13c0eac6c451e407454866c252c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe75ed53b6e80e30cb4a9c9149bb7c01" id="r_afe75ed53b6e80e30cb4a9c9149bb7c01"><td class="memItemLeft" align="right" valign="top"><a id="afe75ed53b6e80e30cb4a9c9149bb7c01" name="afe75ed53b6e80e30cb4a9c9149bb7c01"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_SHADER_FAILED_TO_LINK</b>&#160;&#160;&#160;-10003</td></tr>
+<tr class="separator:afe75ed53b6e80e30cb4a9c9149bb7c01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad815d7e013d0a7d5498d9bb2d879789d" id="r_ad815d7e013d0a7d5498d9bb2d879789d"><td class="memItemLeft" align="right" valign="top"><a id="ad815d7e013d0a7d5498d9bb2d879789d" name="ad815d7e013d0a7d5498d9bb2d879789d"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_OPENGL_DEBUG_MESSAGE</b>&#160;&#160;&#160;-10004</td></tr>
+<tr class="separator:ad815d7e013d0a7d5498d9bb2d879789d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba83c5afde83b4f03f198781a14bf02e" id="r_aba83c5afde83b4f03f198781a14bf02e"><td class="memItemLeft" align="right" valign="top"><a id="aba83c5afde83b4f03f198781a14bf02e" name="aba83c5afde83b4f03f198781a14bf02e"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_OPENGL_NO_CONTEXT</b>&#160;&#160;&#160;-10005</td></tr>
+<tr class="separator:aba83c5afde83b4f03f198781a14bf02e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b1681ad5cd0005e69aafa1d075315e5" id="r_a7b1681ad5cd0005e69aafa1d075315e5"><td class="memItemLeft" align="right" valign="top"><a id="a7b1681ad5cd0005e69aafa1d075315e5" name="a7b1681ad5cd0005e69aafa1d075315e5"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_OPENGL_EMPTY_SHADER</b>&#160;&#160;&#160;-10006</td></tr>
+<tr class="separator:a7b1681ad5cd0005e69aafa1d075315e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a36c8d2a19dcf4e8605efe5e6b54b66f5" id="r_a36c8d2a19dcf4e8605efe5e6b54b66f5"><td class="memItemLeft" align="right" valign="top"><a id="a36c8d2a19dcf4e8605efe5e6b54b66f5" name="a36c8d2a19dcf4e8605efe5e6b54b66f5"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_TEXTURE_LOADED</b>&#160;&#160;&#160;-10007</td></tr>
+<tr class="separator:a36c8d2a19dcf4e8605efe5e6b54b66f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d1abb816e3d3d0520939fac2aa3a29e" id="r_a6d1abb816e3d3d0520939fac2aa3a29e"><td class="memItemLeft" align="right" valign="top"><a id="a6d1abb816e3d3d0520939fac2aa3a29e" name="a6d1abb816e3d3d0520939fac2aa3a29e"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_OPENGL_CREATE_ERROR</b>&#160;&#160;&#160;-10008</td></tr>
+<tr class="separator:a6d1abb816e3d3d0520939fac2aa3a29e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abfadf76e98fc99fba1b917fd96b0b2f3" id="r_abfadf76e98fc99fba1b917fd96b0b2f3"><td class="memItemLeft" align="right" valign="top"><a id="abfadf76e98fc99fba1b917fd96b0b2f3" name="abfadf76e98fc99fba1b917fd96b0b2f3"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>AGEE_CANT_FIND_SID</b>&#160;&#160;&#160;-10009</td></tr>
+<tr class="separator:abfadf76e98fc99fba1b917fd96b0b2f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">详细描述</h2>
+<div class="textblock"><p>应用，类似Vulkan的概念（但是目前用的是OpenGL） </p>
+<dl class="section author"><dt>作者</dt><dd>aaaa0ggmc </dd></dl>
+<dl class="section date"><dt>日期</dt><dd>2025/08/31 @start-date 2025/06/11 </dd></dl>
+<dl class="section version"><dt>版本</dt><dd>3.1 </dd></dl>
+<dl class="section copyright"><dt>版权所有</dt><dd>copyright(C)2025</dd></dl>
+<p>@ **par 修改日志: * </p><table class="doxtable">
+<tr>
+<th>时间 </th><th>版本 </th><th>作者 </th><th>介绍 </th></tr>
+<tr>
+<td>2025-6-11 </td><td>3.1 </td><th>aaaa0ggmc </th><td>v0.1 </td></tr>
+</table>
+</div></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d5ab41234c9871d1e639839e34892fb3.html">AGE</a></li><li class="navelem"><a class="el" href="../../d4/d1c/Application_8h.html">Application.h</a></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=11"/>
+<meta name="generator" content="Doxygen 1.9.8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ULDoc: CDep/headers/alib-g3/log/base_mod.h 源文件</title>
+<link href="../../tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../jquery.js"></script>
+<script type="text/javascript" src="../../dynsections.js"></script>
+<link href="../../navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../resize.js"></script>
+<script type="text/javascript" src="../../navtreedata.js"></script>
+<script type="text/javascript" src="../../navtree.js"></script>
+<link href="../../search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="../../search/searchdata.js"></script>
+<script type="text/javascript" src="../../search/search.js"></script>
+<link href="../../doxygen-awesome.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<div id="titlearea">
+<table cellspacing="0" cellpadding="0">
+ <tbody>
+ <tr id="projectrow">
+  <td id="projectalign">
+   <div id="projectname">ULDoc<span id="projectnumber">&#160;1.0</span>
+   </div>
+   <div id="projectbrief">UnlimitedLife以及子项目自动生成的文档（只有中文）</div>
+  </td>
+ </tr>
+ </tbody>
+</table>
+</div>
+<!-- end header part -->
+<!-- 制作者 Doxygen 1.9.8 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+var searchBox = new SearchBox("searchBox", "../../search/",'.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="../../menudata.js"></script>
+<script type="text/javascript" src="../../menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(function() {
+  initMenu('../../',true,false,'search.php','搜索');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */
+</script>
+<div id="main-nav"></div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function() { init_codefold(1); });
+/* @license-end */
+</script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('d2/deb/base__mod_8h_source.html','../../'); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">载入中...</div>
+<div class="SRStatus" id="Searching">搜索中...</div>
+<div class="SRStatus" id="NoMatches">未找到</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">base_mod.h</div></div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef ALOG_MOD_INCLUDED</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define ALOG_MOD_INCLUDED</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;alib-g3/log/base_msg.h&gt;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &lt;concepts&gt;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;type_traits&gt;</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">namespace </span><a class="code hl_namespace" href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a>{</div>
+<div class="foldopen" id="foldopen00009" data-start="{" data-end="};">
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html">    9</a></span>    <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html">LogTarget</a>{</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a327117146399ac04a2cac6ed1722ac95">   11</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a327117146399ac04a2cac6ed1722ac95">enabled</a>;</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>       </div>
+<div class="foldopen" id="foldopen00014" data-start="{" data-end="}">
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#af22c089d411e600dc6a06b091a49ef68">   14</a></span>        <a class="code hl_struct" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html">LogTarget</a>&amp; <a class="code hl_function" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#af22c089d411e600dc6a06b091a49ef68">toggle</a>(<span class="keywordtype">bool</span> val){</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>            enabled = val;</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        }</div>
+</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span> </div>
+<div class="foldopen" id="foldopen00020" data-start="{" data-end="}">
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#ac6d0b34c5d07ddccc7135bc1448725be">   20</a></span>        <span class="keyword">inline</span> <a class="code hl_function" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#ac6d0b34c5d07ddccc7135bc1448725be">LogTarget</a>(){</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>            enabled = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>        }</div>
+</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>        </div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="}">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a7a50b0d1d8f9489ff0ebc4e33dd43e38">   26</a></span>        <span class="keyword">virtual</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a7a50b0d1d8f9489ff0ebc4e33dd43e38">write</a>(</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>            <a class="code hl_struct" href="../../d2/d81/structalib_1_1g3_1_1LogMsg.html">LogMsg</a> &amp; msg</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span>        ){}</div>
+</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span> </div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno"><a class="line" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a6d0a68464346853ad7f2d18c45fc6318">   31</a></span>        <span class="keyword">virtual</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a6d0a68464346853ad7f2d18c45fc6318">flush</a>(){}</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        </div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a23314611b0228e594f9bb29bae5ddb0e">   35</a></span>        <span class="keyword">virtual</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a23314611b0228e594f9bb29bae5ddb0e">close</a>(){}</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span> </div>
+<div class="foldopen" id="foldopen00038" data-start="{" data-end="}">
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a7a3fc479ce116def18347ea07e12b5a5">   38</a></span>        <span class="keyword">virtual</span> <a class="code hl_function" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a7a3fc479ce116def18347ea07e12b5a5">~LogTarget</a>(){</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>            flush();</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            close();</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        }</div>
+</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    };</div>
+</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
+<div class="foldopen" id="foldopen00045" data-start="{" data-end="};">
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html">   45</a></span>    <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html">LogFilter</a>{</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a9f6b6c4fb159abe16dc11eeb1e45cac1">   47</a></span>        <span class="keywordtype">bool</span> <a class="code hl_variable" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a9f6b6c4fb159abe16dc11eeb1e45cac1">enabled</a>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="foldopen" id="foldopen00050" data-start="{" data-end="}">
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a6140ca21811e989f2dfd0c3b505479f1">   50</a></span>        <a class="code hl_struct" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html">LogFilter</a>&amp; <a class="code hl_function" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a6140ca21811e989f2dfd0c3b505479f1">toggle</a>(<span class="keywordtype">bool</span> val){</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>            enabled = val;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>            <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        }</div>
+</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        </div>
+<div class="foldopen" id="foldopen00056" data-start="{" data-end="}">
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a2abfbf4d5ce23a172b4748ed8157a11e">   56</a></span>        <span class="keyword">inline</span> <a class="code hl_function" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a2abfbf4d5ce23a172b4748ed8157a11e">LogFilter</a>(){</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>            enabled = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>        }</div>
+</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
+<div class="foldopen" id="foldopen00062" data-start="{" data-end="}">
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a418c1b5c130782828673e1d2a3ab7092">   62</a></span>        <span class="keyword">virtual</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a418c1b5c130782828673e1d2a3ab7092">filter</a>(<a class="code hl_struct" href="../../d2/d81/structalib_1_1g3_1_1LogMsg.html">LogMsg</a> &amp; msg){</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>        }</div>
+</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
+<div class="foldopen" id="foldopen00071" data-start="{" data-end="}">
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a7deb9e7a84eb4b06cff6d499d19bbb6a">   71</a></span>        <span class="keyword">virtual</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a7deb9e7a84eb4b06cff6d499d19bbb6a">pre_filter</a>(</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <span class="keywordtype">int</span> level_id,</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>            std::string_view raw_message,</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>            <span class="keyword">const</span> <a class="code hl_struct" href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">LogMsgConfig</a> &amp; cfg</div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>        ){</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>        }</div>
+</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a99e73b9216c3becd295ef032de6c7daa">   81</a></span>        <span class="keyword">virtual</span> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a99e73b9216c3becd295ef032de6c7daa">close</a>(){}</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
+<div class="foldopen" id="foldopen00084" data-start="{" data-end="}">
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#aff8b4a45c0f18cfc6170ff4b0a5eb58c">   84</a></span>        <span class="keyword">virtual</span> <span class="keyword">inline</span> <a class="code hl_function" href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#aff8b4a45c0f18cfc6170ff4b0a5eb58c">~LogFilter</a>(){</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>            close();</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        }</div>
+</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    };</div>
+</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="../../d0/d89/conceptalib_1_1g3_1_1IsLogTarget.html">   89</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt; <span class="keyword">concept </span><a class="code hl_concept" href="../../d0/d89/conceptalib_1_1g3_1_1IsLogTarget.html">IsLogTarget</a> = std::is_base_of_v&lt;LogTarget,T&gt;;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno"><a class="line" href="../../d5/de1/conceptalib_1_1g3_1_1IsLogFilter.html">   90</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt; <span class="keyword">concept </span><a class="code hl_concept" href="../../d5/de1/conceptalib_1_1g3_1_1IsLogFilter.html">IsLogFilter</a> = std::is_base_of_v&lt;LogFilter,T&gt;;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="../../d0/d18/conceptalib_1_1g3_1_1IsLogMod.html">   91</a></span>    <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt; <span class="keyword">concept </span><a class="code hl_concept" href="../../d0/d18/conceptalib_1_1g3_1_1IsLogMod.html">IsLogMod</a> = <a class="code hl_concept" href="../../d0/d89/conceptalib_1_1g3_1_1IsLogTarget.html">IsLogTarget&lt;T&gt;</a> || <a class="code hl_concept" href="../../d5/de1/conceptalib_1_1g3_1_1IsLogFilter.html">IsLogFilter&lt;T&gt;</a>;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="foldopen" id="foldopen00094" data-start="{" data-end="};">
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html">   94</a></span>    <span class="keyword">template</span>&lt;<a class="code hl_concept" href="../../d0/d89/conceptalib_1_1g3_1_1IsLogTarget.html">IsLogTarget</a>... Ts&gt; <span class="keyword">struct </span>DLL_EXPORT <a class="code hl_struct" href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html">LogTargetGroup</a> : <span class="keyword">public</span> <a class="code hl_struct" href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html">LogTarget</a>{</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="keyword">using </span>targets_t = std::tuple&lt;Ts...&gt;;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        targets_t targets;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        <a class="code hl_struct" href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html">LogTargetGroup</a>(targets_t &amp;&amp; t):targets(std::move(t)){}</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <a class="code hl_struct" href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html">LogTargetGroup</a>(Ts&amp;&amp;... args):targets(std::forward&lt;Ts&gt;(args)...){}</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        <span class="keyword">template</span>&lt;<span class="keywordtype">size_t</span> N&gt; <span class="keyword">inline</span> <span class="keywordtype">void</span> toggleTarget(<span class="keywordtype">bool</span> val = <span class="keyword">true</span>){</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>            std::get&lt;N&gt;(targets).enabled = val;</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        }</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keyword">inline</span> <span class="keywordtype">void</span> toggleAll(<span class="keywordtype">bool</span> val){</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            std::apply([&amp;val](<span class="keyword">auto</span> &amp;... t){</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>                ((t.enabled = val),...);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            },targets);</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        }</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="foldopen" id="foldopen00111" data-start="{" data-end="}">
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html#a6228f532b7af3adcf9159e951aabd6bd">  111</a></span>        <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html#a6228f532b7af3adcf9159e951aabd6bd">write</a>(<a class="code hl_struct" href="../../d2/d81/structalib_1_1g3_1_1LogMsg.html">LogMsg</a> &amp; msg)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>            std::apply([&amp;msg](<span class="keyword">auto</span> &amp;... t){</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>                ((t.enabled?t.write(msg):void()),...);</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>            },targets);</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        }</div>
+</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
+<div class="foldopen" id="foldopen00117" data-start="{" data-end="}">
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html#a5e76bde629e5d1b8e7564d7035b57d36">  117</a></span>        <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code hl_function" href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html#a5e76bde629e5d1b8e7564d7035b57d36">flush</a>()<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>            std::apply([](<span class="keyword">auto</span> &amp;... t){</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>                ((t.enabled?t.flush():void()),...);</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>            },targets);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        }</div>
+</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    };</div>
+</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>}</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="aconceptalib_1_1g3_1_1IsLogFilter_html"><div class="ttname"><a href="../../d5/de1/conceptalib_1_1g3_1_1IsLogFilter.html">alib::g3::IsLogFilter</a></div><div class="ttdef"><b>Definition</b> base_mod.h:90</div></div>
+<div class="ttc" id="aconceptalib_1_1g3_1_1IsLogMod_html"><div class="ttname"><a href="../../d0/d18/conceptalib_1_1g3_1_1IsLogMod.html">alib::g3::IsLogMod</a></div><div class="ttdef"><b>Definition</b> base_mod.h:91</div></div>
+<div class="ttc" id="aconceptalib_1_1g3_1_1IsLogTarget_html"><div class="ttname"><a href="../../d0/d89/conceptalib_1_1g3_1_1IsLogTarget.html">alib::g3::IsLogTarget</a></div><div class="ttdef"><b>Definition</b> base_mod.h:89</div></div>
+<div class="ttc" id="anamespacealib_1_1g3_html"><div class="ttname"><a href="../../d1/d27/namespacealib_1_1g3.html">alib::g3</a></div><div class="ttdoc">第三代alib:更加优秀的api以及性能（相比于alib-g2)，主要拿来给自己使用。</div><div class="ttdef"><b>Definition</b> alogger_old.cpp:413</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html">alib::g3::LogFilter</a></div><div class="ttdoc">日志过滤器，支持日志拒绝，日志修改啥的</div><div class="ttdef"><b>Definition</b> base_mod.h:45</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html_a2abfbf4d5ce23a172b4748ed8157a11e"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a2abfbf4d5ce23a172b4748ed8157a11e">alib::g3::LogFilter::LogFilter</a></div><div class="ttdeci">LogFilter()</div><div class="ttdoc">默认启用日志</div><div class="ttdef"><b>Definition</b> base_mod.h:56</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html_a418c1b5c130782828673e1d2a3ab7092"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a418c1b5c130782828673e1d2a3ab7092">alib::g3::LogFilter::filter</a></div><div class="ttdeci">virtual bool filter(LogMsg &amp;msg)</div><div class="ttdoc">尝试过滤日志，可以修改</div><div class="ttdef"><b>Definition</b> base_mod.h:62</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html_a6140ca21811e989f2dfd0c3b505479f1"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a6140ca21811e989f2dfd0c3b505479f1">alib::g3::LogFilter::toggle</a></div><div class="ttdeci">LogFilter &amp; toggle(bool val)</div><div class="ttdoc">切换状态</div><div class="ttdef"><b>Definition</b> base_mod.h:50</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html_a7deb9e7a84eb4b06cff6d499d19bbb6a"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a7deb9e7a84eb4b06cff6d499d19bbb6a">alib::g3::LogFilter::pre_filter</a></div><div class="ttdeci">virtual bool pre_filter(int level_id, std::string_view raw_message, const LogMsgConfig &amp;cfg)</div><div class="ttdoc">尝试在push message时提前处理日志</div><div class="ttdef"><b>Definition</b> base_mod.h:71</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html_a99e73b9216c3becd295ef032de6c7daa"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a99e73b9216c3becd295ef032de6c7daa">alib::g3::LogFilter::close</a></div><div class="ttdeci">virtual void close()</div><div class="ttdoc">关闭过滤器，也许你可以处理一些什么释放啥的，虽然析构也不是不行</div><div class="ttdef"><b>Definition</b> base_mod.h:81</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html_a9f6b6c4fb159abe16dc11eeb1e45cac1"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#a9f6b6c4fb159abe16dc11eeb1e45cac1">alib::g3::LogFilter::enabled</a></div><div class="ttdeci">bool enabled</div><div class="ttdoc">标示是否启用</div><div class="ttdef"><b>Definition</b> base_mod.h:47</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogFilter_html_aff8b4a45c0f18cfc6170ff4b0a5eb58c"><div class="ttname"><a href="../../d1/dbc/structalib_1_1g3_1_1LogFilter.html#aff8b4a45c0f18cfc6170ff4b0a5eb58c">alib::g3::LogFilter::~LogFilter</a></div><div class="ttdeci">virtual ~LogFilter()</div><div class="ttdoc">自动close对象</div><div class="ttdef"><b>Definition</b> base_mod.h:84</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsgConfig_html"><div class="ttname"><a href="../../d8/d46/structalib_1_1g3_1_1LogMsgConfig.html">alib::g3::LogMsgConfig</a></div><div class="ttdoc">日志消息细节控制，用在LogFactory中，控制额外信息的输出</div><div class="ttdef"><b>Definition</b> base_config.h:7</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogMsg_html"><div class="ttname"><a href="../../d2/d81/structalib_1_1g3_1_1LogMsg.html">alib::g3::LogMsg</a></div><div class="ttdoc">日志的每一条消息</div><div class="ttdef"><b>Definition</b> base_msg.h:7</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTargetGroup_html"><div class="ttname"><a href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html">alib::g3::LogTargetGroup</a></div><div class="ttdoc">LogTargetGroup</div><div class="ttdef"><b>Definition</b> base_mod.h:94</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTargetGroup_html_a5e76bde629e5d1b8e7564d7035b57d36"><div class="ttname"><a href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html#a5e76bde629e5d1b8e7564d7035b57d36">alib::g3::LogTargetGroup::flush</a></div><div class="ttdeci">void flush() override</div><div class="ttdoc">刷新数据，比如缓冲区啥的</div><div class="ttdef"><b>Definition</b> base_mod.h:117</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTargetGroup_html_a6228f532b7af3adcf9159e951aabd6bd"><div class="ttname"><a href="../../db/d7f/structalib_1_1g3_1_1LogTargetGroup.html#a6228f532b7af3adcf9159e951aabd6bd">alib::g3::LogTargetGroup::write</a></div><div class="ttdeci">void write(LogMsg &amp;msg) override</div><div class="ttdoc">往某个地方写入消息</div><div class="ttdef"><b>Definition</b> base_mod.h:111</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTarget_html"><div class="ttname"><a href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html">alib::g3::LogTarget</a></div><div class="ttdoc">输出对象</div><div class="ttdef"><b>Definition</b> base_mod.h:9</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTarget_html_a23314611b0228e594f9bb29bae5ddb0e"><div class="ttname"><a href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a23314611b0228e594f9bb29bae5ddb0e">alib::g3::LogTarget::close</a></div><div class="ttdeci">virtual void close()</div><div class="ttdoc">关闭IO</div><div class="ttdef"><b>Definition</b> base_mod.h:35</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTarget_html_a327117146399ac04a2cac6ed1722ac95"><div class="ttname"><a href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a327117146399ac04a2cac6ed1722ac95">alib::g3::LogTarget::enabled</a></div><div class="ttdeci">bool enabled</div><div class="ttdoc">用于toggle输出，一般不用管</div><div class="ttdef"><b>Definition</b> base_mod.h:11</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTarget_html_a6d0a68464346853ad7f2d18c45fc6318"><div class="ttname"><a href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a6d0a68464346853ad7f2d18c45fc6318">alib::g3::LogTarget::flush</a></div><div class="ttdeci">virtual void flush()</div><div class="ttdoc">刷新数据，比如缓冲区啥的</div><div class="ttdef"><b>Definition</b> base_mod.h:31</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTarget_html_a7a3fc479ce116def18347ea07e12b5a5"><div class="ttname"><a href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a7a3fc479ce116def18347ea07e12b5a5">alib::g3::LogTarget::~LogTarget</a></div><div class="ttdeci">virtual ~LogTarget()</div><div class="ttdoc">自动关闭资源</div><div class="ttdef"><b>Definition</b> base_mod.h:38</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTarget_html_a7a50b0d1d8f9489ff0ebc4e33dd43e38"><div class="ttname"><a href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#a7a50b0d1d8f9489ff0ebc4e33dd43e38">alib::g3::LogTarget::write</a></div><div class="ttdeci">virtual void write(LogMsg &amp;msg)</div><div class="ttdoc">往某个地方写入消息</div><div class="ttdef"><b>Definition</b> base_mod.h:26</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTarget_html_ac6d0b34c5d07ddccc7135bc1448725be"><div class="ttname"><a href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#ac6d0b34c5d07ddccc7135bc1448725be">alib::g3::LogTarget::LogTarget</a></div><div class="ttdeci">LogTarget()</div><div class="ttdoc">默认target就是enabled</div><div class="ttdef"><b>Definition</b> base_mod.h:20</div></div>
+<div class="ttc" id="astructalib_1_1g3_1_1LogTarget_html_af22c089d411e600dc6a06b091a49ef68"><div class="ttname"><a href="../../d3/df0/structalib_1_1g3_1_1LogTarget.html#af22c089d411e600dc6a06b091a49ef68">alib::g3::LogTarget::toggle</a></div><div class="ttdeci">LogTarget &amp; toggle(bool val)</div><div class="ttdoc">切换状态</div><div class="ttdef"><b>Definition</b> base_mod.h:14</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="../../dir_414fd41e5c5d231839fa5fbb45c54f18.html">CDep</a></li><li class="navelem"><a class="el" href="../../dir_7af9b032d80012b0228e7b144fdb5b33.html">headers</a></li><li class="navelem"><a class="el" href="../../dir_d2d8d6f82172cceeb2fc41d9f2a4d21e.html">alib-g3</a></li><li class="navelem"><a class="el" href="../../dir_be216c816632aa4955947bd3cb1065c9.html">log</a></li><li class="navelem"><b>base_mod.h</b></li>
+    <li class="footer">制作者 <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.8 </li>
+  </ul>
+</div>
+</body>
+</html>
