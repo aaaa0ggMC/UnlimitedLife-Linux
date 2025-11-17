@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一个简单的性能计算库，能确保数据大致准确，同时省的我每次都要写差不多的benchmark代码
  * @version 0.1
- * @date 2025/11/14
+ * @date 2025/11/17
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -15,6 +15,18 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
+
+#ifndef ALIB_PERF_CLOCK_SOURCE
+#ifndef CLOCK_MONOTONIC_RAW
+#ifndef CLOCK_REALTIME_COARSE
+#define ALIB_PERF_CLOCK_SOURCE CLOCK_REALTIME
+#else
+#define ALIB_PERF_CLOCK_SOURCE CLOCK_REALTIME_COARSE
+#endif
+#else 
+#define ALIB_PERF_CLOCK_SOURCE CLOCK_MONOTONIC_RAW
+#endif 
+#endif
 
 namespace alib::g3{
     /// @brief 进行热身的每轮次数
@@ -60,8 +72,10 @@ namespace alib::g3{
             double shortest_avg = __DBL_MAX__,longest_avg = 0;
             uint32_t times = 0;
             double stddev = 0;
+            std::stringstream ss;
 
             for(auto & t : results){
+                // ss << t.timeSum << " ";
                 sum += t.timeSum;
                 times += t.times;
             }
@@ -78,8 +92,7 @@ namespace alib::g3{
                 stddev += (thisAver - global_aver)*(thisAver-global_aver) * t.times;
             }
             stddev = std::sqrt(stddev / (times - 1));
-
-            double cv = stddev/global_aver;
+            double cv = stddev / global_aver * 100;
 
             static auto get_time = [](double t){
                 constexpr uint32_t mover_size = 4;
@@ -100,17 +113,17 @@ namespace alib::g3{
                 return ret;
             };
 
-            std::stringstream ss;
             ss << "\n";
-            ss << m_name << "-----------------------" << "\n";
+            ss << "-----------------------" << "\n";
+            ss << m_name << "\n\n";
+            ss << std::setprecision(8) << std::left;
             ss << std::setw(16) << "TimeCost" << ":" << get_time(sum) << "\n"
                << std::setw(16) << "RunTimes" << ":" << times << "\n"
                << std::setw(16) << "Average"  << ":" << get_time(global_aver) << "\n"
                << std::setw(16) << "ShortestAvgCall" << ":" << get_time(shortest_avg) << "\n"
                << std::setw(16) << "LongestAvgCall"  << ":" << get_time(longest_avg) << "\n"
                << std::setw(16) << "Stddev"  << ":" << stddev << "\n"
-               << std::setw(16) << "CV"  << ":" << cv << "%";
-            if(cv > 5.0)ss << "\nHigh variance!This benchmark may be invalid!";
+               << std::setw(16) << "CV"  << ":" << std::setprecision(4) << cv << "%";
             ss << "\n--------------------------------";
             return ss.str();
         }
@@ -168,9 +181,11 @@ namespace alib::g3{
             /// 预热，同时计算出对volatile的修改
             {
                 Clock clk;
+                timespec st;
                 clk.start();
                 uint64_t warmTimes = 0;
                 uint64_t sink = 0;
+                clock_gettime(ALIB_PERF_CLOCK_SOURCE,&st);
                 while(clk.getAllTime() < warm_up_time_ms){
                     for(int i = 0; i < warm_up_per_run_times; ++i)sink += 1;
                     warmTimes += warm_up_per_run_times;
@@ -190,14 +205,14 @@ namespace alib::g3{
         #pragma GCC optimize("O0")
         /// 单次运行测试
         inline SingleBenchmarkResult single_run(uint32_t times){
-            Clock clk(false);
             SingleBenchmarkResult result = {0};
-
-            clk.start();
+            timespec st,ed;
+            clock_gettime(ALIB_PERF_CLOCK_SOURCE,&st);
             for(uint32_t i = 0;i < times;++i){
                 func();
             }
-            result.timeSum = clk.getAllTime();
+            clock_gettime(ALIB_PERF_CLOCK_SOURCE,&ed);
+            result.timeSum = (ed.tv_sec - st.tv_sec) * 1000 + (ed.tv_nsec - st.tv_nsec) / 1'000'000.0;
             result.times = times;
             return result;
         }

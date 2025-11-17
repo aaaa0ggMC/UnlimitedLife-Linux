@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/11/16 
+* @date 2025/11/17 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -42,6 +42,7 @@
 #include <type_traits>
 #include <iostream>
 
+#ifndef ALIB_DEF_CLOCK_SOURCE
 #ifndef CLOCK_MONOTONIC_COARSE
 #ifndef CLOCK_REALTIME_COARSE
 #define ALIB_DEF_CLOCK_SOURCE CLOCK_REALTIME
@@ -51,6 +52,7 @@
 #else 
 #define ALIB_DEF_CLOCK_SOURCE CLOCK_MONOTONIC_COARSE
 #endif 
+#endif
 
 namespace alib::g3{
     /// @brief 最多可以有多少信号，默认最大值就行
