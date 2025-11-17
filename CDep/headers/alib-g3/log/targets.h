@@ -298,7 +298,7 @@ namespace alib::g3::lot{
                 }
                 __internal_alib_pc(':');
             }
-            fwrite_unlocked(msg.body.data(),sizeof(decltype(msg.body)::value_type),msg.body.size(),stdout);
+            __internal_alib_fw(msg.body.data(),sizeof(decltype(msg.body)::value_type),msg.body.size(),stdout);
             __internal_alib_pc('\n');
         }
     }
