@@ -19,8 +19,12 @@ void Logger::consumer_func(){
     // 由于这个不是thread_local的，因此能保证资源被正确析构，因此不需要clear
     std::vector<LogMsg> messages;
 
-    while(logger_not_on_destroying){
+    while(true){
         msg_semaphore.acquire();
+        if(!logger_not_on_destroying){
+            messages.clear();
+            return;
+        }
         size_t count = fetch_messages(messages);
         // 没取出一个，说明可能虚假唤醒了
         if(!count)continue;
@@ -99,17 +103,13 @@ Logger::Logger(const LoggerConfig & cfg)
 }
 
 Logger::~Logger(){
-    flush();
+    // flush();
     logger_not_on_destroying = false;
-    // 等待终止线程
-    for(int i = 0;i < consumers.size();++i){
-        msg_semaphore.release(consumers.size() - i + 1);
-        if(consumers[i].joinable())consumers[i].join();
-    }
+    msg_semaphore.release(consumers.size() * 10);
 }
 
 void Logger::flush(){
-    static thread_local std::vector<LogMsg> msgs;
+    std::vector<LogMsg> msgs;
     while(true){
         size_t count = fetch_messages(msgs);
         // 似乎出错了啥的

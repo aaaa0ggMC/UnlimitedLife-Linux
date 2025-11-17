@@ -122,7 +122,7 @@ namespace alib::g3{
         /// @brief 信号量，用来实现异步休眠
         std::counting_semaphore<semaphore_max_val> msg_semaphore;
         /// @brief 线程池，用来管理consumer
-        std::vector<std::thread> consumers; 
+        std::vector<std::jthread> consumers; 
         
         /// @brief 背压阈值
         uint64_t back_pressure_threshold;
