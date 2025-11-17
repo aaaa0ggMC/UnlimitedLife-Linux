@@ -237,8 +237,8 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
                     int vIdx = 0, vnIdx = 0;
 
                     vIdx = strtol(p, &endptr, 10); //strtol默认返回0
-                    p = !valid(endptr)? endptr : endptr + 1;
-                    p++; //跳过一个 /
+                    // 这里额外跳过一个，具体原因我忘了，反正原本下面是p++，为了防止溢出我把它移到了判断这里
+                    p = !valid(endptr)? endptr : endptr + 2; 
                     vnIdx = strtol(p, (&endptr), 10);
                     p = !valid(endptr)? endptr : endptr + 1;
 

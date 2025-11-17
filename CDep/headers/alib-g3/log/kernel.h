@@ -391,7 +391,11 @@ namespace alib::g3{
             time(&rawtime);
             if(rawtime != old_time){
                 struct tm ptminfo;
+                #ifdef __linux
                 __internal_alib_localtime(&rawtime,&ptminfo);
+                #else
+                __internal_alib_localtime(&ptminfo,&rawtime);
+                #endif
                 sdate.clear();
                 sdate.resize(date_str_resize);
                 sdate.resize(snprintf(sdate.data(),date_str_resize,"%02d-%02d-%02d %02d:%02d:%02d",
