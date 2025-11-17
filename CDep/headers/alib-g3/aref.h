@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 不会悬垂的比较安全的容器数据wrapper,Release下单次性能损失为0.3ns
  * @version 0.1
- * @date 2025/11/14
+ * @date 2025/11/17
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  ********************************************************
@@ -228,12 +228,12 @@ namespace alib::g3{
     public:
         template<size_t N2> MultiRefWrapper(MultiRefWrapper<Cont,N2> & c1):cont(c1.cont){
             static_assert(N2 >= N,"Cannot lowercast the container!");
-            std::copy_n(c1.indices.begin(),N,indices.begin());
+            std::copy(c1.indices.begin(),c1.indices.end(),indices.begin());
         }
 
         template<size_t dummy> MultiRefWrapper(MultiRefWrapper<Cont,dummy> & c1,size_t index):cont(c1.cont){
             static_assert(N == dummy+1,"Cannot uppercast the container!");
-            std::copy_n(c1.indices.begin(),N,indices.begin());
+            std::copy(c1.indices.begin(),c1.indices.end(),indices.begin());
             
             assert(index < c1.get().size());
             indices[N-1] = index;

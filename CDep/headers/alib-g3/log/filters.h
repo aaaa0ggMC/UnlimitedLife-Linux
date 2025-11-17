@@ -2,6 +2,7 @@
 #define ALOG2_PREFAB_TARGETS
 #include <alib-g3/log/kernel.h>
 #include <alib-g3/adebug.h>
+#include <functional>
 
 namespace alib::g3::lof{
 

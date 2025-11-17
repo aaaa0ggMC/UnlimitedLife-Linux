@@ -2,7 +2,19 @@
 #define ALOG_PREFAB_TARGETS
 #include <alib-g3/log/kernel.h>
 #include <alib-g3/adebug.h>
+#include <functional>
 #include <stdio.h>
+
+#ifdef __linux__
+#define __internal_alib_fw fwrite_unlocked
+#define __internal_alib_ff fflush_unlocked
+#define __internal_alib_pc putchar_unlocked
+#else
+
+#define __internal_alib_fw _fwrite_nolock
+#define __internal_alib_ff _fflush_nolock
+#define __internal_alib_pc _putchar_nolock
+#endif
 
 namespace alib::g3{
     namespace lot{
@@ -43,7 +55,7 @@ namespace alib::g3{
             inline void flush() override{
                 {
                     std::lock_guard<std::mutex> lock(console_lock);
-                    fflush_unlocked(stdout);
+                    __internal_alib_ff(stdout);
                 }
             }
         };
@@ -234,39 +246,39 @@ namespace alib::g3::lot{
             if(fn){
                 auto ptr = fn(msg);
                 if(!ptr.empty()){
-                    fwrite_unlocked(ptr.data(),sizeof(decltype(ptr)::value_type),ptr.size(),stdout);
+                    __internal_alib_fw(ptr.data(),sizeof(decltype(ptr)::value_type),ptr.size(),stdout);
                     return true;
                 }
             }
             return false;
         };
         static auto reset_color = [](){
-            fwrite_unlocked(c_reset_color.data(),sizeof(decltype(c_reset_color)::value_type),c_reset_color.size(),stdout);
+            __internal_alib_fw(c_reset_color.data(),sizeof(decltype(c_reset_color)::value_type),c_reset_color.size(),stdout);
         };
         {
             std::lock_guard<std::mutex> lock(console_lock);
             if(!msg.cfg.disable_extra_information){
                 if(msg.cfg.gen_date){
-                    fwrite_unlocked("[",1,1,stdout);
+                    __internal_alib_fw("[",1,1,stdout);
                     bool val = fast_print(cfg.date_color_schema,msg);
-                    fwrite_unlocked(msg.sdate.c_str(),sizeof(decltype(msg.sdate)::value_type),msg.sdate.size(),stdout);
+                    __internal_alib_fw(msg.sdate.c_str(),sizeof(decltype(msg.sdate)::value_type),msg.sdate.size(),stdout);
                     if(val)reset_color();
-                    fwrite_unlocked("]",1,1,stdout);
+                    __internal_alib_fw("]",1,1,stdout);
                 }
                 if(msg.cfg.out_level && msg.cfg.level_cast){
-                    fwrite_unlocked("[",1,1,stdout);
+                    __internal_alib_fw("[",1,1,stdout);
                     bool val = fast_print(cfg.level_color_schema,msg);
                     auto ls = msg.cfg.level_cast(msg.level);
-                    fwrite_unlocked(ls.data(),sizeof(decltype(ls)::value_type),ls.size(),stdout);
+                    __internal_alib_fw(ls.data(),sizeof(decltype(ls)::value_type),ls.size(),stdout);
                     if(val)reset_color();
-                    fwrite_unlocked("]",1,1,stdout);
+                    __internal_alib_fw("]",1,1,stdout);
                 }
                 if(msg.cfg.out_header && msg.header.data() != nullptr && msg.header.size()){
-                    fwrite_unlocked("[",1,1,stdout);
+                    __internal_alib_fw("[",1,1,stdout);
                     bool val = fast_print(cfg.head_color_schema,msg);
-                    fwrite_unlocked(msg.header.data(),sizeof(decltype(msg.header)::value_type),msg.header.size(),stdout);
+                    __internal_alib_fw(msg.header.data(),sizeof(decltype(msg.header)::value_type),msg.header.size(),stdout);
                     if(val)reset_color();
-                    fwrite_unlocked("]",1,1,stdout);
+                    __internal_alib_fw("]",1,1,stdout);
                 }
                 if(msg.cfg.gen_time){
                     std::string_view use_color;
@@ -284,10 +296,10 @@ namespace alib::g3::lot{
                         printf("[TID%lu]",msg.thread_id);
                     }
                 }
-                putchar_unlocked(':');
+                __internal_alib_pc(':');
             }
             fwrite_unlocked(msg.body.data(),sizeof(decltype(msg.body)::value_type),msg.body.size(),stdout);
-            putchar_unlocked('\n');
+            __internal_alib_pc('\n');
         }
     }
 }

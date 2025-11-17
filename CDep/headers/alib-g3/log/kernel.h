@@ -42,6 +42,12 @@
 #include <type_traits>
 #include <iostream>
 
+#ifdef __linux__
+#define __internal_alib_localtime localtime_r
+#else
+#define __internal_alib_localtime localtime_s
+#endif
+
 #ifndef ALIB_DEF_CLOCK_SOURCE
 #ifndef CLOCK_MONOTONIC_COARSE
 #ifndef CLOCK_REALTIME_COARSE
