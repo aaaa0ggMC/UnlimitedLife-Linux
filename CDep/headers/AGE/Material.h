@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 材质
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/11/17
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -26,16 +26,13 @@ namespace age{
         };
 
         struct AGE_API Material{
-            DirtyWrapper<float> shininess;
+            float shininess;
             Color ambient;
             Color diffuse;
             Color specular;
 
             inline void upload(MaterialBindings & binding){
-                if(shininess.isDirty()){
-                    binding.shininess.safe_upload(shininess.read());
-                    shininess.clearFlag();
-                }
+                binding.shininess.safe_upload(shininess);
                 ambient.uploadRGBA(binding.ambient);
                 diffuse.uploadRGBA(binding.diffuse);
                 specular.uploadRGBA(binding.specular);
