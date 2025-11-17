@@ -1,3 +1,14 @@
+/**
+ * @file base_mod.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 基础module接口
+ * @version 0.1
+ * @date 2025/11/17
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/11/17 
+ */
 #ifndef ALOG_MOD_INCLUDED
 #define ALOG_MOD_INCLUDED
 #include <alib-g3/log/base_msg.h>
@@ -118,6 +129,47 @@ namespace alib::g3{
             std::apply([](auto &... t){
                 ((t.enabled?t.flush():void()),...);
             },targets);
+        }
+    };
+
+
+    /// @brief LogFilterGroup
+    template<IsLogFilter... Ts> struct DLL_EXPORT LogFilterGroup : public LogFilter{
+        using filters_t = std::tuple<Ts...>;
+        filters_t filters;
+
+        LogFilterGroup(filters_t && t):filters(std::move(t)){}
+        LogFilterGroup(Ts&&... args):filters(std::forward<Ts>(args)...){}
+
+        template<size_t N> inline void toggleFilter(bool val = true){
+            std::get<N>(filters).enabled = val;
+        }
+
+        inline void toggleAll(bool val){
+            std::apply([&val](auto &... t){
+                ((t.enabled = val),...);
+            },filters);
+        }
+
+        inline bool filter(LogMsg & msg) override{
+            bool ret = true;
+
+            std::apply([&ret,&msg](auto &... t){
+                ((ret = ret && (t.enabled?t.filter(msg):true)),...);
+            },filters);
+            return ret;
+        }
+
+        inline bool pre_filter(
+            int level_id,
+            std::string_view raw_message,
+            const LogMsgConfig & cfg
+        ) override{
+            bool ret = true;
+            std::apply([&ret,&level_id,&raw_message,&cfg](auto &... t){
+                ((ret = ret && (t.enabled?t.pre_filter(level_id,raw_message,cfg):true)),...);
+            },filters);
+            return ret;
         }
     };
 }

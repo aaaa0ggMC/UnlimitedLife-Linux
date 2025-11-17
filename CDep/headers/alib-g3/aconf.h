@@ -32,7 +32,7 @@ item2 1 1 1 1;
 */
 #ifndef ACONF_H_INCLUDED
 #define ACONF_H_INCLUDED
-#include <alib-g3/aconf_det.h>
+#include <alib-g3/details/aconf_caster.h>
 #include <alib-g3/autil.h>
 #include <span>
 #include <ranges>

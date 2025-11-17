@@ -1,3 +1,14 @@
+/**
+ * @file base_msg.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 消息的基础架构
+ * @version 0.1
+ * @date 2025/11/17
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/11/17 
+ */
 #ifndef ALOG_LOGMSG_INCLUDED
 #define ALOG_LOGMSG_INCLUDED
 #include <alib-g3/log/base_config.h>
