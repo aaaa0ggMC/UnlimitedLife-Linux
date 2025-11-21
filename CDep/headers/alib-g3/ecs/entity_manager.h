@@ -3,19 +3,39 @@
 #include <alib-g3/ecs/entity.h>
 #include <alib-g3/ecs/component_pool.h>
 #include <alib-g3/ecs/linear_storage.h>
+#include <alib-g3/aref.h>
 #include <memory>
 
 namespace alib::g3::ecs{
-    template<class T,std::is_pointer... Ts> IsDepTuple = std::is_same_v<T,std::tuple<Ts...>>;
-
     namespace detail{
-        template<class... Ts> class ComponentStack{
-            std::tuple<Ts...> tuple;
-            
-            template<class T> ComponentStack<T,Ts...> add(){
-                return ComponentStack<T,Ts...>();
-            }
+        template<bool Already,class Compare,class... Ts> struct CycleChecker;
+
+        template<bool Already,class Compare,class T,class... Ts> 
+            struct CycleChecker<Already,Compare,T,Ts...>{
+            constexpr static bool matched = std::is_same_v<Compare,T>;
+            constexpr static bool next_already = Already || matched;
+            constexpr static bool conflict = (Already&&matched) || CycleChecker<next_already,Ts...>::conflict;
         };
+
+        template<bool Already,class Compare,class T> 
+            struct CycleChecker<Already,Compare,T>{ 
+            constexpr static bool matched = std::is_same_v<Compare,T>;
+            constexpr static bool next_already = Already || matched;
+            constexpr static bool conflict = (Already&&matched);
+        };
+
+        template<bool Already,class Compare> 
+            struct CycleChecker<Already,Compare>{
+            constexpr static bool conflict = false;
+        };
+    };
+
+    template<class... Ts> struct ComponentStack{
+        template<class T> using add_t = ComponentStack<T,Ts...>;
+
+        template<class T> constexpr inline static bool check_cycle(){
+            return detail::CycleChecker<false,T,Ts...>::conflict;
+        }
     };
 
     struct DLL_EXPORT EntityManager{
@@ -62,6 +82,17 @@ namespace alib::g3::ecs{
             };
             return pool;
         }
+
+        template<class T> void get_component_impl(const Entity & e,size_t& index,ComponentPool<T>* &p){
+            p = get_component_pool_unsafe<T>();
+            if(!p)return;
+            auto it = p->mapper.find(e.id);
+            if(it == p->mapper.end()){
+                index = std::numeric_limits<size_t>::max();
+            }else{
+                index = it->second;
+            }
+        }
     public:
 
         inline EntityManager(){
@@ -90,25 +121,37 @@ namespace alib::g3::ecs{
             entities.remove(e.id - 1);
         }
 
-        template<class T> T* get_component(const Entity & e){
-            ComponentPool<T> * p = get_component_pool_unsafe<T>();
-            if(!p)return nullptr;
-            auto it = p->mapper.find(e.id);
-            return (it == p->mapper.end())?nullptr:&(p->data.data[it->second]);
+        template<class T> T* get_component_raw(const Entity & e){
+            size_t index;
+            ComponentPool<T> * p;
+            get_component_impl<T>(e,index,p);
+            if(p && index != std::numeric_limits<size_t>::max())return &((*p).data.data[index]);
+            else return nullptr;
+        }
+
+        template<class T> std::optional<RefWrapper<std::vector<T>>> get_component(const Entity & e){
+            size_t index;
+            ComponentPool<T> * p;
+            get_component_impl<T>(e,index,p);
+            if(p && index >= 0)return ref((*p).data.data,index);
+            else return std::nullopt;
         }
 
         /// 语义上保证非空
-        template<class T,class Tuo = std::tuple<void>,class... Args> T* add_component(const Entity & e,Args&&... args){
+        template<class T,class Tuo = ComponentStack<> ,class... Args> T* add_component(const Entity & e,Args&&... args){
             ComponentPool<T> * p = add_component_pool<T>();
             auto it = p->mapper.find(e.id);
             if(it != p->mapper.end())return &(p->data.data[it->second]);
             // 创建新的component
             // 依赖
-            if(requires{T::Dependency;}){
-                static_assert<
-                [](EntityManager & em,const Entity & e,auto&&... t){
-                    ((em.add_component<decltype(t)>(e)),...);
-                }(*this,e,T::Dependency());
+            if constexpr(requires{typename T::Dependency;}){
+                using Tuo_Next = typename Tuo::add_t<T>;
+                // 检测循环依赖
+                static_assert(!Tuo_Next::template check_cycle<T>(),"Cycle dependency!");
+
+                []<class... TArgs>(EntityManager & em,const Entity & e,ComponentStack<TArgs...>){
+                    ((em.add_component<TArgs,Tuo_Next>(e)),...);
+                }(*this,e,typename T::Dependency{});
             }
 
             // 具体创建
@@ -116,7 +159,7 @@ namespace alib::g3::ecs{
             size_t index;
             T & comp = p->data.try_next_with_index(flag,index,std::forward<Args>(args)...);
             p->mapper.emplace(e.id,index);
-            if(flag)std::cout << "新的component" << std::endl;
+            if(flag)std::cout << "新的component" << typeid(T).name() << std::endl;
             else std::cout << "复用component" << std::endl;
             return &comp;
         }
