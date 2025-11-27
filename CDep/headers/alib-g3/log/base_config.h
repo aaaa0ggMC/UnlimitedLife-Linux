@@ -1,3 +1,14 @@
+/**
+ * @file base_config.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 各种配置文件
+ * @version 0.1
+ * @date 2025/11/27
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/11/27 
+ */
 #ifndef ALOG_BASECONFIG_INCLUDED
 #define ALOG_BASECONFIG_INCLUDED
 #include <alib-g3/autil.h>

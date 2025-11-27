@@ -1,3 +1,14 @@
+/**
+ * @file manipulator.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 一些基本的操作符
+ * @version 0.1
+ * @date 2025/11/27
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/11/27 
+ */
 #ifndef ALOG2_MANIP_INCLUDED
 #define ALOG2_MANIP_INCLUDED
 #include <alib-g3/autil.h>

@@ -1,3 +1,14 @@
+/**
+ * @file streamed_context.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 流式输出处控制，主持write_to_log(类函数&全局函数)编译期注入
+ * @version 0.1
+ * @date 2025/11/27
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/11/27 
+ */
 #ifndef ALOG_STREAMED_CONTEXT_INCLUDED
 #define ALOG_STREAMED_CONTEXT_INCLUDED
 #include <alib-g3/autil.h>

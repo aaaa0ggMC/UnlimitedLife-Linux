@@ -3,41 +3,11 @@
 #include <alib-g3/ecs/entity.h>
 #include <alib-g3/ecs/component_pool.h>
 #include <alib-g3/ecs/linear_storage.h>
+#include <alib-g3/ecs/cycle_checker.h>
 #include <alib-g3/aref.h>
 #include <memory>
 
 namespace alib::g3::ecs{
-    namespace detail{
-        template<bool Already,class Compare,class... Ts> struct CycleChecker;
-
-        template<bool Already,class Compare,class T,class... Ts> 
-            struct CycleChecker<Already,Compare,T,Ts...>{
-            constexpr static bool matched = std::is_same_v<Compare,T>;
-            constexpr static bool next_already = Already || matched;
-            constexpr static bool conflict = (Already&&matched) || CycleChecker<next_already,Ts...>::conflict;
-        };
-
-        template<bool Already,class Compare,class T> 
-            struct CycleChecker<Already,Compare,T>{ 
-            constexpr static bool matched = std::is_same_v<Compare,T>;
-            constexpr static bool next_already = Already || matched;
-            constexpr static bool conflict = (Already&&matched);
-        };
-
-        template<bool Already,class Compare> 
-            struct CycleChecker<Already,Compare>{
-            constexpr static bool conflict = false;
-        };
-    };
-
-    template<class... Ts> struct ComponentStack{
-        template<class T> using add_t = ComponentStack<T,Ts...>;
-
-        template<class T> constexpr inline static bool check_cycle(){
-            return detail::CycleChecker<false,T,Ts...>::conflict;
-        }
-    };
-
     struct DLL_EXPORT EntityManager{
     private:
         std::unordered_map<uint64_t,std::unique_ptr<void,void(*)(void*)>> component_pool;
@@ -94,6 +64,7 @@ namespace alib::g3::ecs{
             }
         }
     public:
+        template<class T> using ref_t = RefWrapper<detail::LinearStorage<T>>;
 
         inline EntityManager(){
             id_max = 0;
@@ -101,11 +72,9 @@ namespace alib::g3::ecs{
  
         inline Entity create_entity(){
             if(entities.free_elements.empty()){
-                std::cout << "新的entity" << std::endl;
                 // 从这里可以看到entities的id是和LinearStorage的index基本对齐的 index = id - 1
                 return entities.next(++id_max);
             }else{
-                std::cout << "复用entity" << std::endl;
                 return entities.next_free();
             }
         }
@@ -114,7 +83,7 @@ namespace alib::g3::ecs{
             for(auto & ref_comp : component_pool){
                 //@Note: its data is not usable!!!
                 auto cp = (ref_comp.second.get());
-                auto destroyer = ((ComponentPool<int>*)cp)->destroyer;
+                auto destroyer = ((detail::PoolDestroyerBase*)cp)->destroyer;
                 // 孩子们，我可能会崩溃吗，应该不可能吧
                 destroyer(cp,e.id);
             }
@@ -129,19 +98,19 @@ namespace alib::g3::ecs{
             else return nullptr;
         }
 
-        template<class T> std::optional<RefWrapper<std::vector<T>>> get_component(const Entity & e){
+        template<class T> std::optional<ref_t<T>> get_component(const Entity & e){
             size_t index;
             ComponentPool<T> * p;
             get_component_impl<T>(e,index,p);
-            if(p && index >= 0)return ref((*p).data.data,index);
+            if(p && index >= 0)return ref((p->data),index);
             else return std::nullopt;
         }
 
         /// 语义上保证非空
-        template<class T,class Tuo = ComponentStack<> ,class... Args> T* add_component(const Entity & e,Args&&... args){
+        template<class T,class Tuo = ComponentStack<> ,class... Args> EntityManager::ref_t<T> add_component(const Entity & e,Args&&... args){
             ComponentPool<T> * p = add_component_pool<T>();
             auto it = p->mapper.find(e.id);
-            if(it != p->mapper.end())return &(p->data.data[it->second]);
+            if(it != p->mapper.end())return ref(p->data,it->second);
             // 创建新的component
             // 依赖
             if constexpr(requires{typename T::Dependency;}){
@@ -159,9 +128,7 @@ namespace alib::g3::ecs{
             size_t index;
             T & comp = p->data.try_next_with_index(flag,index,std::forward<Args>(args)...);
             p->mapper.emplace(e.id,index);
-            if(flag)std::cout << "新的component" << typeid(T).name() << std::endl;
-            else std::cout << "复用component" << std::endl;
-            return &comp;
+            return ref(p->data,index);
         }
 
         enum DestroyResult{
@@ -170,14 +137,12 @@ namespace alib::g3::ecs{
             DRCantFind = 2
         };
 
-        template<class T> DestroyResult destroy_component(const Entity & e){
+        template<class T> DestroyResult remove_component(const Entity & e){
             ComponentPool<T> * p = get_component_pool_unsafe<T>();
             if(!p)return DRNoPool;
             if(p->destroyer((void*)p,e.id) == -1){
-                std::cout << "都没找到" << std::endl;
                 return DRCantFind;
             }
-            std::cout << "成功删除" << std::endl;
             return DRSuccess;
         }
 
@@ -191,13 +156,56 @@ namespace alib::g3::ecs{
     };
 
     struct DLL_EXPORT EntityWrapper{
+    private:
         EntityManager & em;
         Entity e;
+    public:
 
         EntityWrapper(EntityManager & manager):em(manager){
+            e = manager.create_entity();
+        }
 
+        EntityWrapper(EntityManager & manager,const Entity & et):em(manager){
+            e = et;
+        }
+
+        template<class T> std::optional<EntityManager::ref_t<T>> get(){
+            return em.get_component_raw<T>(e);
+        }
+
+        template<class T,class... Args> EntityManager::ref_t<T> add(Args&&... args){
+            return em.add_component<T>(e,std::forward<Args>(args)...);
+        }
+
+        template<class... Cs> std::tuple<EntityManager::ref_t<Cs>...> adds(){
+            return std::make_tuple(
+                em.add_component<Cs>(e)...
+            );
+        }
+
+        template<class T> void remove(){
+            em.remove_component<T>(e);
+        }
+
+        void set_entity(const Entity & et){
+            e = et;
+        }
+
+        void destroy(){
+            em.destroy_entity(e);
+            e = Entity::null();
         }
     };
+
+    template<class T,class... Ts> inline EntityManager::ref_t<T> 
+        get(std::tuple<EntityManager::ref_t<Ts>...> && t){
+            return std::get<EntityManager::ref_t<T>>(std::move(t));
+    }
+
+    template<class T,class... Ts> inline EntityManager::ref_t<T> 
+        get(std::tuple<EntityManager::ref_t<Ts>...> & t){
+            return std::get<EntityManager::ref_t<T>>(t);
+    }
 }
 
 #endif

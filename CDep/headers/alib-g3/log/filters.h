@@ -1,3 +1,14 @@
+/**
+ * @file filters.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 过滤日志的模块，目前还没做完（因为还没需求场景），支持日志级别过滤
+ * @version 0.1
+ * @date 2025/11/27
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/11/27 
+ */
 #ifndef ALOG2_PREFAB_TARGETS
 #define ALOG2_PREFAB_TARGETS
 #include <alib-g3/log/kernel.h>

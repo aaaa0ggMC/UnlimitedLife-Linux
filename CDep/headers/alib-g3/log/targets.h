@@ -1,3 +1,14 @@
+/**
+ * @file targets.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 内置的输出对象，目前支持控制台输出，文件输出，以及多文件输出
+ * @version 0.1
+ * @date 2025/11/27
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/11/27 
+ */
 #ifndef ALOG_PREFAB_TARGETS
 #define ALOG_PREFAB_TARGETS
 #include <alib-g3/log/kernel.h>

@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/11/17 
+* @date 2025/11/27 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -13,6 +13,7 @@
 <tr><td>2025-04-04 <td>3.1         <th>aaaa0ggmc    <td>完成doc
 <tr><td>2025-11-10 <td>pre-4.0     <th>aaaa0ggmc    <td>准备4.0阶段
 <tr><td>2025-11-12 <td>alpha-4.0   <th>aaaa0ggmc    <td>4.0阶段核心完工，优化ing...
+<tr><td>2025-11-27 <td>4.0         <th>aaaa0ggmc    <td>进入日常使用&维护阶段
 </table>
 ********************************
 */

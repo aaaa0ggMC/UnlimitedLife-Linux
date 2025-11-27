@@ -1,3 +1,14 @@
+/**
+ * @file linear_storage.h
+ * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
+ * @brief 线性存储类，目前使用vector，后期可以变成sparse_set啥的
+ * @version 0.1
+ * @date 2025/11/27
+ * 
+ * @copyright Copyright(c)2025 aaaa0ggmc
+ * 
+ * @start-date 2025/11/27 
+ */
 #ifndef AECS_LINEAR_STORAGE_H_INCLUDED
 #define AECS_LINEAR_STORAGE_H_INCLUDED
 #include <alib-g3/autil.h>
@@ -6,25 +17,35 @@
 #include <vector>
 
 namespace alib::g3::ecs::detail{
+    /// @brief 是否可以通过reset方法实现建议重构？
     template<class T,class... Args> concept CanReset = requires(T & t,Args&&... args){
         t.reset(std::forward<Args>(args)...);
     };
-    /// 一个合格的component必须要保证有reset方法，并且reset和构造函数的初始化列表一致！
+    /// @brief 一个合格的component必须要保证有reset方法，并且reset和构造函数的初始化列表建议一致！
     template<class T,class... Args> concept IsResetableComponent = requires(T & t,Args&&... args){
         t.reset(std::forward<Args>(args)...);
         T(std::forward<Args>(args)...);
     };
 
+    /// @brief 单调递增的bitset
     struct DLL_EXPORT MonoticBitSet{
+        /// @brief 单条数据类型
         using store_t = uint64_t;
+        /// @brief 单条数据的大小
         constexpr static size_t data_size = sizeof(store_t) * __CHAR_BIT__;
+        /// @brief 数据集
         std::vector<store_t> mask; 
 
+        /// @brief 获取对应index对应的第几个store_t变量
+        /// @param count 元素index
+        /// @return mask的index
         inline size_t get_ecount(size_t count){
             size_t ecount = count / data_size + 1;
             return ecount;
         }
 
+        /// @brief 确保数据集里面支持这么多元素
+        /// @param count 元素数量
         inline void ensure(size_t count){
             size_t ecount = get_ecount(count);
 
@@ -114,6 +135,15 @@ namespace alib::g3::ecs::detail{
         std::vector<size_t>     free_elements;
         MonoticBitSet          available_bits;
 
+        // 支持ref直接引用
+        using reference = T&;
+        using value_type = T;
+        inline reference operator[](size_t index){
+            return data[index];
+        }
+        inline size_t size(){return data.size();}
+        inline bool empty(){return data.empty();}
+
         inline LinearStorage(size_t reserve_size = 0){
             data.reserve(reserve_size);
         }
@@ -139,7 +169,8 @@ namespace alib::g3::ecs::detail{
 
             T & ret = data[index];
             if constexpr(CanReset<T,Ts...>){
-                static_assert(IsResetableComponent<T,Ts...>,"Reset function must have the same argument list with the constructor!");
+                // 这一块暂时按下不表，后面需要的时候再适配看看
+                // static_assert(IsResetableComponent<T,Ts...>,"Reset function must have the same argument list with the constructor!");
                 ret.reset(std::forward<Ts>(args)...);
             }else{
                 ret.~T();
