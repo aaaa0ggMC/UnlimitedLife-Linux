@@ -1,14 +1,14 @@
 /** @file world/Components.h
  * @brief 提供一些预制的components
  * @author aaaa0ggmc,euuen
- * @date 2025/08/31
+ * @date 2025/11/27
  * @start-date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
 #ifndef AGE_H_COMP
 #define AGE_H_COMP
 #include <AGE/Utils.h>
-#include <AGE/World/Entity.h>
+#include <alib-g3/aecs.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -29,6 +29,8 @@ inline static void glm_e_add(glm::vec3 & outp,float x1,float x2,float x3,const g
 }
 
 namespace age::world{
+    using namespace alib::g3::ecs;
+
     /** @brief 这里是默认提供的一些组件，实际上你也可以自己写
       * @par 组件类规则:
       * 1.需要包含 void reset();这个函数
@@ -92,6 +94,15 @@ namespace age::world{
 
             };
             RotationProxy m_rotation;
+
+            inline void system_dm_mark(){
+                dm_mark();
+                m_rotation.dm_mark();
+            }
+
+            Transform(){
+                reset();
+            }
 
             inline void reset(){
                 dm_clear();
@@ -312,11 +323,8 @@ namespace age::world{
 
         /// 仅用于构建视图矩阵，而且还依赖Transform这个module @todo maybe可以使用c++模板元编程把组件之间的依赖关系也写出来
         struct AGE_API Viewer : public DirtyMarker{
-            static ComponentRequisitions<Transform> requisitions;
-
+            using Dependency = alib::g3::ecs::ComponentStack<Transform>;
             glm::mat4 view_matrix;
-
-            inline static void reset(){}
 
             inline glm::mat4& buildViewMatrix(Transform & trs){
                 if(!trs.dm_check() && !dm_check())return view_matrix;
@@ -330,9 +338,13 @@ namespace age::world{
         };
 
         struct AGE_API Parent{
-            Entity parent;
+            using Dependency = ComponentStack<Transform>;
 
-            Parent(Entity & p){
+            Entity parent;
+            Entity child;
+
+            Parent(const Entity & ch,const Entity & p){
+                child = ch;
                 parent = p;
             }
             //Cache Component Index is not a good option,because the index may vary when the user deleted the component and then added it
@@ -340,8 +352,6 @@ namespace age::world{
 
         /// reserved used for test
         struct AGE_API TestOutput{
-            inline void reset(){}
-
             inline void out(std::string_view  data){
                 std::cout << data << std::endl;
             }
@@ -355,6 +365,10 @@ namespace age::world{
             float aspectRatio;
             float zNear;
             float zFar;
+
+            Projector(){
+                reset();
+            }
 
             inline void reset(){
                 dm_clear();
@@ -404,6 +418,10 @@ namespace age::world{
             void * arg2;
 
             inline Runner(void (*ifn)(void*,void*),void * iarg1,void * iarg2):fn{ifn},arg1{iarg1},arg2{iarg2}{}
+
+            Runner(){
+                reset();
+            }
 
             inline void reset(){
                 fn = NULL;

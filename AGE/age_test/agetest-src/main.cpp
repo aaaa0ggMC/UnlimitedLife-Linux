@@ -2,7 +2,7 @@
  * @brief cubic
  * @author aaaa0ggmc
  * @copyright Copyright(c) 2025 aaaa0ggmc
- * @date 2025/11/16
+ * @date 2025/11/27
  */
 #include <AGE/Application.h>
 #include <AGE/World/Components.h>
@@ -114,8 +114,8 @@ int main(){
     pyramid.transform().move(3,0,0);
     plane.transform().move(0,-10,0);
 
-    em.addComponent<Parent>(pyramid.getEntity(),invPar.getEntity());
-    em.addComponent<Parent>(invPar.getEntity(),cube.getEntity());
+    em.add_component<Parent>(pyramid.getEntity(),pyramid.getEntity(),invPar.getEntity());
+    em.add_component<Parent>(invPar.getEntity(),invPar.getEntity(),cube.getEntity());
 
     ////Systems////
     systems::ParentSystem parent_system (em);
@@ -343,7 +343,7 @@ int main(){
                 ImGui::Text("Texture:");
                 ImGui::ListBox("Binding",&im_textureID,texture_sids.data(),texture_sids.size());
                 ImGui::DragInt("Preview Size (X)",&im_preview,0.5F,0,1024);
-                auto tex = unwrap(app.getTexture(texture_sids[im_textureID]));
+                auto tex = *app.getTexture(texture_sids[im_textureID]);
                 ImGui::Image((ImTextureID)(intptr_t)tex->getId(), ImVec2(im_preview,im_preview * tex->getTextureInfo().height / (float)tex->getTextureInfo().width));
                 break;
             }
@@ -456,7 +456,7 @@ int main(){
                 //post-input-update
                 cube.transform().rotate(glm::vec3(1.0f,0.0f,0.0f),1 * p);
                 invPar.transform().rotate(glm::vec3(0.0f,1.0f,1.0f),2 * p);
-                pyramid.transform().rotate(glm::vec3(0.0f,1.0f,0.0f),1.5 * p);
+                pyramid.transform().rotate(glm::vec3(0.0f,1.0f,0.0f),1.5 * p); 
             }
             em.update<comps::Transform>(elapse.getOffset(),true);
             parent_system.update();
@@ -469,7 +469,7 @@ int main(){
         shader.bind();
         sampler.bind(GL_TEXTURE0);
         // 动态纹理切换测试
-        unwrap(app.getTexture(texture_sids[im_textureID]))->bind(GL_TEXTURE0);
+        (*app.getTexture(texture_sids[im_textureID]))->bind(GL_TEXTURE0);
         //GL statuses//
         if(im_gldepth){
             glEnable(GL_DEPTH_TEST);
@@ -507,7 +507,9 @@ int main(){
         ///Try A Circle
         if(ims_model){
             glFrontFace(GL_CCW);
-            auto lm = camera.viewer().buildViewMatrix(camera.transform()) * invPar.transform().buildModelMatrix();
+            auto cv = camera.viewer().buildViewMatrix(camera.transform());
+            auto lm = cv * invPar.transform().buildModelMatrix();
+
             invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
             mv_matrix.uploadmat4(lm);
             win->draw<Model>(*md);
@@ -521,7 +523,7 @@ int main(){
             win->draw<Model>(*md);
         }
 
-        unwrap(app.getTexture("wall"))->bind(GL_TEXTURE0);
+        (*app.getTexture("wall"))->bind(GL_TEXTURE0);
         mat_jade.upload(mb);
         // bottom
         glFrontFace(GL_CCW);

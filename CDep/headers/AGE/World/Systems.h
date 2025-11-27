@@ -3,40 +3,30 @@
  * @author aaaa0ggmc
  * @brief 提供一些预设的System插件
  * @version 0.1
- * @date 2025/07/18
+ * @date 2025/11/27
  * @start-date 2025/7/16
  * @copyright Copyright (c) 2025
  */
 #ifndef AGE_H_SYSTEMS
-
 #include <AGE/Utils.h>
-#include <AGE/World/EntityManager.h>
 #include <AGE/World/Components.h>
 
 namespace age::world{
+    using namespace alib::g3::ecs;
     namespace systems{
         //@post-update
         /// @brief note that parent system must be a post update of your own transform
         struct AGE_API ParentSystem{
         private:
             EntityManager &em;
-            ComponentPool<comps::Parent>* pool;
-            ComponentPool<comps::Transform>* transformPool;
+            ComponentPool<comps::Parent>& pool;
+            ComponentPool<comps::Transform>& transformPool;
 
         public:
-            inline ParentSystem(EntityManager & iem):em{iem}{
-                initPool();
-            }
-
-            inline void initPool(){
-                auto opt = em.getComponentPool<comps::Parent>();
-                if(!opt)pool = nullptr;
-                else pool = *opt;
-
-                auto opt2 = em.getComponentPool<comps::Transform>();
-                if(!opt2)transformPool = nullptr;
-                else transformPool = *opt2;
-            }
+            inline ParentSystem(EntityManager & iem)
+            :em{iem}
+            ,pool{iem.get_or_create_pool<comps::Parent>()}
+            ,transformPool{iem.get_or_create_pool<comps::Transform>()}{}
 
             void update();
         };
@@ -50,32 +40,26 @@ namespace age::world{
 
         /// @brief 直接把一个pool都标记了
         template<ComponentMarkable T> struct AGE_API DirtySystem{
-            ComponentPool<T> * pool;
-            EntityManager &em;
+            EntityManager & em;
+            ComponentPool<T> & pool;
 
-            inline DirtySystem(EntityManager & iem): em{iem}{
-                initPool();    
-            }
-
-            inline void initPool(){
-                auto opt = em.getComponentPool<T>();
-                if(!opt)pool = nullptr;
-                else pool = *opt;
-            }
+            inline DirtySystem(EntityManager & iem)
+            :em{iem}
+            ,pool{iem.get_or_create_pool<T>()}{}
 
             inline void update(){
-                if(!pool)return;
-                if constexpr(std::is_same_v<T,comps::Transform> == true){
-                    //额外处理
-                    for(T & c: pool->data){
-                        c.dm_mark();
-                        c.m_rotation.dm_mark();
+                pool.data.available_bits.for_each_skip_1_bits(
+                    [this](size_t index){
+                        auto & target = this->pool.data[index];
+                        if constexpr(requires(T&t){
+                            t.system_dm_mark();
+                        }){
+                            target.system_dm_mark();
+                        }else{
+                            target.dm_mark();
+                        }
                     }
-                }else{
-                    for(T & c: pool->data){
-                        c.dm_mark();
-                    }
-                }
+                ,pool.data.size());
             }
         };
 
@@ -86,20 +70,21 @@ namespace age::world{
             inline GenericDirtySystem(EntityManager & iem): em{iem}{}
 
             template<ComponentMarkable T> inline void update(){
-                auto opool = em.getComponentPool<T>();
+                auto opool = em.get_component_pool_unsafe<T>();
                 if(!opool)return;
-                auto * pool = *opool;
-                if constexpr(std::is_same_v<T,comps::Transform> == true){
-                    //额外处理
-                    for(T & c: pool->data){
-                        c.dm_mark();
-                        c.m_rotation.dm_mark();
+                auto &pool = *opool;
+                pool.data.available_bits.for_each_skip_1_bits(
+                    [&pool](size_t index){
+                        auto & target = pool.data[index];
+                        if constexpr(requires(T&t){
+                            t.system_dm_mark();
+                        }){
+                            target.system_dm_mark();
+                        }else{
+                            target.dm_mark();
+                        }
                     }
-                }else{
-                    for(T & c: pool->data){
-                        c.dm_mark();
-                    }
-                }
+                ,pool.data.size());
             }
         };
     }

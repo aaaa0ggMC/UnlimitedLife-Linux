@@ -1,7 +1,7 @@
 /** @file Application.h
  * @brief 应用，类似Vulkan的概念（但是目前用的是OpenGL）
  * @author aaaa0ggmc
- * @date 2025/08/31
+ * @date 2025/11/27
  * @start-date 2025/06/11
  * @version 3.1
  * @copyright copyright(C)2025
@@ -15,13 +15,12 @@
  */
 #ifndef AGE_H_APP
 #define AGE_H_APP
-#include "Window.h"
 #include <AGE/Window.h>
 #include <AGE/VAO.h>
 #include <AGE/VBO.h>
 #include <AGE/Shader.h>
-#include <AGE/World/EntityManager.h>
 #include <AGE/Texture.h>
+#include <alib-g3/aecs.h>
 
 #include <GL/glext.h>
 #include <unordered_map>
@@ -44,6 +43,8 @@
 
 /// Aaaa0ggmc's Graphics Engine 我的图形引擎
 namespace age{
+    using namespace alib::g3::ecs;
+
     /** @struct GLInit
      * @brief 初始化OpenGL
      */
@@ -86,9 +87,9 @@ namespace age{
     public:
         VAOManager vaos;
         VBOManager vbos;
-        world::EntityManager& em; ///< EntityManager
+        EntityManager& em; ///< EntityManager
 
-        Application(world::EntityManager & emm); ///< 构造函数
+        Application(EntityManager & emm); ///< 构造函数
         ~Application(); ///< 析构函数
 
         //// Window  ////

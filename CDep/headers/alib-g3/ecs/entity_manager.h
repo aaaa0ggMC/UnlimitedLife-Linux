@@ -49,6 +49,29 @@ namespace alib::g3::ecs{
             delete static_cast<T*>(ptr);
         }
 
+        /// @brief 获取对应component
+        /// @param e 对应的entity
+        /// @param[out] index component的索引
+        /// @param[out] p 对应组件池的类型，找不到组件池返回nullptr，找不到component则设置索引为size_t::max 
+        template<class T> void get_component_impl(const Entity & e,size_t& index,ComponentPool<T>* &p){
+            p = get_component_pool_unsafe<T>();
+            if(!p)return;
+            auto it = p->mapper.find(e.id);
+            if(it == p->mapper.end()){
+                index = std::numeric_limits<size_t>::max();
+            }else{
+                index = it->second;
+            }
+        }
+    public:
+        /// @brief 获取对应的安全引用
+        template<class T> using ref_t = RefWrapper<detail::LinearStorage<T>>;
+
+        /// @brief 获取当前实体池子的大小
+        inline size_t get_entity_pool_size(){
+            return entities.size();
+        } 
+
         /// @brief 添加一个新的组件池
         /// @return 组件池的指针，保证不为nullptr
         template<class T> inline ComponentPool<T>* add_component_pool(){
@@ -80,23 +103,19 @@ namespace alib::g3::ecs{
             return pool;
         }
 
-        /// @brief 获取对应component
-        /// @param e 对应的entity
-        /// @param[out] index component的索引
-        /// @param[out] p 对应组件池的类型，找不到组件池返回nullptr，找不到component则设置索引为size_t::max 
-        template<class T> void get_component_impl(const Entity & e,size_t& index,ComponentPool<T>* &p){
-            p = get_component_pool_unsafe<T>();
-            if(!p)return;
-            auto it = p->mapper.find(e.id);
-            if(it == p->mapper.end()){
-                index = std::numeric_limits<size_t>::max();
-            }else{
-                index = it->second;
-            }
+        /// @brief 确保并获取对应类型的组件池
+        /// @tparam T 组件类型
+        /// @return 组件池的指针，保证不为nullptr
+        template<class T> inline ComponentPool<T>& get_or_create_pool(){
+            // 实际调用原来的 add_component_pool 或将实现移动到这里
+            return *add_component_pool<T>(); 
         }
-    public:
-        /// @brief 获取对应的安全引用
-        template<class T> using ref_t = RefWrapper<detail::LinearStorage<T>>;
+
+        /// @brief 获取对应类型的对应组件池
+        /// @return 组件池，找不到返回nullptr
+        template<class T> inline ComponentPool<T>* get_component_pool(){
+            return get_component_pool_unsafe<T>();
+        }
 
         /// @brief 构造实体表
         /// @param entity_reserve_size 实体预留数量 
@@ -213,6 +232,28 @@ namespace alib::g3::ecs{
                 func(pool->data.data[index]);
             },pool->data.data.size());
         }
+
+        /// @brief 更新所有的非空闲的组件
+        /// @tparam T 组件池类型，组件内需要有update函数
+        /// @param Args
+        template<class T,class... Args> inline void update(Args&&... args){
+            static_assert(requires(T & t,Args&&... t_args){t.update(t_args...);},"There is not update function in the component.");
+            ComponentPool<T> * pool = get_component_pool_unsafe<T>();
+            if(!pool)return;
+            
+            auto args_tuple = std::make_tuple(std::forward<Args>(args)...);
+
+            pool->data.available_bits.for_each_skip_1_bits(
+                [pool,args_tuple = std::move(args_tuple)](size_t index) mutable{
+                    std::apply(
+                        [&](auto&&... func_args){
+                            pool->data.data[index].update(std::forward<decltype(func_args)>(func_args)...);
+                        },
+                        args_tuple
+                    );
+                },pool->data.data.size()
+            );
+        }
     };
 
     /// @brief 实体的wrapper
@@ -223,6 +264,11 @@ namespace alib::g3::ecs{
         /// @brief 实体
         Entity e;
     public:
+        /// @brief 获取实体
+        Entity get_entity(){
+            return e;
+        }
+
         /// @brief 实体的wrapper
         /// @param manager 对应的manager
         EntityWrapper(EntityManager & manager):em(manager){
@@ -317,6 +363,9 @@ namespace alib::g3::ecs{
         get(std::tuple<EntityManager::ref_t<Ts>...> & t){
             return std::get<EntityManager::ref_t<T>>(t);
     }
+
+    /// @brief 简易包装
+    template<class T> using ref_t = EntityManager::ref_t<T>;
 }
 
 #endif

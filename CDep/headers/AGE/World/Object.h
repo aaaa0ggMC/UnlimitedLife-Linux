@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 对组件的封装，提供transform
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/11/27
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -13,25 +13,25 @@
 #define AGE_H_OBJ
 #include <AGE/Utils.h>
 #include <AGE/World/Components.h>
-#include <AGE/World/EntityManager.h>
 #include <cerrno>
 
 namespace age::world {
+    using namespace alib::g3::ecs;
     using namespace comps;
     struct AGE_API Object : public NonCopyable{
     private:
-        ComponentWrapper<comps::Transform> tran;
         EntityManager & em;
         EntityWrapper e;
+
+        ref_t<comps::Transform> tran;
     public:
-        inline Object(EntityManager & emm):em{emm},
-        e{emm.createEntity(),emm}{
-            e.add<Transform>();
-            tran.build(emm,e.e.id);
-        }
+        inline Object(EntityManager & emm)
+        :em{emm}
+        ,e(emm)
+        ,tran{e.add<Transform>()}{}
 
         inline Entity getEntity(){
-            return e.e;
+            return e.get_entity();
         }
 
         inline EntityWrapper getEntityWrapper(){
@@ -42,7 +42,7 @@ namespace age::world {
             e.destroy();
         }
 
-        inline Transform& transform(){return *tran;}
+        inline Transform& transform(){return tran.get();}
     };
 }
 

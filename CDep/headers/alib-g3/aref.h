@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 不会悬垂的比较安全的容器数据wrapper,Release下单次性能损失为0.3ns
  * @version 0.1
- * @date 2025/11/21
+ * @date 2025/11/27
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  ********************************************************
@@ -185,6 +185,11 @@ namespace alib::g3{
         ref(Cont & cont,size_t index){
         assert(index < cont.size());
         return RefWrapper<Cont>{cont,index};
+    }
+
+    template<CanAccessItem Cont> auto 
+    ref_invalid(Cont & cont){
+        return RefWrapper<Cont>{cont,std::numeric_limits<size_t>::max()};
     }
 
     /**

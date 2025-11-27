@@ -5,40 +5,41 @@
 using namespace age::world::systems;
 using namespace age::world::comps;
 using namespace age::world;
-
-ComponentRequisitions<Transform> Viewer::requisitions;
+using namespace alib::g3::ecs;
 
 void ParentSystem::update(){
-    if(!pool || !transformPool)initPool();
-    if(!pool || !transformPool)return;
-    ///@todo 采用更加高性能的写法
+    static thread_local detail::MonoticBitSet bitset;
+    bitset.ensure(em.get_entity_pool_size());
+    bitset.clear(false);
 
-    std::unordered_set<uint64_t> dealedParent;
-    
-    for(auto & [eid,_] : pool->mapper){
-        std::stack<uint64_t> pstack;
-        if(dealedParent.contains(eid))continue;
-        pstack.push(eid);
-        while(!pstack.empty()){
-            uint64_t child_id = pstack.top();
-            /*这个似乎是冗余的，测试下来多重parent chain注释这一块不影响
-            if(dealedParent.contains(child_id)){
+    pool.data.available_bits.for_each_skip_1_bits(
+        [this](size_t index){
+            std::stack<Parent*> pstack;
+            auto & root_parent_comp = this->pool.data[index];
+            if(bitset.get(root_parent_comp.child.id - 1))return;
+            pstack.push(&root_parent_comp);
+
+            while(!pstack.empty()){
+                Parent & p = *pstack.top();
+                auto iter  = this->pool.mapper.find(p.parent.id);
+                if(!bitset.get(p.parent.id - 1) && iter != this->pool.mapper.end()){
+                    pstack.push(&this->pool.data[(iter->second)]);
+                    continue;
+                }
+                auto citer = this->transformPool.mapper.find(p.child.id); 
+                if(citer != this->transformPool.mapper.end()){
+                    Transform& child = this->transformPool.data[citer->second];
+                    auto piter = this->transformPool.mapper.find(p.parent.id);
+                    
+                    if(piter != this->transformPool.mapper.end()){
+                        child.buildModelMatrixWithParent(this->transformPool.data[piter->second]);
+                    }else child.buildModelMatrix();
+                }
+                
+                bitset.set(p.child.id - 1);
                 pstack.pop();
-                continue;
-            }*/
-            comps::Transform& child = transformPool->data[transformPool->mapper[child_id]];
-            uint64_t parent_id = pool->data[pool->mapper[child_id]].parent.id;
-            auto iter = pool->mapper.find(parent_id);
-            if(iter != pool->mapper.end() && !dealedParent.contains(parent_id)){
-                pstack.push(parent_id);
-                continue;
             }
-            auto piter = transformPool->mapper.find(parent_id);
-            if(piter != transformPool->mapper.end()){
-                child.buildModelMatrixWithParent(transformPool->data[piter->second]);
-            }else child.buildModelMatrix();
-            dealedParent.emplace(child_id);
-            pstack.pop();
-        }
-    }
+
+        },pool.data.size()
+    );
 }

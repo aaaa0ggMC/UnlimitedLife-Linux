@@ -123,7 +123,7 @@ bool Application::destroyWindow(Window * win){
     return destroyWindow(win->sid);
 }
 
-Application::Application(world::EntityManager & emm):em{emm}{
+Application::Application(EntityManager & emm):em{emm}{
     counter++;
     Error::def.setTrigger();
 }

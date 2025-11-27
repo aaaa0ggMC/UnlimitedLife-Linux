@@ -3,7 +3,6 @@
 #include <iostream>
 #include <AMC/AMC.h>
 #include <AGE/Application.h>
-#include <AGE/World/EntityManager.h>
 #include <AGE/Window.h>
 
 using namespace std;
@@ -12,7 +11,7 @@ using namespace std;
 class AppManager: public amc::Manager {
     public:
     age::Window* window;
-    age::world::EntityManager em;
+    alib::g3::ecs::EntityManager em;
     age::Application app;
     AppManager(): app(em){
        

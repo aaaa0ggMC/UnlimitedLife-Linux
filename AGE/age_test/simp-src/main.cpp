@@ -3,6 +3,7 @@
 #include <AGE/Light.h>
 
 using namespace alib::g3;
+using namespace alib::g3::ecs;
 using namespace age;
 using namespace age::light;
 using namespace age::light::uploaders;
@@ -11,7 +12,7 @@ using enum LogLevel;
 int main(){
     Logger logger;
     LogFactory lg(logger,LogFactoryConfig("SIMP"));
-    world::EntityManager entity_manager;
+    EntityManager entity_manager;
     Application app(entity_manager);
     Window *win;
 
