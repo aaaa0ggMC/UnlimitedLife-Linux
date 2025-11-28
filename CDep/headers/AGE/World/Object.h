@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 对组件的封装，提供transform
  * @version 0.1
- * @date 2025/11/27
+ * @date 2025/11/29
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -19,12 +19,12 @@ namespace age::world {
     using namespace alib::g3::ecs;
     using namespace comps;
     struct AGE_API Object : public NonCopyable{
-    private:
+    public:
         EntityManager & em;
         EntityWrapper e;
 
         ref_t<comps::Transform> tran;
-    public:
+        
         inline Object(EntityManager & emm)
         :em{emm}
         ,e(emm)

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 纹理
  * @version 0.1
- * @date 2025/08/31
+ * @date 2025/11/29
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -107,7 +107,7 @@ namespace age{
 
         inline Sampler& borderColor(const glm::vec4& color){
             info->borderColor = color;
-            glSamplerParameterfv(sampler_id,GL_TEXTURE_BORDER_COLOR,glm::value_ptr(color));
+            glSamplerParameterfv(sampler_id,GL_TEXTURE_BORDER_COLOR,glm::value_ptr(info->borderColor));
             return *this;
         }
 

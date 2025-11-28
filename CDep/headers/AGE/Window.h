@@ -161,7 +161,7 @@ namespace age{
         /// 绑定便于访问
         Binder binder { binderArray };
         /// OnResize
-        std::function<void(Window&,int nw,int nh)> m_onResize;
+        std::function<void(Window&,int nw,int nh,int ori_w,int ori_h)> m_onResize;
         std::function<void(Window&,age::KeyWrapper wrapper)> m_onKey;
         std::function<void(Window&,double x,double y)> m_onMouseMove;
         /// Cursor
@@ -218,6 +218,10 @@ namespace age{
 
         inline GLFWwindow* getSystemHandle(){
             return window;
+        }
+
+        inline void setSize(int x,int y){
+            glfwSetWindowSize(window,x,y);
         }
 
         inline glm::vec2 getCursorPos(){
@@ -284,7 +288,7 @@ namespace age{
         }
 
         /// @note nw,nh will multiply by content scale before calling in Linux system,while keep the same in Windows system
-        inline void setWindowSizeCallback(std::function<void(Window&,int nw,int nh)> func){
+        inline void setWindowSizeCallback(std::function<void(Window&,int nw,int nh,int ori_w,int ori_h)> func){
             m_onResize = func;
         }
 

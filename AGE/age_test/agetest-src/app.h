@@ -59,11 +59,12 @@ struct MainApplication{
     VBOManager & vbos;
     /// "Borrowed" from Application
     Window * m_window {nullptr};
-    Sampler * m_sampler {nullptr};
+    std::optional<Sampler> m_sampler;
     std::unordered_map<std::string,Texture*> textures;
 
     //// Models ///
     std::unordered_map<std::string,Model> models;
+    Model * current_model {nullptr};
     Model m_plane;
 
     //// States ////
@@ -80,6 +81,7 @@ struct MainApplication{
     Shader shader {Shader::null()};
     ShaderUniform mv_matrix;
     ShaderUniform invMV;
+    ShaderUniform projectionMatrix;
 
     material::MaterialBindings mb;
     light::LightBindings lb;
@@ -97,6 +99,9 @@ struct MainApplication{
     ~MainApplication();
 
     void run();
+    void handle_input(float elapse_seconds);
+    void draw();
+    void world_update(float ep_milliseconds);
 
     //// Setup sections ////
     void setup();

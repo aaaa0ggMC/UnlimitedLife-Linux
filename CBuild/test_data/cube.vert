@@ -4,6 +4,7 @@ out vec3 varyingNormal;
 out vec3 varyingLightDir;
 out vec3 varyingVertPos;
 out vec3 varyingHalfVector;
+out float varyingLightDistance;
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 texCoord;
@@ -25,8 +26,9 @@ void main(){
   vec4 P = mv_matrix * vec4(position,1.0);
   varyingVertPos = P.xyz;
   varyingLightDir = light.position - varyingVertPos;
-  varyingNormal = (invMV * vec4(normals,1.0)).xyz;
-  varyingHalfVector = (varyingLightDir - varyingNormal).xyz;
+  varyingNormal = (invMV * vec4(normals,0.0)).xyz;
+  varyingHalfVector = normalize(varyingLightDir - varyingVertPos).xyz;
+  varyingLightDistance = length(varyingLightDir);
 
   coord = texCoord;
   gl_Position = proj_matrix * mv_matrix * vec4(position,1.0);

@@ -4,6 +4,7 @@ in vec3 varyingNormal;
 in vec3 varyingLightDir;
 in vec3 varyingVertPos;
 in vec3 varyingHalfVector;
+in float varyingLightDistance;
 out vec4 color;
 
 layout(binding = 0) uniform sampler2D tex;
@@ -26,6 +27,10 @@ uniform Material material;
 uniform PositionalLight light;
 uniform vec4 gambient;
 
+uniform float light_Kc = 1.0;
+uniform float light_Kl = 0.09; 
+uniform float light_Kq = 0.032;
+
 void main(){
   vec3 L = normalize(varyingLightDir);
   vec3 N = normalize(varyingNormal);
@@ -34,11 +39,12 @@ void main(){
   float cosTheta = dot(L,N);
   float cosPhi = dot(H,N);
 
-  vec3 ambient = (gambient * material.ambient + light.ambient * material.ambient).xyz;
-  vec3 diffuse = light.diffuse.xyz * material.diffuse.xyz * max(cosTheta,0.0);
+  float attenuation = 1.0 / (light_Kc + light_Kl * varyingLightDistance + light_Kq * varyingLightDistance * varyingLightDistance);
+
+  vec4 texColor = texture(tex,coord);
+  vec3 ambient = 3 * (gambient * material.ambient + light.ambient * material.ambient).xyz * texColor.xyz;
+  vec3 diffuse = light.diffuse.xyz * material.diffuse.xyz * texColor.xyz * max(cosTheta,0.0);
   vec3 specular = light.specular.xyz * material.specular.xyz * pow(max(cosPhi,0.0),material.shininess);
 
-  vec4 lightColor = vec4(ambient + diffuse + specular,1.0);
-
-  color = lightColor * 0.5 + texture(tex,coord) * 0.5;
+  color = vec4(ambient + attenuation * (diffuse + specular),texColor.a);
 }

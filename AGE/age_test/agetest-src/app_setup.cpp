@@ -32,15 +32,18 @@ void MainApplication::load_sounds(){
 }
 
 void MainApplication::load_uniforms(){
-    shader["gambient"].upload4f(0.7,0.7,0.7,1.0);
-    shader["proj_matrix"].uploadmat4(camera.projector().buildProjectionMatrix());
+    shader["gambient"].upload4f(0.5,0.5,0.5,1.0);
+    projectionMatrix = shader["proj_matrix"];
     mv_matrix = shader["mv_matrix"];
     invMV = shader["invMV"];
+
+    projectionMatrix.uploadmat4(camera.projector().buildProjectionMatrix());
 
     lg(Info) << "LoadUniforms:OK" << endlog;
 }
 
 void MainApplication::load_lights(){
+    using namespace age::light::uploaders;
     light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
     light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
     light.specular.fromRGBA(1.0,1.0,1.0,1.0);
@@ -56,6 +59,7 @@ void MainApplication::load_lights(){
 }
 
 void MainApplication::load_materials(){
+    using namespace age::light::uploaders;
     mat_gold.ambient.fromRGBA(0.2473f,0.1995f,0.0745f,1);
     mat_gold.diffuse.fromRGBA(0.7516f,0.6065f,0.2265f,1);
     mat_gold.specular.fromRGBA(0.6283f,0.5559f,0.3661f,1);
@@ -82,12 +86,13 @@ void MainApplication::load_static_models(){
         mdx = &models[k];
         Clock clk;
         model::loadModelFromFile<model::fmt::AutoDetect>(fp,*mdx);
-        lg(Info) << "Loaded model " << k << "in " << clk.getOffset() << "ms." << std::endl;
+        lg(Info) << "Loaded model " << k << " in " << clk.getOffset() << "ms." << std::endl;
     }
 
-    state.models.emplace("cubes");
-    mdx = &models["cubes"];
+    state.models.emplace("cube");
+    mdx = &models["cube"];
     model::Prefab::cube(1,*mdx);
+    if(!current_model)current_model = mdx;
 
     model::Prefab::box(100,0.2,100,m_plane,32); // 重复多次uv
 
@@ -104,16 +109,28 @@ void MainApplication::load_dynamic_models(){
 
     mdx = &models["torus"];
     model::Prefab::torus(state.precision,1,0.5,*mdx);
+
     lg(Info) << "LoadDynamicModel:OK in " << gclk.getOffset() << "ms" << endlog;
 }
 
 void MainApplication::init_world_objects(){
     camera.transform().move(1,0,10);
-    camera.projector().set(std::numbers::pi/3.0f,win->getFrameBufferSize().x,win->getFrameBufferSize().y);
+    camera.projector().set(std::numbers::pi/3.0f,m_window->getFrameBufferSize().x,m_window->getFrameBufferSize().y);
+    camera.cameraEntity.add<comps::Tag>("camera");
+    
     cube.transform().move(1,-3,6);
+    cube.getEntityWrapper().add<comps::Tag>("cube");
+
     invPar.transform().move(0,0,4);
+    invPar.getEntityWrapper().add<comps::Tag>("invPar");
+
     pyramid.transform().move(3,0,0);
+    pyramid.getEntityWrapper().add<comps::Tag>("pyramid");
+
     plane.transform().move(0,-10,0);
+    plane.getEntityWrapper().add<comps::Tag>("plane");
+
+    root.getEntityWrapper().add<comps::Tag>("root");
 
     em.add_component<Parent>(pyramid.getEntity(),pyramid.getEntity(),invPar.getEntity());
     em.add_component<Parent>(invPar.getEntity(),invPar.getEntity(),cube.getEntity());
@@ -138,12 +155,29 @@ void MainApplication::resolve_bindings(){
 
 void MainApplication::set_control_callbacks(){
     // size callback
-    m_window->setWindowSizeCallback([&camera](Window & win,int nw,int nh){
-        glViewport(0,0,nw,nh);
-        camera.projector().setAspectRatio((float)nw,(float)nh);
+    m_window->setWindowSizeCallback([this](Window & win,int w,int h,int ow,int oh){
+        static int old_x = -1,old_y = -1;
+        if(std::abs(old_x - ow) <= 1 && std::abs(old_y - oh) <= 1){
+            return;
+        }
+
+        float fac_x = w / (float)ow;
+        float fac_y = h / (float)oh;
+        
+        CreateWindowInfo::KeepRatio(ow,oh,this->cfg.ci.width,this->cfg.ci.height);
+        old_x = ow;
+        old_y = oh;
+
+        win.setSize(ow,oh);
+
+        w = ow * fac_x;
+        h = oh * fac_y;
+
+        glViewport(0,0,w,h);
+        this->camera.projector().setAspectRatio((float)w,(float)h);
     });
     // key callback
-    win->setKeyCallback([this](Window&win,KeyWrapper wp){
+    m_window->setKeyCallback([this](Window&win,KeyWrapper wp){
         if(wp.getKeyAction() == KeyAction::Release){
             if(wp.getKeyCode() == KeyCode::P){
                 this->state.playing = !this->state.playing;
@@ -159,7 +193,9 @@ void MainApplication::load_textures(){
     ci.channel_desired = 4;
     ci.uploadToOpenGL = true;
     ci.genMipmap = true;
-    for(size_t i = 0;i < cfg.texture_sids.size();++i){
+    
+    size_t i = 0;
+    for(;i < cfg.texture_sids.size();++i){
         if(i >= cfg.texture_paths.size()){
             lg(Warn) << "Skip " << cfg.texture_sids.size() - i << " textures for the lack of texture paths!" << endlog;
             break;
@@ -169,9 +205,9 @@ void MainApplication::load_textures(){
         auto texture = app.createTexture(ci);
         if(texture){
             textures.emplace(cfg.texture_sids[i],*texture);
-            lg(Error) << "Successfully loaded texture with sid[" << ci.sid << "] file_path[" << ci.file.path << "]!" << endlog;
+            lg(Info) << "Successfully loaded texture with sid[" << ci.sid << "] file_path[" << ci.file.path << "]!" << endlog;
         }else{
-            lg(Error) << "Failed to load texture with sid[" << ci.sid << "] file_path[" << ci.file.path << "]!" << endlog;
+            lg(LogLevel::Error) << "Failed to load texture with sid[" << ci.sid << "] file_path[" << ci.file.path << "]!" << endlog;
         }
     }
     if(i > cfg.texture_sids.size()){
@@ -185,7 +221,7 @@ void MainApplication::setup_sampler(){
     if(!t){
         lg(Fatal) << "Failed to create sampler!" << endlog;
         std::exit(-1);
-    }else m_sampler = *t;
+    }else m_sampler = t;
     lg(Info) << "CreateSampler:OK" << endlog;
 }
 
@@ -228,7 +264,7 @@ void MainApplication::setup_window(){
         lg(Fatal) << "Failed to create window!" << endlog;
         std::exit(-1);
     }else m_window = *t;
-    input.setWindow(m_window);
+    input.setWindow(*m_window);
     m_window->makeCurrent();
     lg(Info) << "CreateWindow:OK" << endlog;
 }

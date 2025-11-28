@@ -68,7 +68,7 @@ std::optional<Window*> Application::createWindow(const CreateWindowInfo &info){
         }
         #ifdef __linux__
         auto scale = window.getContentScale();
-        if(window.m_onResize)window.m_onResize(window,nw * scale.first,nh * scale.second);
+        if(window.m_onResize)window.m_onResize(window,nw * scale.first,nh * scale.second,nw,nh);
         #elif defined(_WIN32)
         // Windows系统下，nw和nh已经是经过content scale处理的
         if(window.m_onResize)window.m_onResize(window,nw,nh);
@@ -626,7 +626,7 @@ std::optional<Sampler> Application::createSampler(std::string_view sid){
         Error::def.pushMessage({AGEE_OPENGL_CREATE_ERROR,"Failed to create a new sampler!"});
         return std::nullopt; //空对象
     }
-    auto samp = samplersInfo.emplace(usid,SamplerInfo()).first->second;
+    auto& samp = samplersInfo.emplace(usid,SamplerInfo()).first->second;
     sampler.info = &samp;
     samplers.emplace(usid,sampler);
     return sampler;

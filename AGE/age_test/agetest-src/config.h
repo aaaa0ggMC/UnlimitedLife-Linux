@@ -9,11 +9,12 @@
 #include <AGE/Input.h>
 #include <AGE/Application.h>
 #include <AGE/World/Camera.h>
+#include <glm/glm.hpp>
 
 using namespace age;
 using namespace alib::g3;
+using namespace age::world;
 using namespace alib::g3::ecs;
-using namespace alib::g3::world;
 using enum LogLevel;
 
 struct MainApplicationConfig{
@@ -31,19 +32,34 @@ struct MainApplicationConfig{
     size_t vbo_count {16};
     float fpsCountTimeMs { 500 };
 
+    //// World ////
+    float world_update_frame_rate { 60 };
+
     //// Shaders ////
     std::string main_vert {"test_data/cube.vert"};
     std::string main_frag {"test_data/cube.frag"};
 
     //// Textures ////
-    std::vector<std::string> texture_sids;
-    std::vector<std::string> texture_paths;
+    std::vector<const char *> texture_sids;
+    std::vector<const char *> texture_paths;
 
     //// Models ////
-    std::unordered_map<std::string,std::string> models;\
+    std::unordered_map<std::string,std::string> models;
 
     //// Sounds ////
-    std::string snd_file {"./test_data/test_music.flac"};
+    std::string snd_file {"./test_data/test_mp3.mp3"};
+
+    //// Injector ////
+    float imgui_refresh_rate {100};
+    
+    //// Camera ////
+    glm::vec2 cam_rot {1,1};
+    float cam_speed {3};
+
+    //// GL ////
+    /// Depth Data ///
+    std::vector<GLenum> gl_depthfunc_enums;
+    std::vector<const char*> gl_depthfunc_desc;
 
     MainApplicationConfig(){
         //// CreateWindowInfo ////
@@ -72,6 +88,16 @@ struct MainApplicationConfig{
 
         //// Models ////
         models["main.obj"] = "./test_data/main.model";
+
+        //// GL ////
+        gl_depthfunc_enums = {
+            GL_LEQUAL, GL_LESS, GL_GREATER, GL_EQUAL,
+            GL_GEQUAL, GL_NOTEQUAL, GL_ALWAYS, GL_NEVER
+        };
+        gl_depthfunc_desc = {
+            "LEqual (≤)", "Less (<)", "Greater (>)", "Equal (=)", 
+            "GEqual (≥)", "NotEqual (!=)", "Always", "Never"
+        };
     }
 };
 #endif

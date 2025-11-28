@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 实体管理
  * @version 0.1
- * @date 2025/11/27
+ * @date 2025/11/29
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -115,6 +115,11 @@ namespace alib::g3::ecs{
         /// @return 组件池，找不到返回nullptr
         template<class T> inline ComponentPool<T>* get_component_pool(){
             return get_component_pool_unsafe<T>();
+        }
+
+        /// @brief 获取持有的entity线性存储
+        inline auto& get_entities_storage(){
+            return entities; 
         }
 
         /// @brief 构造实体表

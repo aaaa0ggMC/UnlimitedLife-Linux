@@ -1,7 +1,7 @@
 /** @file world/Components.h
  * @brief 提供一些预制的components
  * @author aaaa0ggmc,euuen
- * @date 2025/11/27
+ * @date 2025/11/29
  * @start-date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
@@ -408,6 +408,19 @@ namespace age::world{
                 dm_clear();
                 proj_matrix = glm::perspective(fovRad,aspectRatio,zNear,zFar);
                 return proj_matrix;
+            }
+        };
+
+        struct AGE_API Tag{
+        public:
+            std::string tag;
+
+            Tag(std::string_view set_tag){
+                reset(set_tag);
+            }
+
+            inline void reset(std::string_view set_tag){
+                tag = set_tag;
             }
         };
 

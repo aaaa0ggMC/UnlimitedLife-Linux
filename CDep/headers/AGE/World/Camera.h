@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 相机，对组件的一个包装
  * @version 0.1
- * @date 2025/11/27
+ * @date 2025/11/29
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -19,9 +19,7 @@ namespace age::world{
     using namespace comps;
 
     struct Camera : public DirtyMarker,public NonCopyable{
-#ifndef AGE_EM_DEBUG
-    private:
-#endif
+    public:
         // 确保初始化顺序！
         EntityManager& em;
         EntityWrapper cameraEntity;
@@ -30,7 +28,6 @@ namespace age::world{
         ref_t<comps::Viewer> view;
         ref_t<comps::Projector> proj;
 
-    public:
         glm::mat4 vp_matrix;
 
         inline Camera(EntityManager& iem)
