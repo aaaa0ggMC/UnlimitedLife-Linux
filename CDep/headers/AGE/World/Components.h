@@ -337,14 +337,11 @@ namespace age::world{
             }
         };
 
-        struct AGE_API Parent{
+        struct AGE_API Parent : IBindEntity{
             using Dependency = ComponentStack<Transform>;
-
             Entity parent;
-            Entity child;
 
-            Parent(const Entity & ch,const Entity & p){
-                child = ch;
+            Parent(const Entity & p){
                 parent = p;
             }
             //Cache Component Index is not a good option,because the index may vary when the user deleted the component and then added it

@@ -132,8 +132,8 @@ void MainApplication::init_world_objects(){
 
     root.getEntityWrapper().add<comps::Tag>("root");
 
-    em.add_component<Parent>(pyramid.getEntity(),pyramid.getEntity(),invPar.getEntity());
-    em.add_component<Parent>(invPar.getEntity(),invPar.getEntity(),cube.getEntity());
+    em.add_component<Parent>(pyramid.getEntity(),invPar.getEntity());
+    em.add_component<Parent>(invPar.getEntity(),cube.getEntity());
     lg(Info) << "InitWorldObjects:OK" << endlog;
 }
 

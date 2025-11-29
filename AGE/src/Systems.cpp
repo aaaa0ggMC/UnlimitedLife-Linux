@@ -16,7 +16,7 @@ void ParentSystem::update(){
         [this](size_t index){
             std::stack<Parent*> pstack;
             auto & root_parent_comp = this->pool.data[index];
-            if(bitset.get(root_parent_comp.child.id - 1))return;
+            if(bitset.get(root_parent_comp.get_bound().id - 1))return;
             pstack.push(&root_parent_comp);
 
             while(!pstack.empty()){
@@ -26,7 +26,7 @@ void ParentSystem::update(){
                     pstack.push(&this->pool.data[(iter->second)]);
                     continue;
                 }
-                auto citer = this->transformPool.mapper.find(p.child.id); 
+                auto citer = this->transformPool.mapper.find(p.get_bound().id); 
                 if(citer != this->transformPool.mapper.end()){
                     Transform& child = this->transformPool.data[citer->second];
                     auto piter = this->transformPool.mapper.find(p.parent.id);
@@ -36,7 +36,7 @@ void ParentSystem::update(){
                     }else child.buildModelMatrix();
                 }
                 
-                bitset.set(p.child.id - 1);
+                bitset.set(p.get_bound().id - 1);
                 pstack.pop();
             }
 

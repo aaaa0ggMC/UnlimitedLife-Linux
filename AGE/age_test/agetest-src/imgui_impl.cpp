@@ -4,6 +4,7 @@ void ImGUIInjector::info(){
     ImGui::Text("信息");
     ImGui::DragFloat("窗口不透明度",&s.im_winalpha,0.008F,0.0F,1.0F);
     ImGui::DragFloat("UI不透明度 ",&s.im_uialpha,0.008F,0.2F,1.0F);
+    ImGui::DragFloat("鼠标灵敏度",&s.mouse_sensitivity,1);
 }
 
 void ImGUIInjector::inspector(){
@@ -62,7 +63,6 @@ void ImGUIInjector::inspector(){
                 if(it != pool_parents->mapper.end()){
                     comps::Parent & parent = pool_parents->data[it->second];
                     if(ImGui::CollapsingHeader("Parent",ImGuiTreeNodeFlags_DefaultOpen)){
-                        ImGui::Text("子类 %lu %lu",parent.child.id,parent.child.version);
                         ImGui::Text("父类 %lu %lu",parent.parent.id,parent.parent.version);
                     } 
                 }
@@ -150,9 +150,35 @@ void ImGUIInjector::gl(){
 }
 
 void ImGUIInjector::render(){
-
+    ImGui::Text("渲染设置");
+    ImGui::Checkbox("立方体",&s.show_cube);
+    ImGui::Checkbox("金字塔",&s.show_pyramid);
+    ImGui::Checkbox("模型",&s.show_model);
+    ImGui::Checkbox("地板",&s.show_platform);
 }
 
 void ImGUIInjector::music(){
+    ImGui::Text("音乐:");
+    if(app.snd1.getStatus() == age::audio::Status::Stopped){
+        if(ImGui::Button("播放")){
+            app.snd1.play();
+        }
+    }else if(app.snd1.getStatus() == age::audio::Status::Playing){
+        if(ImGui::Button("暂停")){
+            app.snd1.pause();
+        }
+    }else if(app.snd1.getStatus() == age::audio::Status::Paused){
+        if(ImGui::Button("继续")){
+            app.snd1.play();
+        }
+    }
+    size_t len = app.snd1.length().count();
+    size_t prog = app.snd1.tell().count();
+    prog %= len;
 
+    if(ImGui::SliderFloat("进度调整",&s.progress,0.0,1.0)){
+        app.snd1.seek(std::chrono::milliseconds((int)(s.progress * len)));
+    }else s.progress = (float)prog / len;
+    ImGui::Text("进度: %.1f / %.1f",prog/1000.f, len/1000.f);
+    ImGui::Text("状态: %s",audio::getStatusText(app.snd1.getStatus()));
 }

@@ -15,6 +15,7 @@
 #include <alib-g3/ecs/component_pool.h>
 #include <alib-g3/ecs/linear_storage.h>
 #include <alib-g3/ecs/cycle_checker.h>
+#include <alib-g3/ecs/component_concepts.h>
 #include <alib-g3/aref.h>
 #include <alib-g3/adebug.h>
 #include <memory>
@@ -95,6 +96,9 @@ namespace alib::g3::ecs{
                 if constexpr(requires(T & t){t.cleanup();}){
                     // 你是有非销毁不可的理由吗？
                     obj.data.data[it->second].cleanup();
+                }
+                if constexpr(NeedBind<T>){
+                    obj.data.data[it->second].bind(Entity::null());
                 }
                 obj.data.remove(it->second);
                 obj.mapper.erase(it);
@@ -203,6 +207,9 @@ namespace alib::g3::ecs{
             bool flag;
             size_t index;
             T & comp = p->data.try_next_with_index(flag,index,std::forward<Args>(args)...);
+            if constexpr(NeedBind<T>){
+                comp.bind(e);
+            }
             p->mapper.emplace(e.id,index);
             return ref(p->data,index);
         }

@@ -36,6 +36,12 @@ struct States{
     /// @brief 鼠标灵敏度 [建议 1 - 1'000'000，运算的时候会除以1'000'000]
     float mouse_sensitivity { 1000 };
 
+    /// Show
+    bool show_cube {true};
+    bool show_pyramid {true};
+    bool show_model {true};
+    bool show_platform {true};
+
     /// Models ///
     int current_model_index {0};
 
@@ -54,6 +60,9 @@ struct States{
     int sampler_wrap_s {0};
     int sampler_wrap_t {0};
     float sampler_aniso { 2 };
+
+    //// 播放进度 ////
+    float progress { 0.0 };
 };
 
 #endif

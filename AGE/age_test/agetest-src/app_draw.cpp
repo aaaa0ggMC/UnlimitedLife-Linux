@@ -19,7 +19,7 @@ void MainApplication::draw(){
 
     mat_gold.upload(mb);
     /// Cube
-    {
+    if(state.show_cube){
         glFrontFace(GL_CCW);
         // vaos[0].bind(); 绘制model不需要bind vao
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * cube.transform().buildModelMatrix();
@@ -31,7 +31,7 @@ void MainApplication::draw(){
     }
 
     /// Pyramid
-    {
+    if(state.show_pyramid){
         vaos[1].bind();
         glFrontFace(GL_CCW);
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * pyramid.transform().buildModelMatrix();
@@ -41,7 +41,7 @@ void MainApplication::draw(){
     }
 
     /// Current Model
-    {
+    if(state.show_model){
         glFrontFace(GL_CCW);
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * invPar.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
@@ -50,7 +50,7 @@ void MainApplication::draw(){
     }
 
     /// With Root
-    {
+    if(state.show_model){
         glFrontFace(GL_CCW);
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * root.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
@@ -61,7 +61,7 @@ void MainApplication::draw(){
     /// Plane
     (*app.getTexture("wall"))->bind(GL_TEXTURE0);
     mat_jade.upload(mb);
-    {
+    if(state.show_platform){
         glFrontFace(GL_CCW);
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * plane.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));

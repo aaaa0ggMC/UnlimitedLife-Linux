@@ -68,8 +68,9 @@ void MainApplication::world_update(float ep){
     }
 
     //// Update Systems ////
-    parent_system.update();
+    /// 更新也是有顺序的
     em.update<comps::Transform>(ep,true);
+    parent_system.update();
 }
 
 void MainApplication::handle_input(float p){
