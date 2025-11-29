@@ -147,6 +147,14 @@ void ImGUIInjector::model(){
 
 void ImGUIInjector::gl(){
     ImGui::Text("GL设置");
+    if(ImGui::CollapsingHeader("多边形模式",ImGuiTreeNodeFlags_DefaultOpen)){
+        ImGui::ListBox("面",&s.gl_polygon_face_index,app.cfg.gl_polygon_face_desc.data(),app.cfg.gl_polygon_face_desc.size());
+        ImGui::ListBox("模式",&s.gl_polygon_mode_index,app.cfg.gl_polygon_mode_desc.data(),app.cfg.gl_polygon_mode_desc.size());
+    }
+    ImGui::Checkbox("面剔除",&s.gl_cull);
+    ImGui::Checkbox("深度测试",&s.gl_depth);
+    ImGui::ListBox("深度测试函数",&s.gl_depthfunc_index,app.cfg.gl_depthfunc_desc.data(),app.cfg.gl_depthfunc_desc.size(),4);
+    ImGui::DragFloat("点大小",&s.point_size,0.1F,0.1F,64.0F);
 }
 
 void ImGUIInjector::render(){

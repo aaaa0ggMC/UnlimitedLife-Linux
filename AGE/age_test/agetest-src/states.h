@@ -30,11 +30,16 @@ struct States{
     /// @brief 是否启用深度测试
     bool gl_depth {true};
     /// @brief 深度测试的索引
-    size_t gl_depthfunc_index {0};
+    int gl_depthfunc_index {0};
+    /// @brief 其他索引
+    int gl_polygon_face_index {0};
+    int gl_polygon_mode_index {0};
     /// @brief 是否裁切
     bool gl_cull {true};
     /// @brief 鼠标灵敏度 [建议 1 - 1'000'000，运算的时候会除以1'000'000]
     float mouse_sensitivity { 1000 };
+    /// @brief 点的大小
+    float point_size {1.0f};
 
     /// Show
     bool show_cube {true};

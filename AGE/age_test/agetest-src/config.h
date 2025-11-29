@@ -60,6 +60,11 @@ struct MainApplicationConfig{
     /// Depth Data ///
     std::vector<GLenum> gl_depthfunc_enums;
     std::vector<const char*> gl_depthfunc_desc;
+    /// Polygon Mode ///
+    std::vector<GLenum> gl_polygon_face_enums;
+    std::vector<const char*> gl_polygon_face_desc;
+    std::vector<GLenum> gl_polygon_mode_enums;
+    std::vector<const char*> gl_polygon_mode_desc;
 
     MainApplicationConfig(){
         //// CreateWindowInfo ////
@@ -98,6 +103,10 @@ struct MainApplicationConfig{
             "LEqual (≤)", "Less (<)", "Greater (>)", "Equal (=)", 
             "GEqual (≥)", "NotEqual (!=)", "Always", "Never"
         };
+        gl_polygon_face_desc = {"Front","Back","Front And Back"};
+        gl_polygon_face_enums = {GL_FRONT,GL_BACK,GL_FRONT_AND_BACK};
+        gl_polygon_mode_desc = {"Fill","Line","Point"};
+        gl_polygon_mode_enums = {GL_FILL,GL_LINE,GL_POINT};
     }
 };
 #endif

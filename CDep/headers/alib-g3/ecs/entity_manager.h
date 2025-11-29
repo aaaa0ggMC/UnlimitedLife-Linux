@@ -237,13 +237,13 @@ namespace alib::g3::ecs{
         /// @brief 更新所有的非空闲的组件
         /// @tparam T 组件池类型
         /// @param f 函数类型
-        template<class T,class F> inline void update(F && f){
-            ComponentPool<T> * pool = get_component_pool_unsafe<T>();
-            if(!pool)return;
-            pool->data.available_bits.for_each_skip_1_bits([func = std::forward<F>(f),pool](size_t index){
-                func(pool->data.data[index]);
-            },pool->data.data.size());
+        template<class T,detail::FuncForEachable<T> F> inline void update(F && f){
+            ComponentPool<T> * pool = get_component_pool<T>();
+            if(pool){
+                pool->data.for_each(std::forward<F>(f));
+            }
         }
+
 
         /// @brief 更新所有的非空闲的组件
         /// @tparam T 组件池类型，组件内需要有update函数

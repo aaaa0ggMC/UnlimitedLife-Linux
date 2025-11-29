@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 线性存储类，目前使用vector，后期可以变成sparse_set啥的
  * @version 0.1
- * @date 2025/11/27
+ * @date 2025/11/29
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -15,6 +15,7 @@
 #include <alib-g3/adebug.h>
 #include <limits>
 #include <vector>
+#include <bit>
 
 namespace alib::g3::ecs::detail{
     /// @brief 是否可以通过reset方法实现建议重构？
@@ -26,6 +27,8 @@ namespace alib::g3::ecs::detail{
         t.reset(std::forward<Args>(args)...);
         T(std::forward<Args>(args)...);
     };
+    /// @brief 可以用来foreach的函数，对参数进行限制
+    template<class T,class CompT> concept FuncForEachable = requires(T && t,CompT & c){t(c);};
 
     /// @brief 单调递增的bitset
     struct DLL_EXPORT MonoticBitSet{
@@ -181,6 +184,33 @@ namespace alib::g3::ecs::detail{
             data.reserve(reserve_size);
             available_bits.ensure(reserve_size);
         }
+        
+        /// @brief 进行遍历
+        template<FuncForEachable<T> F> void for_each(F && func){
+            size_t stop_at = size();
+            size_t processed = 0;
+
+            for(size_t i = 0;processed < stop_at && i < available_bits.mask.size();++i){
+                MonoticBitSet::store_t inverted_mask = available_bits.mask[i];
+                size_t base_index = i * MonoticBitSet::data_size;
+                if(base_index >= stop_at)break;
+                if(inverted_mask == std::numeric_limits<MonoticBitSet::store_t>::max()){
+                    continue;
+                }
+
+                inverted_mask = ~inverted_mask;
+
+                while(inverted_mask){
+                    size_t offset = std::countr_zero(inverted_mask);
+                    size_t current_index = offset + base_index;
+
+                    if(current_index >= stop_at)break;
+                    func(this->operator[](current_index));
+                    
+                    inverted_mask &= inverted_mask - 1;
+                }
+            }
+        }
 
         /// @brief 获取下一个对象
         /// @param ...args 传入对应类型构造函数的参数
@@ -225,6 +255,10 @@ namespace alib::g3::ecs::detail{
         /// @brief 移除对应序号的数据
         /// @param index 数据的位置序号
         inline void remove(size_t index){
+            if(available_bits.get(index)){
+                panic_debug(true,"Double free a storage!");
+                return;
+            }
             available_bits.set(index);
             free_elements.push_back(index);
         }

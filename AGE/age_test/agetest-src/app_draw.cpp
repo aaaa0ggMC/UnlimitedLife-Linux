@@ -16,6 +16,8 @@ void MainApplication::draw(){
     }else glDisable(GL_DEPTH_TEST);
     if(state.gl_cull)glEnable(GL_CULL_FACE);
     else glDisable(GL_CULL_FACE);
+    glPointSize(state.point_size);
+    glPolygonMode(cfg.gl_polygon_face_enums[state.gl_polygon_face_index],cfg.gl_polygon_mode_enums[state.gl_polygon_mode_index]);
 
     mat_gold.upload(mb);
     /// Cube

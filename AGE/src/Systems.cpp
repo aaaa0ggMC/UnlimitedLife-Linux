@@ -12,15 +12,18 @@ void ParentSystem::update(){
     bitset.ensure(em.get_entity_pool_size());
     bitset.clear(false);
 
-    pool.data.available_bits.for_each_skip_1_bits(
-        [this](size_t index){
+    pool.data.for_each(
+        [this](Parent & root){
             std::stack<Parent*> pstack;
-            auto & root_parent_comp = this->pool.data[index];
-            if(bitset.get(root_parent_comp.get_bound().id - 1))return;
-            pstack.push(&root_parent_comp);
+            if(bitset.get(root.get_bound().id - 1))return;
+            pstack.push(&root);
 
             while(!pstack.empty()){
                 Parent & p = *pstack.top();
+                panicf_debug(
+                    !p.parent.id || !p.get_bound().id,
+                    "Invalid entity!Current[%d],Parent[%d]",
+                p.get_bound().id,p.parent.id);
                 auto iter  = this->pool.mapper.find(p.parent.id);
                 if(!bitset.get(p.parent.id - 1) && iter != this->pool.mapper.end()){
                     pstack.push(&this->pool.data[(iter->second)]);
@@ -40,6 +43,6 @@ void ParentSystem::update(){
                 pstack.pop();
             }
 
-        },pool.data.size()
+        }
     );
 }
