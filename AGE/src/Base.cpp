@@ -13,6 +13,21 @@ std::pmr::unsynchronized_pool_resource Error::pool;
 std::pmr::polymorphic_allocator<char> Error::alloc (&pool);
 Error Error::def;
 
+void Error::checkOpenGLError(){
+    Error &err = Error::def;
+    GLint errc = glGetError();
+
+    while(errc != GL_NO_ERROR){
+        const char* errStr = (const char *)gluErrorString(errc);
+        if(errStr){
+            err.pushMessage({errc, errStr});
+        }else{
+            err.pushMessage({errc, "(GL_INTERNAL_ERROR)"});
+        }
+        errc = glGetError();  // 继续检查下一个错误
+    }
+}
+
 Error::Error(): infos(alloc){
     trigger = nullptr;
     limit = -1;

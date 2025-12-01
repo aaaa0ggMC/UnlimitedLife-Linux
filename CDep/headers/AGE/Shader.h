@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 着色器
  * @version 0.1
- * @date 2025/07/25 （左右）
+ * @date 2025/12/01 （左右）
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -19,6 +19,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+namespace age::manager{
+    class ShaderManager;
+}
 namespace age {
     template<class T>
     inline constexpr bool always_false_v = false;
@@ -213,7 +216,7 @@ namespace age {
         }
 
     private:
-        friend class Application;
+        friend class age::manager::ShaderManager;
 
         //prevent user handy creation
         Shader();

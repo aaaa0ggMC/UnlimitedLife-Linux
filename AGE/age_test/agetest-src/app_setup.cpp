@@ -4,7 +4,7 @@
 
 MainApplication::~MainApplication(){
     // 剩下的让application自己销毁吧。。。
-    app.destroyWindow(m_window);
+    app.windows.destroy(*m_window);
 }
 
 void MainApplication::setup(){
@@ -202,7 +202,7 @@ void MainApplication::load_textures(){
         }
         ci.file.path = cfg.texture_paths[i];
         ci.sid = cfg.texture_sids[i];
-        auto texture = app.createTexture(ci);
+        auto texture = app.textures.create(ci);
         if(texture){
             textures.emplace(cfg.texture_sids[i],*texture);
             lg(Info) << "Successfully loaded texture with sid[" << ci.sid << "] file_path[" << ci.file.path << "]!" << endlog;
@@ -217,7 +217,7 @@ void MainApplication::load_textures(){
 }
 
 void MainApplication::setup_sampler(){
-    auto t = app.createSampler("main");
+    auto t = app.samplers.create("main");
     if(!t){
         lg(Fatal) << "Failed to create sampler!" << endlog;
         std::exit(-1);
@@ -242,7 +242,7 @@ void MainApplication::setup_buffers(){
 }
 
 void MainApplication::setup_shader(){
-    shader = app.createShaderFromFile("main",cfg.main_vert,cfg.main_frag);
+    shader = app.shaders.fromFile("main",cfg.main_vert,cfg.main_frag);
     lg(Info) << "CreateShader:OK" << endlog;
 }
 
@@ -259,7 +259,7 @@ void MainApplication::setup_logger(){
 }
 
 void MainApplication::setup_window(){
-    auto t = app.createWindow(cfg.ci);
+    auto t = app.windows.create(cfg.ci);
     if(!t){
         lg(Fatal) << "Failed to create window!" << endlog;
         std::exit(-1);

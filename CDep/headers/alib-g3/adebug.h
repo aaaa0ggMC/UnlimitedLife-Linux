@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 目标是提供简单可用的错误判断，适合我这种一般不调试的人
  * @version 0.1
- * @date 2025/11/13
+ * @date 2025/12/01
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -122,13 +122,13 @@ namespace alib::g3{
 #define vpaincf(STR,...) alib::g3::VPanicf(STR,std::source_location::current(),##__VA_ARGS__)
 
 #ifndef ADEBUG_DISABLE_PASS_CONDITION_STRING
-#define vpanicf_if(COND,STR,...) if(COND){vpanicf(STR,__VA_ARGS__,#COND);}
-#define panic_if(COND,ARG) if(COND){panicf(alib_g3_internal_panic_if_fmt,ARG,#COND);}
-#define panicf_if(COND,STR,...) if(COND){panicf(STR,__VA_ARGS__,#COND);}
+#define vpanicf_if(COND,STR,...) do {if(COND){vpanicf(STR,__VA_ARGS__,#COND);}} while(0)
+#define panic_if(COND,ARG) do {if(COND){panicf(alib_g3_internal_panic_if_fmt,ARG,#COND);}} while(0)
+#define panicf_if(COND,STR,...) do {if(COND){panicf(STR,__VA_ARGS__,#COND);}} while(0)
 #else
-#define vpanicf_if(COND,STR,...) if(COND){vpanicf(STR,__VA_ARGS__);}
-#define panic_if(COND,ARG) if(COND){panic(ARG);}
-#define panicf_if(COND,STR,...) if(COND){panicf(STR,__VA_ARGS__);}
+#define vpanicf_if(COND,STR,...) do {if(COND){vpanicf(STR,__VA_ARGS__);}} while(0)
+#define panic_if(COND,ARG) do {if(COND){panic(ARG);}} while(0)
+#define panicf_if(COND,STR,...) do {if(COND){panicf(STR,__VA_ARGS__);}} while(0);
 #endif
 
 #ifdef NDEBUG

@@ -125,7 +125,7 @@ void ImGUIInjector::texture(){
     ImGui::Text("纹理");
     ImGui::ListBox("默认绑定的",&s.current_texture_id,app.cfg.texture_sids.data(),app.cfg.texture_sids.size());
     ImGui::DragInt("预览",&s.texture_preview_size,0.5F,0,1024);
-    auto tex = *app.app.getTexture(app.cfg.texture_sids[s.current_texture_id]);
+    auto tex = *app.app.textures.get(app.cfg.texture_sids[s.current_texture_id]);
     ImGui::Image((ImTextureID)(intptr_t)tex->getId(), ImVec2(s.texture_preview_size,s.texture_preview_size * tex->getTextureInfo().height / (float)tex->getTextureInfo().width));
 }
 

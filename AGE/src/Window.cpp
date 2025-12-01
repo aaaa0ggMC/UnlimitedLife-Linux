@@ -10,17 +10,6 @@ using namespace age;
 Window * Window::current = NULL;
 BinderArray Window::binderArray;
 
-CreateWindowInfo::CreateWindowInfo(){
-    sid = "default";
-    windowTitle = "default";
-    width = height = 600;
-    x = y = 0;
-    fps = 0;
-    moniter = std::nullopt;
-    share = std::nullopt;
-    style = WinStyle::FollowGLFW;
-}
-
 Window::Window():
 window{nullptr},
 sid{""},

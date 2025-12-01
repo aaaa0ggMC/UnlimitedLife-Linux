@@ -8,7 +8,7 @@ void MainApplication::draw(){
     shader.bind();
     sampler.bind(GL_TEXTURE0);
     // 绑定首选纹理
-    (*app.getTexture(cfg.texture_sids[state.current_texture_id]))->bind(GL_TEXTURE0);
+    (*app.textures.get(cfg.texture_sids[state.current_texture_id]))->bind(GL_TEXTURE0);
     // GL statuses //
     if(state.gl_depth){
         glEnable(GL_DEPTH_TEST);
@@ -61,7 +61,7 @@ void MainApplication::draw(){
     }
 
     /// Plane
-    (*app.getTexture("wall"))->bind(GL_TEXTURE0);
+    (*app.textures.get("wall"))->bind(GL_TEXTURE0);
     mat_jade.upload(mb);
     if(state.show_platform){
         glFrontFace(GL_CCW);

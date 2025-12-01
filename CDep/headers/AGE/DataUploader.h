@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 支持上传数据到用户定义的任何地方，支持prebind(创建uploader对象) 和 createDataUploader的postbind
  * @version 0.1
- * @date 2025/07/25
+ * @date 2025/12/01
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -47,8 +47,8 @@ namespace age{
         DataUploader<T> ret;
         //using namespace std::placeholders;
         //ret.upload = std::bind(std::forward<Fn>(func),_1,std::forward<Ts>(args)...);
-        auto params = std::forward_as_tuple(std::forward<Ts>(args)...);
-        ret.upload = [f = std::forward<Fn>(func), param = std::move(params)](const T & val) mutable ->void{
+        // auto params = std::forward_as_tuple(std::forward<Ts>(args)...);
+        ret.upload = [f = std::forward<Fn>(func), param = std::make_tuple(std::forward<Ts>(args)...)](const T & val) mutable ->void{
             std::apply(
                 [&](auto&... unpacked){
                     f(val,unpacked...);

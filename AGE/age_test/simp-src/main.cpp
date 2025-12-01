@@ -34,13 +34,13 @@ int main(){
         ci.KeepRatio(ci.width,ci.height,800,600);
         ci.ScreenPercent(0.2,0.2,&ci.x,&ci.y);
 
-        if(!app.createWindow(ci)){
+        if(!app.windows.create(ci)){
             lg.log(LogLevel::Error,"Failed to create window,now exit...");
             exit(-1);
-        }else win = *app.getWindow("SimpTest");
+        }else win = *app.windows.get("SimpTest");
     }
     
-    age::Shader shader = app.createShaderFromFile("main","test_data/cube.vert","test_data/cube.frag");
+    age::Shader shader = app.shaders.fromFile("main","test_data/cube.vert","test_data/cube.frag");
     ////Lights////
     PositionalLight light;
     LightBindings lb;
@@ -70,6 +70,6 @@ int main(){
         win->display();
     }
     
-    app.destroyWindow(win);
+    app.windows.destroy(*win);
     lg.log(Info,"closing");
 }

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 纹理
  * @version 0.1
- * @date 2025/11/29
+ * @date 2025/12/01
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -16,6 +16,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <AGE/Query.h>
+
+namespace age::manager{
+    class TextureManager;
+    class SamplerManager;
+}
 
 namespace age{
     struct AGE_API TextureInfo{
@@ -71,7 +76,7 @@ namespace age{
     struct AGE_API Sampler{
     private:
         friend class Tetxure;
-        friend class Application;
+        friend class age::manager::SamplerManager;
         GLuint sampler_id;
         SamplerInfo * info;
 
@@ -132,15 +137,12 @@ namespace age{
         }
     };
 
-    class Application;
-
     /// @todo 让我斟酌一下要不要搞noncopyable,Application那里先默认copy吧
     struct AGE_API Texture : public NonCopyable{
     private:
+        friend class age::manager::TextureManager;
+
         GLuint texture_id {0};
-        /// 其实我(Texture)不知道纹理的sid是什么hhh (为了代价更小的拷贝,sid在Application那里集中处理)
-        friend class Application;
-        /// Application * parentApp; 待定
         TextureInfo * textureInfo; ///< 这里我是假设(事实上unordered_map九十的)textureInfo对应的内存地址不会变动
         /// 绑定点信息
         GLuint binding_point;
@@ -148,6 +150,7 @@ namespace age{
         ///Forbid User-Define
         inline Texture(){}
     public:
+        /// 其实我(Texture)不知道纹理的sid是什么hhh (为了代价更小的拷贝,sid在Application那里集中处理)
         std::string_view sid;
 
         /// @brief bind the texture to the current vbo

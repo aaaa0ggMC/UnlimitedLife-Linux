@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2025/11/14
+ * @date 2025/12/01
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -20,6 +20,7 @@
 #include <optional>
 #include <functional>
 #include <alib-g3/aclock.h>
+#include <alib-g3/adebug.h>
 #include <thread>
 #include <chrono>
 #include <functional>
@@ -55,11 +56,24 @@
 #endif
 #endif
 
-// Error Code [-1,-9999]
+// Base Error Code [-1,-9999]
 #define AGEE_CONFLICT_SID -1
 #define AGEE_EMPTY_DATA -2
 #define AGEE_WRONG_ENUM -3
 #define AGEE_FEATURE_NOT_SUPPORTED -4
+#define AGEE_CANT_FIND_SID -5
+// Graphics begin from -10000 to -19999
+#define AGEE_CONFLICT_SHADER -10000
+#define AGEE_SHADER_LOG -10001
+#define AGEE_SHADER_FAILED_TO_COMPILE -10002
+#define AGEE_SHADER_FAILED_TO_LINK -10003
+#define AGEE_OPENGL_DEBUG_MESSAGE -10004
+#define AGEE_OPENGL_NO_CONTEXT -10005
+#define AGEE_OPENGL_EMPTY_SHADER -10006
+#define AGEE_TEXTURE_LOADED -10007
+#define AGEE_OPENGL_CREATE_ERROR -10008
+
+#define AGE_CHECK_GL_CONTEXT panic_debug(glfwGetCurrentContext() == nullptr,"There's no valid GL context here!")
 
 namespace age{
     inline constexpr bool AGE_Enable = true;
@@ -176,6 +190,8 @@ namespace age{
         void pushMessage(const ErrorInfo&);
 
         static void defTrigger(const ErrorInfopp&);
+
+        static void checkOpenGLError();
     };
 
     template<GLuint in> constexpr auto GLObjectToBindingMapper(){

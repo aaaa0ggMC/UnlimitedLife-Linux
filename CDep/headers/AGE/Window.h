@@ -30,8 +30,10 @@
 #include <alib-g3/aclock.h>
 #include <glm/glm.hpp>
 
+namespace age::manager{
+    class WindowManager;
+}
 namespace age{
-
     enum class WinStyle: uint32_t {
         FollowGLFW =            0b10000000000000000000000000000000,///< 使用当前GLFW默认设置（位31
         Resizable  =            0b00000000000000000000000000000001,///< 可调整大小（位0）,
@@ -147,7 +149,7 @@ namespace age{
      */
     class AGE_API Window{
     private:
-        friend class Application;
+        friend class age::manager::WindowManager;
         /// 内部的window
         GLFWwindow *window;
         /// 静态变量
@@ -371,22 +373,22 @@ namespace age{
      * @brief 创建窗口的结构
      */
     struct AGE_API CreateWindowInfo{
-        std::string sid;///< 窗口的字符串id
+        std::string sid { "default" };///< 窗口的字符串id
 
-        std::string windowTitle;///< 窗口标题
-        int width;///< 窗口宽度
-        int height;///< 窗口高度
-        int x; ///< x坐标
-        int y; ///< y坐标
+        std::string windowTitle { "default" };///< 窗口标题
+        int width { 600 };///< 窗口宽度
+        int height {600 };///< 窗口高度
+        int x { 0 }; ///< x坐标
+        int y { 0 }; ///< y坐标
 
-        float fps; ///< fps限制，小于等于0等于没有限制
+        float fps { 0 }; ///< fps限制，小于等于0等于没有限制
 
-        WinStyle style; ///< 窗口的样式
+        WinStyle style { WinStyle::FollowGLFW }; ///< 窗口的样式
 
         /// 监视器
-        std::optional<GLFWmonitor*> moniter;
+        std::optional<GLFWmonitor*> moniter { std::nullopt };
         /// 共享
-        std::optional<Window*> share;
+        std::optional<Window*> share { std::nullopt };
 
         static std::pair<int,int> ScreenPercent(float px,float py,int *x,int * y);
         /// @brief 保持比例
@@ -397,8 +399,6 @@ namespace age{
         static inline void KeepRatio(int & tokeep,int & tochange,float a,float b){
             tochange = tokeep * b / a;
         }
-
-        CreateWindowInfo();
     };
 }
 #endif

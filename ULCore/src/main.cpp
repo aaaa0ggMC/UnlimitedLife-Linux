@@ -12,7 +12,7 @@ struct Task : public ul::IRequest{
         idx = i;
     }
 
-    void work(uint64_t tid) noexcept override{
+    void work(uint64_t tid) noexcept override {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         //std::cout << "There is something inside you. * " << idx << " with tid:" << tid << std::endl;
     }
