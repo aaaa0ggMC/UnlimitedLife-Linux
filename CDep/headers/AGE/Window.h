@@ -154,14 +154,10 @@ namespace age{
         GLFWwindow *window;
         /// 静态变量
         static Window * current;
-        /// 用于处理绑定 Actually,It can be replaced by glfwSetWindowUserPointer & glfwGetWindowUserPointer,however,my impl isnt that bad
-        static BinderArray binderArray;
         /// 窗口的SID
         std::string_view sid;
         /// 限制fps
         alib::g3::RateLimiter fpsLimiter;
-        /// 绑定便于访问
-        Binder binder { binderArray };
         /// OnResize
         std::function<void(Window&,int nw,int nh,int ori_w,int ori_h)> m_onResize;
         std::function<void(Window&,age::KeyWrapper wrapper)> m_onKey;
@@ -178,7 +174,7 @@ namespace age{
             Window * old;
             inline ScopedWindow(Window * c){
                 old = (c==Window::current)?NULL:Window::current;
-                if(old)c->makeCurrent();
+                if(c)c->makeCurrent();
             }
 
             inline ~ScopedWindow(){
@@ -200,6 +196,8 @@ namespace age{
         }
 
     public:
+        inline std::string_view get_sid(){return sid;}
+
         /// 设置 interval
         inline static void setSwapInterval(int value){
             glfwSwapInterval(value);
@@ -283,7 +281,7 @@ namespace age{
             m_onMouseMove = func;
             if(func){
                 glfwSetCursorPosCallback(window,[](GLFWwindow * glfwWin,double x,double y){
-                    Window & window = *((Window*)Window::binderArray.get<Window>((intptr_t)glfwWin));
+                    Window & window = *((Window*)glfwGetWindowUserPointer(glfwWin));
                     if(window.m_onMouseMove)window.m_onMouseMove(window,x,y);
                 });
             }else glfwSetCursorPosCallback(window,nullptr);
@@ -373,7 +371,7 @@ namespace age{
      * @brief 创建窗口的结构
      */
     struct AGE_API CreateWindowInfo{
-        std::string sid { "default" };///< 窗口的字符串id
+        std::string sid { "" };///< 窗口的字符串id
 
         std::string windowTitle { "default" };///< 窗口标题
         int width { 600 };///< 窗口宽度

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 着色器
  * @version 0.1
- * @date 2025/12/01 （左右）
+ * @date 2025/12/02 （左右）
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -36,6 +36,7 @@ namespace age {
         GLuint program;
         friend class Shader;
     public:
+
         inline GLint getLocationId(){return location;}
         inline GLuint getProgramId(){return program;}
 
@@ -185,7 +186,10 @@ namespace age {
     };
 
     struct AGE_API Shader{
+    private:
+        std::string_view sid;
     public:
+        inline std::string_view get_sid(){return sid;}
         ///bind shader
         inline Shader& bind(){
             glUseProgram(pid);

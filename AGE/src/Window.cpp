@@ -8,7 +8,6 @@
 using namespace age;
 
 Window * Window::current = NULL;
-BinderArray Window::binderArray;
 
 Window::Window():
 window{nullptr},

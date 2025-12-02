@@ -116,9 +116,9 @@ void ImGUIInjector::sampler(){
         ImGui::Unindent();
     }
     if(max_anisotropy)ImGui::DragFloat("各向异性过滤",&s.sampler_aniso,0.01F,0.0F,max_anisotropy);
-    app.m_sampler->wrapR(wrapFn(s.sampler_wrap_r)).wrapS(wrapFn(s.sampler_wrap_s)).wrapT(wrapFn(s.sampler_wrap_t));
-    if(max_anisotropy)app.m_sampler->try_anisotropy(s.sampler_aniso);
-    app.m_sampler->borderColor(s.sampler_border_color);
+    app.m_sampler.wrapR(wrapFn(s.sampler_wrap_r)).wrapS(wrapFn(s.sampler_wrap_s)).wrapT(wrapFn(s.sampler_wrap_t));
+    if(max_anisotropy)app.m_sampler.try_anisotropy(s.sampler_aniso);
+    app.m_sampler.borderColor(s.sampler_border_color);
 }
 
 void ImGUIInjector::texture(){

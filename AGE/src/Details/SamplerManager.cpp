@@ -11,8 +11,13 @@ SamplerManager::~SamplerManager(){
 
 /// 由于sampler属性可以动态调整，所以只需要sid
 std::optional<Sampler> SamplerManager::create(std::string_view sid){
+    panic_debug(sid.empty(),"Cannot pass empty sid to create function!");
     auto rest = samplers.find(sid);
-    if(rest != samplers.end())return rest->second;
+    if(rest != samplers.end()){
+        panicf_debug(true,"Conflict sampler sid[{}]!",sid);
+        Error::def.pushMessage({AGEE_CONFLICT_SID,"Sampler SID conflicts!!!"});
+        return rest->second;
+    }
     Sampler sampler;
     auto usid = csbuffer.get(sid);
     sampler.sid = usid;
@@ -29,6 +34,7 @@ std::optional<Sampler> SamplerManager::create(std::string_view sid){
 }
 
 bool SamplerManager::destroy(std::string_view sid){
+    panic_debug(sid.empty(),"Cannot pass empty sid to create function!");
     auto it = samplers.find(sid);
     if(it == samplers.end()){
         std::string msg = "Cant find an existing sampler named \"";
@@ -45,6 +51,7 @@ bool SamplerManager::destroy(std::string_view sid){
 }
 
 std::optional<Sampler> SamplerManager::get(std::string_view sid){
+    panic_debug(sid.empty(),"Cannot pass empty sid to create function!");
     auto sp = samplers.find(sid);
     if(sp == samplers.end()){
         Error::def.pushMessage({AGEE_CANT_FIND_SID,"Cannot find required sampler!"});

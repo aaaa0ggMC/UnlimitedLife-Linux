@@ -20,6 +20,10 @@ namespace age::manager{
         std::optional<Window*> get(std::string_view sid);
         bool destroy(std::string_view sid);
         
+        inline bool has(std::string_view sid){
+            return windows.find(sid) != windows.end();
+        }
+
         inline bool destroy(Window & win){
             return destroy(win.sid);
         }

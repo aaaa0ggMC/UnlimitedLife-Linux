@@ -1,7 +1,7 @@
 /** @file Application.h
  * @brief 应用，类似Vulkan的概念（但是目前用的是OpenGL）
  * @author aaaa0ggmc
- * @date 2025/12/01
+ * @date 2025/12/02
  * @start-date 2025/06/11
  * @version 3.1
  * @copyright copyright(C)2025
@@ -23,6 +23,7 @@
 #include <AGE/Details/TextureManager.h>
 #include <AGE/Details/ShaderManager.h>
 #include <AGE/Details/SamplerManager.h>
+#include <AGE/Details/FramebufferManager.h>
 #include <alib-g3/aecs.h>
 
 #include <GL/glext.h>
@@ -53,6 +54,7 @@ namespace age{
         TextureManager textures { csbuffer };
         ShaderManager shaders { csbuffer };
         SamplerManager samplers { csbuffer };
+        FramebufferManager framebuffers { csbuffer , textures , samplers };
 
         EntityManager& em;
 

@@ -16,6 +16,7 @@ WindowManager::~WindowManager(){
 }
 
 bool WindowManager::destroy(std::string_view sid){
+    panic_debug(sid.empty(),"Cannot pass empty sid to function!");
     auto v = windows.find(sid);
     if(v == windows.end())return false;
     Window * win = v->second;
@@ -26,8 +27,16 @@ bool WindowManager::destroy(std::string_view sid){
 }
 
 std::optional<Window*> WindowManager::create(const CreateWindowInfo & info){
-    Window * win = new Window();
+    panic_debug(info.sid.empty(),"Cannot pass empty sid to create function!");
+    auto win_it = windows.find(info.sid);
+    if(win_it != windows.end()){
+        panicf_debug(true,"Conflict window sid[{}]!",info.sid);
+        Error::def.pushMessage({AGEE_CONFLICT_SID,"Window SID conflicts!!!"});
+        return { win_it->second };
+    }
+    
     GLInit::GLFW();
+    Window * win = new Window();
     win->sid = csbuffer.get(info.sid);
     win->window = glfwCreateWindow(
                     info.width,info.height,info.windowTitle.c_str(),
@@ -41,11 +50,11 @@ std::optional<Window*> WindowManager::create(const CreateWindowInfo & info){
     if(info.x >= 0 && info.y >= 0)glfwSetWindowPos(win->window,info.x,info.y);
     if(!(Window::current))win->makeCurrent();
     win->setFramerateLimit(info.fps);
-    win->binder.bind((intptr_t)(win->window),(intptr_t)win);
     GLInit::GLEW();
     //bindings
+    glfwSetWindowUserPointer(win->window,(void*)win);
     glfwSetWindowSizeCallback(win->window,[](GLFWwindow * win,int nw,int nh){
-        Window & window = *((Window*)Window::binderArray.get<Window>((intptr_t)win));
+        Window & window = *((Window*)glfwGetWindowUserPointer(win));
         if(nw == 0 || nh == 0){
             //aspect ratio = 0,glm will not work
             return;
@@ -61,7 +70,7 @@ std::optional<Window*> WindowManager::create(const CreateWindowInfo & info){
 
     glfwSetKeyCallback(win->window,[](GLFWwindow * glfwWin,int key,int scancode,int action,int mods){
         age::KeyWrapper wrapper (glfwWin,key,scancode,action,mods);
-        Window & window = *((Window*)Window::binderArray.get<Window>((intptr_t)glfwWin));
+        Window & window = *((Window*)glfwGetWindowUserPointer(glfwWin));
         if(window.m_onKey)window.m_onKey(window,wrapper);
     });
 
@@ -74,6 +83,7 @@ std::optional<Window*> WindowManager::create(const CreateWindowInfo & info){
 }
 
 std::optional<Window*> WindowManager::get(std::string_view sid){
+    panic_debug(sid.empty(),"Cannot pass empty sid to function!");
     auto v = windows.find(sid);
     if(v == windows.end())return std::nullopt;
     return {v->second};

@@ -59,7 +59,9 @@ struct MainApplication{
     VBOManager & vbos;
     /// "Borrowed" from Application
     Window * m_window {nullptr};
-    std::optional<Sampler> m_sampler;
+    Texture * shadowTex;
+    Sampler m_sampler;
+    Sampler shadowSampler;
     std::unordered_map<std::string,Texture*> textures;
 
     //// Models ///
@@ -88,6 +90,9 @@ struct MainApplication{
 
     //// Sounds ////
     audio::Sound snd1;
+    
+    //// Framebuffer ////
+    Framebuffer shadowMap;
 
     //// Construct Section ////
     MainApplication(MainApplicationConfig cfg)
@@ -113,6 +118,7 @@ struct MainApplication{
     void setup_buffers();
     void setup_sampler();
     void load_textures();
+    void setup_framebuffers();
     void set_control_callbacks();
     void resolve_bindings();
     void init_world_objects();

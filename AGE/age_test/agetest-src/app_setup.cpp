@@ -15,6 +15,7 @@ void MainApplication::setup(){
     setup_buffers();
     setup_sampler();
     load_textures();
+    setup_framebuffers();
     set_control_callbacks();
     resolve_bindings();
     init_world_objects();
@@ -24,6 +25,18 @@ void MainApplication::setup(){
     load_lights();
     load_uniforms();
     load_sounds();
+}
+
+
+void MainApplication::setup_framebuffers(){
+    auto v = m_window->getFrameBufferSize();
+    auto[fb,texture,sampler] = app.framebuffers.createShadowMap("shadowmap_0",(size_t)v.x,(size_t)v.y);
+
+    shadowMap = fb;
+    shadowSampler = sampler;
+    shadowTex = texture;
+
+    lg(Info) << "LoadFramebuffer:OK" << endlog;
 }
 
 void MainApplication::load_sounds(){
@@ -190,7 +203,7 @@ void MainApplication::set_control_callbacks(){
 void MainApplication::load_textures(){
     CreateTextureInfo ci;
     ci.source = ci.FromFile;
-    ci.channel_desired = 4;
+    ci.internalFormat = GL_RGBA;
     ci.uploadToOpenGL = true;
     ci.genMipmap = true;
     
@@ -221,7 +234,7 @@ void MainApplication::setup_sampler(){
     if(!t){
         lg(Fatal) << "Failed to create sampler!" << endlog;
         std::exit(-1);
-    }else m_sampler = t;
+    }else m_sampler = *t;
     lg(Info) << "CreateSampler:OK" << endlog;
 }
 

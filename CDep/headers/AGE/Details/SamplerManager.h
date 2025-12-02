@@ -19,6 +19,10 @@ namespace age::manager{
         bool destroy(std::string_view sid);
         std::optional<Sampler> get(std::string_view sid);
 
+        inline bool has(std::string_view sid){
+            return samplers.find(sid) != samplers.end();
+        }
+
         inline bool destroy(Sampler & sampler){
             return destroy(sampler.sid);
         }

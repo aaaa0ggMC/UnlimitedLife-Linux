@@ -2,7 +2,7 @@
 
 void MainApplication::run(){
     Window & win = *m_window;
-    Sampler & sampler = *m_sampler;
+    Sampler & sampler = m_sampler;
     //// Clocks ////
     Clock fps_counter (false);
     Clock im_clock (false);

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 纹理
  * @version 0.1
- * @date 2025/12/01
+ * @date 2025/12/02
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -20,22 +20,23 @@
 namespace age::manager{
     class TextureManager;
     class SamplerManager;
+    class FramebufferManager;
 }
 
 namespace age{
     struct AGE_API TextureInfo{
-        std::string filePath; ///< empty if loaded from memory
-        bool loadedFromMemory;
+        std::string filePath { "" }; ///< empty if loaded from memory
 
         //图片属性
-        int width;
-        int height;
-        int channels;
-        bool mipmap;
+        int width { 0 };
+        int height { 0 };
+        bool mipmap { false };
+        GLenum internal_format { GL_RGBA };
 
         //上传属性
         bool uploaded;
         bool hasbits;
+        int bits_channels { 0 };
         unsigned char * bits; //要是uploaded为true,保证为nullptr
     };
 
@@ -46,7 +47,7 @@ namespace age{
             ClampToEdge = GL_CLAMP_TO_EDGE,
             ClampToBorder = GL_CLAMP_TO_BORDER
         };
-        enum class MinFilter : GLenum{
+        enum class MinFilter : GLenum {
             Nearest = GL_NEAREST,
             Linear = GL_LINEAR,
             Nearest_Mipmap_Nearest = GL_NEAREST_MIPMAP_NEAREST,
@@ -54,9 +55,43 @@ namespace age{
             Linear_Mipmap_Nearest = GL_LINEAR_MIPMAP_NEAREST,
             Linear_Mipmap_Linear = GL_LINEAR_MIPMAP_LINEAR
         };
-        enum class MagFilter : GLenum{
+        enum class MagFilter : GLenum {
             Nearest = GL_NEAREST,
             Linear = GL_LINEAR
+        };
+        enum class CompareMode : GLenum {
+            /// @brief 禁用比较功能（默认），采样器返回纹理存储的原始值（如原始深度）。
+            None = GL_NONE,
+            
+            /// @brief 启用比较功能，采样器返回深度测试的结果（0.0 或 1.0）。
+            /// 这是实现 PCF 软阴影所必需的模式。
+            RefToTexture = GL_COMPARE_REF_TO_TEXTURE,
+        };
+        enum class CompareFunc : GLenum {
+            /// @brief 如果片段深度 R 总是小于或等于纹理深度 D，则通过测试。 (R <= D)
+            /// 这是透视投影阴影贴图最常用的设置。
+            LEqual = GL_LEQUAL,
+            
+            /// @brief 如果片段深度 R 总是大于或等于纹理深度 D，则通过测试。 (R >= D)
+            GEqual = GL_GEQUAL,
+            
+            /// @brief 如果 R < D，通过。
+            Less = GL_LESS,
+            
+            /// @brief 如果 R > D，通过。
+            Greater = GL_GREATER,
+            
+            /// @brief 如果 R == D，通过。
+            Equal = GL_EQUAL,
+            
+            /// @brief 如果 R != D，通过。
+            NotEqual = GL_NOTEQUAL,
+            
+            /// @brief 总是通过测试。
+            Always = GL_ALWAYS,
+            
+            /// @brief 永不通过测试。
+            Never = GL_NEVER,
         };
 
         WrapMethod warp_s;
@@ -66,10 +101,14 @@ namespace age{
         MinFilter minFilter;
         MagFilter magFilter;
         float anisotropicLevel;
+        CompareMode compareMode;
+        CompareFunc compareFunc;
 
         inline SamplerInfo(){
             warp_s = warp_r = warp_t = WrapMethod::Repeat;
             borderColor = glm::vec4(0,0,0,0);
+            compareMode = CompareMode::None;
+            compareFunc = CompareFunc::LEqual;
         }
     };
 
@@ -77,12 +116,17 @@ namespace age{
     private:
         friend class Tetxure;
         friend class age::manager::SamplerManager;
-        GLuint sampler_id;
-        SamplerInfo * info;
-
-        Sampler(){}
+        friend class age::manager::FramebufferManager;
+        GLuint sampler_id { 0 };
+        SamplerInfo * info { nullptr };
+        std::string_view sid { "" };
     public:
-        std::string_view sid;
+        Sampler(){}
+        bool valid(){
+            return sampler_id == 0;
+        }
+
+        std::string_view get_sid(){return sid;}
 
         inline void bind(GLuint channel){
             glBindSampler(channel - GL_TEXTURE0,sampler_id);
@@ -90,6 +134,18 @@ namespace age{
 
         inline const SamplerInfo& getInfo(){
             return *info;
+        }
+
+        inline Sampler& compareMode(SamplerInfo::CompareMode mode){
+            info->compareMode = mode;
+            glSamplerParameteri(sampler_id,GL_TEXTURE_COMPARE_MODE,static_cast<GLenum>(mode));
+            return *this;
+        }
+
+        inline Sampler& compareFunc(SamplerInfo::CompareFunc fn){
+            info->compareFunc = fn;
+            glSamplerParameteri(sampler_id,GL_TEXTURE_COMPARE_FUNC,static_cast<GLenum>(fn));
+            return *this;
         }
 
         inline Sampler& wrapS(SamplerInfo::WrapMethod method){
@@ -261,7 +317,6 @@ namespace age{
     };
 
     ///@todo for fun: 搞个 TextureInfoEx提供更加细节的配置什么什么的
-
     struct AGE_API CreateTextureInfo{
         enum Source{
             FromFile,
@@ -270,24 +325,32 @@ namespace age{
             CreateEmpty
         };
 
-        std::string sid;
-        Source source;
+        std::string sid { "" };
+        Source source { Source::FromFile };
+        
+        /// leave empty if you don't want to load texture from file
         struct { 
-            std::string path;
-        } file; ///< leave empty if you don't want to load texture from file
-        struct {
-            GLchar * data;
-            size_t eleCount; ///< not the size of the buffer!!!
-        } buffer;
-        struct {
-            std::vector<GLchar>* data;
-        } vec;
-        unsigned int channel_desired;
-        bool uploadToOpenGL; ///< if this value equals to true,make sure that you are creating an image rather than something eg. shadow map
-        bool genMipmap;
-        ///SamplerSettings
+            std::string path { "" };
+        } file;
 
-        CreateTextureInfo();
+        struct {
+            GLchar * data { nullptr };
+            size_t eleCount { 0 }; ///< not the size of the buffer!!!
+        } buffer;
+
+        struct {
+            std::vector<GLchar>* data { nullptr };
+        } vec;
+
+        struct {
+            size_t width { 0 };
+            size_t height { 0 };
+        } empty;
+        
+        GLenum internalFormat { GL_RGBA };
+        bool genMipmap { false };
+
+        bool uploadToOpenGL { true };
     };
 }
 

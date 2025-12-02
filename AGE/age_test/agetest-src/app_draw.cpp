@@ -2,7 +2,7 @@
 
 void MainApplication::draw(){
     Window & win = *m_window;
-    Sampler & sampler = *m_sampler;   
+    Sampler & sampler = m_sampler;   
 
     win.clear();
     shader.bind();

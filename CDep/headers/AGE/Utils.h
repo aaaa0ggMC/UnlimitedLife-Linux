@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2025/12/01
+ * @date 2025/12/02
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -27,6 +27,7 @@
 #include <alib-g3/alogger.h>
 #include <GL/glew.h>
 #include <functional>
+#include <AGE/Details/GLObjectMapper.h>
 //#include <iostream>
 
 ///对象如VAO,VBO为空
@@ -123,50 +124,6 @@ namespace age{
         alib::g3::LogLevel level;
     };
     using TriggerFunc = std::function<void(const ErrorInfopp&)>;
-
-    struct AGE_API BinderArray{
-        std::unordered_map<intptr_t,intptr_t> bindings;
-    
-        template<class T> inline T* get(intptr_t data){
-            auto iter = bindings.find(data);
-            if(iter != bindings.end()){
-                return (T*)(iter->second);
-            }
-            return nullptr;
-        }
-    };
-
-    struct AGE_API Binder{
-        BinderArray & ba;
-        intptr_t addr;
-        intptr_t target;
-
-        inline Binder(BinderArray&b):ba{b}{
-            addr = 0;
-        }
-
-        inline void bind(intptr_t a,intptr_t tg){
-            addr = a;
-            target = tg;
-            ba.bindings[a] = tg;
-        }
-
-        inline void unbind(){
-            if(addr){
-                auto iter = ba.bindings.find(addr);
-                if(iter != ba.bindings.end()){
-                    ba.bindings.erase(iter);
-                }
-                addr = 0;
-            }
-        }
-
-        inline ~Binder(){
-            //自动销毁
-            unbind();
-        }
-    };
-
     /** @struct Error
      *  @brief handle errors during many operations
      */
@@ -194,46 +151,22 @@ namespace age{
         static void checkOpenGLError();
     };
 
-    template<GLuint in> constexpr auto GLObjectToBindingMapper(){
-        /// @TODO Add more mappings
-        if constexpr(in == GL_TEXTURE_2D){
-            return GL_TEXTURE_BINDING_2D;
-        }else if constexpr(in == GL_TEXTURE_3D){
-            return GL_TEXTURE_BINDING_3D;
-        }else if constexpr(in == GL_TEXTURE_1D){
-            return GL_TEXTURE_BINDING_1D;
-        }else{
-            static_assert(false,"Feature Not Supported");
-            return 0;
-        }
-    }
-
-    template<GLuint in> constexpr auto GLObjectToBindingFuncMapper(){
-        if constexpr(in == GL_TEXTURE_2D || in == GL_TEXTURE_BINDING_2D){
-            return +[](GLuint val){glBindTexture(GL_TEXTURE_2D,val);};
-        }else if constexpr(in == GL_TEXTURE_3D || in == GL_TEXTURE_BINDING_3D){
-            return +[](GLuint val){glBindTexture(GL_TEXTURE_3D,val);};
-        }else if constexpr(in == GL_TEXTURE_1D || in == GL_TEXTURE_BINDING_1D){
-            return +[](GLuint val){glBindTexture(GL_TEXTURE_1D,val);};
-        }else{
-            static_assert(false,"Feature Not Supported");
-            return 0;
-        }
-    }
-
     template<GLuint in> struct AGE_API ScopedGLState{
         constexpr static const GLuint bd = GLObjectToBindingMapper<in>(); 
         constexpr static const auto bind = GLObjectToBindingFuncMapper<in>();
         GLint prev;
+        GLuint prev_uint;
+
         inline ScopedGLState(GLuint newone){
             glGetIntegerv(bd,&prev);
+            prev_uint = (GLuint)prev;
             //std::cout << "Get " << prev << std::endl;
             //]]std::cout << "Bind " << newone<< std::endl;
             if(prev != newone)bind(newone); //少一次bind检测
         }
 
         inline ~ScopedGLState(){
-            bind(prev);
+            bind(prev_uint);
             //std::cout << "Bind " << prev << std::endl;
         }
     };

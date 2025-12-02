@@ -22,6 +22,10 @@ namespace age::manager{
         /// Will set GL_TEXTURE_2D to 0 after call
         Texture& uploadImageToGL(Texture & texure);
         
+        inline bool has(std::string_view sid){
+            return textures.find(sid) != textures.end();
+        }
+
         inline bool destroy(Texture& tex){
             return destroy(tex.sid);
         }

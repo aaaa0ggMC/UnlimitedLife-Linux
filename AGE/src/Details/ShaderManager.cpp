@@ -12,6 +12,14 @@ ShaderManager::~ShaderManager(){
 }
 
 Shader ShaderManager::create(const CreateShaderInfo & info){
+    panic_debug(info.sid.empty(),"Cannot pass empty sid to create function!");
+    auto sh_it = shaders.find(info.sid);
+    if(sh_it != shaders.end()){
+        panicf_debug(true,"Conflict shader sid[{}]!",info.sid);
+        Error::def.pushMessage({AGEE_CONFLICT_SID,"Shader SID conflicts!!!"});
+        return { sh_it->second };
+    }
+    
     Shader shader;
     GLuint vid = 0, fid = 0,gid = 0,cid = 0;
     GLint compile_status = 0;
@@ -20,11 +28,7 @@ Shader ShaderManager::create(const CreateShaderInfo & info){
     bool created = false;
 
     Error & err = Error::def;
-
-    if(shaders.find(info.sid) != shaders.end()){
-        err.pushMessage({AGEE_CONFLICT_SID,info.sid.c_str()});
-        return shader;
-    }
+    shader.sid = info.sid;
 
     if(info.vertex.compare("")){
         const char * buf[1] = {info.vertex.c_str()};
@@ -135,6 +139,7 @@ cleanup:
 }
 
 Shader ShaderManager::get(std::string_view sid){
+    panic_debug(sid.empty(),"Cannot pass empty sid to function!");
     auto iter = shaders.find(sid);
     if(iter != shaders.end()){
         return iter->second;
@@ -143,6 +148,7 @@ Shader ShaderManager::get(std::string_view sid){
 }
 
 bool ShaderManager::destroy(std::string_view sid){
+    panic_debug(sid.empty(),"Cannot pass empty sid to function!");
     auto sh = shaders.find(sid);
     if(sh != shaders.end()){
         sh->second.destroy();

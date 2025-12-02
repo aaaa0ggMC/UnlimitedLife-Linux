@@ -36,6 +36,14 @@ namespace age::manager{
         void getProgramLog(Shader shader,std::string & logger);
         /// 获取着色器单体的log,用户一般不使用
         void getShaderLog(GLuint shader,std::string & logger);
+
+        inline bool has(std::string_view sid){
+            return shaders.find(sid) != shaders.end();
+        }
+
+        inline bool destroy(Shader & sh){
+            return destroy(sh.sid);
+        }
     }; 
 }
 
