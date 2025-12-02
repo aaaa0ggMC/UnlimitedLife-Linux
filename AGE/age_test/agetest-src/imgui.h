@@ -42,6 +42,7 @@ struct ImGUIInjector{
     void gl();
     void render();
     void music();
+    void shadow();
 
 };
 

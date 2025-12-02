@@ -121,6 +121,11 @@ void ImGUIInjector::sampler(){
     app.m_sampler.borderColor(s.sampler_border_color);
 }
 
+void ImGUIInjector::shadow(){
+    ImGui::Text("帧缓冲区设置");
+    ImGui::Image((ImTextureID)(app.shadowTexCallback->getId()),ImVec2(256,256));
+}
+
 void ImGUIInjector::texture(){
     ImGui::Text("纹理");
     ImGui::ListBox("默认绑定的",&s.current_texture_id,app.cfg.texture_sids.data(),app.cfg.texture_sids.size());

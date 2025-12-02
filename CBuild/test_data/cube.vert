@@ -1,5 +1,6 @@
 #version 430 core
 out vec2 coord;
+out vec4 shadowCoord;
 out vec3 varyingNormal;
 out vec3 varyingLightDir;
 out vec3 varyingVertPos;
@@ -21,6 +22,7 @@ uniform PositionalLight light;
 uniform mat4 invMV;
 uniform mat4 mv_matrix;
 uniform mat4 proj_matrix;
+uniform mat4 shadowMVP;
 
 void main(){
   vec4 P = mv_matrix * vec4(position,1.0);
@@ -31,5 +33,6 @@ void main(){
   varyingLightDistance = length(varyingLightDir);
 
   coord = texCoord;
+  shadowCoord = shadowMVP * vec4(position,1.0);
   gl_Position = proj_matrix * mv_matrix * vec4(position,1.0);
 }

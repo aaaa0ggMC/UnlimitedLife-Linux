@@ -1,5 +1,6 @@
 #version 430 core
 in vec2 coord;
+in vec4 shadowCoord;
 in vec3 varyingNormal;
 in vec3 varyingLightDir;
 in vec3 varyingVertPos;
@@ -8,6 +9,7 @@ in float varyingLightDistance;
 out vec4 color;
 
 layout(binding = 0) uniform sampler2D tex;
+layout(binding = 1) uniform sampler2DShadow shadowTex;
 
 struct Material{
   float shininess;
@@ -27,10 +29,6 @@ uniform Material material;
 uniform PositionalLight light;
 uniform vec4 gambient;
 
-uniform float light_Kc = 1.0;
-uniform float light_Kl = 0.09; 
-uniform float light_Kq = 0.032;
-
 void main(){
   vec3 L = normalize(varyingLightDir);
   vec3 N = normalize(varyingNormal);
@@ -39,12 +37,12 @@ void main(){
   float cosTheta = dot(L,N);
   float cosPhi = dot(H,N);
 
-  float attenuation = 1.0 / (light_Kc + light_Kl * varyingLightDistance + light_Kq * varyingLightDistance * varyingLightDistance);
-
   vec4 texColor = texture(tex,coord);
-  vec3 ambient = 3 * (gambient * material.ambient + light.ambient * material.ambient).xyz * texColor.xyz;
+
+  vec3 ambient = 2* (gambient * material.ambient + light.ambient * material.ambient).xyz * texColor.xyz;
   vec3 diffuse = light.diffuse.xyz * material.diffuse.xyz * texColor.xyz * max(cosTheta,0.0);
   vec3 specular = light.specular.xyz * material.specular.xyz * pow(max(cosPhi,0.0),material.shininess);
 
-  color = vec4(ambient + attenuation * (diffuse + specular),texColor.a);
+  float notInShadow = textureProj(shadowTex,shadowCoord);
+  color = vec4(ambient + notInShadow * (diffuse + specular),texColor.a);
 }

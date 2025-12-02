@@ -52,6 +52,7 @@ namespace age::manager{
             t.internalFormat = fmt;
             t.genMipmap = false;
             t.uploadToOpenGL = true;
+            t.format = GL_DEPTH_COMPONENT;
             auto texture = tm.create(t);
             [[unlikely]] if(!texture){
                 Error::def.pushMessage({AGEE_OPENGL_CREATE_ERROR,"Cannot create relevant texture!"});

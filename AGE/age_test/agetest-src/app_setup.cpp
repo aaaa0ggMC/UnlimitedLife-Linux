@@ -8,6 +8,12 @@ MainApplication::~MainApplication(){
 }
 
 void MainApplication::setup(){
+    shadow_bias = glm::mat4(
+        0.5f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.5f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.5f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f
+    );
     setup_logger();
     setup_window();
     if(cfg.gl_err_callback)setup_err_callback();
@@ -15,13 +21,13 @@ void MainApplication::setup(){
     setup_buffers();
     setup_sampler();
     load_textures();
-    setup_framebuffers();
     set_control_callbacks();
     resolve_bindings();
     init_world_objects();
     load_dynamic_models();
     load_static_models();
     load_materials();
+    setup_framebuffers();
     load_lights();
     load_uniforms();
     load_sounds();
@@ -30,11 +36,36 @@ void MainApplication::setup(){
 
 void MainApplication::setup_framebuffers(){
     auto v = m_window->getFrameBufferSize();
-    auto[fb,texture,sampler] = app.framebuffers.createShadowMap("shadowmap_0",(size_t)v.x,(size_t)v.y);
+    v.x = 1024;
+    v.y = 1024;
+    auto[fb,texture,sampler] = 
+        app.framebuffers.createShadowMap("shadowmap_0",(size_t)v.x,(size_t)v.y);
 
     shadowMap = fb;
     shadowSampler = sampler;
     shadowTex = texture;
+    sampler.wrapR(SamplerInfo::WrapMethod::ClampToBorder);
+    sampler.wrapS(SamplerInfo::WrapMethod::ClampToBorder);
+    sampler.wrapT(SamplerInfo::WrapMethod::ClampToBorder);
+    sampler.borderColor(glm::vec4(1.0,1.0,1.0,1.0));
+
+    CreateTextureInfo t;
+    t.source = t.CreateEmpty;
+    t.empty.width = v.x;
+    t.empty.height = v.y;
+    t.internalFormat = GL_RGBA;
+    t.sid = "shadow_callback";
+    shadowTexCallback = *app.textures.create(t);
+
+    CreateFramebufferInfo f;
+    FBOAttachment color;
+    color = *shadowTexCallback;
+    f.sid = "shadow_callback";
+    shadowMapCallback = app.framebuffers.create(f);
+    shadowMapCallback.color(color);
+    
+    e_light.projector().set(std::numbers::pi/3.0f,v.x,v.y);
+    e_light.cameraEntity.add<comps::Tag>("light");
 
     lg(Info) << "LoadFramebuffer:OK" << endlog;
 }
@@ -49,8 +80,10 @@ void MainApplication::load_uniforms(){
     projectionMatrix = shader["proj_matrix"];
     mv_matrix = shader["mv_matrix"];
     invMV = shader["invMV"];
+    shadowMVP2 = shader["shadowMVP"];
 
     projectionMatrix.uploadmat4(camera.projector().buildProjectionMatrix());
+    shadowMVP = shadowShader["mvp_matrix"];
 
     lg(Info) << "LoadUniforms:OK" << endlog;
 }
@@ -60,7 +93,8 @@ void MainApplication::load_lights(){
     light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
     light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
     light.specular.fromRGBA(1.0,1.0,1.0,1.0);
-    light.position = glm::vec3(0,4,0);
+    light.position = glm::vec3(1.2,4.1,0.3);
+    e_light.transform().setPosition(light.position);
 
     lb.ambient = createUniformName<glm::vec4>(shader,"light.ambient")();
     lb.diffuse = createUniformName<glm::vec4>(shader,"light.diffuse")();
@@ -256,6 +290,8 @@ void MainApplication::setup_buffers(){
 
 void MainApplication::setup_shader(){
     shader = app.shaders.fromFile("main",cfg.main_vert,cfg.main_frag);
+    shadowShader = app.shaders.fromFile("shadow",cfg.sh_vert,cfg.sh_frag);
+    callbackShader = app.shaders.fromFile("shadow_callback",cfg.shc_vert,cfg.shc_frag);
     lg(Info) << "CreateShader:OK" << endlog;
 }
 

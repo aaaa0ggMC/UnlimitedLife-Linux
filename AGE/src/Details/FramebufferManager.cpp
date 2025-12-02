@@ -19,7 +19,7 @@ Framebuffer FramebufferManager::create(const CreateFramebufferInfo & info){
         return { sh_it->second };
     }
     Framebuffer fb;
-    glGenFramebuffers(1,&fb.framebuffer_id);
+    glCreateFramebuffers(1,&fb.framebuffer_id);
     fb.sid = csbuffer.get(info.sid);
 
     if(!info.colors.size()){

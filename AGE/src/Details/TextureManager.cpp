@@ -73,6 +73,7 @@ std::optional<Texture*> TextureManager::create(const CreateTextureInfo & info){
     Texture* texture = tex.first->second;
     texture->sid = sid;
     texture->textureInfo = &tex_info;
+    tex_info.format = info.format;
     tex_info.uploaded = false;
     tex_info.mipmap = info.genMipmap;
 
@@ -122,11 +123,20 @@ Texture& TextureManager::uploadImageToGL(Texture & texture){
     if(!texture.textureInfo->hasbits){
         ScopedGLState<GL_TEXTURE_2D> scope(texture.texture_id);
 
+        if(!texture.textureInfo->mipmap){
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        }
+
+        if(texture.textureInfo->format < 0)texture.textureInfo->format = GL_RED;
         // 其余的值为空就行
         texture.texImage2D(
             Texture::TexImageParams().
             internalformat(texture.textureInfo->internal_format).
             width(texture.textureInfo->width).
+            format(texture.textureInfo->format).
             height(texture.textureInfo->height)
         );
 
@@ -140,32 +150,40 @@ Texture& TextureManager::uploadImageToGL(Texture & texture){
 
     texture.textureInfo->uploaded = true;
     ScopedGLState<GL_TEXTURE_2D> scope(texture.texture_id);
-    int bits_fmt = GL_RGB;
-    switch(texture.textureInfo->bits_channels){
-    case 1:
-        bits_fmt = GL_RED;
-        break;
-    case 2:
-        bits_fmt = GL_RG;
-        break;
-    case 4:
-        bits_fmt = GL_RGBA;
-        break;
-    case 3:
-        break;
-    default:
-        Error::def.pushMessage({AGEE_FEATURE_NOT_SUPPORTED,"File with channel count bigger than 4 or lower than 1 is unsupported!"});
-        glBindTexture(GL_TEXTURE_2D,0);
-        return texture;
+    if(texture.textureInfo->format < 0){
+        int bits_fmt = GL_RGB;
+        switch(texture.textureInfo->bits_channels){
+        case 1:
+            bits_fmt = GL_RED;
+            break;
+        case 2:
+            bits_fmt = GL_RG;
+            break;
+        case 4:
+            bits_fmt = GL_RGBA;
+            break;
+        case 3:
+            break;
+        default:
+            Error::def.pushMessage({AGEE_FEATURE_NOT_SUPPORTED,"File with channel count bigger than 4 or lower than 1 is unsupported!"});
+            glBindTexture(GL_TEXTURE_2D,0);
+            return texture;
+        }
+        texture.textureInfo->format = bits_fmt;
     }
     texture.texImage2D(
         Texture::TexImageParams().
-        internalformat(texture.textureInfo->internal_format).format(bits_fmt).
+        internalformat(texture.textureInfo->internal_format).format(texture.textureInfo->format).
         width(texture.textureInfo->width).height(texture.textureInfo->height).
         data(texture.textureInfo->bits)
     );
     if(texture.textureInfo->mipmap){
         glGenerateMipmap(GL_TEXTURE_2D);
+    }else{
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
     stbi_image_free(texture.textureInfo->bits);
     texture.textureInfo->bits = nullptr;

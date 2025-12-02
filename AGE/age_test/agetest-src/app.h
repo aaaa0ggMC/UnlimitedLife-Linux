@@ -26,6 +26,8 @@ using namespace alib::g3::ecs;
 using enum LogLevel;
 
 struct MainApplication{
+    glm::mat4 shadow_bias;
+
     /// Stored Config
     MainApplicationConfig cfg;
     
@@ -44,6 +46,7 @@ struct MainApplication{
     //// World & ECS ////
     EntityManager em;
     Camera camera {em};
+    Camera e_light { em };
     Object cube {em};
     Object invPar {em};
     Object pyramid {em};
@@ -81,9 +84,13 @@ struct MainApplication{
 
     //// Shaders ////
     Shader shader {Shader::null()};
+    Shader shadowShader { Shader::null() };
+    Shader callbackShader { Shader::null() };
     ShaderUniform mv_matrix;
     ShaderUniform invMV;
     ShaderUniform projectionMatrix;
+    ShaderUniform shadowMVP;
+    ShaderUniform shadowMVP2;
 
     material::MaterialBindings mb;
     light::LightBindings lb;
@@ -93,6 +100,10 @@ struct MainApplication{
     
     //// Framebuffer ////
     Framebuffer shadowMap;
+
+    //// Callback ////
+    Framebuffer shadowMapCallback;
+    Texture * shadowTexCallback;
 
     //// Construct Section ////
     MainApplication(MainApplicationConfig cfg)
@@ -106,6 +117,9 @@ struct MainApplication{
     void run();
     void handle_input(float elapse_seconds);
     void draw();
+    void draw_pass_one();
+    void draw_pass_two();
+    void draw_callback();
     void world_update(float ep_milliseconds);
 
     //// Setup sections ////

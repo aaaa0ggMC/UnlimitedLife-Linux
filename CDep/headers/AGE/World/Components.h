@@ -1,7 +1,7 @@
 /** @file world/Components.h
  * @brief 提供一些预制的components
  * @author aaaa0ggmc,euuen
- * @date 2025/11/29
+ * @date 2025/12/02
  * @start-date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
@@ -102,6 +102,10 @@ namespace age::world{
 
             Transform(){
                 reset();
+            }
+
+            inline glm::mat4 lookAt(glm::vec3 center,glm::vec3 up = glm::vec3(0,1,0)){
+                return glm::lookAt(m_position,center,up);
             }
 
             inline void reset(){

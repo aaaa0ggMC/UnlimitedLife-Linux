@@ -32,6 +32,8 @@ namespace age{
         int height { 0 };
         bool mipmap { false };
         GLenum internal_format { GL_RGBA };
+        /// lower than 0 means auto detect by bits
+        int64_t format { -1 };
 
         //上传属性
         bool uploaded;
@@ -348,6 +350,8 @@ namespace age{
         } empty;
         
         GLenum internalFormat { GL_RGBA };
+        // lower than 0 means auto detect by channel count
+        int64_t format { -1 };
         bool genMipmap { false };
 
         bool uploadToOpenGL { true };

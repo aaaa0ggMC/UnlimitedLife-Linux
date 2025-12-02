@@ -27,7 +27,7 @@ struct MainApplicationConfig{
     float framerate { 120 };
     //// Window & Graphics ////
     CreateWindowInfo ci;
-    bool gl_err_callback {false};
+    bool gl_err_callback { true };
     size_t vao_count {32};
     size_t vbo_count {16};
     float fpsCountTimeMs { 500 };
@@ -38,6 +38,10 @@ struct MainApplicationConfig{
     //// Shaders ////
     std::string main_vert {"test_data/cube.vert"};
     std::string main_frag {"test_data/cube.frag"};
+    std::string sh_vert {"test_data/shadow.vert"};
+    std::string sh_frag {"test_data/shadow.frag"};
+    std::string shc_vert {"test_data/shadow_cl.vert"};
+    std::string shc_frag {"test_data/shadow_cl.frag"};
 
     //// Textures ////
     std::vector<const char *> texture_sids;

@@ -3,10 +3,99 @@
 void MainApplication::draw(){
     Window & win = *m_window;
     Sampler & sampler = m_sampler;   
-
     win.clear();
+    draw_pass_one();
+    draw_callback();
+    draw_pass_two();
+}
+
+void MainApplication::draw_pass_one(){
+    Window & win = *m_window;  
+    glViewport(0,0,shadowTex->getTextureInfo().width,shadowTex->getTextureInfo().height);
+
+    shadowMap.bind();
+    shadowShader.bind();
+    glDrawBuffer(GL_NONE);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+
+    lb.position.safe_upload(e_light.transform().m_position);
+
+    if(state.show_cube){
+        glFrontFace(GL_CCW);
+        shadowMVP.uploadmat4(e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(root.transform().m_position) * 
+            cube.transform().buildModelMatrix());
+        win.draw<Model>(models["cube"]);
+    }
+
+    if(state.show_pyramid){
+        vaos[1].bind();
+        glFrontFace(GL_CCW);
+        shadowMVP.uploadmat4(
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(root.transform().m_position) * 
+            pyramid.transform().buildModelMatrix());
+        win.drawArray(PrimitiveType::Triangles,0,36);
+    }
+
+    if(state.show_model){
+        glFrontFace(GL_CCW);
+        shadowMVP.uploadmat4(
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(root.transform().m_position) * 
+            invPar.transform().buildModelMatrix());
+        win.draw<Model>(*current_model);
+    }
+
+    if(state.show_model){
+        glFrontFace(GL_CCW);
+        shadowMVP.uploadmat4(
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(root.transform().m_position) * 
+            root.transform().buildModelMatrix());
+        win.draw<Model>(*current_model);
+    }
+
+    if(state.show_platform){
+        glFrontFace(GL_CCW);
+        shadowMVP.uploadmat4(
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(root.transform().m_position) * 
+            plane.transform().buildModelMatrix());
+        win.draw<Model>(m_plane);
+    }
+
+    shadowMap.unbind();
+}
+
+void MainApplication::draw_callback(){
+    glViewport(0,0,shadowTexCallback->getTextureInfo().width,shadowTexCallback->getTextureInfo().height);
+    shadowMapCallback.bind();
+    callbackShader.bind();
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    shadowSampler.bind(GL_TEXTURE1);
+    shadowTex->bind(GL_TEXTURE1);
+
+    m_window->drawArray(PrimitiveType::Triangles,0,6);
+    shadowMapCallback.unbind();
+}
+
+void MainApplication::draw_pass_two(){
+    Window & win = *m_window;
+    
+    glViewport(0,0,win.getFrameBufferSize().x,win.getFrameBufferSize().y);
+    glDrawBuffer(GL_BACK);
     shader.bind();
-    sampler.bind(GL_TEXTURE0);
+    m_sampler.bind(GL_TEXTURE0);
+    shadowSampler.bind(GL_TEXTURE1);
+    shadowTex->bind(GL_TEXTURE1);
     // 绑定首选纹理
     (*app.textures.get(cfg.texture_sids[state.current_texture_id]))->bind(GL_TEXTURE0);
     // GL statuses //
@@ -18,6 +107,8 @@ void MainApplication::draw(){
     else glDisable(GL_CULL_FACE);
     glPointSize(state.point_size);
     glPolygonMode(cfg.gl_polygon_face_enums[state.gl_polygon_face_index],cfg.gl_polygon_mode_enums[state.gl_polygon_mode_index]);
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(2.0f,4.0f);
 
     mat_gold.upload(mb);
     /// Cube
@@ -27,6 +118,11 @@ void MainApplication::draw(){
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * cube.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
+        shadowMVP2.uploadmat4(
+            shadow_bias *
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
+            cube.transform().buildModelMatrix());
 
         win.draw<Model>(models["cube"]);
         // win.drawArray(PrimitiveType::Triangles,0,36,1);
@@ -39,6 +135,12 @@ void MainApplication::draw(){
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * pyramid.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
+        shadowMVP2.uploadmat4(
+            shadow_bias *
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
+            pyramid.transform().buildModelMatrix());
+
         win.drawArray(PrimitiveType::Triangles,0,36);
     }
 
@@ -48,6 +150,12 @@ void MainApplication::draw(){
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * invPar.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
+        shadowMVP2.uploadmat4(
+            shadow_bias *
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
+            invPar.transform().buildModelMatrix());
+
         win.draw<Model>(*current_model);
     }
 
@@ -57,6 +165,12 @@ void MainApplication::draw(){
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * root.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
+        shadowMVP2.uploadmat4(
+            shadow_bias *
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
+            root.transform().buildModelMatrix());
+
         win.draw<Model>(*current_model);
     }
 
@@ -68,6 +182,12 @@ void MainApplication::draw(){
         auto lm = camera.viewer().buildViewMatrix(camera.transform()) * plane.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
+        shadowMVP2.uploadmat4(
+            shadow_bias *
+            e_light.projector().buildProjectionMatrix() * 
+            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
+            plane.transform().buildModelMatrix());
+
         win.draw<Model>(m_plane);
     }
 }

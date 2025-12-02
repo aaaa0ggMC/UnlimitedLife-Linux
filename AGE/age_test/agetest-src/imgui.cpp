@@ -32,6 +32,9 @@ void ImGUIInjector::ui(MainApplication &){
         if(ImGui::MenuItem("音乐")){
             im_menu = 6;
         }
+        if(ImGui::MenuItem("帧缓冲区")){
+            im_menu = 8;
+        }
         ImGui::EndMenuBar();
     }
     ImGui::Text("ImGui帧率: %.2f ", im_io->Framerate);
@@ -62,6 +65,9 @@ void ImGUIInjector::ui(MainApplication &){
         break;
     case 7:
         info();
+        break;
+    case 8:
+        shadow();
         break;
     }
 
