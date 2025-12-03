@@ -32,9 +32,6 @@ void ImGUIInjector::ui(MainApplication &){
         if(ImGui::MenuItem("音乐")){
             im_menu = 6;
         }
-        if(ImGui::MenuItem("帧缓冲区")){
-            im_menu = 8;
-        }
         ImGui::EndMenuBar();
     }
     ImGui::Text("ImGui帧率: %.2f ", im_io->Framerate);
@@ -66,13 +63,32 @@ void ImGUIInjector::ui(MainApplication &){
     case 7:
         info();
         break;
-    case 8:
-        shadow();
-        break;
+    }
+    ImGui::End();
+    ImGui::PopStyleVar();
+
+    ImGui::Begin("Viewer", nullptr ,ImGuiWindowFlags_MenuBar);
+    if(ImGui::BeginMenuBar()){
+        if(ImGui::MenuItem("阴影贴图")){
+            im_vmenu = 0;
+        }
+        if(ImGui::MenuItem("留空")){
+            im_vmenu = 999;
+        }
+        ImGui::EndMenuBar();
     }
 
-    ImGui::PopStyleVar();
+    switch(im_vmenu){
+    case 0:
+        app.draw_callback();
+        shadow();
+        break;
+    default:
+        break;
+    }
+    
     ImGui::End();
+    
     ImGui::Render();
     s.im_cached = (void*) ImGui::GetDrawData();
 }

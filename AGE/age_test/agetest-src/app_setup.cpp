@@ -1,6 +1,11 @@
 #include "app.h"
+#include "app_comp.h"
 #include <AGE/ModelLoader/PrefabGenerator.h>
 #include <AGE/ModelLoader/Loader.h>
+
+constexpr int shadowbuffer_w = 1024;
+constexpr int shadowbuffer_h = 1024;
+
 
 MainApplication::~MainApplication(){
     // 剩下的让application自己销毁吧。。。
@@ -35,11 +40,8 @@ void MainApplication::setup(){
 
 
 void MainApplication::setup_framebuffers(){
-    auto v = m_window->getFrameBufferSize();
-    v.x = 1024;
-    v.y = 1024;
     auto[fb,texture,sampler] = 
-        app.framebuffers.createShadowMap("shadowmap_0",(size_t)v.x,(size_t)v.y);
+        app.framebuffers.createShadowMap("shadowmap_0",(size_t)shadowbuffer_w,(size_t)shadowbuffer_h);
 
     shadowMap = fb;
     shadowSampler = sampler;
@@ -51,8 +53,8 @@ void MainApplication::setup_framebuffers(){
 
     CreateTextureInfo t;
     t.source = t.CreateEmpty;
-    t.empty.width = v.x;
-    t.empty.height = v.y;
+    t.empty.width = shadowbuffer_w;
+    t.empty.height = shadowbuffer_h;
     t.internalFormat = GL_RGBA;
     t.sid = "shadow_callback";
     shadowTexCallback = *app.textures.create(t);
@@ -63,9 +65,6 @@ void MainApplication::setup_framebuffers(){
     f.sid = "shadow_callback";
     shadowMapCallback = app.framebuffers.create(f);
     shadowMapCallback.color(color);
-    
-    e_light.projector().set(std::numbers::pi/3.0f,v.x,v.y);
-    e_light.cameraEntity.add<comps::Tag>("light");
 
     lg(Info) << "LoadFramebuffer:OK" << endlog;
 }
@@ -94,7 +93,6 @@ void MainApplication::load_lights(){
     light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
     light.specular.fromRGBA(1.0,1.0,1.0,1.0);
     light.position = glm::vec3(1.2,4.1,0.3);
-    e_light.transform().setPosition(light.position);
 
     lb.ambient = createUniformName<glm::vec4>(shader,"light.ambient")();
     lb.diffuse = createUniformName<glm::vec4>(shader,"light.diffuse")();
@@ -102,6 +100,12 @@ void MainApplication::load_lights(){
     lb.position = createUniformName<glm::vec3>(shader,"light.position")();
 
     light.upload(lb);
+
+    e_light.projector().set(std::numbers::pi/3.0f,shadowbuffer_w,shadowbuffer_h);
+    e_light.cameraEntity.add<comps::Tag>("light");
+    e_light.transform().setPosition(light.position);
+    e_light.cameraEntity.add<LightComponent>();
+
     lg(Info) << "LoadLight:OK" << endlog;
 }
 
@@ -167,6 +171,7 @@ void MainApplication::init_world_objects(){
     
     cube.transform().move(1,-3,6);
     cube.getEntityWrapper().add<comps::Tag>("cube");
+    cube.getEntityWrapper().add<LightMVP>(cube.tran);
 
     invPar.transform().move(0,0,4);
     invPar.getEntityWrapper().add<comps::Tag>("invPar");

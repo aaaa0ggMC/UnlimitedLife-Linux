@@ -29,6 +29,21 @@ uniform Material material;
 uniform PositionalLight light;
 uniform vec4 gambient;
 
+#define FACTOR 1
+#define FACTOR_DIV 9
+#define STEP 0.001
+
+float sampleShadow(in vec4 tex_coord){
+    float val = 0;
+    for(int i = -FACTOR;i <= FACTOR;++i){
+        for(int j = -FACTOR;j <= FACTOR;++j){
+            val += textureProj(shadowTex,tex_coord + vec4(i * STEP * tex_coord.w, j * STEP * tex_coord.w, -0.001 ,0));
+        }
+    }
+    val /= FACTOR_DIV;
+    return val;
+}
+
 void main(){
   vec3 L = normalize(varyingLightDir);
   vec3 N = normalize(varyingNormal);
@@ -43,6 +58,5 @@ void main(){
   vec3 diffuse = light.diffuse.xyz * material.diffuse.xyz * texColor.xyz * max(cosTheta,0.0);
   vec3 specular = light.specular.xyz * material.specular.xyz * pow(max(cosPhi,0.0),material.shininess);
 
-  float notInShadow = textureProj(shadowTex,shadowCoord);
-  color = vec4(ambient + notInShadow * (diffuse + specular),texColor.a);
+  color = vec4(ambient + sampleShadow(shadowCoord) * (diffuse + specular),texColor.a);
 }

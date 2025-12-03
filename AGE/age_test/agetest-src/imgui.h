@@ -12,6 +12,7 @@ struct ImGUIInjector{
     MainApplicationConfig cfg;
     ImGuiIO* im_io;
     size_t im_menu { 7 };
+    size_t im_vmenu { 0 };
 
     ImGUIInjector(MainApplication & a)
     :app(a)

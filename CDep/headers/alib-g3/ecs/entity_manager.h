@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 实体管理
  * @version 0.1
- * @date 2025/11/29
+ * @date 2025/12/03
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -209,6 +209,11 @@ namespace alib::g3::ecs{
             T & comp = p->data.try_next_with_index(flag,index,std::forward<Args>(args)...);
             if constexpr(NeedBind<T>){
                 comp.bind(e);
+            }
+            if constexpr(NeedSlotId<T>){
+                if(flag){
+                    comp.slot(index);
+                }
             }
             p->mapper.emplace(e.id,index);
             return ref(p->data,index);

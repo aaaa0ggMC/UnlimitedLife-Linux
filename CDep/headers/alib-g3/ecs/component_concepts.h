@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 这里列出了entity_manager支持的所有注入方式，主要为文档说明
  * @version 0.1
- * @date 2025/11/29
+ * @date 2025/12/03
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -58,7 +58,23 @@ namespace alib::g3::ecs{
             return bound_entity;
         }
     };
-    
+
+    /// 如果你希望获取组件目前的slot可以设置这个，由于组件slot位置都不会变动，因此每次创建component的时候会bind
+    /// 复用的时候不会处理
+    template<class T> concept NeedSlotId = requires(T& t,size_t index){t.slot(index);};
+    /// @brief 简单注入
+    struct ISlotComponent{
+        size_t m_slot;
+
+        inline void slot(size_t i){
+            m_slot = i;
+        }
+
+        inline size_t get_slot(){
+            return m_slot;
+        }
+    };
+
     /// 这里可以对组件进行依赖
     /// 要求组件内存在 using Dependency = ComponentStack<...>;
     /// 碰到循环依赖会报错
