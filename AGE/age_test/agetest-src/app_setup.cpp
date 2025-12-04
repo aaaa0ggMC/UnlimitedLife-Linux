@@ -13,12 +13,6 @@ MainApplication::~MainApplication(){
 }
 
 void MainApplication::setup(){
-    shadow_bias = glm::mat4(
-        0.5f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.5f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f
-    );
     setup_logger();
     setup_window();
     if(cfg.gl_err_callback)setup_err_callback();
@@ -92,7 +86,7 @@ void MainApplication::load_lights(){
     light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
     light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
     light.specular.fromRGBA(1.0,1.0,1.0,1.0);
-    light.position = glm::vec3(1.2,4.1,0.3);
+    light.position = e_light.transform().m_position;
 
     lb.ambient = createUniformName<glm::vec4>(shader,"light.ambient")();
     lb.diffuse = createUniformName<glm::vec4>(shader,"light.diffuse")();
@@ -100,12 +94,6 @@ void MainApplication::load_lights(){
     lb.position = createUniformName<glm::vec3>(shader,"light.position")();
 
     light.upload(lb);
-
-    e_light.projector().set(std::numbers::pi/3.0f,shadowbuffer_w,shadowbuffer_h);
-    e_light.cameraEntity.add<comps::Tag>("light");
-    e_light.transform().setPosition(light.position);
-    e_light.cameraEntity.add<LightComponent>();
-
     lg(Info) << "LoadLight:OK" << endlog;
 }
 
@@ -165,27 +153,41 @@ void MainApplication::load_dynamic_models(){
 }
 
 void MainApplication::init_world_objects(){
+    /// Add Tags
+    camera.add<comps::Tag>("camera");
+    cube.add<comps::Tag>("cube");
+    invPar.add<comps::Tag>("invPar");
+    pyramid.add<comps::Tag>("pyramid");
+    plane.add<comps::Tag>("plane");
+    root.add<comps::Tag>("root");
+    e_light.add<comps::Tag>("light");
+
+    /// Add Shadow MVP Calculations
+    camera.add<LightMVP>();
+    cube.add<LightMVP>();
+    invPar.add<LightMVP>();
+    pyramid.add<LightMVP>();
+    plane.add<LightMVP>();
+    root.add<LightMVP>();
+
+    /// Parents
+    pyramid.add<comps::Parent>(invPar.getEntity());
+    invPar.add<comps::Parent>(cube.getEntity());
+
+    camera.projector().set(std::numbers::pi/3.0f,
+        m_window->getFrameBufferSize().x,
+        m_window->getFrameBufferSize().y);
     camera.transform().move(1,0,10);
-    camera.projector().set(std::numbers::pi/3.0f,m_window->getFrameBufferSize().x,m_window->getFrameBufferSize().y);
-    camera.cameraEntity.add<comps::Tag>("camera");
-    
     cube.transform().move(1,-3,6);
-    cube.getEntityWrapper().add<comps::Tag>("cube");
-    cube.getEntityWrapper().add<LightMVP>(cube.tran);
-
     invPar.transform().move(0,0,4);
-    invPar.getEntityWrapper().add<comps::Tag>("invPar");
-
     pyramid.transform().move(3,0,0);
-    pyramid.getEntityWrapper().add<comps::Tag>("pyramid");
-
     plane.transform().move(0,-10,0);
-    plane.getEntityWrapper().add<comps::Tag>("plane");
 
-    root.getEntityWrapper().add<comps::Tag>("root");
+    e_light.transform().move(glm::vec3(1.2,4.1,0.3));
+    e_light.projector().set(std::numbers::pi/3.0f,
+        shadowbuffer_w,shadowbuffer_h);
+    e_light.add<LightComponent>(e_light);
 
-    em.add_component<Parent>(pyramid.getEntity(),invPar.getEntity());
-    em.add_component<Parent>(invPar.getEntity(),cube.getEntity());
     lg(Info) << "InitWorldObjects:OK" << endlog;
 }
 

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 相机，对组件的一个包装
  * @version 0.1
- * @date 2025/11/29
+ * @date 2025/12/04
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -11,6 +11,7 @@
  */
 #ifndef AGE_H_CAMERA
 #define AGE_H_CAMERA
+#include <AGE/World/PrefabBase.h>
 #include <AGE/Utils.h>
 #include <AGE/World/Components.h>
 
@@ -18,36 +19,28 @@ namespace age::world{
     using namespace alib::g3::ecs;
     using namespace comps;
 
-    struct Camera : public DirtyMarker,public NonCopyable{
+    struct Camera : public MonoBehavior{
     public:
-        // 确保初始化顺序！
-        EntityManager& em;
-        EntityWrapper cameraEntity;
-        
         ref_t<comps::Transform> tran;
         ref_t<comps::Viewer> view;
         ref_t<comps::Projector> proj;
-
         glm::mat4 vp_matrix;
+        uint64_t dm_tran { 0 }, dm_proj {0};
 
         inline Camera(EntityManager& iem)
-        :em{iem}
-        ,cameraEntity{iem}
-        ,tran{cameraEntity.add<comps::Transform>()}
-        ,view{cameraEntity.add<comps::Viewer>()}
-        ,proj{cameraEntity.add<comps::Projector>()}{
-            tran->chain = (DirtyMarker*)this;
-            proj->chain = (DirtyMarker*)this;
+        :MonoBehavior(iem){
+            tran = add<comps::Transform>();
+            view = add<comps::Viewer>();
+            proj = add<comps::Projector>();
+
             vp_matrix = glm::mat4(1.0f);
         }
 
-        inline ~Camera(){
-            cameraEntity.destroy();
-        }
-
         inline glm::mat4& buildVPMatrix(){
-            if(!dm_check())return vp_matrix;
-            vp_matrix = projector().buildProjectionMatrix() * viewer().buildViewMatrix(transform());
+            // Trick or treat，这里这么写是因为不会短路处理从而更新版本来着...
+            if(tran->dm_version(dm_tran) | proj->dm_version(dm_proj)){
+                vp_matrix = projector().buildProjectionMatrix() * viewer().buildViewMatrix(transform());
+            }
             return vp_matrix;
         }
 

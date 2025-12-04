@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些基本的操作符
  * @version 0.1
- * @date 2025/11/27
+ * @date 2025/12/04
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -11,6 +11,7 @@
  */
 #ifndef ALOG2_MANIP_INCLUDED
 #define ALOG2_MANIP_INCLUDED
+#include <alib-g3/log/base_config.h>
 #include <alib-g3/autil.h>
 #include <source_location>
 

@@ -68,6 +68,8 @@ struct States{
 
     //// 播放进度 ////
     float progress { 0.0 };
+
+    bool use_light_cam { false };
 };
 
 #endif

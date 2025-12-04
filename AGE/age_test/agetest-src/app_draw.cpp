@@ -1,18 +1,21 @@
 #include "app.h"
+#include "app_comp.h"
 
 void MainApplication::draw(){
     Window & win = *m_window;
     Sampler & sampler = m_sampler;   
     win.clear();
+    e_light.transform().lookAt(root.transform().m_position);
     draw_pass_one();
     draw_callback();
     draw_pass_two();
 }
 
 void MainApplication::draw_pass_one(){
-    Window & win = *m_window;  
-    glViewport(0,0,shadowTex->getTextureInfo().width,shadowTex->getTextureInfo().height);
+    Window & win = *m_window;
+    LightComponent & lc = e_light.get<LightComponent>()->get();
 
+    glViewport(0,0,shadowTex->getTextureInfo().width,shadowTex->getTextureInfo().height);
     shadowMap.bind();
     shadowShader.bind();
     glDrawBuffer(GL_NONE);
@@ -20,51 +23,36 @@ void MainApplication::draw_pass_one(){
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-
     lb.position.safe_upload(e_light.transform().m_position);
 
     if(state.show_cube){
         glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4(e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(root.transform().m_position) * 
-            cube.transform().buildModelMatrix());
+        shadowMVP.uploadmat4((*cube.get<LightMVP>())->build_light_mvp(lc));
         win.draw<Model>(models["cube"]);
     }
 
     if(state.show_pyramid){
         vaos[1].bind();
         glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4(
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(root.transform().m_position) * 
-            pyramid.transform().buildModelMatrix());
+        shadowMVP.uploadmat4((*pyramid.get<LightMVP>())->build_light_mvp(lc));
         win.drawArray(PrimitiveType::Triangles,0,36);
     }
 
     if(state.show_model){
         glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4(
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(root.transform().m_position) * 
-            invPar.transform().buildModelMatrix());
+        shadowMVP.uploadmat4((*invPar.get<LightMVP>())->build_light_mvp(lc));
         win.draw<Model>(*current_model);
     }
 
     if(state.show_model){
         glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4(
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(root.transform().m_position) * 
-            root.transform().buildModelMatrix());
+        shadowMVP.uploadmat4((*root.get<LightMVP>())->build_light_mvp(lc));
         win.draw<Model>(*current_model);
     }
 
     if(state.show_platform){
         glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4(
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(root.transform().m_position) * 
-            plane.transform().buildModelMatrix());
+        shadowMVP.uploadmat4((*plane.get<LightMVP>())->build_light_mvp(lc));
         win.draw<Model>(m_plane);
     }
 
@@ -89,6 +77,8 @@ void MainApplication::draw_callback(){
 
 void MainApplication::draw_pass_two(){
     Window & win = *m_window;
+    LightComponent & lc = e_light.get<LightComponent>()->get();
+    Camera &cam = state.use_light_cam? e_light : camera;
     
     glViewport(0,0,win.getFrameBufferSize().x,win.getFrameBufferSize().y);
     glDrawBuffer(GL_BACK);
@@ -110,19 +100,16 @@ void MainApplication::draw_pass_two(){
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(2.0f,4.0f);
 
+    projectionMatrix.uploadmat4(cam.projector().buildProjectionMatrix());
     mat_gold.upload(mb);
     /// Cube
     if(state.show_cube){
         glFrontFace(GL_CCW);
         // vaos[0].bind(); 绘制model不需要bind vao
-        auto lm = camera.viewer().buildViewMatrix(camera.transform()) * cube.transform().buildModelMatrix();
+        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * cube.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4(
-            shadow_bias *
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
-            cube.transform().buildModelMatrix());
+        shadowMVP2.uploadmat4((*cube.get<LightMVP>())->build_light_mvp(lc));
 
         win.draw<Model>(models["cube"]);
         // win.drawArray(PrimitiveType::Triangles,0,36,1);
@@ -132,14 +119,10 @@ void MainApplication::draw_pass_two(){
     if(state.show_pyramid){
         vaos[1].bind();
         glFrontFace(GL_CCW);
-        auto lm = camera.viewer().buildViewMatrix(camera.transform()) * pyramid.transform().buildModelMatrix();
+        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * pyramid.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4(
-            shadow_bias *
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
-            pyramid.transform().buildModelMatrix());
+        shadowMVP2.uploadmat4((*pyramid.get<LightMVP>())->build_light_mvp(lc));
 
         win.drawArray(PrimitiveType::Triangles,0,36);
     }
@@ -147,14 +130,10 @@ void MainApplication::draw_pass_two(){
     /// Current Model
     if(state.show_model){
         glFrontFace(GL_CCW);
-        auto lm = camera.viewer().buildViewMatrix(camera.transform()) * invPar.transform().buildModelMatrix();
+        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * invPar.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4(
-            shadow_bias *
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
-            invPar.transform().buildModelMatrix());
+        shadowMVP2.uploadmat4((*invPar.get<LightMVP>())->build_light_mvp(lc));
 
         win.draw<Model>(*current_model);
     }
@@ -162,14 +141,10 @@ void MainApplication::draw_pass_two(){
     /// With Root
     if(state.show_model){
         glFrontFace(GL_CCW);
-        auto lm = camera.viewer().buildViewMatrix(camera.transform()) * root.transform().buildModelMatrix();
+        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * root.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4(
-            shadow_bias *
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
-            root.transform().buildModelMatrix());
+        shadowMVP2.uploadmat4((*root.get<LightMVP>())->build_light_mvp(lc));
 
         win.draw<Model>(*current_model);
     }
@@ -179,14 +154,10 @@ void MainApplication::draw_pass_two(){
     mat_jade.upload(mb);
     if(state.show_platform){
         glFrontFace(GL_CCW);
-        auto lm = camera.viewer().buildViewMatrix(camera.transform()) * plane.transform().buildModelMatrix();
+        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * plane.transform().buildModelMatrix();
         invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
         mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4(
-            shadow_bias *
-            e_light.projector().buildProjectionMatrix() * 
-            e_light.transform().lookAt(glm::vec3(0,0,0)) * 
-            plane.transform().buildModelMatrix());
+        shadowMVP2.uploadmat4((*plane.get<LightMVP>())->build_light_mvp(lc));
 
         win.draw<Model>(m_plane);
     }

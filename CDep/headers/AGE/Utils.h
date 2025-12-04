@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2025/12/02
+ * @date 2025/12/04
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -13,16 +13,11 @@
 #define AGE_H_BASE
 
 #include <cstdint>
-#include <string>
 #include <vector>
-#include <memory_resource>
 #include <numbers>
-#include <optional>
 #include <functional>
 #include <alib-g3/aclock.h>
 #include <alib-g3/adebug.h>
-#include <thread>
-#include <chrono>
 #include <functional>
 #include <alib-g3/alogger.h>
 #include <GL/glew.h>
@@ -93,15 +88,11 @@ namespace age{
     struct AGE_API DirtyMarker{
     private:
         bool dirty {true};
+        uint64_t dirtymarker_version { 1 };
     public:
-        DirtyMarker * chain {NULL};
         inline void dm_mark(){
-            if(dirty)return;
+            ++dirtymarker_version;
             dirty = true;
-            if(chain){
-                chain->dm_mark();
-                //std::cout << "chained" << std::endl;
-            }
         }
 
         inline bool dm_check(){
@@ -111,6 +102,17 @@ namespace age{
         inline void dm_clear(){
             dirty = false;
         }
+
+        /// @return 返回是否应该更新
+        inline bool dm_version(uint64_t& cached){
+            if(cached != dirtymarker_version){
+                cached = dirtymarker_version;
+                return true;
+            }
+            return false;
+        }
+
+        inline uint64_t dm_get_version(){return dirtymarker_version;}
     };
     struct AGE_API ErrorInfo{
         int32_t code;

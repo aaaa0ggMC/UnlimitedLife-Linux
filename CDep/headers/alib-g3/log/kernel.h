@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/11/27 
+* @date 2025/12/04 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -22,7 +22,6 @@
  */
 #ifndef ALOGGER2_H_INCLUDED
 #define ALOGGER2_H_INCLUDED
-#include <chrono>
 #include <alib-g3/autil.h>
 #include <alib-g3/aref.h>
 #include <alib-g3/aclock.h>
@@ -41,7 +40,6 @@
 #include <memory>
 #include <span>
 #include <type_traits>
-#include <iostream>
 
 #ifdef __linux__
 #define __internal_alib_localtime localtime_r
@@ -213,15 +211,15 @@ namespace alib::g3{
             }
         }
         /// @brief 安全获取内容，但是使用比较繁琐，需要先使用has_data确认，然后ret.get()->XX使用
-        template<IsLogMod T> inline auto get_mod_handle(std::string_view name){
+        template<IsLogMod T> auto get_mod_handle(std::string_view name){
             if constexpr(IsLogTarget<T>){
                 auto i = search_targets.find(std::string(name));
                 if(i == search_targets.end())return ref(targets,UINT32_MAX);
-                return {i->second};
+                return i->second;
             }else{
                 auto i = search_filters.find(std::string(name));
                 if(i == search_filters.end())return ref(filters,UINT32_MAX);
-                return {i->second};
+                return i->second;
             }
         }
 

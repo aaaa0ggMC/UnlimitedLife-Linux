@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 对循环依赖的组件进行检测
  * @version 0.1
- * @date 2025/11/27
+ * @date 2025/12/04
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -11,6 +11,8 @@
  */
 #ifndef AECS_CYCLE_CHECKER
 #define AECS_CYCLE_CHECKER
+#include <alib-g3/aref.h>
+#include <alib-g3/ecs/linear_storage.h>
 #include <type_traits>
 
 namespace alib::g3::ecs{
@@ -44,11 +46,16 @@ namespace alib::g3::ecs{
         };
     };
 
+
+    /// @brief 获取对应的安全引用
+    template<class T> using ref_t = RefWrapper<detail::LinearStorage<T>>;
     /// @brief 用于递归的传入链，也是Dependency的依赖链
     /// @tparam ...Ts 类型列表
     template<class... Ts> struct ComponentStack{
         /// @brief 添加一个新的类型
         template<class T> using add_t = ComponentStack<T,Ts...>;
+        /// @brief 获取对应的tuple
+        using deptup_t = std::tuple<ref_t<Ts>...>;
 
         /// @brief 检查是否出现循环依赖
         /// @tparam T 要检测的类型

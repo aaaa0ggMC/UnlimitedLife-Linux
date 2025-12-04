@@ -1,7 +1,7 @@
 /** @file world/Components.h
  * @brief 提供一些预制的components
  * @author aaaa0ggmc,euuen
- * @date 2025/12/02
+ * @date 2025/12/04
  * @start-date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
@@ -104,8 +104,11 @@ namespace age::world{
                 reset();
             }
 
-            inline glm::mat4 lookAt(glm::vec3 center,glm::vec3 up = glm::vec3(0,1,0)){
-                return glm::lookAt(m_position,center,up);
+            inline void lookAt(glm::vec3 center,glm::vec3 up = glm::vec3(0,1,0)){
+                dm_mark();
+                // 复用model_matrix，后面会自动懒惰求值覆盖
+                model_matrix = glm::lookAt(m_position,center,up);
+                m_rotation.get_mutable_unnorm() = glm::quat_cast(model_matrix);
             }
 
             inline void reset(){

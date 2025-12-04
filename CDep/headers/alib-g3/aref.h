@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 不会悬垂的比较安全的容器数据wrapper,Release下单次性能损失为0.3ns
  * @version 0.1
- * @date 2025/11/27
+ * @date 2025/12/04
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  ********************************************************
@@ -64,9 +64,14 @@ RELEASE:
  */
 #ifndef AREF_H_INCLUDED
 #define AREF_H_INCLUDED
+#include <algorithm>
 #include <concepts>
+#include <limits>
 #include <type_traits>
 #include <cassert>
+#include <utility>
+#include <cstddef>
+#include <alib-g3/adebug.h>
 
 namespace alib::g3{
     template<class T> concept CanAccessItem = requires(T&t){
@@ -78,7 +83,7 @@ namespace alib::g3{
     };
 
     template<class T> concept IsNumber =
-        std::is_same_v<T,size_t> ||
+        std::is_same_v<T,std::size_t> ||
         std::is_same_v<T,int> ||
         std::is_same_v<T,long> ||
         std::is_same_v<T,unsigned int> ||
@@ -92,26 +97,29 @@ namespace alib::g3{
     template<CanAccessItem Cont> struct RefWrapper{
         using BaseType = typename Cont::value_type;
         /// 容器的引用，所以你需要保证至少容器是存在的，嵌套容器就可能不太支持了
-        Cont & cont;
+        /// 不行了，受不了了，准备改成指针
+        Cont * cont { nullptr };
         /// index
-        size_t index;
+        std::size_t index { std::numeric_limits<size_t>::max() };
 
         /// 确认现在是否还存在数据
         inline bool has_data(){
-            return index < cont.size();
+            return index < cont->size();
         }
     
         /// 获取当前的引用
         inline auto& get(){
             // debug下防止shrink
-            assert(index < cont.size());
-            return cont[index];
+            panic_debug(!cont,"Root container is empty!");
+            panic_debug(index >= cont->size(),"Index out of bounds!");
+            return (*cont)[index];
         }
 
         inline auto* ptr(){
             // debug下防止shrink
-            assert(index < cont.size());
-            return &(cont[index]);
+            panic_debug(!cont,"Root container is empty!");
+            panic_debug(index >= cont->size(),"Index out of bounds!");
+            return &((*cont)[index]);
         }
 
         /// 访问应用内部
@@ -121,7 +129,7 @@ namespace alib::g3{
 
         /// 尝试调用引用的赋值
         template<class U> inline auto operator=(U&& val) 
-            -> decltype(cont[index] = std::forward<U>(val))
+            -> decltype((*cont)[index] = std::forward<U>(val))
         {
             return get() = std::forward<U>(val);
         }
@@ -170,7 +178,8 @@ namespace alib::g3{
 
         /// 手动设置index
         inline RefWrapper<Cont>& set_index(size_t index){
-            assert(index < cont.size());
+            panic_debug(!cont,"Root container is empty!");
+            panic_debug(index >= cont->size(),"Index out of bounds!");
             this->index = index;
             return *this;
         }
@@ -183,13 +192,8 @@ namespace alib::g3{
 
     template<CanAccessItem Cont> auto 
         ref(Cont & cont,size_t index){
-        assert(index < cont.size());
-        return RefWrapper<Cont>{cont,index};
-    }
-
-    template<CanAccessItem Cont> auto 
-    ref_invalid(Cont & cont){
-        return RefWrapper<Cont>{cont,std::numeric_limits<size_t>::max()};
+        panic_debug(index >= cont.size(),"Index out of bounds!");
+        return RefWrapper<Cont>{ &cont , index};
     }
 
     /**
@@ -204,7 +208,7 @@ namespace alib::g3{
     template<CanAccessItem Cont,size_t N> struct MultiRefWrapper{
         using value_type = Cont::value_type;
         /// 底层容器，需要保证不悬垂
-        Cont & cont;
+        Cont * cont;
         /// 存储索引的数组
         std::array<size_t,N> indices;
     private:
@@ -212,7 +216,7 @@ namespace alib::g3{
         /// 递归获取对象，每次都会进行一次检查
         template<CanAccessItem ICont,size_t Depth = 0> 
             auto& get_raw(ICont & ucont){
-            assert(indices[Depth] < ucont.size());
+            panic_debug(indices[Depth] >= ucont.size(),"Index out of bounds!");
             // 到达索引最内层，由于set_indices已经保证层数匹配
             if constexpr(Depth == N-1){
                 return ucont[indices[Depth]];
@@ -222,7 +226,7 @@ namespace alib::g3{
         /// 最后一层调用
         template<CanAccessItem ICont,size_t Index = 0,IsNumber Arg> void 
             set_indices_raw(ICont& c,Arg&& index){ 
-            assert(index < c.size());
+            panic_debug(index >= c.size(),"Index out of bounds!");
             indices[Index] = std::forward<Arg>(index);   
         }
 
@@ -231,7 +235,7 @@ namespace alib::g3{
             set_indices_raw(ICont & c,Arg&& index,Args&&... iss){
             // 说明此时有附加参数但是没有对应层数
             static_assert(CanAccessItem<typename ICont::value_type>,"Too many indices! Your ref is too deep for the container!");
-            assert(index < c.size());
+            panic_debug(index >= c.size(),"Index out of bounds!");
             indices[Index] = std::forward<Arg>(index);
             set_indices_raw<typename ICont::value_type,Index+1,Args...>(c[index],std::forward<Args>(iss)...); // 递归检测
         }
@@ -257,13 +261,15 @@ namespace alib::g3{
 
         /// 获取内存对象
         inline auto& get(){
-            return get_raw<Cont,0>(cont);
+            panic_debug(!cont, "Root container is empty!");
+            return get_raw<Cont,0>(*cont);
         }
 
         /// 设置索引
         template<IsNumber... Args> inline void 
             set_indices(Args&&... iss){
-            set_indices_raw<Cont,0,Args...>(cont,std::forward<Args>(iss)...); // 递归检测
+            panic_debug(!cont, "Root container is empty!");
+            set_indices_raw<Cont,0,Args...>(*cont,std::forward<Args>(iss)...); // 递归检测
         }
 
         /// 获取当前对象
@@ -302,7 +308,7 @@ namespace alib::g3{
     /// 获取多层container的引用
     template<CanAccessItem Cont,IsNumber... Args> auto
         refs(Cont & cont,Args&&... indices){
-        return MultiRefWrapper<Cont,sizeof...(Args)>(cont,std::forward<Args>(indices)...);
+        return MultiRefWrapper<Cont,sizeof...(Args)>( &cont,std::forward<Args>(indices)...);
     }
 }
 

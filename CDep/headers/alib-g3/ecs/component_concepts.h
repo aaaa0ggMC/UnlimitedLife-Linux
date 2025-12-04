@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 这里列出了entity_manager支持的所有注入方式，主要为文档说明
  * @version 0.1
- * @date 2025/12/03
+ * @date 2025/12/04
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -73,6 +73,13 @@ namespace alib::g3::ecs{
         inline size_t get_slot(){
             return m_slot;
         }
+    };
+
+    /// 如果你希望获取你需要注入的依赖，可以使用bind_dep方法来设置，传入的是tuple
+    /// 需要Dependency::deptup_t 来获取，所以你的Dependency的类型要为
+    /// ComponentStack
+    template<class T,class Tup> concept NeedBindDependency = requires(T & t,Tup & tup){
+        t.bind_dep(tup);
     };
 
     /// 这里可以对组件进行依赖

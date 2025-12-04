@@ -101,5 +101,6 @@
         "__tree": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "clangd.arguments": ["--header-insertion=never"]
 }

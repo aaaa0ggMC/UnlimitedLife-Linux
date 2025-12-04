@@ -4,6 +4,7 @@ project(UnlimitedLife-Linux)
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
 set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "-Wl,--allow-multiple-definition -Wl,--rpath,./") 
@@ -24,6 +25,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
 add_compile_options("-fdebug-prefix-map=${CMAKE_SOURCE_DIR}=UnlimitedLife-Linux")
 endif()
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${build_dir})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${build_dir})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${build_dir})

@@ -116,8 +116,9 @@ void ImGUIInjector::camera(MainApplication & a){
                     glm::vec2 delta = curPos - lastPos;
 
                     if(delta.x != 0 || delta.y != 0){
+                        Camera & cam = a.state.use_light_cam?a.e_light:a.camera;
                         // 孩子们，我要旋转了
-                        a.camera.transform().rotate(
+                        cam.transform().rotate(
                             glm::angleAxis(delta.x * a.state.mouse_sensitivity / 1'000'000,glm::vec3(0,1,0)) *
                             glm::angleAxis(delta.y * a.state.mouse_sensitivity / 1'000'000,glm::vec3(1,0,0))
                         ); // 绕y轴旋转

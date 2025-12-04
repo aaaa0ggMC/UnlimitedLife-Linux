@@ -96,19 +96,21 @@ void MainApplication::handle_input(float p){
         veloDir.y -= 1;
     }
 
+
+    Camera & cam = state.use_light_cam?e_light:camera;
     if(input.getKeyInfo(KeyCode::Left).isPressing()){
-        camera.transform().rotate(glm::vec3(0,1,0),-cfg.cam_rot.x * p);
+        cam.transform().rotate(glm::vec3(0,1,0),-cfg.cam_rot.x * p);
     }else if(input.getKeyInfo(KeyCode::Right).isPressing()){
-        camera.transform().rotate(glm::vec3(0,1,0),cfg.cam_rot.x * p);
+        cam.transform().rotate(glm::vec3(0,1,0),cfg.cam_rot.x * p);
     }
 
     if(input.getKeyInfo(KeyCode::Up).isPressing()){
-        camera.transform().rotate(glm::vec3(1,0,0),-cfg.cam_rot.y * p);
+        cam.transform().rotate(glm::vec3(1,0,0),-cfg.cam_rot.y * p);
     }else if(input.getKeyInfo(KeyCode::Down).isPressing()){
-        camera.transform().rotate(glm::vec3(1,0,0),cfg.cam_rot.y * p);
+        cam.transform().rotate(glm::vec3(1,0,0),cfg.cam_rot.y * p);
     }
 
-    camera.transform().buildVelocity(veloDir,cfg.cam_speed);
+    cam.transform().buildVelocity(veloDir,cfg.cam_speed);
 
     if(imgui_camera_rot_injector)imgui_camera_rot_injector(*this);
 }

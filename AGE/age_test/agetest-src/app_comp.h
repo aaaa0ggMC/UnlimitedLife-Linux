@@ -11,10 +11,11 @@ using namespace alib::g3::ecs;
 using namespace age::world;
 
 struct LightComponent{
-    std::vector<glm::mat4> light_mvp_usage;
-    EntityManager::ref_t<Camera> camera;
 
-    LightMVP(EntityManager::ref_t<Camera> cam):camera{cam}{}
+    Camera* camera;
+    std::vector<glm::mat4> light_mvp_usage;
+
+    LightComponent(Camera & cam):camera(&cam){}
 
     glm::mat4& get(size_t index){
         if(index >= light_mvp_usage.size())light_mvp_usage.resize(index + 1);
@@ -26,14 +27,15 @@ struct LightMVP : public ISlotComponent,public age::DirtyMarker{
     using Dependency = ComponentStack<comps::Transform>;
     EntityManager::ref_t<Transform> transform;
 
-    LightMVP(EntityManager::ref_t<Transform> trans):transform{trans}{
-        trans->chain = (age::DirtyMarker *)this;
+    void bind_dep(const Dependency::deptup_t & tup){
+        auto& [t_tran] = tup;
+        transform = t_tran;
     }
-
-    const glm::mat4& build_light_mvp(Camera & light_cam,LightComponent & light){
+    
+    const glm::mat4& build_light_mvp(LightComponent & light){
         glm::mat4 & val = light.get(get_slot());
         if(!dm_check())return val;
-        val = light_cam.buildVPMatrix() * transform->buildModelMatrix();
+        val = light.camera->buildVPMatrix() * transform->buildModelMatrix();
         return val;
     }
 };

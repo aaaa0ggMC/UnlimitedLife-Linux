@@ -5,6 +5,7 @@ void ImGUIInjector::info(){
     ImGui::DragFloat("窗口不透明度",&s.im_winalpha,0.008F,0.0F,1.0F);
     ImGui::DragFloat("UI不透明度 ",&s.im_uialpha,0.008F,0.2F,1.0F);
     ImGui::DragFloat("鼠标灵敏度",&s.mouse_sensitivity,1);
+    ImGui::Checkbox("使用光源相机", &s.use_light_cam);
 }
 
 void ImGUIInjector::inspector(){
@@ -41,7 +42,7 @@ void ImGUIInjector::inspector(){
         if(ImGui::CollapsingHeader(a.c_str())){
             ImGui::PushID(valid_entities[i].id);
             ImGui::Text("ID: %lu",valid_entities[i].id);
-            ImGui::Text("版本号: %lu",valid_entities[i].version);
+            ImGui::Text("版本号: %u",valid_entities[i].version);
             ImGui::Indent();
             /// Transform
             if(pool_transform){
@@ -63,7 +64,7 @@ void ImGUIInjector::inspector(){
                 if(it != pool_parents->mapper.end()){
                     comps::Parent & parent = pool_parents->data[it->second];
                     if(ImGui::CollapsingHeader("Parent",ImGuiTreeNodeFlags_DefaultOpen)){
-                        ImGui::Text("父类 %lu %lu",parent.parent.id,parent.parent.version);
+                        ImGui::Text("父类 %lu %u",parent.parent.id,parent.parent.version);
                     } 
                 }
             }else pool_parents = app.em.get_component_pool<Parent>();
@@ -74,13 +75,16 @@ void ImGUIInjector::inspector(){
                 if(it != pool_projs->mapper.end()){
                     comps::Projector & proj = pool_projs->data[it->second];
                     if(ImGui::CollapsingHeader("Projector",ImGuiTreeNodeFlags_DefaultOpen)){
-                        ImGui::DragFloat("FOV",&proj.fovRad,0.01);
-                        ImGui::DragFloat("近裁切面",&proj.zNear,0.1);
-                        ImGui::DragFloat("远裁切面",&proj.zFar,0.1);
+                        bool changed = false;
 
-                        proj.dm_mark();
-                        app.projectionMatrix.uploadmat4(proj.buildProjectionMatrix());
-                    } 
+                        changed |= ImGui::DragFloat("FOV",&proj.fovRad,0.01);
+                        changed |= ImGui::DragFloat("近裁切面",&proj.zNear,0.1);
+                        changed |= ImGui::DragFloat("远裁切面",&proj.zFar,0.1);
+
+                        if(changed){
+                            proj.dm_mark();
+                        }
+                    }
                 }
             }else pool_projs = app.em.get_component_pool<Projector>();
 

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 实体管理
  * @version 0.1
- * @date 2025/12/03
+ * @date 2025/12/04
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -19,6 +19,7 @@
 #include <alib-g3/aref.h>
 #include <alib-g3/adebug.h>
 #include <memory>
+#include <tuple>
 
 namespace alib::g3::ecs{
     /**
@@ -66,7 +67,7 @@ namespace alib::g3::ecs{
         }
     public:
         /// @brief 获取对应的安全引用
-        template<class T> using ref_t = RefWrapper<detail::LinearStorage<T>>;
+        template<class T> using ref_t = alib::g3::ecs::ref_t<T>;
 
         /// @brief 获取当前实体池子的大小
         inline size_t get_entity_pool_size(){
@@ -191,32 +192,49 @@ namespace alib::g3::ecs{
             ComponentPool<T> * p = add_component_pool<T>();
             auto it = p->mapper.find(e.id);
             if(it != p->mapper.end())return ref(p->data,it->second);
+            
+            auto create = [&](auto&& deps){
+                bool flag;
+                size_t index;
+                T & comp = p->data.try_next_with_index(flag,index,std::forward<Args>(args)...);
+                if constexpr(NeedBind<T>){
+                    comp.bind(e);
+                }
+                /// 为了让clangd不报错，我只能这么写了。。。
+                if constexpr(NeedDependency<T>){
+                    if constexpr(NeedBindDependency<T,typename T::Dependency::deptup_t>){
+                        comp.bind_dep(deps);
+                    }
+                }
+                if constexpr(NeedSlotId<T>){
+                    if(flag){
+                        comp.slot(index);
+                    }
+                }
+                p->mapper.emplace(e.id,index);
+                return ref(p->data,index);
+            };
+            
             // 创建新的component
             // 依赖
-            if constexpr(requires{typename T::Dependency;}){
-                using Tuo_Next = typename Tuo::add_t<T>;
+            // 就算没有依赖也不得不创建一个tuple，虽然数据都是简易类型，还是有点亏
+            if constexpr(NeedDependency<T>){
+                using Tuo_Next = typename Tuo::template add_t<T>;
                 // 检测循环依赖
                 static_assert(!Tuo_Next::template check_cycle<T>(),"Cycle dependency!");
 
-                []<class... TArgs>(EntityManager & em,const Entity & e,ComponentStack<TArgs...>){
-                    ((em.add_component<TArgs,Tuo_Next>(e)),...);
+                typename T::Dependency::deptup_t deps;
+                deps = []<class... TArgs>(EntityManager & em,const Entity & e,ComponentStack<TArgs...>){
+                    return std::make_tuple(
+                        (em.add_component<TArgs,Tuo_Next>(e))
+                    ...);
                 }(*this,e,typename T::Dependency{});
-            }
 
-            // 具体创建
-            bool flag;
-            size_t index;
-            T & comp = p->data.try_next_with_index(flag,index,std::forward<Args>(args)...);
-            if constexpr(NeedBind<T>){
-                comp.bind(e);
+                return create(deps);
+            }else{
+                // 具体创建
+                return create(std::ignore);
             }
-            if constexpr(NeedSlotId<T>){
-                if(flag){
-                    comp.slot(index);
-                }
-            }
-            p->mapper.emplace(e.id,index);
-            return ref(p->data,index);
         }
 
         /// @brief 移除组件的返回值
