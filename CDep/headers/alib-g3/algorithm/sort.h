@@ -144,7 +144,7 @@ namespace alib::g3::algo::sort{
                     if(l != h){
                         [[unlikely]] if(l == pivot){
                             pivot = h;
-                        }[[unlikely]] else if(h == pivot){
+                        }else [[unlikely]] if(h == pivot){
                             pivot = l;
                         }
 
