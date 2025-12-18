@@ -33,6 +33,7 @@ void main(){
   varyingLightDistance = length(varyingLightDir);
 
   coord = texCoord;
-  shadowCoord = (shadowMVP * vec4(position,1.0)) * 0.5 + vec4(0.5,0.5,0.5,0.5);
+  vec4 shcoord0 =  (shadowMVP * vec4(position,1.0));
+  shadowCoord = shcoord0 * 0.5 + shcoord0.w * vec4(0.5,0.5,0.5,0.5);
   gl_Position = proj_matrix * mv_matrix * vec4(position,1.0);
 }

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 光照支持
  * @version 0.1
- * @date 2025/11/14
+ * @date 2025/12/18
  *
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -15,7 +15,6 @@
 #include <AGE/Shader.h>
 #include <AGE/DataUploader.h>
 #include <AGE/Color.h>
-#include <type_traits>
 
 namespace age{
     namespace light{
@@ -65,6 +64,10 @@ namespace age{
                 diffuse.uploadRGBA(binding.diffuse);
                 specular.uploadRGBA(binding.specular);
             }
+        };
+
+        struct AGE_API SpotLight{
+
         };
 
         /// @brief default uploaders for binding,you can also define you own

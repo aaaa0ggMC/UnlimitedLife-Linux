@@ -5,7 +5,6 @@ void MainApplication::draw(){
     Window & win = *m_window;
     Sampler & sampler = m_sampler;   
     win.clear();
-    e_light.transform().lookAt(root.transform().m_position);
     draw_pass_one();
     draw_callback();
     draw_pass_two();
@@ -13,6 +12,7 @@ void MainApplication::draw(){
 
 void MainApplication::draw_pass_one(){
     Window & win = *m_window;
+    Camera &cam = state.use_light_cam? e_light : camera;
     LightComponent & lc = e_light.get<LightComponent>()->get();
 
     glViewport(0,0,shadowTex->getTextureInfo().width,shadowTex->getTextureInfo().height);
@@ -23,7 +23,9 @@ void MainApplication::draw_pass_one(){
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    lb.position.safe_upload(e_light.transform().m_position);
+
+    glm::vec4 pos = cam.viewer().buildViewMatrix(cam.transform()) * glm::vec4(e_light.transform().m_position,1.0);
+    lb.position.safe_upload(glm::vec3(pos));
 
     if(state.show_cube){
         glFrontFace(GL_CCW);

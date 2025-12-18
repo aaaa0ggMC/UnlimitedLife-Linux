@@ -187,6 +187,7 @@ void MainApplication::init_world_objects(){
     e_light.projector().set(std::numbers::pi/3.0f,
         shadowbuffer_w,shadowbuffer_h);
     e_light.add<LightComponent>(e_light);
+    e_light.transform().lookAt(root.transform().m_position);
 
     lg(Info) << "InitWorldObjects:OK" << endlog;
 }
