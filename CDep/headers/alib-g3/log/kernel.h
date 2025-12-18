@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/12/04 
+* @date 2025/12/18 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -31,6 +31,7 @@
 #include <alib-g3/log/base_msg.h>
 #include <alib-g3/log/base_mod.h>
 
+#include <format>
 #include <unordered_map>
 #include <deque>
 #include <thread>

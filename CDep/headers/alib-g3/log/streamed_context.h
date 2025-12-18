@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 流式输出处控制，主持write_to_log(类函数&全局函数)编译期注入
  * @version 0.1
- * @date 2025/11/27
+ * @date 2025/12/18
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -14,6 +14,7 @@
 #include <alib-g3/autil.h>
 #include <alib-g3/log/base_config.h>
 #include <alib-g3/log/manipulator.h>
+#include <format>
 
 #ifndef ALIB_DISABLE_GLM_EXTENSIONS
 #include <glm/glm.hpp>
