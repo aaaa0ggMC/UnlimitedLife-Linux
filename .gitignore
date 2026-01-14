@@ -19,6 +19,7 @@ CDep/headers/imgui
 CDep/headers/miniaudio.h
 */Testing
 .cache
+build
 
 Pacman/
 !Pacman/PKGBUILD

@@ -75,6 +75,7 @@ void MainApplication::draw_callback(){
 
     m_window->drawArray(PrimitiveType::Triangles,0,6);
     shadowMapCallback.unbind();
+    shadowSampler.unbind(GL_TEXTURE1);
 }
 
 void MainApplication::draw_pass_two(){
@@ -163,4 +164,7 @@ void MainApplication::draw_pass_two(){
 
         win.draw<Model>(m_plane);
     }
+
+    m_sampler.unbind(GL_TEXTURE0);
+    shadowSampler.unbind(GL_TEXTURE1);
 }

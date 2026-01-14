@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 纹理
  * @version 0.1
- * @date 2025/12/02
+ * @date 2026/01/14
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -132,6 +132,10 @@ namespace age{
 
         inline void bind(GLuint channel){
             glBindSampler(channel - GL_TEXTURE0,sampler_id);
+        }
+
+        inline static void unbind(GLuint channel){
+            glBindSampler(channel - GL_TEXTURE0,0);
         }
 
         inline const SamplerInfo& getInfo(){

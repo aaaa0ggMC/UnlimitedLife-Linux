@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2025/12/18 
+* @date 2026/01/14 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -110,7 +110,7 @@ namespace alib::g3{
         /// @brief 专门给消息池的内存池 
         std::pmr::polymorphic_allocator<LogMsg> msg_alloc;
         /// @brief 消息池的resource
-        std::pmr::unsynchronized_pool_resource msg_buf;
+        std::pmr::synchronized_pool_resource msg_buf;
         
         /// @brief 消息池
         std::pmr::deque<LogMsg> messages;

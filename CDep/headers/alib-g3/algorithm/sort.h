@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 各种排序算法，在reverse=false的情况下，若使用defcompare，即arg1 < arg2,保证升序
  * @version 0.1
- * @date 2025/12/18
+ * @date 2026/01/14
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -261,31 +261,6 @@ namespace alib::g3::algo::sort{
             PartitionMethod::partition(low,high,compare,
                         reverse,inject,stack,begin,end);
         }
-    }
-
-    /// @brief 基础的快速排序，时间复杂度O(nlogn) Tier:B
-    /// @param begin   开始
-    /// @param end     结束
-    /// @param compare 比较函数 
-    /// @param reverse 是否反转排序方向
-    /// @param inject  每次进行一次数据交换后进行的操作
-    template<class PartitionMethod = PartitionMedianThree,IsIterator IterType,
-            IsCompareFn<typename std::iterator_traits<IterType>::value_type> CompareFn,
-            IsInjectFn InjectFn = std::nullptr_t
-    > 
-    void merge(
-        IterType begin,
-        IterType end,
-        CompareFn&& i_compare,
-        bool reverse = false,
-        InjectFn && i_inject = nullptr
-    ){
-        using value_t = std::iterator_traits<IterType>::value_type;
-        auto compare = wrap_compare(std::forward<CompareFn>(i_compare));
-        auto inject = wrap_inject(std::forward<InjectFn>(i_inject));
-        if(begin == end)return;
-        
-        
     }
 }
 

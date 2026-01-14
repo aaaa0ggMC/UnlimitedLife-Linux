@@ -113,9 +113,16 @@ void GLAPIENTRY Application::glErrDefDebugProc(
     const void* userParam
 ){
     Application & app = *((Application*)userParam);
-    static std::string buf = "";
-    buf.clear();
+    static thread_local std::string buf = "";
+    const static std::vector<GLuint> noises = {
+        131222, 131185
+    };
+    if(std::find(noises.begin(),noises.end(),id) != noises.end()){
+        return;
+    }
 
+    
+    buf.clear();
     const char* sourceStr = "";
     switch (source) {
         case GL_DEBUG_SOURCE_API:             sourceStr = "API"; break;

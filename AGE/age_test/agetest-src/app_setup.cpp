@@ -15,7 +15,9 @@ MainApplication::~MainApplication(){
 void MainApplication::setup(){
     setup_logger();
     setup_window();
-    if(cfg.gl_err_callback)setup_err_callback();
+    if(cfg.gl_err_callback){
+        setup_err_callback();
+    }
     setup_shader();
     setup_buffers();
     setup_sampler();
