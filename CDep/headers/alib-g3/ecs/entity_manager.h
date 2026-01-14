@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 实体管理
  * @version 0.1
- * @date 2025/12/04
+ * @date 2026/01/14
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -94,11 +94,11 @@ namespace alib::g3::ecs{
                 ComponentPool<T> & obj = *(ComponentPool<T>*)(pobj);
                 auto it = obj.mapper.find(entity_id);
                 if(it == obj.mapper.end())return -1;
-                if constexpr(requires(T & t){t.cleanup();}){
+                if constexpr(ComponentTraits<T>::cleanup){
                     // 你是有非销毁不可的理由吗？
                     obj.data.data[it->second].cleanup();
                 }
-                if constexpr(NeedBind<T>){
+                if constexpr(ComponentTraits<T>::bind){
                     obj.data.data[it->second].bind(Entity::null());
                 }
                 obj.data.remove(it->second);
@@ -197,16 +197,16 @@ namespace alib::g3::ecs{
                 bool flag;
                 size_t index;
                 T & comp = p->data.try_next_with_index(flag,index,std::forward<Args>(args)...);
-                if constexpr(NeedBind<T>){
+                if constexpr(ComponentTraits<T>::bind){
                     comp.bind(e);
                 }
                 /// 为了让clangd不报错，我只能这么写了。。。
-                if constexpr(NeedDependency<T>){
-                    if constexpr(NeedBindDependency<T,typename T::Dependency::deptup_t>){
+                if constexpr(ComponentTraits<T>::dependency){
+                    if constexpr(ComponentTraits<T>::bind_dependency){
                         comp.bind_dep(deps);
                     }
                 }
-                if constexpr(NeedSlotId<T>){
+                if constexpr(ComponentTraits<T>::slot_id){
                     if(flag){
                         comp.slot(index);
                     }
@@ -218,7 +218,7 @@ namespace alib::g3::ecs{
             // 创建新的component
             // 依赖
             // 就算没有依赖也不得不创建一个tuple，虽然数据都是简易类型，还是有点亏
-            if constexpr(NeedDependency<T>){
+            if constexpr(ComponentTraits<T>::dependency){
                 using Tuo_Next = typename Tuo::template add_t<T>;
                 // 检测循环依赖
                 static_assert(!Tuo_Next::template check_cycle<T>(),"Cycle dependency!");
@@ -272,7 +272,7 @@ namespace alib::g3::ecs{
         /// @tparam T 组件池类型，组件内需要有update函数
         /// @param Args
         template<class T,class... Args> inline void update(Args&&... args){
-            static_assert(requires(T & t,Args&&... t_args){t.update(t_args...);},"There is not update function in the component.");
+            static_assert(ComponentTraits<T>::template update<Args...>,"There is not update function in the component.");
             ComponentPool<T> * pool = get_component_pool_unsafe<T>();
             if(!pool)return;
             

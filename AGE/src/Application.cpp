@@ -114,10 +114,8 @@ void GLAPIENTRY Application::glErrDefDebugProc(
 ){
     Application & app = *((Application*)userParam);
     static thread_local std::string buf = "";
-    const static std::vector<GLuint> noises = {
-        131222, 131185
-    };
-    if(std::find(noises.begin(),noises.end(),id) != noises.end()){
+    
+    if(id == 131222 || id == 131185){
         return;
     }
 

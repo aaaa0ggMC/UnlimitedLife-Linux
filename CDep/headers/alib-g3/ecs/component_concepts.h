@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 这里列出了entity_manager支持的所有注入方式，主要为文档说明
  * @version 0.1
- * @date 2025/12/04
+ * @date 2026/01/14
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -92,5 +92,18 @@ namespace alib::g3::ecs{
      * };
      */
     template<class T> concept NeedDependency = requires{typename T::Dependency;};
+
+    /// 如果你希望使用entitymanager.update<T>这个原始人函数来统一update你的组件，可以使用这个
+    template<class T,class... Args> concept NeedUpdate = requires(T & t,Args&&... t_args){t.update(t_args...);};
+
+    /// 这个是用来检测你的某个类是否达到标准从而拥有某个trait的
+    template<class T> struct ComponentTraits{
+        constexpr static bool dependency = NeedDependency<T>;
+        constexpr static bool bind_dependency = dependency && NeedBindDependency<T,typename T::Dependency::deptup_t>;
+        constexpr static bool cleanup = NeedCleanup<T>;
+        constexpr static bool bind = NeedBind<T>;
+        constexpr static bool slot_id = NeedSlotId<T>;
+        template<class... Args> constexpr static bool update = NeedUpdate<T,Args...>;
+    };
 }
 #endif
