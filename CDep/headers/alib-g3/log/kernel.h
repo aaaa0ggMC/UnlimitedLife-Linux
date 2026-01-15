@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2026/01/14 
+* @date 2026/01/15 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -157,7 +157,7 @@ namespace alib::g3{
         );
 
         /// @brief 内部处理，会直接调用std::move高效交换数据
-        bool push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg);
+        bool push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg,LogCustomTag * tags = NULL,uint32_t size = 0);
     public:
         /// @brief 字符串数据池
         std::pmr::polymorphic_allocator<char> msg_str_alloc;
@@ -253,7 +253,7 @@ namespace alib::g3{
         /// @param cfg                  消息配置
         inline LogFactory(
             Logger & binded,
-            std::string_view header = "",
+            std::string_view header,
             int def_level = 0,
             LogFactoryConfig::LevelKeepFn level_should_keep = nullptr,
             const LogMsgConfig& msg = LogMsgConfig()
@@ -297,10 +297,10 @@ namespace alib::g3{
         }
         /// @brief 提供已经装载到对应内存的数据，这个时候直接move就行
         /// @note  pmr_data会失效！
-        inline bool log_pmr(int level,std::pmr::string & pmr_data,const LogMsgConfig & mcfg){
+        inline bool log_pmr(int level,std::pmr::string & pmr_data,const LogMsgConfig & mcfg,LogCustomTag * tags = NULL,uint32_t tag_size = 0){
             if(cfg.level_should_keep && !cfg.level_should_keep(level))return false;
             
-            return logger.push_message_pmr(level,cfg.header,pmr_data,mcfg);
+            return logger.push_message_pmr(level,cfg.header,pmr_data,mcfg,tags,tag_size);
         }
 
         /// @brief 提供流式输出，这里采用默认的level
@@ -448,6 +448,8 @@ namespace alib::g3{
         timestamp = msg.timestamp;
         cfg = msg.cfg;
         level = msg.level;
+        tag_count = msg.tag_count;
+        if(tag_count)memcpy(tags,msg.tags,tag_count * sizeof(LogCustomTag));
     }
 
     inline LoggerConfig::LoggerConfig(){

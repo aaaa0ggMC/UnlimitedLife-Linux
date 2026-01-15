@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 消息的基础架构
  * @version 0.1
- * @date 2025/11/17
+ * @date 2026/01/15
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -37,6 +37,10 @@ namespace alib::g3{
         uint64_t thread_id;
         /// @brief producer生成的时间戳
         double timestamp;
+        /// @brief 用户自定义的tag
+        LogCustomTag tags[log_custom_tag_count];
+        /// @brief 有用的数量
+        uint32_t tag_count;
 
         //// 缓冲 ////
         /// @brief 用于缓冲日期数据

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 各种配置文件
  * @version 0.1
- * @date 2025/11/27
+ * @date 2026/01/15
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -14,6 +14,25 @@
 #include <alib-g3/autil.h>
 
 namespace alib::g3{
+    /// @brief 控制自定义tag的数量，当插入数量大于这个数字时debug模式下会报错，release模式下忽略，所以注意一条日志别插入太多tag
+    constexpr uint32_t log_custom_tag_count = 8;
+
+    /// @brief 自定义的Tag
+    struct DLL_EXPORT LogCustomTag{
+        /// 插入的位置，1 表示第0个字符前面，0表示无效
+        /// 为了对齐，还是不准备使用size_t了
+        uint64_t pos {0};
+        /// 插入的id，我觉得还是支持任意的值为好
+        int64_t id {0};
+
+        /// 正常人的设置方式，0表示第0个字符前面
+        inline void set(uint64_t p){pos = p + 1;}
+        /// 获取位置，错误的时候返回npos也不错
+        inline uint64_t get(){return pos - 1;}
+        /// 获取当前是否valid
+        inline bool valid(){return pos != 0;}
+    };
+
     /// @brief 日志消息细节控制，用在LogFactory中，控制额外信息的输出
     struct DLL_EXPORT LogMsgConfig{
         /// @brief 可以通过这个形式的函数自定义某个数字对应的level显示

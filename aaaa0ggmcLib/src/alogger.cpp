@@ -120,7 +120,7 @@ void Logger::flush(){
     flush_targets();
 }
 
-bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg){
+bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg,LogCustomTag * tags,uint32_t tag_size){
     // pre filter
     for(auto & filter : filters){
         if(!filter->enabled)continue;
@@ -133,11 +133,16 @@ bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string &
     msg.level = level;
     msg.body = std::move(body);
     msg.build_on_producer(start_time);
+    msg.tag_count = 0;
    
     if(config.consumer_count){ // 异步模式
         {
             std::lock_guard<std::mutex> lock(msg_lock);
-            messages.emplace_back(std::move(msg));
+            LogMsg & msg2 = messages.emplace_back(std::move(msg));
+            if(tag_size){
+                msg2.tag_count = tag_size;
+                memcpy(msg2.tags,tags,tag_size * sizeof(LogCustomTag));
+            }
             msg_sz = message_size.fetch_add(1,std::memory_order::relaxed) + 1;
         }
         msg_semaphore.release();
@@ -154,6 +159,10 @@ bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string &
             }
         }
     }else{ // 同步模式
+        if(tag_size){
+            msg.tag_count = tag_size;
+            memcpy(msg.tags,tags,tag_size * sizeof(LogCustomTag));
+        }
         // 不自动刷新从而节省性能
         write_messages(std::span(&msg,1),false);
     }

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 内置的输出对象，目前支持控制台输出，文件输出，以及多文件输出
  * @version 0.1
- * @date 2025/11/27
+ * @date 2026/01/15
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -27,9 +27,41 @@
 #define __internal_alib_pc _putchar_nolock
 #endif
 
+#define LOG_COLOR3(fore,back,style) alib::g3::lot::color(alib::g3::lot::Color::fore,alib::g3::lot::Color::back,alib::g3::lot::Style::style)
+#define LOG_COLOR2(fore,back) alib::g3::lot::color(alib::g3::lot::Color::fore,alib::g3::lot::Color::back)
+#define LOG_COLOR1(fore) alib::g3::lot::color(alib::g3::lot::Color::fore)
+
 namespace alib::g3{
     namespace lot{
         constexpr const char * rotate_file_def_fmt = "log{1}.txt";
+
+        /// @brief 标准与亮色颜色枚举
+        enum class Color : uint8_t {
+            None = 0,
+            Black = 30, Red = 31, Green = 32, Yellow = 33, Blue = 34, Magenta = 35, Cyan = 36, Gray = 36, White = 37,
+            LRed = 91, LGreen = 92, LYellow = 93, LBlue = 94, LMagenta = 95, LCyan = 96, LGray = 96, LWhite = 97
+        };
+
+        /// @brief 样式位掩码
+        enum class Style : uint16_t {
+            None = 0,
+            Bold      = 1 << 0, Dim       = 1 << 1, Italic    = 1 << 2, Underline = 1 << 3,
+            Blink     = 1 << 4, BlinkFast = 1 << 5, Reverse   = 1 << 6, Hidden    = 1 << 7
+        };
+
+        /// @brief 构建颜色操纵器，ID 为 0 时表示 RESET
+        inline constexpr log_tag color(Color fg, Color bg = Color::None, Style style = Style::None){
+            if(fg == Color::None && bg == Color::None && style == Style::None){
+                return log_tag(0);
+            }
+            
+            uint8_t fg_val = static_cast<uint8_t>(fg);
+            // 背景色在 ANSI 中通常是前景色 + 10 (例如 Red 31 -> BG_Red 41)
+            uint8_t bg_val = (bg == Color::None) ? 0 : (static_cast<uint8_t>(bg) + 10);
+            
+            int64_t id = (static_cast<int64_t>(style) << 16) | (static_cast<int64_t>(bg_val) << 8) | fg_val;
+            return log_tag(id);
+        }
 
         /// @brief 控制台的配置文件
         struct DLL_EXPORT ConsoleConfig{
@@ -59,7 +91,12 @@ namespace alib::g3{
             /// @brief 控制台配置
             ConsoleConfig cfg;
 
-            inline Console(ConsoleConfig c = ConsoleConfig()):cfg(c){}
+            /// @brief 类别id
+            short category_id;
+
+            inline Console(short category_id = 0,ConsoleConfig c = ConsoleConfig()):cfg(c){
+                this->category_id = category_id;
+            }
             
             void write(LogMsg & msg) override;
 
@@ -248,69 +285,124 @@ namespace alib::g3::lot{
         }
     }
 
-    inline void Console::write(
-        LogMsg & msg
-    ){
-        static std::string_view c_reset_color = "\e[0m"; // 复原颜色
-        // 在flush中刷新
-        static auto fast_print = [](ConsoleConfig::ColorSchemaFn fn,LogMsg & msg){
-            if(fn){
-                auto ptr = fn(msg);
-                if(!ptr.empty()){
-                    __internal_alib_fw(ptr.data(),sizeof(decltype(ptr)::value_type),ptr.size(),stdout);
-                    return true;
+    inline void Console::write(LogMsg & msg){
+        static thread_local std::string s_buffer;
+        s_buffer.clear();
+        if(s_buffer.capacity() < 1024) s_buffer.reserve(1024);
+        
+        auto append_ansi_payload = [](std::string& buf, uint64_t payload){
+            if(payload == 0){
+                buf.append("\e[0m");
+                return;
+            }
+
+            buf.append("\e[");
+            bool first = true;
+
+            // 处理 Style 位掩码 (Bits 16-31)
+            uint16_t style = (payload >> 16) & 0xFFFF;
+            for(int i = 0; i < 8; ++i){
+                if(style & (1 << i)){
+                    if(!first) buf.push_back(';');
+                    buf.push_back((char)('1' + i));
+                    first = false;
                 }
             }
-            return false;
+
+            // 处理背景色 (Bits 8-15)
+            uint8_t bg = (payload >> 8) & 0xFF;
+            if(bg){
+                if(!first)buf.push_back(';');
+                // 转换数字为字符串追加
+                char bg_buf[4];
+                int n = snprintf(bg_buf, sizeof(bg_buf), "%d", bg);
+                buf.append(bg_buf, n);
+                first = false;
+            }
+
+            // 处理前景色 (Bits 0-7)
+            uint8_t fg = payload & 0xFF;
+            if(fg){
+                if(!first) buf.push_back(';');
+                char fg_buf[4];
+                int n = snprintf(fg_buf, sizeof(fg_buf), "%d", fg);
+                buf.append(fg_buf, n);
+            }
+            buf.push_back('m');
         };
-        static auto reset_color = [](){
-            __internal_alib_fw(c_reset_color.data(),sizeof(decltype(c_reset_color)::value_type),c_reset_color.size(),stdout);
-        };
+
+        if (!msg.cfg.disable_extra_information) {
+            if (msg.cfg.gen_date) {
+                s_buffer.append("[");
+                if (cfg.date_color_schema) s_buffer.append(cfg.date_color_schema(msg));
+                s_buffer.append(msg.sdate);
+                if (cfg.date_color_schema) s_buffer.append("\e[0m");
+                s_buffer.append("]");
+            }
+
+            if (msg.cfg.out_level && msg.cfg.level_cast) {
+                s_buffer.append("[");
+                if (cfg.level_color_schema) s_buffer.append(cfg.level_color_schema(msg));
+                s_buffer.append(msg.cfg.level_cast(msg.level));
+                if (cfg.level_color_schema) s_buffer.append("\e[0m");
+                s_buffer.append("]");
+            }
+
+            if (msg.cfg.out_header && !msg.header.empty()) {
+                s_buffer.append("[");
+                if (cfg.head_color_schema) s_buffer.append(cfg.head_color_schema(msg));
+                s_buffer.append(msg.header);
+                if (cfg.head_color_schema) s_buffer.append("\e[0m");
+                s_buffer.append("]");
+            }
+
+            if (msg.cfg.gen_time) {
+                s_buffer.append("[");
+                if (cfg.time_color_schema) s_buffer.append(cfg.time_color_schema(msg));
+                char t_buf[32];
+                int n = snprintf(t_buf, sizeof(t_buf), "%.2lfms", msg.timestamp);
+                s_buffer.append(t_buf, n);
+                if (cfg.time_color_schema) s_buffer.append("\e[0m");
+                s_buffer.append("]");
+            }
+
+            if (msg.cfg.gen_thread_id) {
+                s_buffer.append("[");
+                if (cfg.thread_id_color_schema) s_buffer.append(cfg.thread_id_color_schema(msg));
+                char tid_buf[32];
+                int n = snprintf(tid_buf, sizeof(tid_buf), "TID%lu", msg.thread_id);
+                s_buffer.append(tid_buf, n);
+                if (cfg.thread_id_color_schema) s_buffer.append("\e[0m");
+                s_buffer.append("]");
+            }
+            s_buffer.append(":");
+        }
+        size_t last_pos = 0;
+        std::string_view body_view = msg.body;
+
+        if (cfg.body_color_schema) s_buffer.append(cfg.body_color_schema(msg));
+        for(uint32_t i = 0; i < msg.tag_count; ++i){
+            auto& tag = msg.tags[i];
+            // 提取 16位 Category ID 进行过滤
+            uint16_t tag_cat = static_cast<uint16_t>(static_cast<uint64_t>(tag.id) >> 48);
+            if (tag_cat == this->category_id) {
+                uint64_t current_pos = tag.get();
+                if(current_pos > last_pos && current_pos <= body_view.size()) {
+                    s_buffer.append(body_view.substr(last_pos, current_pos - last_pos));
+                }
+
+                append_ansi_payload(s_buffer, static_cast<uint64_t>(tag.id) & 0xFFFFFFFFFFFFULL);
+                last_pos = current_pos;
+            }
+        }
+
+        if(last_pos < body_view.size()){
+            s_buffer.append(body_view.substr(last_pos));
+        }
+        s_buffer.append("\e[0m\n");
         {
             std::lock_guard<std::mutex> lock(console_lock);
-            if(!msg.cfg.disable_extra_information){
-                if(msg.cfg.gen_date){
-                    __internal_alib_fw("[",1,1,stdout);
-                    bool val = fast_print(cfg.date_color_schema,msg);
-                    __internal_alib_fw(msg.sdate.c_str(),sizeof(decltype(msg.sdate)::value_type),msg.sdate.size(),stdout);
-                    if(val)reset_color();
-                    __internal_alib_fw("]",1,1,stdout);
-                }
-                if(msg.cfg.out_level && msg.cfg.level_cast){
-                    __internal_alib_fw("[",1,1,stdout);
-                    bool val = fast_print(cfg.level_color_schema,msg);
-                    auto ls = msg.cfg.level_cast(msg.level);
-                    __internal_alib_fw(ls.data(),sizeof(decltype(ls)::value_type),ls.size(),stdout);
-                    if(val)reset_color();
-                    __internal_alib_fw("]",1,1,stdout);
-                }
-                if(msg.cfg.out_header && msg.header.data() != nullptr && msg.header.size()){
-                    __internal_alib_fw("[",1,1,stdout);
-                    bool val = fast_print(cfg.head_color_schema,msg);
-                    __internal_alib_fw(msg.header.data(),sizeof(decltype(msg.header)::value_type),msg.header.size(),stdout);
-                    if(val)reset_color();
-                    __internal_alib_fw("]",1,1,stdout);
-                }
-                if(msg.cfg.gen_time){
-                    std::string_view use_color;
-                    if(cfg.time_color_schema && !(use_color = cfg.time_color_schema(msg)).empty()){
-                        printf("[%s%.2lfms%s]",use_color.data(),msg.timestamp,c_reset_color.data());
-                    }else{
-                        printf("[%.2lfms]",msg.timestamp);
-                    }
-                }
-                if(msg.cfg.gen_thread_id){
-                    std::string_view use_color;
-                    if(cfg.thread_id_color_schema && !(use_color = cfg.thread_id_color_schema(msg)).empty()){
-                        printf("[%sTID%lu%s]",use_color.data(),msg.thread_id,c_reset_color.data());
-                    }else{
-                        printf("[TID%lu]",msg.thread_id);
-                    }
-                }
-                __internal_alib_pc(':');
-            }
-            __internal_alib_fw(msg.body.data(),sizeof(decltype(msg.body)::value_type),msg.body.size(),stdout);
-            __internal_alib_pc('\n');
+            __internal_alib_fw(s_buffer.data(), 1, s_buffer.size(), stdout);
         }
     }
 }

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些基本的操作符
  * @version 0.1
- * @date 2025/12/04
+ * @date 2026/01/15
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -21,6 +21,8 @@ namespace alib::g3{
     typedef void (*EndLogFn)(LogEnd);
     /// @brief 流式输出日志终止表示
     inline void DLL_EXPORT endlog(LogEnd){}
+    /// @brief 另一种方式
+    constexpr LogEnd fls = {};
 
     struct DLL_EXPORT log_source{
         /// @brief 缓存的路径
@@ -118,6 +120,13 @@ namespace alib::g3{
         inline void manipulate(LogMsgConfig & cfg) const{
             cfg.gen_thread_id = val;
         }
+    };
+
+    /// @brief 自定义的推送给target的manipulate
+    struct log_tag{
+        int64_t id;
+
+        inline constexpr log_tag(int64_t iid):id(iid){}
     };
 }
 

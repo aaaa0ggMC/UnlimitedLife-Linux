@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 这里列出了entity_manager支持的所有注入方式，主要为文档说明
  * @version 0.1
- * @date 2026/01/14
+ * @date 2026/01/15
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -99,11 +99,39 @@ namespace alib::g3::ecs{
     /// 这个是用来检测你的某个类是否达到标准从而拥有某个trait的
     template<class T> struct ComponentTraits{
         constexpr static bool dependency = NeedDependency<T>;
-        constexpr static bool bind_dependency = dependency && NeedBindDependency<T,typename T::Dependency::deptup_t>;
+        
+        constexpr static bool __get_bind_dependency(){
+            if constexpr(dependency){
+                if constexpr(NeedBindDependency<T,typename T::Dependency::deptup_t>){
+                    return true;
+                }
+                return false;
+            }
+            return false;
+        }
+
+        constexpr static bool bind_dependency = __get_bind_dependency();
         constexpr static bool cleanup = NeedCleanup<T>;
         constexpr static bool bind = NeedBind<T>;
         constexpr static bool slot_id = NeedSlotId<T>;
+        template<class... Args> constexpr static bool reset = NeedReset<T,Args...>;
         template<class... Args> constexpr static bool update = NeedUpdate<T,Args...>;
+    
+        template<class Target,class EndToken> static void check(Target && t,EndToken && end_token){
+            auto simp_yn = [](bool val){
+                return val?"Y":"N";
+            };
+            
+            t << typeid(T).name() << ":\n"
+            "\tDependency            :" << simp_yn(dependency) << "\n"
+            "\tCleanup               :" << simp_yn(cleanup) << "\n"
+            "\tBindEntity            :" << simp_yn(bind) << "\n"
+            "\tBindSlotId            :" << simp_yn(slot_id) << "\n"
+            "\tBindDependency        :" << simp_yn(bind_dependency) << "\n"
+            "\tHasEmptyReset         :" << simp_yn(requires(T && t){t.reset();}) << "\n"
+            "\tHasEmptyUpdate        :" << simp_yn(requires(T && t){t.update();})
+            << end_token;
+        }
     };
 }
 #endif
