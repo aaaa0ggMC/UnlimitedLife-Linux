@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 这里列出了entity_manager支持的所有注入方式，主要为文档说明
  * @version 0.1
- * @date 2026/01/15
+ * @date 2026/01/16
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -117,6 +117,32 @@ namespace alib::g3::ecs{
         template<class... Args> constexpr static bool reset = NeedReset<T,Args...>;
         template<class... Args> constexpr static bool update = NeedUpdate<T,Args...>;
     
+        template<class Tg> static void write_to_log(Tg & target){
+            auto simp_yn = [](bool val){
+                return val?"Y":"N";
+            };
+
+            std::format_to(
+                std::back_inserter(target),
+                "\n{}:\n"
+                "\tDependency            :{}\n"
+                "\tCleanup               :{}\n"
+                "\tBindEntity            :{}\n"
+                "\tBindSlotId            :{}\n"
+                "\tBindDependency        :{}\n"
+                "\tHasEmptyReset         :{}\n"
+                "\tHasEmptyUpdate        :{}", 
+                typeid(T).name(),
+                simp_yn(dependency),
+                simp_yn(cleanup),
+                simp_yn(bind),
+                simp_yn(slot_id),
+                simp_yn(bind_dependency),                
+                simp_yn(requires(T && t){t.reset();}),
+                simp_yn(requires(T && t){t.update();})
+            );
+        } 
+
         template<class Target,class EndToken> static void check(Target && t,EndToken && end_token){
             auto simp_yn = [](bool val){
                 return val?"Y":"N";

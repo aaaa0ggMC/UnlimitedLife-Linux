@@ -2,7 +2,7 @@
 * @brief 与日志有关的函数库
 * @author aaaa0ggmc
 * @last-date 2025/04/04
-* @date 2026/01/15 
+* @date 2026/01/16 
 * @version pre-4.0
 * @copyright Copyright(C)2025
 ********************************
@@ -310,12 +310,12 @@ namespace alib::g3{
         }
         /// @brief 提供流式输出
         inline StreamedContext<LogFactory> operator()(int spec_level){
-            bool valid = !cfg.level_should_keep || cfg.level_should_keep(cfg.def_level);
+            bool valid = !cfg.level_should_keep || cfg.level_should_keep(spec_level);
             return StreamedContext<LogFactory>(spec_level,*this,valid);
         }
         /// @brief 提供流式输出，适配LogLevel
         inline StreamedContext<LogFactory> operator()(LogLevel spec_level){
-            bool valid = !cfg.level_should_keep || cfg.level_should_keep(cfg.def_level);
+            bool valid = !cfg.level_should_keep || cfg.level_should_keep(static_cast<int>(spec_level));
             return StreamedContext<LogFactory>(static_cast<int>(spec_level),*this,valid);
         }
         /// @brief 提供流式输出，采用默认的level,这里构造了亡值链，通过RVO减少一次copy
