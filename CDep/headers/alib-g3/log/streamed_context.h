@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 流式输出处控制，主持write_to_log(类函数&全局函数)编译期注入
  * @version 0.1
- * @date 2026/01/15
+ * @date 2026/01/16
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -55,8 +55,7 @@ namespace alib::g3{
         /// @brief 配置信息
         LogMsgConfig msg_cfg;
         /// @brief TAG信息
-        LogCustomTag tags[log_custom_tag_count];
-        uint32_t current_index = 0;
+        std::pmr::vector<LogCustomTag> tags;
         
 
         // 禁止拷贝，允许移动
@@ -69,7 +68,8 @@ namespace alib::g3{
         inline StreamedContext(int level,LogFactory & fac,bool valid = true)
         :factory(fac)
         ,cache_str(factory.logger.msg_str_alloc)
-        ,msg_cfg(fac.cfg.msg){
+        ,msg_cfg(fac.cfg.msg)
+        ,tags(fac.logger.tag_alloc){
             this->level = level;
             fmt_str = "";
             fmt_tmp = false;
@@ -81,7 +81,7 @@ namespace alib::g3{
         /// @note   StreamedContext设计出来就是用于局部构造的，因此upload后就失效了
         inline bool upload(){
             // 拒绝上传空的日志
-            if(context_valid && !cache_str.empty())return factory.log_pmr(level,cache_str,msg_cfg,tags,current_index);
+            if(context_valid && !cache_str.empty())return factory.log_pmr(level,cache_str,msg_cfg,tags);
             return false;
         }
 
@@ -152,10 +152,10 @@ namespace alib::g3{
 
         /// @brief 支持插入自定义的信息
         inline StreamedContext&& operator<<(const log_tag & t){
-            panic_debug(current_index >= log_custom_tag_count,"There are too many custom tags!");
-            if(!context_valid || current_index >= log_custom_tag_count)return std::move(*this);
-            LogCustomTag & tag = tags[current_index++];
-            tag.id  = t.id;
+            if(!context_valid)return std::move(*this);
+            LogCustomTag & tag = tags.emplace_back();
+            tag.category  = t.category;
+            tag.payload = t.payload;
             tag.set(cache_str.size());
             return std::move(*this);
         }

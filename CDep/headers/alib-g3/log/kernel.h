@@ -157,12 +157,16 @@ namespace alib::g3{
         );
 
         /// @brief 内部处理，会直接调用std::move高效交换数据
-        bool push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg,LogCustomTag * tags = NULL,uint32_t size = 0);
+        bool push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg,std::pmr::vector<LogCustomTag> * tags = NULL);
     public:
         /// @brief 字符串数据池
         std::pmr::polymorphic_allocator<char> msg_str_alloc;
         /// @brief 可能涉及多线程同时操作&分配，因此需要sync，无奈之举
         std::pmr::synchronized_pool_resource msg_str_buf;
+        /// @brief 用于存储tag的池子
+        std::pmr::polymorphic_allocator<LogCustomTag> tag_alloc;
+        /// @brief Tag池resource
+        std::pmr::synchronized_pool_resource tag_buf;
         
         /// @brief 初始化内存池，配置......
         Logger(const LoggerConfig & cfg = LoggerConfig());
@@ -297,10 +301,10 @@ namespace alib::g3{
         }
         /// @brief 提供已经装载到对应内存的数据，这个时候直接move就行
         /// @note  pmr_data会失效！
-        inline bool log_pmr(int level,std::pmr::string & pmr_data,const LogMsgConfig & mcfg,LogCustomTag * tags = NULL,uint32_t tag_size = 0){
+        inline bool log_pmr(int level,std::pmr::string & pmr_data,const LogMsgConfig & mcfg,std::pmr::vector<LogCustomTag> & tags){
             if(cfg.level_should_keep && !cfg.level_should_keep(level))return false;
             
-            return logger.push_message_pmr(level,cfg.header,pmr_data,mcfg,tags,tag_size);
+            return logger.push_message_pmr(level,cfg.header,pmr_data,mcfg,&tags);
         }
 
         /// @brief 提供流式输出，这里采用默认的level
@@ -357,9 +361,10 @@ namespace alib::g3{
         }
     }
 
-    inline LogMsg::LogMsg(const std::pmr::polymorphic_allocator<char> &__a,const LogMsgConfig & c)
+    inline LogMsg::LogMsg(const std::pmr::polymorphic_allocator<char> &__a,const std::pmr::polymorphic_allocator<LogCustomTag> & __tg,const LogMsgConfig & c)
     :body(__a)
-    ,cfg(c){
+    ,cfg(c)
+    ,tags(__tg){
         m_nice_one = true;
         generated = false;
     }
@@ -448,8 +453,7 @@ namespace alib::g3{
         timestamp = msg.timestamp;
         cfg = msg.cfg;
         level = msg.level;
-        tag_count = msg.tag_count;
-        if(tag_count)memcpy(tags,msg.tags,tag_count * sizeof(LogCustomTag));
+        tags = std::move(msg.tags);
     }
 
     inline LoggerConfig::LoggerConfig(){

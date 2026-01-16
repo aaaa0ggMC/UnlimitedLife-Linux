@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些基本的操作符
  * @version 0.1
- * @date 2026/01/15
+ * @date 2026/01/16
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -13,6 +13,7 @@
 #define ALOG2_MANIP_INCLUDED
 #include <alib-g3/log/base_config.h>
 #include <alib-g3/autil.h>
+#include <alib-g3/adebug.h>
 #include <source_location>
 
 namespace alib::g3{
@@ -124,9 +125,14 @@ namespace alib::g3{
 
     /// @brief 自定义的推送给target的manipulate
     struct log_tag{
-        int64_t id;
+        uint64_t category : 16;
+        uint64_t payload : 48;
 
-        inline constexpr log_tag(int64_t iid):id(iid){}
+        inline constexpr log_tag(uint16_t cate_id,uint64_t payload){
+            panic_debug(payload > 0xFFFFFFFFFFFFULL, "Payload value must be in range 0 - (2^48 - 1).");
+            category = cate_id;
+            this->payload = payload;
+        }
     };
 }
 

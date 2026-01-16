@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 各种配置文件
  * @version 0.1
- * @date 2026/01/15
+ * @date 2026/01/16
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -22,8 +22,10 @@ namespace alib::g3{
         /// 插入的位置，1 表示第0个字符前面，0表示无效
         /// 为了对齐，还是不准备使用size_t了
         uint64_t pos {0};
-        /// 插入的id，我觉得还是支持任意的值为好
-        int64_t id {0};
+        /// 用于标识的种类id
+        uint64_t category : 16;
+        /// 具体的信息
+        uint64_t payload  : 48;
 
         /// 正常人的设置方式，0表示第0个字符前面
         inline void set(uint64_t p){pos = p + 1;}

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 消息的基础架构
  * @version 0.1
- * @date 2026/01/15
+ * @date 2026/01/16
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -38,9 +38,7 @@ namespace alib::g3{
         /// @brief producer生成的时间戳
         double timestamp;
         /// @brief 用户自定义的tag
-        LogCustomTag tags[log_custom_tag_count];
-        /// @brief 有用的数量
-        uint32_t tag_count;
+        std::pmr::vector<LogCustomTag> tags;
 
         //// 缓冲 ////
         /// @brief 用于缓冲日期数据
@@ -49,7 +47,7 @@ namespace alib::g3{
         static thread_local std::string scomposed;
 
         /// @brief 构造核心内容
-        LogMsg(const std::pmr::polymorphic_allocator<char> &__a,const LogMsgConfig & c);
+        LogMsg(const std::pmr::polymorphic_allocator<char> &__a,const std::pmr::polymorphic_allocator<LogCustomTag> & __tg,const LogMsgConfig & c);
         /// @brief 构造空的数据，用于占位
         LogMsg(){}
         

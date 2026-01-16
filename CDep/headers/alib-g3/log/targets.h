@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 内置的输出对象，目前支持控制台输出，文件输出，以及多文件输出
  * @version 0.1
- * @date 2026/01/15
+ * @date 2026/01/16
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -50,9 +50,9 @@ namespace alib::g3{
         };
 
         /// @brief 构建颜色操纵器，ID 为 0 时表示 RESET
-        inline constexpr log_tag color(Color fg, Color bg = Color::None, Style style = Style::None){
+        inline constexpr log_tag color(Color fg, Color bg = Color::None, Style style = Style::None,uint16_t cate_id = 0){
             if(fg == Color::None && bg == Color::None && style == Style::None){
-                return log_tag(0);
+                return log_tag(0,0);
             }
             
             uint8_t fg_val = static_cast<uint8_t>(fg);
@@ -60,7 +60,7 @@ namespace alib::g3{
             uint8_t bg_val = (bg == Color::None) ? 0 : (static_cast<uint8_t>(bg) + 10);
             
             int64_t id = (static_cast<int64_t>(style) << 16) | (static_cast<int64_t>(bg_val) << 8) | fg_val;
-            return log_tag(id);
+            return log_tag(cate_id,id);
         }
 
         /// @brief 控制台的配置文件
@@ -381,17 +381,15 @@ namespace alib::g3::lot{
         std::string_view body_view = msg.body;
 
         if (cfg.body_color_schema) s_buffer.append(cfg.body_color_schema(msg));
-        for(uint32_t i = 0; i < msg.tag_count; ++i){
+        for(uint32_t i = 0; i < msg.tags.size(); ++i){
             auto& tag = msg.tags[i];
-            // 提取 16位 Category ID 进行过滤
-            uint16_t tag_cat = static_cast<uint16_t>(static_cast<uint64_t>(tag.id) >> 48);
-            if (tag_cat == this->category_id) {
+            if (tag.category == this->category_id) {
                 uint64_t current_pos = tag.get();
                 if(current_pos > last_pos && current_pos <= body_view.size()) {
                     s_buffer.append(body_view.substr(last_pos, current_pos - last_pos));
                 }
 
-                append_ansi_payload(s_buffer, static_cast<uint64_t>(tag.id) & 0xFFFFFFFFFFFFULL);
+                append_ansi_payload(s_buffer, tag.payload);
                 last_pos = current_pos;
             }
         }

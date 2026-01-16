@@ -94,7 +94,9 @@ Logger::Logger(const LoggerConfig & cfg)
 ,msg_str_buf()
 ,msg_str_alloc(&msg_str_buf)
 ,msg_semaphore(0)
-,config(cfg){
+,config(cfg)
+,tag_buf()
+,tag_alloc(&tag_buf){
     logger_not_on_destroying = true;
     back_pressure_threshold = cfg.back_pressure_multiply * 
                 cfg.fetch_message_count_max * cfg.consumer_count;
@@ -120,29 +122,25 @@ void Logger::flush(){
     flush_targets();
 }
 
-bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg,LogCustomTag * tags,uint32_t tag_size){
+bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string & body,const LogMsgConfig & cfg,std::pmr::vector<LogCustomTag> * tags){
     // pre filter
     for(auto & filter : filters){
         if(!filter->enabled)continue;
         if(!filter->pre_filter(level,body,cfg))return false;
     }
-    LogMsg msg(msg_alloc,cfg);
+    LogMsg msg(msg_alloc,tag_alloc,cfg);
     size_t msg_sz = 0;
 
     msg.header = head;
     msg.level = level;
     msg.body = std::move(body);
+    if(tags)msg.tags = std::move(*tags);
     msg.build_on_producer(start_time);
-    msg.tag_count = 0;
    
     if(config.consumer_count){ // 异步模式
         {
             std::lock_guard<std::mutex> lock(msg_lock);
-            LogMsg & msg2 = messages.emplace_back(std::move(msg));
-            if(tag_size){
-                msg2.tag_count = tag_size;
-                memcpy(msg2.tags,tags,tag_size * sizeof(LogCustomTag));
-            }
+            messages.emplace_back(std::move(msg));
             msg_sz = message_size.fetch_add(1,std::memory_order::relaxed) + 1;
         }
         msg_semaphore.release();
@@ -159,10 +157,6 @@ bool Logger::push_message_pmr(int level,std::string_view head,std::pmr::string &
             }
         }
     }else{ // 同步模式
-        if(tag_size){
-            msg.tag_count = tag_size;
-            memcpy(msg.tags,tags,tag_size * sizeof(LogCustomTag));
-        }
         // 不自动刷新从而节省性能
         write_messages(std::span(&msg,1),false);
     }
