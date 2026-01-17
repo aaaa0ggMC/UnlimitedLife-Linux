@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 这里列出了entity_manager支持的所有注入方式，主要为文档说明
  * @version 0.1
- * @date 2026/01/16
+ * @date 2026/01/17
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -148,7 +148,7 @@ namespace alib::g3::ecs{
                 return val?"Y":"N";
             };
             
-            t << typeid(T).name() << ":\n"
+            std::forward<Target>(t) << typeid(T).name() << ":\n"
             "\tDependency            :" << simp_yn(dependency) << "\n"
             "\tCleanup               :" << simp_yn(cleanup) << "\n"
             "\tBindEntity            :" << simp_yn(bind) << "\n"
@@ -156,7 +156,7 @@ namespace alib::g3::ecs{
             "\tBindDependency        :" << simp_yn(bind_dependency) << "\n"
             "\tHasEmptyReset         :" << simp_yn(requires(T && t){t.reset();}) << "\n"
             "\tHasEmptyUpdate        :" << simp_yn(requires(T && t){t.update();})
-            << end_token;
+            << std::forward<EndToken>(end_token);
         }
     };
 }

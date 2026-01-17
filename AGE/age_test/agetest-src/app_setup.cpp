@@ -312,7 +312,7 @@ void MainApplication::setup_err_callback(){
 }
 
 void MainApplication::setup_logger(){
-    logger.append_mod<lot::Console>("console",cfg.mod_console);
+    logger.append_mod<lot::Console>("console",0,cfg.mod_console);
     logger.append_mod<lot::File>("file0",cfg.file_path);
     lg(Info) << "SetupLogger:OK" << endlog;
 }

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 内置的输出对象，目前支持控制台输出，文件输出，以及多文件输出
  * @version 0.1
- * @date 2026/01/16
+ * @date 2026/01/17
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -69,6 +69,9 @@ namespace alib::g3{
             /// @brief 默认的级别函数
             static std::string_view default_level_color_schema(const LogMsg & msg);
             
+            /// @brief 输出对象，默认为stdout
+            FILE* output_target {stdout};
+
             /// @brief 控制台输出头颜色方案
             ColorSchemaFn head_color_schema {nullptr};
             /// @brief 控制台主体颜色方案
@@ -91,11 +94,17 @@ namespace alib::g3{
             /// @brief 控制台配置
             ConsoleConfig cfg;
 
+            /// @brief 输出对象
+            FILE * out {stdout};
+
             /// @brief 类别id
             short category_id;
 
             inline Console(short category_id = 0,ConsoleConfig c = ConsoleConfig()):cfg(c){
                 this->category_id = category_id;
+                if(c.output_target){
+                    out = c.output_target;
+                }
             }
             
             void write(LogMsg & msg) override;

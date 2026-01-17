@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 流式输出处控制，主持write_to_log(类函数&全局函数)编译期注入
  * @version 0.1
- * @date 2026/01/16
+ * @date 2026/01/17
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -36,6 +36,11 @@ namespace alib::g3{
     template<class T> concept CanManipulate = requires(T && t,LogMsgConfig & c){
         t.manipulate(c);
     };
+    /// @brief 对象可以接管 StreamedContext 的控制权
+    template<class T,class Context>
+    concept CanSelfForward = requires(T && t,Context && ctx){
+        { std::forward<T>(t).self_forward(std::move(ctx)) } -> std::same_as<Context&&>;
+    };
 
     /// @brief 流式输出核心
     /// @tparam LogFactory 类CRTP写法与LogFactory解耦，理论上只能接上LogFactory
@@ -48,6 +53,8 @@ namespace alib::g3{
         int level;
         /// @brief 当前Context是否是启用的，如果Level不满足LogFactory需求其会被标记为invalid，进而不组合&上传日志
         bool context_valid;
+        /// @brief 当前临时对象是否已经被使用，如果被使用，则会在upload阶段直接panic，无论debug/release
+        bool context_used;
         /// @brief 格式化字符串，用后就清除
         std::string_view fmt_str;
         /// @brief 格式化是否是临时的
@@ -57,7 +64,6 @@ namespace alib::g3{
         /// @brief TAG信息
         std::pmr::vector<LogCustomTag> tags;
         
-
         // 禁止拷贝，允许移动
         StreamedContext(const StreamedContext&) = delete;
         StreamedContext& operator=(const StreamedContext&) = delete;
@@ -73,21 +79,39 @@ namespace alib::g3{
             this->level = level;
             fmt_str = "";
             fmt_tmp = false;
+            context_used = false;
             context_valid = valid;
         }
 
         /// @brief  上传日志
         /// @return 是否上传成功
         /// @note   StreamedContext设计出来就是用于局部构造的，因此upload后就失效了
-        inline bool upload(){
+        inline bool upload() && {
+            [[unlikely]] panic_if(context_used,"The context has been used!");
+            context_used = true;
             // 拒绝上传空的日志
-            if(context_valid && !cache_str.empty())return factory.log_pmr(level,cache_str,msg_cfg,tags);
+            if(context_valid && !cache_str.empty())
+                return factory.log_pmr(level,cache_str,msg_cfg,tags);
             return false;
+        }
+
+        /// @brief 直接写入format args
+        template<class _Context, class... _InternalArgs>
+        StreamedContext&& operator<<(std::__format::_Arg_store<_Context, _InternalArgs...> && ctx) {
+            if(!context_valid) return std::move(*this);
+            std::vformat_to(std::back_inserter(cache_str), 
+                        fmt_str.empty() ? "{}" : fmt_str, 
+                        ctx);
+                        
+            if(fmt_tmp){
+                fmt_str = "";
+            }
+            return std::move(*this);
         }
 
         /// @brief 防止<<通用匹配过于通用而设计的
         template<class T>
-        StreamedContext&& write(T && t){
+        StreamedContext&& write(T && t) && {
             if(!context_valid)return std::move(*this);
             if(fmt_str.empty())std::format_to(std::back_inserter(cache_str),"{}",t);
             else{
@@ -103,7 +127,7 @@ namespace alib::g3{
 
         /// @brief 注入式的manipulator
         template<CanManipulate T>
-        StreamedContext&& operator<<(T && t){
+        StreamedContext&& operator<<(T && t) && {
             if(!context_valid)return std::move(*this);
             t.manipulate(msg_cfg);
             return std::move(*this);
@@ -111,13 +135,13 @@ namespace alib::g3{
 
         /// @brief 格式化基础类型
         template<GoUniversal T>
-        StreamedContext&& operator<<(T && t){
-            return write<T>(std::forward<T>(t));
+        StreamedContext&& operator<<(T && t) && {
+            return std::move(*this).template write<T>(std::forward<T>(t));
         }
 
         /// @brief 格式化可转发类型
         template<CanForward T>
-        StreamedContext&& operator<<(T && t){
+        StreamedContext&& operator<<(T && t) && {
             if(!context_valid)return std::move(*this);
             // 是的，孩子们，你可以通过这个实现非侵入式的覆写了
             if constexpr(requires(T&&t,std::pmr::string&val){write_to_log(val,t);}){
@@ -129,29 +153,29 @@ namespace alib::g3{
         }
 
         /// @brief 支持endlog终止日志
-        inline bool operator<<(EndLogFn fn){
-            return upload();
+        inline bool operator<<(EndLogFn fn) && {
+            return std::move(*this).upload();
         }
 
         /// @brief 支持std::endl终止日志
-        inline bool operator<<(std::ostream& (*manip)(std::ostream&)){
-            return upload();
+        inline bool operator<<(std::ostream& (*manip)(std::ostream&)) && {
+            return std::move(*this).upload();
         }
 
         // 孩子们，你觉得下面的terminate method还是人类吗？
 
         /// @brief YetAnotherTerminateMethod
-        inline bool operator<<(LogEnd){
-            return upload();
+        inline bool operator<<(LogEnd) && {
+            return std::move(*this).upload();
         }
 
         /// @brief YetAnotherAnotherTerminateMethod
-        inline bool operator|(LogEnd){
-            return upload();
+        inline bool operator|(LogEnd) && {
+            return std::move(*this).upload();
         }
 
         /// @brief 支持插入自定义的信息
-        inline StreamedContext&& operator<<(const log_tag & t){
+        inline StreamedContext&& operator<<(const log_tag & t) && {
             if(!context_valid)return std::move(*this);
             LogCustomTag & tag = tags.emplace_back();
             tag.category  = t.category;
@@ -160,8 +184,15 @@ namespace alib::g3{
             return std::move(*this);
         }
 
+        /// @brief 支持 SelfForward 接口，对象接管 Context 进行复杂扩展
+        template<CanSelfForward<StreamedContext> T>
+        StreamedContext&& operator<<(T && t) && {
+            if(!context_valid)return std::move(*this);
+            return std::forward<T>(t).self_forward(std::move(*this));
+        }
+
         /// @brief 支持设置格式化，需要保证局部不悬垂（应该没人会在一句话就把数据删除了吧）
-        inline StreamedContext&& operator<<(const log_fmt & fmt){
+        inline StreamedContext&& operator<<(const log_fmt & fmt) && {
             if(!context_valid)return std::move(*this);
             fmt_str = fmt.fmt_str.data();
             fmt_tmp = false;
@@ -169,7 +200,7 @@ namespace alib::g3{
         }
 
         /// @brief 支持设置格式化，需要保证局部不悬垂（应该没人会在一句话就把数据删除了吧）
-        inline StreamedContext&& operator<<(const log_tfmt & fmt){
+        inline StreamedContext&& operator<<(const log_tfmt & fmt) && {
             if(!context_valid)return std::move(*this);
             fmt_str = fmt.fmt_str.data();
             fmt_tmp = true;
@@ -179,19 +210,19 @@ namespace alib::g3{
         #ifndef ALIB_DISABLE_GLM_EXTENSIONS
         /// @brief 格式化glm的向量
         template<int N,class T,enum glm::qualifier Q> 
-            inline StreamedContext&& operator<<(const glm::vec<N,T,Q> & v){
+            inline StreamedContext&& operator<<(const glm::vec<N,T,Q> & v) && {
             if(!context_valid)return std::move(*this);
             std::span<const T,N> value(glm::value_ptr(v),N);
-            return (*this) << value;
+            return std::move(*this) << value;
         }
         /// @brief 格式化glm的矩阵
         template<int M,int N,class T,enum glm::qualifier Q> 
-            inline StreamedContext&& operator<<(const glm::mat<M,N,T,Q> & v){
+            inline StreamedContext&& operator<<(const glm::mat<M,N,T,Q> & v) && {
             if(!context_valid)return std::move(*this);
-            std::span<const T,N> data (glm::value_ptr(v),M*N);
+            std::span<const T,M*N> data (glm::value_ptr(v),M*N);
             cache_str.append("{");
             for(int m = 0;m < M;++m){
-                (*this) << data.subspan(m*N,N);
+                std::move(*this) << data.subspan(m*N,N);
                 if(m+1 != M)cache_str.append(" , ");
             }
             cache_str.append("}");
@@ -199,13 +230,36 @@ namespace alib::g3{
         }
         /// @brief 格式化glm的四元数
         template<class T,enum glm::qualifier Q> 
-            inline StreamedContext&& operator<<(const glm::qua<T,Q> & v){
+            inline StreamedContext&& operator<<(const glm::qua<T,Q> & v) && {
             if(!context_valid)return std::move(*this);
             std::span<const T,4> data (glm::value_ptr(v),4);
-            return (*this) << data;
+            return std::move(*this) << data;
         }
         #endif
     };
+
+    /// 对你的参数列表进行简单的封装提高可用性
+    template<typename... Ts>
+    struct CoupledArgs {
+        std::tuple<Ts...> storage; 
+
+        template<typename... Args>
+        explicit CoupledArgs(Args&&... args) 
+            : storage(std::forward<Args>(args)...) {}
+
+        template<class Context>
+        Context&& self_forward(Context&& ctx) && {
+            return std::apply([&ctx](auto&... args) mutable -> Context&& {
+                return std::move(ctx) << std::make_format_args(args...);
+            }, storage);
+        }
+    };
+
+    /// @brief 生成couple
+    template<typename... Args>
+    auto couple(Args&&... args) {
+        return CoupledArgs<std::decay_t<Args>...>(std::forward<Args>(args)...);
+    }
 }
 
 #endif
