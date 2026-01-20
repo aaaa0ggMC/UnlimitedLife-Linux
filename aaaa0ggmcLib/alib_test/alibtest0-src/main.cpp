@@ -4,7 +4,7 @@
 #include <alib-g3/aclock.h>
 #include <alib-g3/autil.h>
 #include <alib-g3/alogger.h>
-#include <alib-g3/atranslator.h>
+#include <alib-g3/legacy/atranslator.h>
 #include <string.h>
 #include <glm/glm.hpp>
 #include <thread>
@@ -15,6 +15,7 @@
 
 using namespace std;
 using namespace alib::g3;
+using namespace alib::g3::old;
 
 void test_autil();
 void test_alogger();

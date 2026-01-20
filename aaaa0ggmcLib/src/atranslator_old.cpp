@@ -1,12 +1,11 @@
-#include <alib-g3/atranslator.h>
+#include <alib-g3/legacy/atranslator.h>
+#include <alib-g3/legacy/adata.h>
 #include <alib-g3/autil.h>
-#include <alib-g3/adata.h>
 #include <unordered_map>
-#include <algorithm>
 #include <string.h>
-#include <iostream>
 
 using namespace alib::g3;
+using namespace alib::g3::old;
 
 Translator* Translator::instance;
 

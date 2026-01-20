@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 线性存储类，目前使用vector，后期可以变成sparse_set啥的
  * @version 0.1
- * @date 2025/11/29
+ * @date 2026/01/20
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -16,6 +16,7 @@
 #include <limits>
 #include <vector>
 #include <bit>
+#include <memory_resource>
 
 namespace alib::g3::ecs::detail{
     /// @brief 是否可以通过reset方法实现建议重构？
@@ -158,9 +159,9 @@ namespace alib::g3::ecs::detail{
      */
     template<class T> struct DLL_EXPORT LinearStorage{
         /// @brief 目前的内部数据类型
-        std::vector<T>         data;
+        std::pmr::vector<T>         data;
         /// @brief 空闲数据块列表
-        std::vector<size_t>     free_elements;
+        std::pmr::vector<size_t>     free_elements;
         /// @brief 用于遍历的列表
         MonoticBitSet          available_bits;
 
@@ -178,9 +179,20 @@ namespace alib::g3::ecs::detail{
         /// 获取当前是否为空
         inline bool empty(){return data.empty();}
 
+        /// 清除当前容器
+        inline void clear(){
+            // 清除数据，这里是假装回到初始状态
+            data.clear();
+            available_bits.mask.clear();
+            free_elements.clear();
+        }
+
         /// @brief 构造函数
         /// @param reserve_size 预留大小 
-        inline LinearStorage(size_t reserve_size = 0){
+        inline LinearStorage(size_t reserve_size = 0,
+            std::pmr::memory_resource * __data = std::pmr::get_default_resource(),
+            std::pmr::memory_resource * __free_list = std::pmr::get_default_resource()
+        ):data(__data),free_elements(__free_list){
             data.reserve(reserve_size);
             available_bits.ensure(reserve_size);
         }

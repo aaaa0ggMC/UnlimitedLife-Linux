@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdlib.h>
-#include <alib-g3/adata.h>
+#include <alib-g3/legacy/adata.h>
 #include <alib-g3/alogger.h>
 #include <alib-g3/aparser.h>
 #include <fstream>
@@ -11,6 +11,7 @@
 #include <format>
 #include <vector>
 using namespace std;
+using namespace alib::g3::old;
 using namespace alib::g3;
 using enum LogLevel;
 

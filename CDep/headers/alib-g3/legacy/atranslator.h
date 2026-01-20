@@ -55,7 +55,7 @@ extern "C"
 
 //since generation3,only utf8 is guaranteed to work well
 namespace alib{
-namespace g3{
+namespace g3::old{
     /** @struct Translator
      * @brief 文字多语言支持,目前支持json与toml文件的读取
      * @todo lazyloading..(也许也没那么必要)

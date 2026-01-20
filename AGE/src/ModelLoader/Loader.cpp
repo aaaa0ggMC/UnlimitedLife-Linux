@@ -5,7 +5,7 @@
 #include <alib-g3/autil.h>
 #include <unordered_set>
 #include <bit>
-#include <alib-g3/adata.h>
+#include <alib-g3/legacy/adata.h>
 
 using namespace age::model::fmt;
 using namespace age::model;
