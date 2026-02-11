@@ -1,15 +1,14 @@
 #include <AGE/Details/GLInit.h>
 #include <AGE/Application.h>
 #include <GL/glext.h>
-#include <cstring>
 #include <GL/glu.h>
 #include <AGE/Input.h>
-#include <alib-g3/autil.h>
+#include <alib5/autil.h>
 
 // #include <iostream>
 
 using namespace age;
-using namespace alib::g3;
+using namespace alib5;
 
 bool GLInit::inited_glew = false;
 bool GLInit::inited_glfw = false;

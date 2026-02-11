@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 音频播放
  * @version 0.1
- * @date 2025/09/03
+ * @date 2026/02/11
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -34,6 +34,8 @@ namespace age::audio{
             return "Stopped";
         case Status::Paused:
             return "Paused";
+        default:
+            break;
         }
         return "Invalid";
     }

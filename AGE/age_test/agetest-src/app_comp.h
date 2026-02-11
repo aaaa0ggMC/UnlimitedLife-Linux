@@ -1,13 +1,13 @@
 #ifndef AECS_APP_COMP_H
 #define AECS_APP_COMP_H
-#include <alib-g3/aecs.h>
+#include <alib5/aecs.h>
 #include <AGE/World/Components.h>
 #include <AGE/World/Camera.h>
 #include <AGE/Shader.h>
 #include <AGE/Window.h>
 #include <AGE/Model.h>
 
-using namespace alib::g3::ecs;
+using namespace alib5::ecs;
 using namespace age::world;
 
 struct LightComponent{

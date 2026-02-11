@@ -1,11 +1,8 @@
 #include <AGE/ModelLoader/Loader.h>
-#include <sstream>
 #include <vector>
 #include <glm/glm.hpp>
-#include <alib-g3/autil.h>
-#include <unordered_set>
+#include <alib5/autil.h>
 #include <bit>
-#include <alib-g3/legacy/adata.h>
 
 using namespace age::model::fmt;
 using namespace age::model;
@@ -171,7 +168,7 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
                 auto lend = line.begin();
                 lend += (ps == std::string::npos)?line.size():ps;
                 eleCount = std::count(line.begin(),lend,'/');
-                float feleCount = eleCount / 3;
+                float feleCount = eleCount / 3.0;
                 if(feleCount - (int)feleCount > 0.1){ // 小数都是 0.33 0.25起步的，0.1判断绰绰有余了
                     eleCount = eleCount / 4;
                 }else eleCount = eleCount / 3;
@@ -287,7 +284,7 @@ void Obj::parse(std::string_view data, ModelData& md,bool flipV,std::string_view
         out += "Data: \n" + std::string(data.substr(0, 100)) + "...\n";
         out += "End of OBJ Model";
         Error::def.pushMessage(
-           {0, out.c_str(), alib::g3::LogLevel::Debug}
+           {0, out.c_str(), alib5::Severity::Debug}
         );
     }
 #endif
@@ -306,7 +303,7 @@ void Stl::parse(std::string_view data,ModelData & md,bool flipV,std::string_view
         // treat it as ascii STL
 #ifdef AGE_ML_DEBUG
         Error::def.pushMessage(
-            {0, "Detected STL ASCII format", alib::g3::LogLevel::Debug}
+            {0, "Detected STL ASCII format", alib5::Severity::Debug}
         );
 #endif
         StlAscii::parse(std::string_view(p),md,flipV,fp);
@@ -314,7 +311,7 @@ void Stl::parse(std::string_view data,ModelData & md,bool flipV,std::string_view
         // stl-bin
 #ifdef AGE_ML_DEBUG
         Error::def.pushMessage(
-            {0, "Detected STL Binary format", alib::g3::LogLevel::Debug}
+            {0, "Detected STL Binary format", alib5::Severity::Debug}
         );
 #endif
         StlBinary::parse(data,md,flipV,fp);
@@ -399,7 +396,7 @@ void StlAscii::parse(std::string_view data,ModelData & md,bool flipV,std::string
         out += "Data: \n" + std::string(data.substr(0, 100)) + "...\n";
         out += "End of STL ASCII Model";
         Error::def.pushMessage(
-           {0, out.c_str(), alib::g3::LogLevel::Debug}
+           {0, out.c_str(), alib5::Severity::Debug}
         );
     }
 #endif
@@ -473,7 +470,7 @@ void StlBinary::parse(std::string_view data,ModelData & md,bool flipV,std::strin
         out += "Data Size: " + std::to_string(data.size()) + " bytes\n";
         out += "End of STL Binary Model";
         Error::def.pushMessage(
-           {0, out.c_str(), alib::g3::LogLevel::Debug}
+           {0, out.c_str(), alib5::Severity::Debug}
         );
     }
 #endif
@@ -486,7 +483,7 @@ void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::st
         if(filePath.ends_with(".obj")){
 #ifdef AGE_ML_DEBUG
             Error::def.pushMessage(
-                {0, "Detected OBJ format by suffix.", alib::g3::LogLevel::Debug}
+                {0, "Detected OBJ format by suffix.", alib5::Severity::Debug}
             );
 #endif
             Obj::parse(data, md, flipV, filePath);
@@ -494,7 +491,7 @@ void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::st
         }else if(filePath.ends_with(".stl")){
 #ifdef AGE_ML_DEBUG
             Error::def.pushMessage(
-                {0, "Detected STL format by suffix.", alib::g3::LogLevel::Debug}
+                {0, "Detected STL format by suffix.", alib5::Severity::Debug}
             );
 #endif
             Stl::parse(data, md, flipV, filePath);
@@ -502,7 +499,7 @@ void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::st
         }else if(filePath.ends_with(".stla")){
 #ifdef AGE_ML_DEBUG
             Error::def.pushMessage(
-                {0, "Detected STL ASCII format by suffix.", alib::g3::LogLevel::Debug}
+                {0, "Detected STL ASCII format by suffix.", alib5::Severity::Debug}
             );
 #endif
             StlAscii::parse(data, md, flipV, filePath);
@@ -510,7 +507,7 @@ void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::st
         }else if(filePath.ends_with(".stlb")){
 #ifdef AGE_ML_DEBUG
             Error::def.pushMessage(
-                {0, "Detected STL Binary format by suffix.", alib::g3::LogLevel::Debug}
+                {0, "Detected STL Binary format by suffix.", alib5::Severity::Debug}
             );
 #endif
             StlBinary::parse(data, md, flipV, filePath);
@@ -524,7 +521,7 @@ void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::st
        sample.find("facet normal") != std::string_view::npos){
 #ifdef AGE_ML_DEBUG
         Error::def.pushMessage(
-            {0, "Detected STL ASCII format by the first 1024 bytes.", alib::g3::LogLevel::Debug}
+            {0, "Detected STL ASCII format by the first 1024 bytes.", alib5::Severity::Debug}
         );
 #endif
         StlAscii::parse(data, md, flipV, filePath);
@@ -535,7 +532,7 @@ void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::st
              sample.find("vt ") != std::string_view::npos){
 #ifdef AGE_ML_DEBUG
         Error::def.pushMessage(
-            {0, "Detected OBJ format by the first 1024 bytes.", alib::g3::LogLevel::Debug}
+            {0, "Detected OBJ format by the first 1024 bytes.", alib5::Severity::Debug}
         );
 #endif
         Obj::parse(data, md, flipV, filePath);
@@ -549,7 +546,7 @@ void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::st
         //maybe stl-bin
 #ifdef AGE_ML_DEBUG
         Error::def.pushMessage(
-            {0, "Detected STL Binary format by file's chunk patterns.", alib::g3::LogLevel::Debug}
+            {0, "Detected STL Binary format by file's chunk patterns.", alib5::Severity::Debug}
         );
 #endif
         StlBinary::parse(data, md, flipV, filePath);
@@ -561,6 +558,6 @@ void AutoDetect::parse(std::string_view data, ModelData & md, bool flipV,std::st
         s += ", File Path: " + std::string(filePath);
     }
     Error::def.pushMessage(
-        {AGEE_FEATURE_NOT_SUPPORTED, s.c_str() , alib::g3::LogLevel::Error}
+        {AGEE_FEATURE_NOT_SUPPORTED, s.c_str() , alib5::Severity::Debug }
     );
 }

@@ -70,7 +70,7 @@ void MainApplication::draw_callback(){
     glDisable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    shadowSampler.bind(GL_TEXTURE1);
+    shadowSampler.unbind(GL_TEXTURE1);
     shadowTex->bind(GL_TEXTURE1);
 
     m_window->drawArray(PrimitiveType::Triangles,0,6);

@@ -1,8 +1,8 @@
 #ifndef AGETEST_APP_H
 #define AGETEST_APP_H
 #include <unordered_map>
-#include <alib-g3/alogger.h>
-#include <alib-g3/aecs.h>
+#include <alib5/alogger.h>
+#include <alib5/aecs.h>
 
 #include <AGE/Input.h>
 #include <AGE/Model.h>
@@ -19,16 +19,16 @@
 #include "states.h"
 
 using namespace age;
-using namespace alib::g3;
+using namespace alib5;
 using namespace age::world;
 using namespace age::material;
-using namespace alib::g3::ecs;
+using namespace alib5::ecs;
 using enum LogLevel;
 
 struct MainApplication{
     glm::mat4 shadow_bias;
 
-    /// Stored Config
+    /// Stored"states.h" Config
     MainApplicationConfig cfg;
     
     /// IMGUI Injectors ///

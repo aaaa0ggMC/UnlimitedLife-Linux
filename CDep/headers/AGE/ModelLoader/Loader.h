@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 加载模型
  * @version 0.1
- * @date 2025/11/14
+ * @date 2026/02/11
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -13,7 +13,7 @@
 #define AGE_H_LOADER
 #include <AGE/Utils.h>
 #include <AGE/Model.h>
-#include <alib-g3/autil.h>
+#include <alib5/autil.h>
 
 namespace age::model{
     template<class T> concept AFormat = requires(std::string_view data,ModelData & model,bool flipV,std::string_view path){
@@ -86,15 +86,13 @@ namespace age::model{
     /// @note 反转v分量是为了兼容OpenGL的纹理，一般来讲blender导出的不要翻转，其余的可能要翻转
     /// @note 目前只有 obj 会对翻转处理
     template<AFormat Format> inline void loadModelFromFile(std::string_view filePath,ModelData & model,bool flipV = false){
-        std::string fp = "";
-        fp += filePath;
         std::string data = "";
-        int fsize = alib::g3::Util::io_readAll(fp,data);
-        if(fsize == -1){
+        auto fsize = alib5::io::read_all(filePath,data);
+        if(fsize == std::variant_npos){
             Error::def.pushMessage({
                 -1,
                 "<-[alib error code]Cannot open file or fetch valid data!",
-                alib::g3::LogLevel::Error
+                alib5::LogLevel::Error
             });
             return;
         }
@@ -103,15 +101,13 @@ namespace age::model{
     /// @return scene id @warning binding point doesnt work for GLTF
     template<AFormat Format> inline int loadModelFromFile(std::string_view filePath,Model & model,
         int index = 0,GLuint vloc = 0,GLuint vtloc = 1,GLuint vnloc = 2,bool flipV = false){
-        std::string fp = "";
-        fp += filePath;
         std::string data = "";
-        int fsize = alib::g3::Util::io_readAll(fp,data);
-        if(fsize == -1){
+        auto fsize = alib5::io::read_all(filePath,data);
+        if(fsize == std::variant_npos){
             Error::def.pushMessage({
                 -1,
                 "<-[alib error code]Cannot open file or fetch valid data!",
-                alib::g3::LogLevel::Error
+                alib5::Severity::Error
             });
             return -1;
         }

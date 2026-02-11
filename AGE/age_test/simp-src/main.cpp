@@ -2,8 +2,8 @@
 #include <AGE/Application.h>
 #include <AGE/Light.h>
 
-using namespace alib::g3;
-using namespace alib::g3::ecs;
+using namespace alib5;
+using namespace alib5::ecs;
 using namespace age;
 using namespace age::light;
 using namespace age::light::uploaders;

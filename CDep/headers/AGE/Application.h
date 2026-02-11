@@ -1,7 +1,7 @@
 /** @file Application.h
  * @brief 应用，类似Vulkan的概念（但是目前用的是OpenGL）
  * @author aaaa0ggmc
- * @date 2025/12/02
+ * @date 2026/02/11
  * @start-date 2025/06/11
  * @version 3.1
  * @copyright copyright(C)2025
@@ -24,18 +24,12 @@
 #include <AGE/Details/ShaderManager.h>
 #include <AGE/Details/SamplerManager.h>
 #include <AGE/Details/FramebufferManager.h>
-#include <alib-g3/aecs.h>
-
+#include <alib5/aecs.h>
 #include <GL/glext.h>
-#include <unordered_map>
-#include <string>
-#include <memory_resource>
-#include <unordered_set>
-#include <optional>
 
 /// Aaaa0ggmc's Graphics Engine 我的图形引擎
 namespace age{
-    using namespace alib::g3::ecs;
+    using namespace alib5::ecs;
     using namespace age::manager;
     
     /** @struct Application

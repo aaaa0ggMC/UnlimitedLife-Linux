@@ -3,17 +3,16 @@
  * @author aaaa0ggmc
  * @brief 获取OpenGL各种信息，glew必须初始化完成才可以使用这个文件的东西
  * @version 0.1
- * @date 2025/07/18
+ * @date 2026/02/11
  * @start-date 2025/07/18
  * @copyright Copyright (c) 2025
 */
 #ifndef AGE_H_QUERY
 #define AGE_H_QUERY
+#include <AGE/Utils.h>
 #include <GLFW/glfw3.h>
 #include <GL/glew.h>
 #include <stdexcept>
-
-#include <AGE/Utils.h>
 
 namespace age{
     /// @brief QueryOpenGL State @warning OpenGL Context Must Be Available,or the program will definitely crash!!

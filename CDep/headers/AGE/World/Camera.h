@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 相机，对组件的一个包装
  * @version 0.1
- * @date 2025/12/04
+ * @date 2026/02/11
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -16,7 +16,7 @@
 #include <AGE/World/Components.h>
 
 namespace age::world{
-    using namespace alib::g3::ecs;
+    using namespace alib5::ecs;
     using namespace comps;
 
     struct Camera : public MonoBehavior{

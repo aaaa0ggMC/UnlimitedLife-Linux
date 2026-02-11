@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief VBO
  * @version 0.1
- * @date 2025/07/25
+ * @date 2026/02/11
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -12,12 +12,8 @@
 #ifndef AGE_H_VBO
 #define AGE_H_VBO
 #include <AGE/Utils.h>
-
 #include <GL/glew.h>
-
 #include <cstring>
-#include <span>
-#include <iostream>
 
 namespace age {
     enum class PrimitiveType : GLenum {

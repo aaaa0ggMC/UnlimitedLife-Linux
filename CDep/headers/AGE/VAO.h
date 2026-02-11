@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief VAO
  * @version 0.1
- * @date 2025/07/25
+ * @date 2026/02/11
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -16,8 +16,6 @@
 
 #include <GL/glew.h>
 #include <GL/gl.h>
-#include <cstring>
-#include <string>
 #include <vector>
 
 namespace age {

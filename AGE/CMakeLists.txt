@@ -1,61 +1,89 @@
+# ==========================================
+# 1. 第三方库: miniaudio (静态库)
+# ==========================================
 aux_source_directory("./miniaudio-src" MINIAUDIO_SRC)
 add_library(miniaudio STATIC ${MINIAUDIO_SRC})
-# 这里指定了miniaudio的优化，是因为-O2优化在我电脑上会使得miniaudio崩溃
+
+# 保持你的特殊优化设置：-O2 会崩溃，故锁定 -O1
 target_compile_options(miniaudio PUBLIC "-O1")
 
-aux_source_directory("./src" AGE-SRC)
-aux_source_directory("./src/ModelLoader" MODEL)
-aux_source_directory("./src/Audio" AUDIO)
-aux_source_directory("./src/Details" DETAIL)
-add_library(AGE SHARED ${AUDIO} ${AGE-SRC} ${DETAIL} ${MODEL})
+
+# ==========================================
+# 2. 核心库: AGE (动态库)
+# ==========================================
+# 收集所有源码目录
+aux_source_directory("./src" AGE_SRC_ROOT)
+aux_source_directory("./src/ModelLoader" AGE_SRC_MODEL)
+aux_source_directory("./src/Audio" AGE_SRC_AUDIO)
+aux_source_directory("./src/Details" AGE_SRC_DETAIL)
+
+add_library(AGE SHARED 
+    ${AGE_SRC_ROOT} 
+    ${AGE_SRC_MODEL} 
+    ${AGE_SRC_AUDIO} 
+    ${AGE_SRC_DETAIL}
+)
+
 set_target_properties(AGE PROPERTIES LINKER_LANGUAGE CXX)
-# target_compile_options(AGE PUBLIC "-Winline") # 查看内联函数
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	target_compile_options(AGE PRIVATE "-g" "-O0")
-	target_compile_definitions(AGE PRIVATE AGE_TRACE_SKIP_CPP_NATIVE AGE_TRACE_COMPACT AGE_ML_DEBUG AGE_LIGHT_BUZZ)
-else()
-	target_compile_options(AGE PRIVATE "-g" "-O3")
-endif()
-target_compile_definitions(AGE PRIVATE AGE_BUILD_DLL)
-if(WIN32)	
-	target_link_libraries(AGE PRIVATE stdc++exp miniaudio dbghelp Shcore aaaa0ggmcLib glu32 glfw3.dll glew32.dll opengl32 gdi32 user32 kernel32)
-	target_compile_definitions(AGE PRIVATE GLFW_DLL)
-else()
-	target_link_libraries(AGE PRIVATE stdc++exp miniaudio dl GLU OpenGL GLEW glfw aaaa0ggmcLib)
-endif()
-target_compile_definitions(AGE PUBLIC AGE_BUILD_DLL)
 
+# --- AGE 编译宏与选项 ---
+target_compile_definitions(AGE PUBLIC AGE_BUILD_DLL) # 统一设为 PUBLIC
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(AGE PRIVATE "-g" "-O0")
+    target_compile_definitions(AGE PRIVATE 
+        AGE_TRACE_SKIP_CPP_NATIVE 
+        AGE_TRACE_COMPACT 
+        AGE_ML_DEBUG 
+        AGE_LIGHT_BUZZ
+    )
+else()
+    target_compile_options(AGE PRIVATE "-g" "-O3")
+endif()
+
+# --- AGE 平台特定链接 ---
+target_link_libraries(AGE PUBLIC stdc++exp aaaa0ggmcLib)
+
+if(WIN32)
+    target_compile_definitions(AGE PRIVATE GLFW_DLL)
+    target_link_libraries(AGE PRIVATE 
+        miniaudio dbghelp Shcore glu32 
+        glfw3.dll glew32.dll opengl32 gdi32 user32 kernel32
+    )
+else()
+    target_link_libraries(AGE PRIVATE miniaudio dl GLU OpenGL GLEW glfw)
+endif()
+
+
+# ==========================================
+# 3. 测试程序 (agetest & age_simptest)
+# ==========================================
+
+# --- 辅助宏：减少测试程序的重复配置 ---
+macro(configure_age_test_target TARGET_NAME SOURCES)
+    add_executable(${TARGET_NAME} ${SOURCES})
+    
+    # 编译选项
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        target_compile_options(${TARGET_NAME} PRIVATE "-g" "-O0")
+        target_compile_definitions(${TARGET_NAME} PRIVATE AGE_TRACE_COMPACT AGE_EM_DEBUG AGE_LIGHT_BUZZ)
+    else()
+        target_compile_options(${TARGET_NAME} PRIVATE "-g" "-O3")
+    endif()
+
+    # 链接与平台定义
+    if(WIN32)
+        target_compile_definitions(${TARGET_NAME} PRIVATE GLFW_DLL)
+        target_link_libraries(${TARGET_NAME} PRIVATE imgui AGE glfw3.dll glew32.dll opengl32)
+    else()
+        target_link_libraries(${TARGET_NAME} PRIVATE imgui AGE glfw GLEW OpenGL)
+    endif()
+endmacro()
+
+# 实例化 agetest
 aux_source_directory("./age_test/agetest-src/" AGETEST_SRC)
-add_executable(agetest ${AGETEST_SRC})
-#target_compile_options(agetest PUBLIC "-O3")
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-target_compile_definitions(agetest PRIVATE AGE_TRACE_COMPACT AGE_EM_DEBUG AGE_LIGHT_BUZZ)
-target_compile_options(agetest PRIVATE "-g" "-O0")
-else()
-target_compile_options(agetest PRIVATE "-g" "-O3")
-endif()
-if(WIN32)
-target_link_libraries(agetest PRIVATE imgui AGE glfw3.dll glew32.dll opengl32 aaaa0ggmcLib)
-target_compile_definitions(agetest PRIVATE GLFW_DLL)
-else()
-# 直接链接
-target_link_libraries(agetest PRIVATE imgui AGE aaaa0ggmcLib glfw GLEW OpenGL) 
-endif()
+configure_age_test_target(agetest "${AGETEST_SRC}")
 
+# 实例化 age_simptest
 aux_source_directory("./age_test/simp-src/" SIMPTEST_SRC)
-add_executable(age_simptest ${SIMPTEST_SRC})
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-target_compile_definitions(age_simptest PRIVATE AGE_TRACE_COMPACT AGE_EM_DEBUG AGE_LIGHT_BUZZ)
-target_compile_options(age_simptest PRIVATE "-g" "-O0")
-else()
-target_compile_options(age_simptest PRIVATE "-g" "-O3")
-endif()
-if(WIN32)
-target_link_libraries(age_simptest PRIVATE imgui AGE glfw3.dll glew32.dll opengl32 aaaa0ggmcLib)
-target_compile_definitions(age_simptest PRIVATE GLFW_DLL)
-else()
-# 直接链接
-target_link_libraries(age_simptest PRIVATE imgui AGE aaaa0ggmcLib glfw GLEW OpenGL) 
-endif()
-
-
+configure_age_test_target(age_simptest "${SIMPTEST_SRC}")

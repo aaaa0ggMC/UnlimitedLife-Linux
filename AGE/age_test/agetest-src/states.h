@@ -1,17 +1,17 @@
 #ifndef AGETEST_STATES_H
 #define AGETEST_STATES_H
 #include <unordered_set>
-#include <alib-g3/alogger.h>
-#include <alib-g3/aecs.h>
+#include <alib5/alogger.h>
+#include <alib5/aecs.h>
 
 #include <AGE/Input.h>
 #include <AGE/Application.h>
 #include <AGE/World/Camera.h>
 
 using namespace age;
-using namespace alib::g3;
+using namespace alib5;
 using namespace age::world;
-using namespace alib::g3::ecs;
+using namespace alib5::ecs;
 using enum LogLevel;
 
 struct States{

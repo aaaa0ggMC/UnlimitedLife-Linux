@@ -127,7 +127,7 @@ void MainApplication::load_static_models(){
         mdx = &models[k];
         Clock clk;
         model::loadModelFromFile<model::fmt::AutoDetect>(fp,*mdx);
-        lg(Info) << "Loaded model " << k << " in " << clk.getOffset() << "ms." << std::endl;
+        lg(Info) << "Loaded model " << k << " in " << clk.get_offset() << "ms." << std::endl;
     }
 
     state.models.emplace("cube");
@@ -137,7 +137,7 @@ void MainApplication::load_static_models(){
 
     model::Prefab::box(100,0.2,100,m_plane,32); // 重复多次uv
 
-    lg(Info) << "LoadStaticModel:OK in " << gclk.getOffset() << "ms" << endlog;
+    lg(Info) << "LoadStaticModel:OK in " << gclk.get_offset() << "ms" << endlog;
 }
 
 void MainApplication::load_dynamic_models(){
@@ -151,7 +151,7 @@ void MainApplication::load_dynamic_models(){
     mdx = &models["torus"];
     model::Prefab::torus(state.precision,1,0.5,*mdx);
 
-    lg(Info) << "LoadDynamicModel:OK in " << gclk.getOffset() << "ms" << endlog;
+    lg(Info) << "LoadDynamicModel:OK in " << gclk.get_offset() << "ms" << endlog;
 }
 
 void MainApplication::init_world_objects(){

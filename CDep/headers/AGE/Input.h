@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 输入处理
  * @version 0.1
- * @date 2025/09/03
+ * @date 2026/02/11
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -11,11 +11,11 @@
  */
 #ifndef AGE_H_INPUT
 #define AGE_H_INPUT
+#include <alib5/aclock.h>
+
 #include <AGE/Utils.h>
-#include <alib-g3/aclock.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
 #include <unordered_map>
 #include <cstdint>
 
@@ -67,8 +67,8 @@ namespace age {
     struct AGE_API Input{
         Window* win;
         std::unordered_map<KeyCode,KeyInfo> codes;
-        alib::g3::Clock rater;
-        alib::g3::Trigger trig;
+        alib5::Clock rater;
+        alib5::Trigger trig;
         bool ticked;
 
         void update();

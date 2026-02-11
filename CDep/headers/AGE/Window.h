@@ -23,11 +23,10 @@
 #include <GL/gl.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <algorithm>
 #include <cstdlib>
 #include <string>
 #include <optional>
-#include <alib-g3/aclock.h>
+#include <alib5/aclock.h>
 #include <glm/glm.hpp>
 
 namespace age::manager{
@@ -157,7 +156,7 @@ namespace age{
         /// 窗口的SID
         std::string_view sid;
         /// 限制fps
-        alib::g3::RateLimiter fpsLimiter;
+        alib5::RateLimiter fpsLimiter;
         /// OnResize
         std::function<void(Window&,int nw,int nh,int ori_w,int ori_h)> m_onResize;
         std::function<void(Window&,age::KeyWrapper wrapper)> m_onKey;

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc
  * @brief 提供一些预设的System插件
  * @version 0.1
- * @date 2025/11/27
+ * @date 2026/02/11
  * @start-date 2025/7/16
  * @copyright Copyright (c) 2025
  */
@@ -12,7 +12,7 @@
 #include <AGE/World/Components.h>
 
 namespace age::world{
-    using namespace alib::g3::ecs;
+    using namespace alib5::ecs;
     namespace systems{
         //@post-update
         /// @brief note that parent system must be a post update of your own transform

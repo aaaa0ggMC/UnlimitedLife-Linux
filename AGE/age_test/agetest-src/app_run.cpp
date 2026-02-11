@@ -28,8 +28,8 @@ void MainApplication::run(){
     while(!win.shouldClose()){
         //// Counting Framerate ////
         ++frame_count;
-        if(fps_counter.getOffset() >= cfg.fpsCountTimeMs){
-            fps_counter.clearOffset();
+        if(fps_counter.get_offset() >= cfg.fpsCountTimeMs){
+            fps_counter.clear_offset();
             state.fps = (int)(frame_count / cfg.fpsCountTimeMs * 1000);
             frame_count = 0;
         }
@@ -44,9 +44,9 @@ void MainApplication::run(){
         //// Input System && Update Worlds ////
         input.update();
         if(input.checkTick()){
-            float elapse_seconds = elapse.getOffset() / 1000.f;
+            float elapse_seconds = elapse.get_offset() / 1000.f;
             handle_input(elapse_seconds);
-            elapse.clearOffset();
+            elapse.clear_offset();
         }
         if(world_trigger.test()){
             world_update(world_trigger.duration);

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2025/12/04
+ * @date 2026/02/11
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -11,19 +11,19 @@
  */
 #ifndef AGE_H_BASE
 #define AGE_H_BASE
+#include <alib5/aclock.h>
+#include <alib5/adebug.h>
+#include <alib5/alogger.h>
 
 #include <cstdint>
 #include <vector>
 #include <numbers>
 #include <functional>
-#include <alib-g3/aclock.h>
-#include <alib-g3/adebug.h>
 #include <functional>
-#include <alib-g3/alogger.h>
 #include <GL/glew.h>
 #include <functional>
 #include <AGE/Details/GLObjectMapper.h>
-//#include <iostream>
+
 
 ///对象如VAO,VBO为空
 #define AGE_NULL_OBJ 0
@@ -117,13 +117,13 @@ namespace age{
     struct AGE_API ErrorInfo{
         int32_t code;
         const char * message;
-        alib::g3::LogLevel level;
+        alib5::Severity level;
     };
 
     struct AGE_API ErrorInfopp{
         int32_t code;
         std::pmr::string message;
-        alib::g3::LogLevel level;
+        alib5::Severity level;
     };
     using TriggerFunc = std::function<void(const ErrorInfopp&)>;
     /** @struct Error
@@ -230,81 +230,6 @@ namespace age{
         inline DirtyWrapper& operator=(const T & t){
             write(t);
             return *this;
-        }
-    };
-
-    // @author:里挥发
-    // @brief:事件
-    class Event {
-        public:
-        int64_t startOn;
-        int64_t interval = 0;
-        std::function<void()> task;
-    };
-
-    /// @author:里挥发
-    /// @brief:事件循环器
-    class EventLoop {
-        public:
-        alib::g3::Clock clock;
-        alib::g3::RateLimiter ratelimiter = alib::g3::RateLimiter(1000.0f);
-        std::vector<Event> events;
-        bool isRunning;
-
-        inline void setInterval(const std::function<void()>&task, int64_t time){
-            int64_t now = (int64_t) clock.getAllTime();
-            Event event;
-            event.startOn = now + time;
-            event.task = task;
-            event.interval = time;
-            addEvent(event);
-        }
-
-        inline void setTimeout(const std::function<void()>& task, int64_t time){
-            int64_t now = (int64_t) clock.getAllTime();
-            Event event;
-            event.startOn = now + time;
-            event.task = task;
-            addEvent(event);
-        }
-
-        inline void addEvent(Event& event){
-            events.push_back(event);
-        }
-
-        inline void loop(){
-            while (isRunning){
-                std::vector<int> toErase;
-                // 事件循环
-                int size = events.size();
-                for (int index = 0;index < size;index++){
-                    auto& event = events[index];
-                    int64_t now = (int64_t) clock.getAllTime();
-                    if (now >= event.startOn){
-                        event.task();
-                        if (!isRunning) break;
-                        if (event.interval > 0){
-                            event.startOn = now + event.interval;
-                        }else {
-                            toErase.push_back(index);
-                        }
-                    }
-                }
-                // 删除事件
-                for (int& i : toErase){
-                    events.erase(events.begin() + i);
-                }
-                ratelimiter.wait();
-            }
-        }
-
-        inline void start(){
-            isRunning = true;
-            loop();
-        }
-
-        inline void stop(){
-            isRunning = false;
         }
     };
 }

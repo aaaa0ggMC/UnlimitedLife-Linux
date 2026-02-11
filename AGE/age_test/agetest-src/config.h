@@ -1,10 +1,9 @@
 #ifndef AGETEST_CONFIG_H
 #define AGETEST_CONFIG_H
 #include <unordered_map>
-#include <functional>
 
-#include <alib-g3/alogger.h>
-#include <alib-g3/aecs.h>
+#include <alib5/alogger.h>
+#include <alib5/aecs.h>
 
 #include <AGE/Input.h>
 #include <AGE/Application.h>
@@ -12,9 +11,9 @@
 #include <glm/glm.hpp>
 
 using namespace age;
-using namespace alib::g3;
+using namespace alib5;
 using namespace age::world;
-using namespace alib::g3::ecs;
+using namespace alib5::ecs;
 using enum LogLevel;
 
 struct MainApplicationConfig{
@@ -54,7 +53,7 @@ struct MainApplicationConfig{
     std::string snd_file {"./test_data/test_mp3.mp3"};
 
     //// Injector ////
-    float imgui_refresh_rate {100};
+    float imgui_refresh_rate {60};
     
     //// Camera ////
     glm::vec2 cam_rot {1,1};

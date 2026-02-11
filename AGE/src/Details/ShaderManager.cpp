@@ -1,8 +1,8 @@
 #include <AGE/Details/ShaderManager.h>
-#include <alib-g3/autil.h>
+#include <alib5/autil.h>
 
 using namespace age;
-using namespace alib::g3;
+using namespace alib5;
 using namespace age::manager;
 
 ShaderManager::~ShaderManager(){
@@ -167,26 +167,17 @@ Shader ShaderManager::fromFile(std::string_view  sid,
     std::string vert,frag,geom,comp;
     vert = frag = geom = comp = "";
 
-    std::string fvert = "";
-    fvert += cfvert;
-    std::string ffrag = "";
-    ffrag += cffrag;
-    std::string fgeom = "";
-    fgeom += cfgeom;
-    std::string fcomp = "";
-    fcomp += cfcomp;
-
-    if(fvert.compare("")){
-        Util::io_readAll(fvert,vert);
+    if(cfvert.compare("")){
+        io::read_all(cfvert,vert);
     }
-    if(ffrag.compare("")){
-        Util::io_readAll(ffrag,frag);
+    if(cffrag.compare("")){
+        io::read_all(cffrag,frag);
     }
-    if(fgeom.compare("")){
-        Util::io_readAll(fgeom,geom);
+    if(cfgeom.compare("")){
+        io::read_all(cfgeom,geom);
     }
-    if(fcomp.compare("")){
-        Util::io_readAll(fcomp,comp);
+    if(cfcomp.compare("")){
+        io::read_all(cfcomp,comp);
     }
 
     return fromSrc(sid,vert,frag,geom,comp);

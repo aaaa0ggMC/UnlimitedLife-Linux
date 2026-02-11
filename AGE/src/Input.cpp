@@ -14,7 +14,7 @@ void Input::update(){
         case KeyState::Released:
             if(down){
                 keyinfo.status = KeyState::PressedThisTick;
-                keyinfo.this_pressed = rater.getAllTime();
+                keyinfo.this_pressed = rater.get_all();
                 if(keyinfo.double_time_ms > 0){
                     if(keyinfo.this_pressed - keyinfo.last_pressed >= keyinfo.double_time_ms){
                         keyinfo.last_pressed = keyinfo.this_pressed;
@@ -34,7 +34,7 @@ void Input::update(){
                 keyinfo.status = KeyState::Released;
             }else {
                 keyinfo.status = KeyState::PressedThisTick;
-                keyinfo.this_pressed = rater.getAllTime();
+                keyinfo.this_pressed = rater.get_all();
                 if(keyinfo.double_time_ms > 0){
                     if(keyinfo.this_pressed - keyinfo.last_pressed >= keyinfo.double_time_ms){
                         keyinfo.last_pressed = keyinfo.this_pressed;

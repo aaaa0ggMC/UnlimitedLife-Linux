@@ -1,13 +1,11 @@
 #ifndef AGE_PREFAB_BASE_H
 #define AGE_PREFAB_BASE_H
 #include <AGE/Utils.h>
-#include <alib-g3/ecs/entity.h>
-#include <alib-g3/ecs/entity_manager.h>
-#include <alib-g3/aecs.h>
+#include <alib5/aecs.h>
 #include <utility>
 
 namespace age::world{
-    using namespace alib::g3::ecs;
+    using namespace alib5::ecs;
 
     struct MonoBehavior : public NonCopyable{
         EntityManager& em;

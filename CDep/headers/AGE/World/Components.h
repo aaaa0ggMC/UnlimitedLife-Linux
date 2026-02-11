@@ -1,14 +1,14 @@
 /** @file world/Components.h
  * @brief 提供一些预制的components
  * @author aaaa0ggmc,euuen
- * @date 2025/12/04
+ * @date 2026/02/11
  * @start-date 2025/6/19
  * @copyright copyright(c)2025 aaaa0ggmc
  */
 #ifndef AGE_H_COMP
 #define AGE_H_COMP
 #include <AGE/Utils.h>
-#include <alib-g3/aecs.h>
+#include <alib5/aecs.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -29,7 +29,7 @@ inline static void glm_e_add(glm::vec3 & outp,float x1,float x2,float x3,const g
 }
 
 namespace age::world{
-    using namespace alib::g3::ecs;
+    using namespace alib5::ecs;
 
     /** @brief 这里是默认提供的一些组件，实际上你也可以自己写
       * @par 组件类规则:
@@ -330,7 +330,7 @@ namespace age::world{
 
         /// 仅用于构建视图矩阵，而且还依赖Transform这个module @todo maybe可以使用c++模板元编程把组件之间的依赖关系也写出来
         struct AGE_API Viewer : public DirtyMarker{
-            using Dependency = alib::g3::ecs::ComponentStack<Transform>;
+            using Dependency = alib5::ecs::ComponentStack<Transform>;
             glm::mat4 view_matrix;
 
             inline glm::mat4& buildViewMatrix(Transform & trs){
