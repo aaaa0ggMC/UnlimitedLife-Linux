@@ -52,9 +52,7 @@ void MainApplication::run(){
         }
         draw();
         if(imgui_draw_injector)imgui_draw_injector(*this);
-        win.display([this]{
-            lg << "You know im waiting..." << fls;
-        });
+        win.display();
     }
 }
 
