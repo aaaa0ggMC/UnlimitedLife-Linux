@@ -32,7 +32,7 @@ struct MainApplicationConfig{
     float fpsCountTimeMs { 500 };
 
     //// World ////
-    float world_update_frame_rate { 60 };
+    float world_update_frame_rate { 200 };
 
     //// Shaders ////
     std::string main_vert {"test_data/cube.vert"};
@@ -53,7 +53,7 @@ struct MainApplicationConfig{
     std::string snd_file {"./test_data/test_mp3.mp3"};
 
     //// Injector ////
-    float imgui_refresh_rate {60};
+    float imgui_refresh_rate {100};
     
     //// Camera ////
     glm::vec2 cam_rot {1,1};
@@ -79,7 +79,7 @@ struct MainApplicationConfig{
         ci.x = 100;
         ci.y = 100;
         ci.style = WinStylePresetNormal;
-        ci.fps = 0;
+        ci.fps = framerate;
         ci.ScreenPercent(0.5,1,&ci.width,&ci.height);
         ci.KeepRatio(ci.width,ci.height,800,600);
         ci.ScreenPercent(0.2,0.2,&ci.x,&ci.y);

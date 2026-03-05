@@ -20,6 +20,7 @@ CDep/headers/miniaudio.h
 */Testing
 .cache
 build
+CBuild/*
 
 Pacman/
 !Pacman/PKGBUILD

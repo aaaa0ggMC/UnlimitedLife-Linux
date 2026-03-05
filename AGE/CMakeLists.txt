@@ -63,6 +63,9 @@ endif()
 macro(configure_age_test_target TARGET_NAME SOURCES)
     add_executable(${TARGET_NAME} ${SOURCES})
     
+    # 这里是SANITIZE选项
+    # target_compile_options(${TARGET_NAME} PRIVATE "-fsanitize=undefined,address" "-fno-omit-frame-pointer")
+    # target_link_options(${TARGET_NAME} PRIVATE "-fsanitize=undefined,address" "-fno-omit-frame-pointer")
     # 编译选项
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(${TARGET_NAME} PRIVATE "-g" "-O0")

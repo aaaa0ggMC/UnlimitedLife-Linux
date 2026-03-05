@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 一些工具
  * @version 0.1
- * @date 2026/02/11
+ * @date 2026/03/05
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -16,7 +16,6 @@
 #include <alib5/alogger.h>
 
 #include <cstdint>
-#include <vector>
 #include <numbers>
 #include <functional>
 #include <functional>
@@ -136,10 +135,11 @@ namespace age{
         
         static Error def;
 
-        static std::pmr::unsynchronized_pool_resource pool;
+        static std::pmr::synchronized_pool_resource pool;
         static std::pmr::polymorphic_allocator<char> alloc;
 
-        std::pmr::vector<ErrorInfopp> infos;
+        std::pmr::deque<ErrorInfopp> infos;
+        std::mutex info_mutex;
 
         Error();
 

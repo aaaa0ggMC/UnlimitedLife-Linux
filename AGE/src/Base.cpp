@@ -5,7 +5,7 @@
 
 using namespace age;
 
-std::pmr::unsynchronized_pool_resource Error::pool;
+std::pmr::synchronized_pool_resource Error::pool;
 std::pmr::polymorphic_allocator<char> Error::alloc (&pool);
 Error Error::def;
 
@@ -34,9 +34,15 @@ void Error::setTrigger(TriggerFunc fn){
 }
 
 void Error::pushMessage(const ErrorInfo& info){
-    infos.emplace_back(info.code,std::pmr::string(info.message,alloc),info.level);
-    if(limit > 0 && infos.size() >= limit)infos.erase(infos.begin());
-    if(trigger)trigger(infos[infos.size()-1]);
+    // 这里面的pmr用的是全局的内存池
+    static thread_local ErrorInfopp pp;
+    {
+        std::lock_guard<std::mutex> lock(info_mutex);
+        infos.emplace_back(info.code,std::pmr::string(info.message,alloc),info.level);
+        if(limit > 0 && infos.size() >= limit)infos.pop_front();
+        pp = infos[infos.size()-1];
+    }
+    if(trigger)trigger(pp);
 }
 
 static void fast_replace_all(std::string& s, const std::string& from, const std::string& to) {

@@ -9,6 +9,7 @@ TextureManager::~TextureManager(){
         if(tex->texture_id){
             glDeleteTextures(1,&(tex->texture_id));
         }
+        delete tex;
     }
     for(auto& [_,info] : texturesInfo){
         if(!info.uploaded && info.bits){

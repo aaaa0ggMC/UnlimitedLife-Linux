@@ -35,12 +35,6 @@ void MainApplication::run(){
         }
         //// Poll Events ////
         win.pollEvents();
-
-        //// ImGUI UI event ////
-        if(imgui_ui_injector && (im_trigger.test(true) || !state.im_cached)){
-            imgui_ui_injector(*this);
-        }
-
         //// Input System && Update Worlds ////
         input.update();
         if(input.checkTick()){
@@ -51,10 +45,16 @@ void MainApplication::run(){
         if(world_trigger.test()){
             world_update(world_trigger.duration);
         }
-
+        
+        //// ImGUI UI event ////
+        if(imgui_ui_injector && (im_trigger.test(true) || !state.im_cached)){
+            imgui_ui_injector(*this);
+        }
         draw();
         if(imgui_draw_injector)imgui_draw_injector(*this);
-        win.display();
+        win.display([this]{
+            lg << "You know im waiting..." << fls;
+        });
     }
 }
 

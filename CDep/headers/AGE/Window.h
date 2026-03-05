@@ -215,6 +215,12 @@ namespace age{
             fpsLimiter.wait();
         }
 
+        template<class T>
+        inline void display(T && fwd){
+            glfwSwapBuffers(window);
+            fpsLimiter.wait(std::forward<T>(fwd));
+        }
+
         inline GLFWwindow* getSystemHandle(){
             return window;
         }
