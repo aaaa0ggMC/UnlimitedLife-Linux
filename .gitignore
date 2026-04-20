@@ -1,26 +1,9 @@
 # Cmake
-CBuild/Windows/imgui.ini
-CMakeFiles/
-CBuild_CACHE/
-CBuild_CACHE_WIN/
-CBuild/agetest
-CBuild/alibtest0
-CBuild/alib4test
-CBuild/hello.log
-CBuild/log
-CBuild/logs/
-CBuild/simp-biliplayer
-CBuild/UnlimitedLife
-CBuild/agetest
-CBuild/ULCore
-CBuild/Windows/test_data
-@externals
 CDep/headers/imgui
 CDep/headers/miniaudio.h
 */Testing
 .cache
 build
-CBuild/*
 
 Pacman/
 !Pacman/PKGBUILD
