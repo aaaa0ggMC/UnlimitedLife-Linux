@@ -1,5 +1,6 @@
 #include "app.h"
 #include "app_comp.h"
+#include "renderer.h"
 
 void MainApplication::draw(){
     Window & win = *m_window;
@@ -27,36 +28,12 @@ void MainApplication::draw_pass_one(){
     glm::vec4 pos = cam.viewer().buildViewMatrix(cam.transform()) * glm::vec4(e_light.transform().m_position,1.0);
     lb.position.safe_upload(glm::vec3(pos));
 
-    if(state.show_cube){
-        glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4((*cube.get<LightMVP>())->build_light_mvp(lc));
-        win.draw<Model>(models["cube"]);
-    }
-
-    if(state.show_pyramid){
-        vaos[1].bind();
-        glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4((*pyramid.get<LightMVP>())->build_light_mvp(lc));
-        win.drawArray(PrimitiveType::Triangles,0,36);
-    }
-
-    if(state.show_model){
-        glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4((*invPar.get<LightMVP>())->build_light_mvp(lc));
-        win.draw<Model>(*current_model);
-    }
-
-    if(state.show_model){
-        glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4((*root.get<LightMVP>())->build_light_mvp(lc));
-        win.draw<Model>(*current_model);
-    }
-
-    if(state.show_platform){
-        glFrontFace(GL_CCW);
-        shadowMVP.uploadmat4((*plane.get<LightMVP>())->build_light_mvp(lc));
-        win.draw<Model>(m_plane);
-    }
+    RenderSystem::render(RenderSystem::Shadow{
+        .win = win,
+        .em = em,
+        .shadowMVP = shadowMVP,
+        .light_component = lc,
+    });
 
     shadowMap.unbind();
 }
@@ -89,8 +66,6 @@ void MainApplication::draw_pass_two(){
     m_sampler.bind(GL_TEXTURE0);
     shadowSampler.bind(GL_TEXTURE1);
     shadowTex->bind(GL_TEXTURE1);
-    // 绑定首选纹理
-    (*app.textures.get(cfg.texture_sids[state.current_texture_id]))->bind(GL_TEXTURE0);
     // GL statuses //
     if(state.gl_depth){
         glEnable(GL_DEPTH_TEST);
@@ -102,68 +77,18 @@ void MainApplication::draw_pass_two(){
     glPolygonMode(cfg.gl_polygon_face_enums[state.gl_polygon_face_index],cfg.gl_polygon_mode_enums[state.gl_polygon_mode_index]);
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(2.0f,4.0f);
-
     projectionMatrix.uploadmat4(cam.projector().buildProjectionMatrix());
-    mat_gold.upload(mb);
-    /// Cube
-    if(state.show_cube){
-        glFrontFace(GL_CCW);
-        // vaos[0].bind(); 绘制model不需要bind vao
-        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * cube.transform().buildModelMatrix();
-        invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
-        mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4((*cube.get<LightMVP>())->build_light_mvp(lc));
 
-        win.draw<Model>(models["cube"]);
-        // win.drawArray(PrimitiveType::Triangles,0,36,1);
-    }
-
-    /// Pyramid
-    if(state.show_pyramid){
-        vaos[1].bind();
-        glFrontFace(GL_CCW);
-        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * pyramid.transform().buildModelMatrix();
-        invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
-        mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4((*pyramid.get<LightMVP>())->build_light_mvp(lc));
-
-        win.drawArray(PrimitiveType::Triangles,0,36);
-    }
-
-    /// Current Model
-    if(state.show_model){
-        glFrontFace(GL_CCW);
-        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * invPar.transform().buildModelMatrix();
-        invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
-        mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4((*invPar.get<LightMVP>())->build_light_mvp(lc));
-
-        win.draw<Model>(*current_model);
-    }
-
-    /// With Root
-    if(state.show_model){
-        glFrontFace(GL_CCW);
-        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * root.transform().buildModelMatrix();
-        invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
-        mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4((*root.get<LightMVP>())->build_light_mvp(lc));
-
-        win.draw<Model>(*current_model);
-    }
-
-    /// Plane
-    (*app.textures.get("wall"))->bind(GL_TEXTURE0);
-    mat_jade.upload(mb);
-    if(state.show_platform){
-        glFrontFace(GL_CCW);
-        auto lm = cam.viewer().buildViewMatrix(cam.transform()) * plane.transform().buildModelMatrix();
-        invMV.uploadmat4(glm::transpose(glm::inverse(lm)));
-        mv_matrix.uploadmat4(lm);
-        shadowMVP2.uploadmat4((*plane.get<LightMVP>())->build_light_mvp(lc));
-
-        win.draw<Model>(m_plane);
-    }
+    RenderSystem::render(RenderSystem::Object{
+        .win = win,
+        .em = em,
+        .light_component = lc,
+        .invMV = invMV,
+        .mv_matrix = mv_matrix,
+        .shadowMVP2 = shadowMVP2,
+        .bindings = mb,
+        .camera_viewer_matrix = cam.viewer().buildViewMatrix(cam.transform()),
+    });
 
     m_sampler.unbind(GL_TEXTURE0);
     shadowSampler.unbind(GL_TEXTURE1);

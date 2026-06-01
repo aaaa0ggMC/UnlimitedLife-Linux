@@ -79,7 +79,7 @@ Shader ShaderManager::create(const CreateShaderInfo & info){
         }else created = true;
     }
     if(!errored && info.compute.compare("")){
-        if(vid || gid || cid){
+        if(vid || fid || gid){
             err.pushMessage({AGEE_CONFLICT_SHADER,"You have already passed vertex/fragment/geometry shader to the program,which conflicts with compute shader!"});
         }else{
             const char * buf[1] = {info.compute.c_str()};

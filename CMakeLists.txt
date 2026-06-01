@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
-add_compile_options(-fno-omit-frame-pointer -g)
+add_definitions(-DGLM_ENABLE_EXPERIMENTAL -DALIB5_ENABLE_REFLECTION)
+add_compile_options(-fno-omit-frame-pointer -g -freflection)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_options("-fdebug-prefix-map=${CMAKE_SOURCE_DIR}=UnlimitedLife-Linux")

@@ -104,6 +104,8 @@ bool TextureManager::destroy(std::string_view sid){
         return false;
     }
     glDeleteTextures(1,&(tex->second->texture_id));
+    delete tex->second;
+    
     textures.erase(tex);
     auto tinfo =  texturesInfo.find(sid);
     if(tinfo != texturesInfo.end())texturesInfo.erase(tinfo);

@@ -40,15 +40,4 @@ struct LightMVP : public ISlotComponent,public age::DirtyMarker{
     }
 };
 
-struct Render{
-    using Dependency = ComponentStack<comps::Transform>;
-    age::Model * model {nullptr};
-
-};
-
-struct LightSystem{
-
-
-};
-
 #endif

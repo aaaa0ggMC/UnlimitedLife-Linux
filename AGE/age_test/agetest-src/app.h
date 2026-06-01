@@ -100,7 +100,6 @@ struct MainApplication{
     
     //// Framebuffer ////
     Framebuffer shadowMap;
-
     //// Callback ////
     Framebuffer shadowMapCallback;
     Texture * shadowTexCallback;

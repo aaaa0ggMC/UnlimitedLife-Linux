@@ -1,4 +1,6 @@
 #include "imgui.h"
+#include "renderer.h"
+#include "renderer.h"
 
 void ImGUIInjector::info(){
     ImGui::Text("信息");
@@ -8,73 +10,96 @@ void ImGUIInjector::info(){
     ImGui::Checkbox("使用光源相机", &s.use_light_cam);
 }
 
-void ImGUIInjector::inspector(){
-    static std::vector<Entity> valid_entities;
-    static ComponentPool<Transform>* pool_transform = nullptr;
-    static ComponentPool<Tag>* pool_tag = nullptr;
-    static ComponentPool<Parent>* pool_parents = nullptr;
-    static ComponentPool<Projector>* pool_projs = nullptr;
-    
-    valid_entities.clear(); 
-    app.em.get_entities_storage().available_bits.for_each_skip_1_bits(
-        [this](size_t pos){
-            valid_entities.push_back(app.em.get_entities_storage()[pos]);
-        },app.em.get_entities_storage().size()
-    );
+// 程序使用imgui的缓存
+struct ImGuiCache{
+    int texture_select_index = 0;
+    int model_select_index = 0;
+};
 
-    ImGui::Text("检查器");
-    
-    std::string a;
-    for(size_t i = 0;i < valid_entities.size();++i){
-        a = "Entity";
-        const char* entity_tag = nullptr;
-        if(pool_tag){
-            auto it = pool_tag->mapper.find(valid_entities[i].id);
-            if(it != pool_tag->mapper.end()){
-                entity_tag = pool_tag->data[it->second].tag.c_str();
-            }
-        }else pool_tag = app.em.get_component_pool<Tag>();
-        if(entity_tag){
-            a += " @" + std::string(entity_tag);
+void ImGUIInjector::inspector(){
+    static std::vector<const char *> texture_names;
+    static std::vector<const char *> model_names;
+
+    if(app.textures.size() != texture_names.size()){
+        texture_names.clear();
+
+        for(auto & [k,_] : app.textures){
+            texture_names.push_back(k.c_str());
         }
-        a += " #" + std::to_string(valid_entities[i].id);
+    }
+
+    if(app.models.size() != model_names.size()){
+        model_names.clear();
+
+        for(auto & [k,_] : app.models){
+            model_names.push_back(k.c_str());
+        }
+    }
+
+
+    std::string a;
+    ImGui::Text("检查器");
+    bool unlocked = true;
+
+    auto check_pool = [&]<class T,class Fn>(const Entity & entity,Fn && fn) 
+        requires std::invocable<Fn, T&>
+    {
+        static ComponentPool<T>* pool = nullptr;
+
+        if(pool){
+            auto it = pool->mapper.find(entity.id);
+            if(it != pool->mapper.end()) fn(pool->data[it->second]);
+        }else if(unlocked) pool = app.em.get_component_pool<T>();
+    };
+     
+    auto get_cache = [this](Entity entity) -> ImGuiCache&{
+        return app.em.add_component<ImGuiCache>(entity).get();
+    };
+
+    app.em.get_entities_storage().for_each(
+    [&](Entity & entity){
+        a = "Entity";
+
+        check_pool.template operator()<Tag>(entity,
+            [&](Tag & tag){
+                a += " @";
+                a += tag.tag.c_str();
+            }
+        );
+
+        a += " #" + std::to_string(entity.id);
         
         if(ImGui::CollapsingHeader(a.c_str())){
-            ImGui::PushID(valid_entities[i].id);
-            ImGui::Text("ID: %lu",valid_entities[i].id);
-            ImGui::Text("版本号: %u",valid_entities[i].version);
+            ImGui::PushID(entity.id);
+            ImGui::Text("ID: %lu",entity.id);
+            ImGui::Text("版本号: %u",entity.version);
             ImGui::Indent();
+            
             /// Transform
-            if(pool_transform){
-                auto it = pool_transform->mapper.find(valid_entities[i].id);
-                if(it != pool_transform->mapper.end()){
-                    comps::Transform & trans = pool_transform->data[it->second];
+            check_pool.template operator()<Transform>(entity,
+                [&](Transform & transform){
                     if(ImGui::CollapsingHeader("Transform",ImGuiTreeNodeFlags_DefaultOpen)){
-                        ImGui::DragFloat3("位置",glm::value_ptr(trans.m_position),0.1);
-                        ImGui::DragFloat4("旋转",glm::value_ptr(trans.m_rotation.get_mutable_unnorm()),0.01);
-                        ImGui::DragFloat3("缩放",glm::value_ptr(trans.m_scale),0.01);
-                        ImGui::DragFloat3("速度",glm::value_ptr(trans.velocity),0.1);
-                    } 
+                        ImGui::DragFloat3("位置",glm::value_ptr(transform.m_position),0.1);
+                        ImGui::DragFloat4("旋转",glm::value_ptr(transform.m_rotation.get_mutable_unnorm()),0.01);
+                        ImGui::DragFloat3("缩放",glm::value_ptr(transform.m_scale),0.01);
+                        ImGui::DragFloat3("速度",glm::value_ptr(transform.velocity),0.1);
+                    }
                 }
-            }else pool_transform = app.em.get_component_pool<Transform>();
+            );
             
             /// Parents
-            if(pool_parents){
-                auto it = pool_parents->mapper.find(valid_entities[i].id);
-                if(it != pool_parents->mapper.end()){
-                    comps::Parent & parent = pool_parents->data[it->second];
+            check_pool.template operator()<Parent>(entity,
+                [&](Parent & parent){
                     if(ImGui::CollapsingHeader("Parent",ImGuiTreeNodeFlags_DefaultOpen)){
                         ImGui::Text("父类 %lu %u",parent.parent.id,parent.parent.version);
                     } 
                 }
-            }else pool_parents = app.em.get_component_pool<Parent>();
-            
+            );
+
             /// Projector
-            if(pool_projs){
-                auto it = pool_projs->mapper.find(valid_entities[i].id);
-                if(it != pool_projs->mapper.end()){
-                    comps::Projector & proj = pool_projs->data[it->second];
-                    if(ImGui::CollapsingHeader("Projector",ImGuiTreeNodeFlags_DefaultOpen)){
+            check_pool.template operator()<Projector>(entity,
+                [&](Projector & proj){
+                     if(ImGui::CollapsingHeader("Projector",ImGuiTreeNodeFlags_DefaultOpen)){
                         bool changed = false;
 
                         changed |= ImGui::DragFloat("FOV",&proj.fovRad,0.01);
@@ -86,12 +111,51 @@ void ImGUIInjector::inspector(){
                         }
                     }
                 }
-            }else pool_projs = app.em.get_component_pool<Projector>();
+            );
+
+            /// Object Render
+            check_pool.template operator()<my_comps::ObjectRender>(entity,
+                [&](my_comps::ObjectRender & render){
+                    if(ImGui::CollapsingHeader("Render",ImGuiTreeNodeFlags_DefaultOpen)){
+                        ImGui::Checkbox("显示", &render.visible);
+
+                        ImGuiCache & cache = get_cache(entity);
+                        /// 贴图选择
+                        if(texture_names.size() && ImGui::ListBox("贴图", &cache.texture_select_index, texture_names.data(),texture_names.size())){
+                            auto it = app.textures.find(texture_names[cache.texture_select_index]);
+                            if(it != app.textures.end()){
+                                render.texture = it->second;
+                            }
+                        }
+
+                        /// 渲染模式
+                        bool is_draw_array = render.mode == render.DrawArray;
+                        if(ImGui::Checkbox("Draw Array Mode", &is_draw_array)){
+                            render.mode = is_draw_array ? render.DrawArray : render.DrawModel;
+                        }
+
+                        if(render.mode == render.DrawModel){
+                            if(model_names.size() && ImGui::ListBox("模型",&cache.model_select_index,model_names.data(),model_names.size())){
+                                auto it = app.models.find(model_names[cache.model_select_index]);
+                                if(it != app.models.end()){
+                                    render.model.model = &(it->second);
+                                }
+                            }
+                        }else if(render.mode == render.DrawArray){
+                            
+                        }
+                    }
+                }
+            );
+
 
             ImGui::Unindent();
             ImGui::PopID();
+
+            /// 单次只查询一次池子，多查询没必要
+            unlocked = false;
         }
-    }
+    });
 }
 
 void ImGUIInjector::sampler(){
@@ -130,14 +194,6 @@ void ImGUIInjector::shadow(){
     ImGui::Image((ImTextureID)(app.shadowTexCallback->getId()),ImVec2(256,256));
 }
 
-void ImGUIInjector::texture(){
-    ImGui::Text("纹理");
-    ImGui::ListBox("默认绑定的",&s.current_texture_id,app.cfg.texture_sids.data(),app.cfg.texture_sids.size());
-    ImGui::DragInt("预览",&s.texture_preview_size,0.5F,0,1024);
-    auto tex = *app.app.textures.get(app.cfg.texture_sids[s.current_texture_id]);
-    ImGui::Image((ImTextureID)(intptr_t)tex->getId(), ImVec2(s.texture_preview_size,s.texture_preview_size * tex->getTextureInfo().height / (float)tex->getTextureInfo().width));
-}
-
 void ImGUIInjector::model(){
     static std::vector<const char *> buf;
     ImGui::Text("模型");
@@ -146,12 +202,15 @@ void ImGUIInjector::model(){
     for(auto&[k,v] : app.models){
         buf.push_back(k.data());
     }
+
     ImGui::ListBox("默认加载的模型",&s.current_model_index,buf.data(),buf.size());
     if(ImGui::DragInt("生成精度",&s.precision,0.1,1,64)){
         app.load_dynamic_models();
     }
 
-    if(buf.size())app.current_model = &app.models[buf[s.current_model_index]];
+    if(buf.size()){
+        app.current_model = &app.models[buf[s.current_model_index]];
+    }
 }
 
 void ImGUIInjector::gl(){
@@ -164,14 +223,6 @@ void ImGUIInjector::gl(){
     ImGui::Checkbox("深度测试",&s.gl_depth);
     ImGui::ListBox("深度测试函数",&s.gl_depthfunc_index,app.cfg.gl_depthfunc_desc.data(),app.cfg.gl_depthfunc_desc.size(),4);
     ImGui::DragFloat("点大小",&s.point_size,0.1F,0.1F,64.0F);
-}
-
-void ImGUIInjector::render(){
-    ImGui::Text("渲染设置");
-    ImGui::Checkbox("立方体",&s.show_cube);
-    ImGui::Checkbox("金字塔",&s.show_pyramid);
-    ImGui::Checkbox("模型",&s.show_model);
-    ImGui::Checkbox("地板",&s.show_platform);
 }
 
 void ImGUIInjector::music(){

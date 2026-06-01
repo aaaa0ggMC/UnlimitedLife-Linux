@@ -1,7 +1,9 @@
 #include "app.h"
 #include "app_comp.h"
+#include "renderer.h"
 #include <AGE/ModelLoader/PrefabGenerator.h>
 #include <AGE/ModelLoader/Loader.h>
+#include <alib5/adata.h>
 
 constexpr int shadowbuffer_w = 1024;
 constexpr int shadowbuffer_h = 1024;
@@ -24,16 +26,16 @@ void MainApplication::setup(){
     load_textures();
     set_control_callbacks();
     resolve_bindings();
-    init_world_objects();
     load_dynamic_models();
     load_static_models();
     load_materials();
     setup_framebuffers();
+
+    init_world_objects();
     load_lights();
     load_uniforms();
     load_sounds();
 }
-
 
 void MainApplication::setup_framebuffers(){
     auto[fb,texture,sampler] = 
@@ -171,6 +173,65 @@ void MainApplication::init_world_objects(){
     pyramid.add<LightMVP>();
     plane.add<LightMVP>();
     root.add<LightMVP>();
+
+    /// 添加渲染器
+    cube.add<my_comps::ObjectRender>()->apply({
+        .mode = my_comps::ObjectRender::DrawModel,
+        .model = {
+            .model = &(models["cube"]),
+        },
+        .front_face = GL_CCW,
+        .visible = true,
+        .material = &mat_gold,
+        .texture = *app.textures.get("wall"),
+    });
+
+    pyramid.add<my_comps::ObjectRender>()->apply({
+        .mode = my_comps::ObjectRender::DrawArray,
+        .array = {
+            .target = vaos[1],
+            .primitive_type = PrimitiveType::Triangles,
+            .start_index = 0,
+            .count = 36
+        },
+        .front_face = GL_CCW,
+        .visible = true,
+        .material = &mat_gold,
+        .texture = *app.textures.get("wall"),
+    });
+
+    invPar.add<my_comps::ObjectRender>()->apply({
+        .mode = my_comps::ObjectRender::DrawModel,
+        .model = {
+            .model = &(models["cube"]),
+        },
+        .front_face = GL_CCW,
+        .visible = true,
+        .material = &mat_gold,
+        .texture = *app.textures.get("wall"),
+    });
+
+    root.add<my_comps::ObjectRender>()->apply({
+        .mode = my_comps::ObjectRender::DrawModel,
+        .model = {
+            .model = &(models["cube"]),
+        },
+        .front_face = GL_CCW,
+        .visible = true,
+        .material = &mat_gold,
+        .texture = *app.textures.get("wall"),
+    });
+
+    plane.add<my_comps::ObjectRender>()->apply({
+        .mode = my_comps::ObjectRender::DrawModel,
+        .model = {
+            .model = &(m_plane),
+        },
+        .front_face = GL_CCW,
+        .visible = true,
+        .material = &mat_jade,
+        .texture = *app.textures.get("wall"),
+    });
 
     /// Parents
     pyramid.add<comps::Parent>(invPar.getEntity());

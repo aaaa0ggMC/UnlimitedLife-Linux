@@ -16,14 +16,17 @@ using namespace age::world;
 using namespace alib5::ecs;
 using enum LogLevel;
 
+
 struct MainApplicationConfig{
     //// Logger ////
     LoggerConfig logger;
     LogFactoryConfig logfactory;
     lot::ConsoleConfig mod_console;
     std::string file_path {"logs/cube.log"};
+
     //// Input ////
     float framerate { 120 };
+
     //// Window & Graphics ////
     CreateWindowInfo ci;
     bool gl_err_callback { true };

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 帧缓冲区的创建
  * @version 0.1
- * @date 2025/12/02
+ * @date 2026/06/01
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -86,23 +86,23 @@ namespace age{
 
     public:
         inline Framebuffer(){} 
-        inline bool valid(){
-            return framebuffer_id == 0;
+        inline bool valid() const {
+            return framebuffer_id != 0;
         }
 
-        std::string_view get_sid(){
+        std::string_view get_sid() const {
             return sid;
         }
 
-        std::vector<FBOAttachment> get_colors(){
+        std::vector<FBOAttachment> get_colors() const {
             return m_colors;
         }
 
-        FBOAttachment get_depth(){
+        FBOAttachment get_depth() const {
             return m_depth;
         }
 
-        FBOAttachment get_stencil(){
+        FBOAttachment get_stencil() const {
             return m_stencil;
         }
 
