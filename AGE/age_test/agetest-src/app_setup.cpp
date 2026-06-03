@@ -17,7 +17,7 @@ MainApplication::~MainApplication(){
 void MainApplication::setup(){
     setup_logger();
     setup_window();
-    if(cfg.gl_err_callback){
+    if(cfg.gl.err_callback){
         setup_err_callback();
     }
     setup_shader();
@@ -175,6 +175,8 @@ void MainApplication::init_world_objects(){
     root.add<LightMVP>();
 
     /// 添加渲染器
+    auto op_tex = app.textures.get("wall");
+    Texture * tex = op_tex ? *op_tex : nullptr;
     cube.add<my_comps::ObjectRender>()->apply({
         .mode = my_comps::ObjectRender::DrawModel,
         .model = {
@@ -183,7 +185,7 @@ void MainApplication::init_world_objects(){
         .front_face = GL_CCW,
         .visible = true,
         .material = &mat_gold,
-        .texture = *app.textures.get("wall"),
+        .texture = tex,
     });
 
     pyramid.add<my_comps::ObjectRender>()->apply({
@@ -197,7 +199,7 @@ void MainApplication::init_world_objects(){
         .front_face = GL_CCW,
         .visible = true,
         .material = &mat_gold,
-        .texture = *app.textures.get("wall"),
+        .texture = tex,
     });
 
     invPar.add<my_comps::ObjectRender>()->apply({
@@ -208,7 +210,7 @@ void MainApplication::init_world_objects(){
         .front_face = GL_CCW,
         .visible = true,
         .material = &mat_gold,
-        .texture = *app.textures.get("wall"),
+        .texture = tex,
     });
 
     root.add<my_comps::ObjectRender>()->apply({
@@ -219,7 +221,7 @@ void MainApplication::init_world_objects(){
         .front_face = GL_CCW,
         .visible = true,
         .material = &mat_gold,
-        .texture = *app.textures.get("wall"),
+        .texture = tex,
     });
 
     plane.add<my_comps::ObjectRender>()->apply({
@@ -230,7 +232,7 @@ void MainApplication::init_world_objects(){
         .front_face = GL_CCW,
         .visible = true,
         .material = &mat_jade,
-        .texture = *app.textures.get("wall"),
+        .texture = tex,
     });
 
     /// Parents
@@ -282,7 +284,7 @@ void MainApplication::set_control_callbacks(){
         float fac_x = w / (float)ow;
         float fac_y = h / (float)oh;
         
-        CreateWindowInfo::KeepRatio(ow,oh,this->cfg.ci.width,this->cfg.ci.height);
+        CreateWindowInfo::KeepRatio(ow,oh,this->cfg.i.ci.width,this->cfg.i.ci.height);
         old_x = ow;
         old_y = oh;
 
@@ -313,23 +315,23 @@ void MainApplication::load_textures(){
     ci.genMipmap = true;
     
     size_t i = 0;
-    for(;i < cfg.texture_sids.size();++i){
-        if(i >= cfg.texture_paths.size()){
-            lg(Warn) << "Skip " << cfg.texture_sids.size() - i << " textures for the lack of texture paths!" << endlog;
+    for(;i < cfg.i.texture_sids.size();++i){
+        if(i >= cfg.i.texture_paths.size()){
+            lg(Warn) << "Skip " << cfg.i.texture_sids.size() - i << " textures for the lack of texture paths!" << endlog;
             break;
         }
-        ci.file.path = cfg.texture_paths[i];
-        ci.sid = cfg.texture_sids[i];
+        ci.file.path = cfg.i.texture_paths[i];
+        ci.sid = cfg.i.texture_sids[i];
         auto texture = app.textures.create(ci);
         if(texture){
-            textures.emplace(cfg.texture_sids[i],*texture);
+            textures.emplace(cfg.i.texture_sids[i],*texture);
             lg(Info) << "Successfully loaded texture with sid[" << ci.sid << "] file_path[" << ci.file.path << "]!" << endlog;
         }else{
             lg(LogLevel::Error) << "Failed to load texture with sid[" << ci.sid << "] file_path[" << ci.file.path << "]!" << endlog;
         }
     }
-    if(i > cfg.texture_sids.size()){
-        lg(Warn) << "Skip " << cfg.texture_sids.size() - i << " textures for the lack of texture sids!" << endlog;
+    if(i > cfg.i.texture_sids.size()){
+        lg(Warn) << "Skip " << cfg.i.texture_sids.size() - i << " textures for the lack of texture sids!" << endlog;
     }
     lg(Info) << "LoadTextures:OK" << endlog;
 }
@@ -344,11 +346,11 @@ void MainApplication::setup_sampler(){
 }
 
 void MainApplication::setup_buffers(){
-    app.createVAOs(cfg.vao_count);
+    app.createVAOs(cfg.gl.vao_count);
     app.checkOpenGLError();
     lg(Info) << "CreateVAOs:OK" << endlog;
 
-    app.createVBOs(cfg.vbo_count);
+    app.createVBOs(cfg.gl.vbo_count);
     app.checkOpenGLError();
     lg(Info) << "CreateVBOs:OK" << endlog;
 
@@ -360,9 +362,9 @@ void MainApplication::setup_buffers(){
 }
 
 void MainApplication::setup_shader(){
-    shader = app.shaders.fromFile("main",cfg.main_vert,cfg.main_frag);
-    shadowShader = app.shaders.fromFile("shadow",cfg.sh_vert,cfg.sh_frag);
-    callbackShader = app.shaders.fromFile("shadow_callback",cfg.shc_vert,cfg.shc_frag);
+    shader = app.shaders.fromFile("main",cfg.shader.main_vert,cfg.shader.main_frag);
+    shadowShader = app.shaders.fromFile("shadow",cfg.shader.sh_vert,cfg.shader.sh_frag);
+    callbackShader = app.shaders.fromFile("shadow_callback",cfg.shader.shc_vert,cfg.shader.shc_frag);
     lg(Info) << "CreateShader:OK" << endlog;
 }
 
@@ -373,13 +375,13 @@ void MainApplication::setup_err_callback(){
 }
 
 void MainApplication::setup_logger(){
-    logger.append_mod<lot::Console>("console",0,cfg.mod_console);
-    logger.append_mod<lot::File>("file0",cfg.file_path);
+    logger.append_mod<lot::Console>("console",0,cfg.i.mod_console);
+    logger.append_mod<lot::File>("file0",cfg.logger.file_path);
     lg(Info) << "SetupLogger:OK" << endlog;
 }
 
 void MainApplication::setup_window(){
-    auto t = app.windows.create(cfg.ci);
+    auto t = app.windows.create(cfg.i.ci);
     if(!t){
         lg(Fatal) << "Failed to create window!" << endlog;
         std::exit(-1);

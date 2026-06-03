@@ -22,6 +22,7 @@ void MainApplication::draw_pass_one(){
     glDrawBuffer(GL_NONE);
     glClear(GL_DEPTH_BUFFER_BIT);
     glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
@@ -36,6 +37,8 @@ void MainApplication::draw_pass_one(){
     });
 
     shadowMap.unbind();
+
+    glCullFace(GL_BACK);
 }
 
 void MainApplication::draw_callback(){
@@ -69,12 +72,12 @@ void MainApplication::draw_pass_two(){
     // GL statuses //
     if(state.gl_depth){
         glEnable(GL_DEPTH_TEST);
-        glDepthFunc(cfg.gl_depthfunc_enums[state.gl_depthfunc_index]);
+        glDepthFunc(gl_depthfunc_enums[state.gl_depthfunc_index]);
     }else glDisable(GL_DEPTH_TEST);
     if(state.gl_cull)glEnable(GL_CULL_FACE);
     else glDisable(GL_CULL_FACE);
     glPointSize(state.point_size);
-    glPolygonMode(cfg.gl_polygon_face_enums[state.gl_polygon_face_index],cfg.gl_polygon_mode_enums[state.gl_polygon_mode_index]);
+    glPolygonMode(gl_polygon_face_enums[state.gl_polygon_face_index],gl_polygon_mode_enums[state.gl_polygon_mode_index]);
     glEnable(GL_POLYGON_OFFSET_FILL);
     glPolygonOffset(2.0f,4.0f);
     projectionMatrix.uploadmat4(cam.projector().buildProjectionMatrix());

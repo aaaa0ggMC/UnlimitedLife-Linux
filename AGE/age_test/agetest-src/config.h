@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include <alib5/alogger.h>
+#include <alib5/adata.h>
 #include <alib5/aecs.h>
 
 #include <AGE/Input.h>
@@ -16,103 +17,140 @@ using namespace age::world;
 using namespace alib5::ecs;
 using enum LogLevel;
 
+namespace detail_data{
+    constexpr GLenum gl_depthfunc_enums[] {
+        GL_LEQUAL, GL_LESS, GL_GREATER, GL_EQUAL,
+        GL_GEQUAL, GL_NOTEQUAL, GL_ALWAYS, GL_NEVER
+    };
+    constexpr const char* gl_depthfunc_desc[] = {
+        "LEqual (≤)", "Less (<)", "Greater (>)", "Equal (=)", 
+        "GEqual (≥)", "NotEqual (!=)", "Always", "Never"
+    };
+    constexpr GLenum gl_polygon_face_enums[] = {GL_FRONT,GL_BACK,GL_FRONT_AND_BACK};
+    constexpr const char* gl_polygon_face_desc[] = {"Front","Back","Front And Back"};
+    constexpr GLenum gl_polygon_mode_enums[] = {GL_FILL,GL_LINE,GL_POINT};
+    constexpr const char* gl_polygon_mode_desc[] = {"Fill","Line","Point"};
+}
+constexpr std::span<const GLenum> gl_depthfunc_enums (detail_data::gl_depthfunc_enums);
+constexpr std::span<const GLenum> gl_polygon_face_enums (detail_data::gl_polygon_face_enums);
+constexpr std::span<const GLenum> gl_polygon_mode_enums (detail_data::gl_polygon_mode_enums);
+constexpr std::span<const char* const> gl_depthfunc_desc (detail_data::gl_depthfunc_desc);
+constexpr std::span<const char* const> gl_polygon_face_desc (detail_data::gl_polygon_face_desc);
+constexpr std::span<const char* const> gl_polygon_mode_desc (detail_data::gl_polygon_mode_desc);
 
-struct MainApplicationConfig{
-    //// Logger ////
-    LoggerConfig logger;
-    LogFactoryConfig logfactory;
-    lot::ConsoleConfig mod_console;
-    std::string file_path {"logs/cube.log"};
+struct MainApplicationConfig {
+    /// Subs
+    struct Logger{
+        int consumer_count = 1;
+        /// 文件日志写入位置
+        std::string file_path = "logs/cube.log";
+    };
+    struct Window{
+        std::string title = "TestAGE - 测试";
+        float framerate = 120;
+    };
+    struct GL {
+        bool err_callback = true;
 
-    //// Input ////
-    float framerate { 120 };
+        [[=alib5::attr::rename<"reserve_vaos">()]]
+        size_t vao_count = 32;
+        
+        [[=alib5::attr::rename<"reserve_vbos">()]]
+        size_t vbo_count = 16;
+    };
+    struct UI {
+        float fps_count_elapse_ms = 500;
+        float refresh_rate = 100;
+    };
+    struct World{
+        float update_elapse_ms = 200;
+    };
+    struct Shader{
+        std::string main_vert = "test_data/cube.vert";
+        std::string main_frag = "test_data/cube.frag";
+        std::string sh_vert = "test_data/shadow.vert";
+        std::string sh_frag = "test_data/shadow.frag";
+        std::string shc_vert = "test_data/shadow_cl.vert";
+        std::string shc_frag = "test_data/shadow_cl.frag";
+    };
+    struct FileInfo{
+        std::string sid;
+        std::string path;
+    };
+    struct Camera{
+        struct V2{
+            float x;
+            float y;
+        };
 
-    //// Window & Graphics ////
-    CreateWindowInfo ci;
-    bool gl_err_callback { true };
-    size_t vao_count {32};
-    size_t vbo_count {16};
-    float fpsCountTimeMs { 500 };
+        V2 rotation {1,1};
+        float speed {3};
+    };
+    struct Internal{
+        /// 这个是用于给imgui选择而生成的列表
+        std::vector<const char *> texture_sids;
+        std::vector<const char *> texture_paths;
+        /// 创建info
+        CreateWindowInfo ci;
+        /// 日志配置
+        LoggerConfig logger;
+        LogFactoryConfig logfactory;
+        lot::ConsoleConfig mod_console;
+    };
 
-    //// World ////
-    float world_update_frame_rate { 200 };
 
-    //// Shaders ////
-    std::string main_vert {"test_data/cube.vert"};
-    std::string main_frag {"test_data/cube.frag"};
-    std::string sh_vert {"test_data/shadow.vert"};
-    std::string sh_frag {"test_data/shadow.frag"};
-    std::string shc_vert {"test_data/shadow_cl.vert"};
-    std::string shc_frag {"test_data/shadow_cl.frag"};
+    /// 日志系统配置
+    Logger logger { };
+    /// GL设置
+    GL gl;
+    /// UI设置
+    UI ui;
+    /// 世界设置
+    World world;
+    /// 窗口设置
+    Window window;
+    /// 着色器
+    Shader shader;
+    /// 贴图
+    std::vector<FileInfo> textures {
+        {"wall","./test_data/imgs/wall.jpg"},
+        {"ice","./test_data/imgs/ice.png"}
+    };
+    /// 模型
+    std::vector<FileInfo> models {
+        {"main.obj","./test_data/main.model"}
+    };
+    /// 音频文件地址
+    std::string snd_file { "./test_data/test_mp3.mp3" };
+    /// 相机配置
+    Camera camera;
 
-    //// Textures ////
-    std::vector<const char *> texture_sids;
-    std::vector<const char *> texture_paths;
+    [[=alib5::attr::skip()]]
+    Internal i;
 
-    //// Models ////
-    std::unordered_map<std::string,std::string> models;
-
-    //// Sounds ////
-    std::string snd_file {"./test_data/test_mp3.mp3"};
-
-    //// Injector ////
-    float imgui_refresh_rate {100};
-    
-    //// Camera ////
-    glm::vec2 cam_rot {1,1};
-    float cam_speed {3};
-
-    //// GL ////
-    /// Depth Data ///
-    std::vector<GLenum> gl_depthfunc_enums;
-    std::vector<const char*> gl_depthfunc_desc;
-    /// Polygon Mode ///
-    std::vector<GLenum> gl_polygon_face_enums;
-    std::vector<const char*> gl_polygon_face_desc;
-    std::vector<GLenum> gl_polygon_mode_enums;
-    std::vector<const char*> gl_polygon_mode_desc;
-
-    MainApplicationConfig(){
-        //// CreateWindowInfo ////
-        ci.sid = "TestWindow";
-        ci.windowTitle = "TestAGE-测试";
+    void build_internal(){
+        /// 窗口配置
+        i.ci.sid = "TestWindow";
+        i.ci.windowTitle = window.title;
         // 真正设置大小在后面，并非真的800*600
-        ci.width = 800;
-        ci.height = 600;
-        ci.x = 100;
-        ci.y = 100;
-        ci.style = WinStylePresetNormal;
-        ci.fps = framerate;
-        ci.ScreenPercent(0.5,1,&ci.width,&ci.height);
-        ci.KeepRatio(ci.width,ci.height,800,600);
-        ci.ScreenPercent(0.2,0.2,&ci.x,&ci.y);
+        i.ci.width = 800;
+        i.ci.height = 600;
+        i.ci.x = 100;
+        i.ci.y = 100;
+        i.ci.style = WinStylePresetNormal;
+        i.ci.fps = window.framerate;
+        i.ci.ScreenPercent(0.5,1,&i.ci.width,&i.ci.height);
+        i.ci.KeepRatio(i.ci.width,i.ci.height,800,600);
+        i.ci.ScreenPercent(0.2,0.2,&i.ci.x,&i.ci.y);
+        /// textures表
+        for(auto & target : textures){
+            i.texture_sids.emplace_back(target.sid.c_str());
+            i.texture_paths.emplace_back(target.path.c_str());
+        }
+        /// Logger
+        i.logger.consumer_count = logger.consumer_count;
 
-        //// Textures ////
-        texture_sids = {
-            "wall",
-            "ice"
-        };
-        texture_paths = {
-            "./test_data/imgs/wall.jpg",
-            "./test_data/imgs/ice.png"
-        };
-
-        //// Models ////
-        models["main.obj"] = "./test_data/main.model";
-
-        //// GL ////
-        gl_depthfunc_enums = {
-            GL_LEQUAL, GL_LESS, GL_GREATER, GL_EQUAL,
-            GL_GEQUAL, GL_NOTEQUAL, GL_ALWAYS, GL_NEVER
-        };
-        gl_depthfunc_desc = {
-            "LEqual (≤)", "Less (<)", "Greater (>)", "Equal (=)", 
-            "GEqual (≥)", "NotEqual (!=)", "Always", "Never"
-        };
-        gl_polygon_face_desc = {"Front","Back","Front And Back"};
-        gl_polygon_face_enums = {GL_FRONT,GL_BACK,GL_FRONT_AND_BACK};
-        gl_polygon_mode_desc = {"Fill","Line","Point"};
-        gl_polygon_mode_enums = {GL_FILL,GL_LINE,GL_POINT};
     }
 };
+
 #endif

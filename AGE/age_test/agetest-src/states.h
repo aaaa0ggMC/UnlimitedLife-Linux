@@ -41,16 +41,6 @@ struct States{
     /// @brief 点的大小
     float point_size {1.0f};
 
-    /// Show
-    bool show_cube {true};
-    bool show_pyramid {true};
-    bool show_model {true};
-    bool show_platform {true};
-
-    /// Models ///
-    int current_model_index {0};
-
-
     //// IM Settings ////
     /// @brief IMCacheData
     void* im_cached {nullptr};

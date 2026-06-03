@@ -9,8 +9,8 @@ void MainApplication::run(){
     Clock elapse (false);
     Clock world_updater (false);
 
-    Trigger im_trigger (im_clock,1000 / cfg.imgui_refresh_rate);
-    Trigger world_trigger (world_updater,1000 / cfg.world_update_frame_rate);
+    Trigger im_trigger (im_clock,1000 / cfg.ui.refresh_rate);
+    Trigger world_trigger (world_updater,1000 / cfg.world.update_elapse_ms);
 
     uint64_t frame_count {0};
     // play sounds
@@ -28,9 +28,9 @@ void MainApplication::run(){
     while(!win.shouldClose()){
         //// Counting Framerate ////
         ++frame_count;
-        if(fps_counter.get_offset() >= cfg.fpsCountTimeMs){
+        if(fps_counter.get_offset() >= cfg.ui.fps_count_elapse_ms){
             fps_counter.clear_offset();
-            state.fps = (int)(frame_count / cfg.fpsCountTimeMs * 1000);
+            state.fps = (int)(frame_count / cfg.ui.fps_count_elapse_ms * 1000);
             frame_count = 0;
         }
         //// Poll Events ////
@@ -97,18 +97,18 @@ void MainApplication::handle_input(float p){
 
     Camera & cam = state.use_light_cam?e_light:camera;
     if(input.getKeyInfo(KeyCode::Left).isPressing()){
-        cam.transform().rotate(glm::vec3(0,1,0),-cfg.cam_rot.x * p);
+        cam.transform().rotate(glm::vec3(0,1,0),-cfg.camera.rotation.x * p);
     }else if(input.getKeyInfo(KeyCode::Right).isPressing()){
-        cam.transform().rotate(glm::vec3(0,1,0),cfg.cam_rot.x * p);
+        cam.transform().rotate(glm::vec3(0,1,0),cfg.camera.rotation.x * p);
     }
 
     if(input.getKeyInfo(KeyCode::Up).isPressing()){
-        cam.transform().rotate(glm::vec3(1,0,0),-cfg.cam_rot.y * p);
+        cam.transform().rotate(glm::vec3(1,0,0),-cfg.camera.rotation.y * p);
     }else if(input.getKeyInfo(KeyCode::Down).isPressing()){
-        cam.transform().rotate(glm::vec3(1,0,0),cfg.cam_rot.y * p);
+        cam.transform().rotate(glm::vec3(1,0,0),cfg.camera.rotation.y * p);
     }
 
-    cam.transform().buildVelocity(veloDir,cfg.cam_speed);
+    cam.transform().buildVelocity(veloDir,cfg.camera.speed);
 
     if(imgui_camera_rot_injector)imgui_camera_rot_injector(*this);
 }

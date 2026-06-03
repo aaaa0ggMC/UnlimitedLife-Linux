@@ -106,8 +106,8 @@ struct MainApplication{
 
     //// Construct Section ////
     MainApplication(MainApplicationConfig cfg)
-    :logger(cfg.logger),lg(logger,cfg.logfactory)
-    ,input(cfg.framerate),vaos(app.vaos),vbos(app.vbos){
+    :logger(cfg.i.logger),lg(logger,cfg.i.logfactory)
+    ,input(cfg.window.framerate),vaos(app.vaos),vbos(app.vbos){
         this->cfg = cfg;
     }
 

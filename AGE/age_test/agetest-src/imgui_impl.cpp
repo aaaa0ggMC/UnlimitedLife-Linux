@@ -194,34 +194,15 @@ void ImGUIInjector::shadow(){
     ImGui::Image((ImTextureID)(app.shadowTexCallback->getId()),ImVec2(256,256));
 }
 
-void ImGUIInjector::model(){
-    static std::vector<const char *> buf;
-    ImGui::Text("模型");
-
-    buf.clear();
-    for(auto&[k,v] : app.models){
-        buf.push_back(k.data());
-    }
-
-    ImGui::ListBox("默认加载的模型",&s.current_model_index,buf.data(),buf.size());
-    if(ImGui::DragInt("生成精度",&s.precision,0.1,1,64)){
-        app.load_dynamic_models();
-    }
-
-    if(buf.size()){
-        app.current_model = &app.models[buf[s.current_model_index]];
-    }
-}
-
 void ImGUIInjector::gl(){
     ImGui::Text("GL设置");
     if(ImGui::CollapsingHeader("多边形模式",ImGuiTreeNodeFlags_DefaultOpen)){
-        ImGui::ListBox("面",&s.gl_polygon_face_index,app.cfg.gl_polygon_face_desc.data(),app.cfg.gl_polygon_face_desc.size());
-        ImGui::ListBox("模式",&s.gl_polygon_mode_index,app.cfg.gl_polygon_mode_desc.data(),app.cfg.gl_polygon_mode_desc.size());
+        ImGui::ListBox("面",&s.gl_polygon_face_index,gl_polygon_face_desc.data(),gl_polygon_face_desc.size());
+        ImGui::ListBox("模式",&s.gl_polygon_mode_index,gl_polygon_mode_desc.data(),gl_polygon_mode_desc.size());
     }
     ImGui::Checkbox("面剔除",&s.gl_cull);
     ImGui::Checkbox("深度测试",&s.gl_depth);
-    ImGui::ListBox("深度测试函数",&s.gl_depthfunc_index,app.cfg.gl_depthfunc_desc.data(),app.cfg.gl_depthfunc_desc.size(),4);
+    ImGui::ListBox("深度测试函数",&s.gl_depthfunc_index,gl_depthfunc_desc.data(),gl_depthfunc_desc.size(),4);
     ImGui::DragFloat("点大小",&s.point_size,0.1F,0.1F,64.0F);
 }
 

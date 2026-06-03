@@ -17,9 +17,6 @@ void ImGUIInjector::ui(MainApplication &){
         if(ImGui::MenuItem("采样器")){
             im_menu = 1;
         }
-        if(ImGui::MenuItem("模型")){
-            im_menu = 3;
-        }
         if(ImGui::MenuItem("GL设置")){
             im_menu = 4;
         }
@@ -38,9 +35,6 @@ void ImGUIInjector::ui(MainApplication &){
         break;
     case 1:
         sampler();
-        break;
-    case 3:
-        model();
         break;
     case 4:
         gl();

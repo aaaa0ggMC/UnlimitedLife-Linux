@@ -38,7 +38,6 @@ struct ImGUIInjector{
     void info();
     void inspector();
     void sampler();
-    void model();
     void gl();
     void music();
     void shadow();
