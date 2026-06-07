@@ -1,14 +1,12 @@
-# Cmake
-CDep/headers/imgui
-CDep/headers/miniaudio.h
-*/Testing
+# XMake
+data
+.xmake
 .cache
 build
-
-Pacman/
-!Pacman/PKGBUILD
-Doxygen
-
+compile_commands.json
+CDep/headers/imgui
+CDep/headers/miniaudio.h
+CDep/headers/toml.hpp
 
 #kate
 *.kate-swp
@@ -57,7 +55,3 @@ Doxygen
 *.exe
 *.out
 *.app
-/third_party
-CBuild/ULGTests
-CBuild/ULCore
-compile_commands.json
