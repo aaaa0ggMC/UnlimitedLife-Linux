@@ -87,17 +87,25 @@ void MainApplication::load_uniforms(){
 
 void MainApplication::load_lights(){
     using namespace age::light::uploaders;
-    light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
-    light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
-    light.specular.fromRGBA(1.0,1.0,1.0,1.0);
-    light.position = e_light.transform().m_position;
-
     lb.ambient = createUniformName<glm::vec4>(shader,"light.ambient")();
     lb.diffuse = createUniformName<glm::vec4>(shader,"light.diffuse")();
     lb.specular = createUniformName<glm::vec4>(shader,"light.specular")();
     lb.position = createUniformName<glm::vec3>(shader,"light.position")();
 
+    //// Lights ////
+    light::PositionalLight light;
+
+    light.ambient.fromRGBA(0.0,0.0,0.0,1.0);
+    light.diffuse.fromRGBA(1.0,1.0,1.0,1.0);
+    light.specular.fromRGBA(1.0,1.0,1.0,1.0);
+    light.position = e_light.transform().m_position;
+
     light.upload(lb);
+
+    e_light.add<age::light::PositionalLight>(
+        light
+    );
+
     lg(Info) << "LoadLight:OK" << endlog;
 }
 

@@ -26,9 +26,6 @@ void MainApplication::draw_pass_one(){
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
-    glm::vec4 pos = cam.viewer().buildViewMatrix(cam.transform()) * glm::vec4(e_light.transform().m_position,1.0);
-    lb.position.safe_upload(glm::vec3(pos));
-
     RenderSystem::render(RenderSystem::Shadow{
         .win = win,
         .em = em,
@@ -74,8 +71,10 @@ void MainApplication::draw_pass_two(){
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(gl_depthfunc_enums[state.gl_depthfunc_index]);
     }else glDisable(GL_DEPTH_TEST);
+    
     if(state.gl_cull)glEnable(GL_CULL_FACE);
     else glDisable(GL_CULL_FACE);
+    
     glPointSize(state.point_size);
     glPolygonMode(gl_polygon_face_enums[state.gl_polygon_face_index],gl_polygon_mode_enums[state.gl_polygon_mode_index]);
     glEnable(GL_POLYGON_OFFSET_FILL);

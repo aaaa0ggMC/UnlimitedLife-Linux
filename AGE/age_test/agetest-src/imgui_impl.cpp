@@ -74,12 +74,58 @@ void ImGUIInjector::inspector(){
             ImGui::Text("ID: %lu",entity.id);
             ImGui::Text("版本号: %u",entity.version);
             ImGui::Indent();
+
+            // 只能在遍历时局部缓存指针，不然会出现内存问题
+            light::PositionalLight * positional_ptr = nullptr;
+
+            /// Positional Light
+            check_pool.template operator()<light::PositionalLight>(entity,
+                [&](light::PositionalLight & light){
+                    positional_ptr = &light;
+
+                    if(ImGui::CollapsingHeader("DirectionalLight",ImGuiTreeNodeFlags_DefaultOpen)){
+                        glm::vec4 ambient = light.ambient.getRGBA();
+                        glm::vec4 specular = light.specular.getRGBA();
+                        glm::vec4 diffuse = light.diffuse.getRGBA();
+
+                        if(ImGui::DragFloat4(
+                            "Ambient",
+                            glm::value_ptr(ambient),
+                            0.01,0.0f,1.0f
+                        )) {
+                            light.ambient.fromRGBA(ambient);
+                            app.lb.ambient.safe_upload(ambient);
+                        }
+
+                        if(ImGui::DragFloat4(
+                            "Specular",
+                            glm::value_ptr(specular),
+                            0.01,0.0f,1.0f
+                        )) {
+                            light.specular.fromRGBA(specular);
+                            app.lb.specular.safe_upload(specular);
+                        }
+
+                        if(ImGui::DragFloat4(
+                            "Diffuse",
+                            glm::value_ptr(diffuse),
+                            0.01,0.0f,1.0f
+                        )) {
+                            light.diffuse.fromRGBA(diffuse);
+                            app.lb.diffuse.safe_upload(diffuse);
+                        }
+                    }
+                }
+            );
             
             /// Transform
             check_pool.template operator()<Transform>(entity,
                 [&](Transform & transform){
                     if(ImGui::CollapsingHeader("Transform",ImGuiTreeNodeFlags_DefaultOpen)){
-                        ImGui::DragFloat3("位置",glm::value_ptr(transform.m_position),0.1);
+                        if(positional_ptr && ImGui::DragFloat3("位置",glm::value_ptr(transform.m_position),0.1)){
+                            // 这里其实完全用不上 positional_ptr->position = transform.m_position;
+                            app.lb.position.safe_upload(transform.m_position);
+                        }
                         ImGui::DragFloat4("旋转",glm::value_ptr(transform.m_rotation.get_mutable_unnorm()),0.01);
                         ImGui::DragFloat3("缩放",glm::value_ptr(transform.m_scale),0.01);
                         ImGui::DragFloat3("速度",glm::value_ptr(transform.velocity),0.1);
@@ -147,7 +193,6 @@ void ImGUIInjector::inspector(){
                     }
                 }
             );
-
 
             ImGui::Unindent();
             ImGui::PopID();

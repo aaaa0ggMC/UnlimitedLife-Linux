@@ -79,9 +79,6 @@ struct MainApplication{
     material::Material mat_gold;
     material::Material mat_jade;
 
-    //// Lights ////
-    light::PositionalLight light;
-
     //// Shaders ////
     Shader shader {Shader::null()};
     Shader shadowShader { Shader::null() };
