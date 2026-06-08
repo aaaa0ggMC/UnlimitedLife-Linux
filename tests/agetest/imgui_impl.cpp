@@ -122,7 +122,7 @@ void ImGUIInjector::inspector(){
             check_pool.template operator()<Transform>(entity,
                 [&](Transform & transform){
                     if(ImGui::CollapsingHeader("Transform",ImGuiTreeNodeFlags_DefaultOpen)){
-                        if(positional_ptr && ImGui::DragFloat3("位置",glm::value_ptr(transform.m_position),0.1)){
+                        if(ImGui::DragFloat3("位置",glm::value_ptr(transform.m_position),0.1) && positional_ptr){
                             // 这里其实完全用不上 positional_ptr->position = transform.m_position;
                             app.lb.position.safe_upload(transform.m_position);
                         }
