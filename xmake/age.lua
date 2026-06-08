@@ -18,7 +18,7 @@ function configure_age_test_target(target_name,src_dir)
         add_deps("AGE")
         add_packages("imgui")
         add_links(aaaa0ggmcLib , { public = true})
-        set_rundir("CData") 
+        set_rundir("assets")
         if is_plat("windows") then
             add_defines("GLFW_DLL")
             add_links("glfw3", "glew32", "opengl32")

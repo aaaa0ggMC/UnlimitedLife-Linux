@@ -1,24 +1,24 @@
 includes("xmake/defines.lua")
 includes("xmake/age.lua")
 
+add_rules("mode.debug","mode.release")
 add_rules("plugin.compile_commands.autoupdate", {outputdir = "."})
+
 add_requires("opengl","glfw", "glew", "glm", "stb","miniaudio")
 add_requires("imgui docking", {configs = {glfw = true, opengl3 = true}})
 
-add_rules("mode.debug","mode.release")
 set_languages("c++26")
 set_symbols("debug")
 add_cxflags("-fno-omit-frame-pointer")
 add_cxxflags("-freflection", {force = true})
 add_ldflags("-fPIC")
 add_ldflags("-Wl,--allow-multiple-definition")
-
+add_rpathdirs(".","/usr/local/lib")
+add_includedirs("include")
 add_defines(
     "GLM_ENABLE_EXPERIMENTAL",
     "ALIB5_ENABLE_REFLECTION"
 )
-add_rpathdirs(".","/usr/local/lib")
-add_includedirs("include")
 
 target("AGE", function ()
     set_kind("shared")
@@ -29,6 +29,8 @@ target("AGE", function ()
     add_age_debug_defines()
 
     add_packages("opengl", "glfw", "glew", "glm", "stb", "miniaudio")
+
+    add_links(aaaa0ggmclib , {public = true})
     if is_plat("linux", "macosx") then 
         add_syslinks("stdc++exp", {public = true})
     end
