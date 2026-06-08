@@ -1,12 +1,10 @@
 # XMake
-data
 .xmake
 .cache
 build
 compile_commands.json
-CDep/headers/imgui
-CDep/headers/miniaudio.h
-CDep/headers/toml.hpp
+assets
+doxygen
 
 #kate
 *.kate-swp

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# 获取今天日期，比如 2025/07/15 格式
+TODAY=$(date +"%Y/%m/%d")
+
+# 需要处理的文件后缀，可以按需加，比如 .cpp .h .hpp .c .cc
+EXTENSIONS="(cpp|h|hpp|c|cc)"
+
+# 查找所有被git跟踪且修改的文件
+FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "\.$EXTENSIONS$")
+
+if [ -z "$FILES" ]; then
+  exit 0
+fi
+
+for file in $FILES; do
+  # 用sed替换文件里的 @date 后面的日期，更新为今天
+  # -i.bak 是直接修改文件并备份（备份可选）
+  sed -i.bak -E "s|(@date)[[:space:]]+[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}|\1 $TODAY|g" "$file"
+  rm -f "$file.bak"
+
+  # 把修改后的文件重新加入暂存区
+  git add "$file"
+done
+
+exit 0

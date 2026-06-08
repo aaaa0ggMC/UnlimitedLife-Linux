@@ -1,9 +1,9 @@
 #ifndef AGETEST_H_IMGUI
 #define AGETEST_H_IMGUI
-#include <imgui/imgui_impl_opengl3.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui.h>
-#include <imgui/imgui_internal.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
+#include <imgui.h>
+#include <imgui_internal.h>
 #include "app.h"
 
 struct ImGUIInjector{
