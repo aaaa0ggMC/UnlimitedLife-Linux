@@ -49,6 +49,8 @@ void MainApplication::run(){
         //// ImGUI UI event ////
         if(imgui_ui_injector && (im_trigger.test(true) || !state.im_cached)){
             imgui_ui_injector(*this);
+            // 由于imgui可能修改了opengl状态，因此这里需要同步一下
+            context.sync();
         }
         draw();
         if(imgui_draw_injector)imgui_draw_injector(*this);

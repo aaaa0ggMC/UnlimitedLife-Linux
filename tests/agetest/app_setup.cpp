@@ -396,5 +396,8 @@ void MainApplication::setup_window(){
     }else m_window = *t;
     input.setWindow(*m_window);
     m_window->makeCurrent();
+
+    // 初始化context
+    context.sync();
     lg(Info) << "CreateWindow:OK" << endlog;
 }

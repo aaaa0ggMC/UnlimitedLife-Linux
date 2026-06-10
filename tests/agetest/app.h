@@ -8,6 +8,7 @@
 #include <AGE/Model.h>
 #include <AGE/Light.h>
 #include <AGE/Audio.h>
+#include <AGE/Context.h>
 #include <AGE/Texture.h>
 #include <AGE/Material.h>
 #include <AGE/Application.h>
@@ -58,6 +59,7 @@ struct MainApplication{
 
     //// Graphics ////
     Application app {em};
+    Context context;
     VAOManager & vaos;
     VBOManager & vbos;
     /// "Borrowed" from Application

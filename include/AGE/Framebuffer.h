@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 帧缓冲区的创建
  * @version 0.1
- * @date 2026/06/01
+ * @date 2026/06/10
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -93,7 +93,7 @@ namespace age{
         std::string_view get_sid() const {
             return sid;
         }
-
+        
         std::vector<FBOAttachment> get_colors() const {
             return m_colors;
         }

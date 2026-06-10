@@ -3,6 +3,8 @@
 #include <alib5/adata.h>
 #include <alib5/adebug.h>
 
+using namespace alib5;
+
 int main(){
     MainApplicationConfig cfg;
     /// 初始化配置
