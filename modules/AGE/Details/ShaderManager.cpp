@@ -28,7 +28,7 @@ Shader ShaderManager::create(const CreateShaderInfo & info){
     bool created = false;
 
     Error & err = Error::def;
-    shader.sid = info.sid;
+    shader.sid = csbuffer.get(info.sid);
 
     if(info.vertex.compare("")){
         const char * buf[1] = {info.vertex.c_str()};

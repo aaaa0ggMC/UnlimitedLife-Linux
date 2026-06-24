@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 纹理
  * @version 0.1
- * @date 2026/01/14
+ * @date 2026/06/24
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -124,8 +124,9 @@ namespace age{
         std::string_view sid { "" };
     public:
         Sampler(){}
+        
         bool valid(){
-            return sampler_id == 0;
+            return sampler_id != 0;
         }
 
         std::string_view get_sid(){return sid;}

@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 帧缓冲区的创建
  * @version 0.1
- * @date 2026/06/10
+ * @date 2026/06/24
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -118,8 +118,8 @@ namespace age{
 
         inline void colors(std::span<const FBOAttachment> attachments,GLuint beg_index = 0,GLuint level = 0,bool auto_update = true){
             panic_debug(framebuffer_id == 0,"Invalid framebuffer id!");
-            if(beg_index + attachments.size() >= m_colors.size()){
-                m_colors.resize(beg_index + attachments.size() + 1);
+            if(beg_index + attachments.size() > m_colors.size()){
+                m_colors.resize(beg_index + attachments.size());
             }
             for(size_t i = 0;i < attachments.size();++i){
                 m_colors[i + beg_index] = attachments[i];

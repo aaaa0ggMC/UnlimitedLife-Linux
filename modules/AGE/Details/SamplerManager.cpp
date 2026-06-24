@@ -34,7 +34,7 @@ std::optional<Sampler> SamplerManager::create(std::string_view sid){
 }
 
 bool SamplerManager::destroy(std::string_view sid){
-    panic_debug(sid.empty(),"Cannot pass empty sid to create function!");
+    panic_debug(sid.empty(),"Cannot pass empty sid to destroy function!");
     auto it = samplers.find(sid);
     if(it == samplers.end()){
         std::string msg = "Cant find an existing sampler named \"";

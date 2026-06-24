@@ -61,6 +61,7 @@ Sound::Sound(const Sound& in){
     if(in.inited && ma_sound_init_copy(val_eng,(ma_sound*)in.sound,0,NULL,(ma_sound*)sound) == MA_SUCCESS){
         inited = true;
     }
+    volume = in.volume; m_length = in.m_length; 
 }
 
 Sound& Sound::operator=(Sound&& snd){
@@ -115,7 +116,7 @@ bool Sound::loadFromFile(std::string_view fp){
         m_length = lengthDynamicCalc();
         return true;
     }
-    return true;
+    return false;
 }
 
 void Sound::__try_reset(){
@@ -128,10 +129,10 @@ void Sound::__try_reset(){
 
 unsigned int Sound::setVolume(unsigned int v){
     if(!val_eng || !inited)return volume;
-    ma_sound_set_volume((ma_sound*)sound,v);
+    ma_sound_set_volume((ma_sound*)sound,v / 100.f);
     unsigned int ret = volume;
     volume = v;
-    return volume;
+    return ret;
 }
 
 unsigned int Sound::getVolume(){

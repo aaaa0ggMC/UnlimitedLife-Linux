@@ -22,7 +22,7 @@ Framebuffer FramebufferManager::create(const CreateFramebufferInfo & info){
     glCreateFramebuffers(1,&fb.framebuffer_id);
     fb.sid = csbuffer.get(info.sid);
 
-    if(!info.colors.size()){
+    if(info.colors.size()){
         fb.colors(info.colors,info.base_index,0);
     }
     if(!info.depth.empty()){

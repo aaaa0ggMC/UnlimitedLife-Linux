@@ -37,6 +37,7 @@ std::optional<Texture*> TextureManager::create(const CreateTextureInfo & info){
     case CreateTextureInfo::FromVector:
         buf = info.vec.data->data();
         eleC = info.vec.data->size();
+        [[fallthrough]];
     case CreateTextureInfo::FromBuffer:
         if(!buf){
             Error::def.pushMessage({AGEE_EMPTY_DATA,"Buffer passed to createTexture is empty!"});
