@@ -26,6 +26,8 @@ namespace age::world {
         :MonoBehavior(emm){
             tran = add<Transform>();
         }
+
+        virtual ~Object();
         
         inline Transform& transform(){return tran.get();}
     };

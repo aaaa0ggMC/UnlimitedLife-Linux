@@ -7,7 +7,7 @@
 namespace age::world{
     using namespace alib5::ecs;
 
-    struct MonoBehavior : public NonCopyable{
+    struct AGE_API MonoBehavior : public NonCopyable{
         EntityManager& em;
         EntityWrapper entity;
 

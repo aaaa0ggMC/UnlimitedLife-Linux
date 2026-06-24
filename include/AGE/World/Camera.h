@@ -19,7 +19,7 @@ namespace age::world{
     using namespace alib5::ecs;
     using namespace comps;
 
-    struct Camera : public MonoBehavior{
+    struct AGE_API Camera : public MonoBehavior{
     public:
         ref_t<comps::Transform> tran;
         ref_t<comps::Viewer> view;
@@ -35,6 +35,8 @@ namespace age::world{
 
             vp_matrix = glm::mat4(1.0f);
         }
+
+        virtual ~Camera();
 
         inline glm::mat4& buildVPMatrix(){
             // Trick or treat，这里这么写是因为不会短路处理从而更新版本来着...

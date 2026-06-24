@@ -64,7 +64,7 @@ std::optional<Window*> WindowManager::create(const CreateWindowInfo & info){
         if(window.m_onResize)window.m_onResize(window,nw * scale.first,nh * scale.second,nw,nh);
         #elif defined(_WIN32)
         // Windows系统下，nw和nh已经是经过content scale处理的
-        if(window.m_onResize)window.m_onResize(window,nw,nh);
+        if(window.m_onResize)window.m_onResize(window,nw,nh,nw,nh);
         #endif
     });
 

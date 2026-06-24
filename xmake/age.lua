@@ -9,7 +9,7 @@ function add_age_debug_defines()
     end
 end
 
-function configure_age_test_target(target_name,src_dir)
+function configure_age_test_target(target_name, src_dir)
     target(target_name)
         set_kind("binary")
         add_files(src_dir .. "/**.cpp")
@@ -19,9 +19,10 @@ function configure_age_test_target(target_name,src_dir)
         add_packages("imgui")
         add_links(aaaa0ggmcLib , { public = true})
         set_rundir("assets")
-        if is_plat("windows") then
+        
+        if is_plat("windows", "mingw") then
             add_defines("GLFW_DLL")
-            add_links("glfw3", "glew32", "opengl32")
+            add_links("glfw3.dll", "glew32", "opengl32")
         else
             add_syslinks("GLEW", "GL", "glfw")
         end
