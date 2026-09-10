@@ -1,5 +1,13 @@
-#!/bin/bash
-# cd .. 工作目录就是 ./
-export name=/tmp/UnlimitedLife-v1.0.0.tar.gz
-tar -czvf $name --exclude="./Pacman" --exclude="./.git" --exclude="./.github"  .
-mv $name ./Pacman
+#!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
+require_command git
+if (( $# != 0 )); then
+    printf 'Usage: %s (archives committed HEAD into build/packages/)\n' "$0" >&2
+    exit 2
+fi
+revision="$(git rev-parse --short HEAD)"
+archive_dir="$PROJECT_ROOT/build/packages"
+mkdir -p -- "$archive_dir"
+archive="$archive_dir/UnlimitedLife-$revision.tar.gz"
+git archive --format=tar.gz --prefix="UnlimitedLife-$revision/" --output="$archive" HEAD
+printf 'Archived committed HEAD only (local changes and assets excluded): %s\n' "$archive"

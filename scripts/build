@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
 source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
 require_command xmake
-if (( $# == 0 )); then
-    set -- agetest
-fi
-exec xmake run "$@"
+exec xmake build "$@"

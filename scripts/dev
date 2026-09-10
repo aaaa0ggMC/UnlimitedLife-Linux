@@ -1,5 +1,5 @@
-#!/bin/bash
-# cd .. 工作目录就是 ./
-cd "$(dirname "${BASH_SOURCE[0]}")"
-sh ./configure
-sh ./build
+#!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
+require_command xmake
+xmake f -m debug "$@"
+exec xmake build

@@ -101,9 +101,8 @@
         "__tree": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "clangd.arguments": [
         "--header-insertion=never"
     ],
-    "cmake.sourceDirectory": "/home/aaaa0ggmc/Projs/UnlimitedLife-Linux/scripts/imgui"
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json"
 }

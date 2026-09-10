@@ -1,15 +1,7 @@
-# cd .. 工作目录就是 ./
-mkdir -p CBuild_CACHE_WIN
-cd CBuild_CACHE_WIN
-
-ninja
-
-# Move Artifact
-mv ../CBuild/Windows/* ../CBuild/
-rmdir ../CBuild/Windows/
-
-#mov deps
-cp /ucrt64/bin/glfw3.dll ../CBuild/
-cp /ucrt64/bin/glew32.dll ../CBuild/
-cp /ucrt64/bin/libwinpthread-1.dll ../CBuild/
-cp /ucrt64/bin/libgcc_s_seh-1.dll ../CBuild/
+#!/usr/bin/env bash
+source "$(dirname -- "${BASH_SOURCE[0]}")/common.sh"
+if [[ "${MSYSTEM:-}" != UCRT64 ]]; then
+    printf 'Run this command in an MSYS2 UCRT64 terminal.\n' >&2
+    exit 1
+fi
+exec bash "$PROJECT_ROOT/scripts/build" "$@"

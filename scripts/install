@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""Build as the caller, then reconcile only this library's installed files."""
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+from installlib import PROFILES, apply, inventory, plan
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def metadata(stage, name):
+    _, lib = PROFILES[name]
+    pc = stage / 'lib/pkgconfig' / f'{lib}.pc'
+    pc.parent.mkdir(parents=True, exist_ok=True)
+    # A local development build has no claimed upstream semantic version.
+    pc.write_text(f'''prefix=${{pcfiledir}}/../..
+libdir=${{prefix}}/lib
+includedir=${{prefix}}/include
+
+Name: {lib}
+Description: Locally built {lib} (GCC C++26 reflection)
+Version: 0.0.0
+Libs: -L"${{libdir}}" -Wl,-rpath,"${{libdir}}" -l{lib} -lstdc++exp
+Cflags: -I"${{includedir}}" -DGLM_ENABLE_EXPERIMENTAL -DALIB5_ENABLE_REFLECTION
+''')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('library', choices=PROFILES, nargs='?', default='AGE')
+    parser.add_argument('--project', type=Path, help='Source project; defaults to UL or sibling aaaa0ggmcLib')
+    parser.add_argument('--prefix', type=Path, default=Path('/usr/local'))
+    parser.add_argument('--dry-run', action='store_true', help='Build/stage and show changes without writing the prefix')
+    parser.add_argument('--adopt-existing', action='store_true', help='First migration only: back up and take ownership of this library namespace')
+    parser.add_argument('--uninstall', action='store_true', help='Remove only unmodified files recorded in the manifest')
+    parser.add_argument('--no-build', action='store_true', help='Stage an already built target')
+    parser.add_argument('--apply-stage', type=Path, help=argparse.SUPPRESS)
+    parser.add_argument('--apply-only', action='store_true', help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    if sys.platform != 'linux':
+        parser.error('This installer currently supports native Linux shared libraries only')
+    prefix = Path(os.path.abspath(args.prefix.expanduser()))
+    if args.uninstall and args.adopt_existing:
+        parser.error('--uninstall cannot be combined with --adopt-existing')
+    if args.apply_only:
+        apply(prefix, args.apply_stage, args.library, args.adopt_existing, args.dry_run)
+        return
+    if os.geteuid() == 0:
+        parser.error('Run without sudo; only the final copy/cleanup step requests sudo')
+    project = (args.project or (ROOT if args.library == 'AGE' else ROOT.parent / 'aaaa0ggmcLib')).resolve()
+    with tempfile.TemporaryDirectory(prefix='ul-install-') as work:
+        stage = None
+        if not args.uninstall:
+            if not (project / 'xmake.lua').is_file():
+                parser.error(f'No xmake.lua in {project}')
+            target = PROFILES[args.library][1]
+            if not args.no_build:
+                subprocess.run(['xmake', 'build', target], cwd=project, check=True)
+            stage = Path(work) / 'stage'
+            subprocess.run(['xmake', 'install', '--packages=n', '-o', str(stage), target], cwd=project, check=True)
+            metadata(stage, args.library)
+            # Installation hooks may stage other dependencies; never claim them.
+            expected = inventory(stage, args.library)
+            for p in stage.rglob('*'):
+                if p.is_file() and p.relative_to(stage).as_posix() not in expected:
+                    raise RuntimeError(f'Unexpected staged file: {p.relative_to(stage)}')
+        # Preflight before sudo, then repeat under the install lock.
+        plan(prefix, stage, args.library, args.adopt_existing)
+        if args.dry_run:
+            apply(prefix, stage, args.library, args.adopt_existing, True)
+            return
+        probe = prefix
+        while not probe.exists():
+            probe = probe.parent
+        if os.access(probe, os.W_OK):
+            apply(prefix, stage, args.library, args.adopt_existing)
+        else:
+            sudo = shutil.which('sudo')
+            if not sudo:
+                raise RuntimeError('Prefix is not writable and sudo is unavailable; choose --prefix ~/.local')
+            command = [sudo, sys.executable, str(Path(__file__).resolve()), args.library,
+                       '--prefix', str(prefix), '--apply-only']
+            if stage:
+                command += ['--apply-stage', str(stage)]
+            if args.adopt_existing:
+                command += ['--adopt-existing']
+            subprocess.run(command, check=True)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, RuntimeError, subprocess.CalledProcessError) as exc:
+        print(f'Install failed: {exc}', file=sys.stderr)
+        sys.exit(1)

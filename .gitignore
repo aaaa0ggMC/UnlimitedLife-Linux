@@ -1,10 +1,13 @@
 # XMake
-.xmake
-.cache
-build
-compile_commands.json
-assets
-doxygen
+/.xmake/
+/.cache/
+/build/
+/compile_commands.json
+/.vscode/compile_commands.json
+/assets/*
+!/assets/README.md
+/doxygen/
+__pycache__/
 
 #kate
 *.kate-swp
