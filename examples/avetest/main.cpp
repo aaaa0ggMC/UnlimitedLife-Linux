@@ -16,6 +16,13 @@ auto main() -> int {
             .height = 1080,
         });
 
+        ave::Renderer renderer = 
+            ave::RenderProfile::from_window(context, window)
+            .build()    
+        ;
+
+        lg << "Created renderer " << renderer.instance.get() << std::endl;
+
         while(!window.should_close()){
             window.poll_events();
 

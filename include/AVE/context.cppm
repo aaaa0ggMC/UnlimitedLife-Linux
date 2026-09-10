@@ -10,6 +10,8 @@
  */
  module;
 #include <AVE/config.h>
+#include <vulkan/vulkan.h>
+
 export module ave.context;
 
 import std;
@@ -19,18 +21,24 @@ export namespace ave{
 
     struct AVE_API Context{
     private:
+        VkAllocationCallbacks * allocator { nullptr };
         alib6::memory_resource * mem_res;
         alib6::str::StringPool<> pool;
-
     public:    
-        Context(alib6::memory_resource * res = alib6::get_default_resource())
-        :pool(res){
+        inline Context(VkAllocationCallbacks * allocator = nullptr,alib6::memory_resource * res = alib6::get_default_resource())
+        :allocator(allocator)
+        ,pool(res){
             this->mem_res = res;
         }
 
         /// 长期驻留字符串
-        std::string_view intern(std::string_view ctx){
+        inline std::string_view intern(std::string_view ctx){
             return pool.get(ctx);
+        }
+
+        /// 获取Vulkan内存分配器
+        inline VkAllocationCallbacks* get_vk_allocator(){
+            return allocator;
         }
     };
 

@@ -37,9 +37,6 @@ export namespace ave{
                 return false;
             }
 
-            // 一些hint设置
-            glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
             if(glfwInit() == GL_FALSE){
                 // 初始化失败，获取错误
                 if(ew){
@@ -59,16 +56,25 @@ export namespace ave{
             return true;
         }
 
-        static bool inited(){
+        inline static bool inited(){
             return glfw_inited;
         }
 
-        static void terminate(){
+        inline static void terminate(){
             if(!glfw_inited) return;
             glfwTerminate();
             glfw_inited = false;
         }
     
+        /// 获取glfw扩展
+        inline static auto get_required_instance_extensions() -> std::span<const char* const> {
+            alib6::u32 count = 0;
+            const char ** exts = nullptr;
+
+            exts = glfwGetRequiredInstanceExtensions(&count);
+
+            return { exts, count};
+        }
     };
 
 }

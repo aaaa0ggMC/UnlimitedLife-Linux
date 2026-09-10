@@ -16,14 +16,15 @@ import std;
 import alib6;
 
 #define BASE 100'000 
-#define NEW_ECODE(X) constexpr alib6::i64 ave_##X = BASE + __LINE__ 
+#define NEW_ECODE(X) inline constexpr alib6::i64 ave_##X = BASE + __LINE__ 
 
 export namespace ave{
-    constexpr alib6::i64 ave_success = 0;
+    inline constexpr alib6::i64 ave_success = 0;
 
     NEW_ECODE(not_in_main_thread);
     NEW_ECODE(bad_glfw);
-    NEW_ECODE(window_already_created);
+    NEW_ECODE(already_created);
+    NEW_ECODE(vk_create_instance);
 };
 
 #undef BASE
