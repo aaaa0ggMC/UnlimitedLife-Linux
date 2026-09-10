@@ -357,7 +357,7 @@ namespace age{
                 ptr = nullptr;
             }else {
                 ptr = namedIndices.data();
-                if(count)count = namedIndices.size();
+                if(!count)count = namedIndices.size();
             }
             std::optional<VAO::ScopedVAO> scp = std::nullopt;
             if(vao.getId() != 0){

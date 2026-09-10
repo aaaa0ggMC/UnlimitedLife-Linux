@@ -15,7 +15,7 @@ else
     add_requires("opengl", "glfw", "glew", "glm", "stb", "miniaudio")
 end
 
-add_requires("imgui docking", {configs = {glfw = true, opengl3 = true}})
+add_requires("imgui", {configs = {glfw = true, opengl3 = true}})
 
 set_languages("c++26")
 set_symbols("debug")

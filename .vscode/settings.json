@@ -102,5 +102,8 @@
     },
     "C_Cpp.errorSquiggles": "disabled",
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-    "clangd.arguments": ["--header-insertion=never"]
+    "clangd.arguments": [
+        "--header-insertion=never"
+    ],
+    "cmake.sourceDirectory": "/home/aaaa0ggmc/Projs/UnlimitedLife-Linux/scripts/imgui"
 }

@@ -34,8 +34,8 @@ void Window::setStyle(WinStyle styles,bool enableV){
     if(ws_hasFlag(styles,age::WinStyle::AutoIconify))setAttribute(GLFW_AUTO_ICONIFY);
 
     if(ws_hasFlag(styles,age::WinStyle::Maximized)){
-        if(enableV)glfwRestoreWindow(window);
-        else glfwMaximizeWindow(window);
+        if(enableV) glfwMaximizeWindow(window);
+        else glfwRestoreWindow(window); 
     }
 }
 

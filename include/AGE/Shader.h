@@ -3,7 +3,7 @@
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief 着色器
  * @version 0.1
- * @date 2025/12/02 （左右）
+ * @date 2026/09/10 （左右）
  * 
  * @copyright Copyright(c)2025 aaaa0ggmc
  * 
@@ -208,7 +208,8 @@ namespace age {
         }
 
         ShaderUniform getUniformByName(std::string_view name){
-            return ShaderUniform(glGetUniformLocation(pid,name.data()),pid);
+            // well, leave it to SSO
+            return ShaderUniform(glGetUniformLocation(pid,std::string(name).c_str()),pid);
         }
 
         ShaderUniform operator[](GLuint location){
