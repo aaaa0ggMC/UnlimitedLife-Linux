@@ -11,6 +11,7 @@ import uuid
 PROFILES = {
     'AGE': ('AGE', 'AGE'),
     'alib5': ('alib5', 'aaaa0ggmcLib'),
+    'alib6': ('alib6', 'aaaa0ggmcLib6'),
 }
 STATE = '.ul-install'
 
@@ -21,6 +22,10 @@ def allowed(name, rel):
     if p.is_absolute() or '..' in p.parts or str(p) != rel:
         return False
     return (rel.startswith(f'include/{header}/') or
+            (name == 'alib6' and (rel.startswith('share/alib6/modules/') or
+             rel == 'share/alib6/repository/packages/a/alib6/xmake.lua' or
+             (len(p.parts) == 3 and p.parts[0] == 'modules' and
+              p.parts[2].endswith(('.cppm', '.cppm.meta-info'))))) or
             rel == f'lib/pkgconfig/{lib}.pc' or
             rel == f'lib/{lib}.sym' or
             rel == f'lib/lib{lib}.so' or
@@ -54,6 +59,21 @@ def inventory(root, name):
         candidates += list(lib_dir.glob(f'lib{lib}.so*')) if lib_dir.exists() else []
         candidates += [safe_path(root, f'lib/{lib}.sym')]
         candidates += [safe_path(root, f'lib/pkgconfig/{lib}.pc')]
+        if name == 'alib6':
+            owned = safe_path(root, 'share/alib6')
+            candidates += list(owned.rglob('*')) if owned.exists() else []
+            # Old xmake installations used a shared modules/<hash> namespace.
+            # Claim only pairs whose metadata explicitly identifies alib6.
+            legacy = safe_path(root, 'modules')
+            for meta in legacy.glob('*/*.cppm.meta-info'):
+                safe_path(root, meta.relative_to(root).as_posix())
+                data = json.loads(meta.read_text())
+                module = data.get('name', '')
+                if module == 'alib6' or module.startswith('alib6.'):
+                    rel = 'modules/' + data.get('file', '')
+                    if not allowed(name, rel) or root / rel != meta.with_suffix(''):
+                        raise RuntimeError(f'Invalid legacy module metadata: {meta}')
+                    candidates += [meta, safe_path(root, rel)]
         for p in candidates:
             rel = p.relative_to(root).as_posix()
             if allowed(name, rel) and (p.is_file() or p.is_symlink()):
@@ -88,6 +108,9 @@ def plan(prefix, stage, name, adopt=False):
         header, lib = PROFILES[name]
         if f'lib/lib{lib}.so' not in new or not any(k.startswith(f'include/{header}/') for k in new):
             raise RuntimeError('Staging is incomplete: expected headers and shared library')
+        if name == 'alib6' and (not any(k.startswith('share/alib6/modules/') and k.endswith('.meta-info') for k in new)
+                               or 'share/alib6/repository/packages/a/alib6/xmake.lua' not in new):
+            raise RuntimeError('Staging is incomplete: expected alib6 module metadata and package recipe')
     changes = []
     for rel in sorted(old.keys() | new.keys()):
         current = digest(safe_path(prefix, rel))

@@ -1,6 +1,8 @@
 """Filesystem regression tests; all installation prefixes are temporary."""
 import importlib.util
 import json
+import runpy
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -107,6 +109,65 @@ class InstallTests(unittest.TestCase):
         self.assertEqual((self.prefix / 'include/alib5/current.h').read_text(), 'v1')
         self.assertEqual((self.prefix / 'lib/libaaaa0ggmcLib.so').read_text(), 'binary')
         self.assertEqual((self.prefix / '.ul-install/alib5.json').read_bytes(), original_manifest)
+
+    def alib6_stage(self):
+        stage = self.root / 'alib6-stage'
+        self.put(stage, 'include/alib6/main.cppm', 'export module alib6;')
+        self.put(stage, 'lib/libaaaa0ggmcLib6.so', 'alib6 binary')
+        self.put(stage, 'share/alib6/modules/main/main.cppm', 'export module alib6;')
+        self.put(stage, 'share/alib6/modules/main/main.cppm.meta-info', '{}')
+        self.put(stage, 'share/alib6/repository/packages/a/alib6/xmake.lua', 'package("alib6")')
+        return stage
+
+    def test_alib6_migration_and_uninstall_do_not_touch_other_modules(self):
+        stage = self.alib6_stage()
+        self.put(self.prefix, 'modules/old/old.cppm', 'old interface')
+        self.put(self.prefix, 'modules/old/old.cppm.meta-info', json.dumps({
+            'name': 'alib6.core:old', 'file': 'old/old.cppm'}))
+        other = self.put(self.prefix, 'modules/other/api.cppm', 'other library')
+        self.put(self.prefix, 'modules/other/api.cppm.meta-info', json.dumps({
+            'name': 'other', 'file': 'other/api.cppm'}))
+        alib5 = self.put(self.prefix, 'include/alib5/current.h', 'keep')
+        installer.apply(self.prefix, stage, 'alib6', adopt=True)
+        self.assertFalse((self.prefix / 'modules/old/old.cppm').exists())
+        self.assertTrue(other.exists())
+        installer.apply(self.prefix, None, 'alib6')
+        self.assertFalse((self.prefix / 'share/alib6/modules/main/main.cppm').exists())
+        self.assertEqual(alib5.read_text(), 'keep')
+        self.assertEqual(other.read_text(), 'other library')
+
+    def test_alib6_upgrade_removes_old_module_pairs(self):
+        stage = self.alib6_stage()
+        old = 'share/alib6/modules/old/old.cppm'
+        self.put(stage, old, 'old interface')
+        self.put(stage, old + '.meta-info', '{}')
+        installer.apply(self.prefix, stage, 'alib6')
+        (stage / old).unlink()
+        (stage / (old + '.meta-info')).unlink()
+        installer.apply(self.prefix, stage, 'alib6')
+        self.assertFalse((self.prefix / old).exists())
+        self.assertFalse((self.prefix / (old + '.meta-info')).exists())
+
+    def test_alib6_incomplete_install_is_rejected(self):
+        stage = self.alib6_stage()
+        (stage / 'share/alib6/modules/main/main.cppm.meta-info').unlink()
+        with self.assertRaisesRegex(RuntimeError, 'module metadata'):
+            installer.apply(self.prefix, stage, 'alib6')
+
+    def test_alib6_metadata_export_has_own_package_and_no_alib5_defines(self):
+        stage = self.root / 'export'
+        self.put(stage, 'modules/hash/main.cppm', 'export module alib6;')
+        self.put(stage, 'modules/hash/main.cppm.meta-info', json.dumps({
+            'name': 'alib6', 'file': 'hash/main.cppm'}))
+        sys.path.insert(0, str(ROOT / 'scripts'))
+        try:
+            entry = runpy.run_path(str(ROOT / 'scripts/install'), run_name='install_test')
+        finally:
+            sys.path.pop(0)
+        entry['metadata'](stage, 'alib6')
+        self.assertTrue((stage / 'share/alib6/modules/hash/main.cppm').is_file())
+        self.assertTrue((stage / 'share/alib6/repository/packages/a/alib6/xmake.lua').is_file())
+        self.assertNotIn('ALIB5', (stage / 'lib/pkgconfig/aaaa0ggmcLib6.pc').read_text())
 
 
 if __name__ == '__main__':

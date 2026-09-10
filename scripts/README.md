@@ -5,7 +5,7 @@
 
 | 入口 | 用途 | 示例（在项目根目录执行） |
 | --- | --- | --- |
-| `install` | 带清单、备份和旧文件清理的库安装 | `./scripts/install alib5` |
+| `install` | 带清单、备份和旧文件清理的库安装 | `./scripts/install alib5` / `./scripts/install alib6` |
 | `configure` | 配置 xmake | `./scripts/configure -m release --examples=y` |
 | `build` | 构建全部或指定目标 | `./scripts/build AGE` |
 | `run` | 运行目标，默认 `agetest` | `./scripts/run age_simptest` |

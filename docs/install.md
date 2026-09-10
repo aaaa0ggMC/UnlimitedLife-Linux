@@ -1,7 +1,7 @@
 # 安装、升级与卸载（Linux）
 
 统一入口是 `scripts/install`，需要 Python 3、xmake 和 pkg-config。
-它支持 AGE 和 alib5 的本机 Linux 共享库，不覆盖 alib6、静态库或跨平台发布。
+它支持 AGE、alib5 和 alib6 的本机 Linux 共享库，不覆盖静态库或跨平台发布。
 不要在入口前加 sudo：构建与 xmake 暂存安装以当前用户运行，只有最终写入受保护前缀时才调用 sudo。
 
 ## 首次迁移已有的 /usr/local 安装
@@ -97,3 +97,51 @@ UL 将上述查找封装在 `xmake/alib.lua`，额外检查指定前缀，使用
 脚本拒绝经过符号链接的目标路径；当前仅支持普通共享库文件。
 
 测试：`python3 -m unittest discover -s tests/scripts -v`，仅使用临时目录。
+
+## alib6 模块库
+
+```bash
+# 首次接管已有 /usr/local 安装
+./scripts/install alib6 --adopt-existing --dry-run
+./scripts/install alib6 --adopt-existing
+# 后续更新
+./scripts/install alib6
+# 卸载预览
+./scripts/install alib6 --uninstall --dry-run
+```
+
+源码默认使用相邻的 `../aaaa0ggmcLib`，同样支持 `--project`、`--prefix` 和 `--no-build`。
+安装使用的是源码项目自己的构建目录，不是调用脚本时所在目录的 `build/`。
+例如在 UL 中执行 `scripts/install alib6`，默认使用相邻 `aaaa0ggmcLib` 的缓存。
+脚本会打印实际源码目录。
+
+若 `.meta-info` 报 `cannot open file` / `Not access because it is busy`，先检查报错文件的
+所有者和写权限。以前的 `sudo xmake --root install` 可能在普通用户的构建目录生成
+root 所有的元数据；此时应修复这些生成文件的所有权，不需要继续用 sudo 构建。
+本机已确认过此原因，不能仅凭该错误文本断定存在并发构建。
+
+新安装将模块接口和元数据放在 `<prefix>/share/alib6/modules/`。
+首次接管旧安装时，只清理旧 `<prefix>/modules/<hash>/` 中元数据明确声明属于 `alib6`
+或 `alib6.*` 的文件对。其他模块库不受影响。
+
+消费端的 xmake.lua：
+
+```lua
+set_languages("c++26")
+add_cxxflags("-freflection", {force = true})
+set_policy("build.c++.modules", true)
+add_repositories("local-alib6 /usr/local/share/alib6/repository")
+add_requires("alib6", {system = false})
+
+target("demo")
+    set_kind("binary")
+    add_files("main.cpp")
+    add_packages("alib6")
+target_end()
+```
+
+随后源码可以写 `import alib6;`。自定义安装前缀时替换仓库路径。
+这里使用脚本生成的原生 xmake 包描述，因为它还负责让 xmake 发现模块接口。
+生成的 `aaaa0ggmcLib6.pc` 仅描述头文件与链接参数，不能单独完成模块导入。
+
+想学习各个 xmake 文件的写法，见 [项目 xmake 教程](xmake-guide.md)。

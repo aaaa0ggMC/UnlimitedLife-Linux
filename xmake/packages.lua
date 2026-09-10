@@ -10,6 +10,8 @@ else
     add_requires("opengl", "glfw", "glew", "glm", "stb", "miniaudio")
 end
 
+add_requires("vulkansdk")
+
 if has_config("examples") then
     add_requires("imgui", {configs = {glfw = true, opengl3 = true}})
 end

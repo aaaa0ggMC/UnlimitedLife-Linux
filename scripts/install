@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Build as the caller, then reconcile only this library's installed files."""
 import argparse
+import json
 import os
 from pathlib import Path
 import shutil
@@ -8,13 +9,14 @@ import subprocess
 import sys
 import tempfile
 
-from installlib import PROFILES, apply, inventory, plan
+from installlib import PROFILES, apply, inventory, plan, safe_path
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
 def metadata(stage, name):
     _, lib = PROFILES[name]
+    defines = '' if name == 'alib6' else ' -DGLM_ENABLE_EXPERIMENTAL -DALIB5_ENABLE_REFLECTION'
     pc = stage / 'lib/pkgconfig' / f'{lib}.pc'
     pc.parent.mkdir(parents=True, exist_ok=True)
     # A local development build has no claimed upstream semantic version.
@@ -26,7 +28,53 @@ Name: {lib}
 Description: Locally built {lib} (GCC C++26 reflection)
 Version: 0.0.0
 Libs: -L"${{libdir}}" -Wl,-rpath,"${{libdir}}" -l{lib} -lstdc++exp
-Cflags: -I"${{includedir}}" -DGLM_ENABLE_EXPERIMENTAL -DALIB5_ENABLE_REFLECTION
+Cflags: -I"${{includedir}}"{defines}
+''')
+    if name == 'alib6':
+        modules = stage / 'modules'
+        if not modules.is_dir() or not list(modules.glob('*/*.meta-info')):
+            raise RuntimeError('xmake did not export alib6 module metadata; rebuild the library first')
+        names = set()
+        for meta in modules.glob('*/*.meta-info'):
+            data = json.loads(meta.read_text())
+            module = data.get('name', '')
+            rel = data.get('file', '')
+            if (not (module == 'alib6' or module.startswith('alib6.')) or
+                    Path(rel).is_absolute() or '..' in Path(rel).parts or
+                    modules / rel != meta.with_suffix('') or
+                    not safe_path(modules, rel).is_file()):
+                raise RuntimeError(f'Invalid alib6 module export: {meta}')
+            names.add(module)
+            # xmake's JSON key/import order can vary between identical exports.
+            # Canonicalize it so unchanged installs do not create new backups.
+            if isinstance(data.get('imports'), list):
+                data['imports'] = sorted(data['imports'])
+            meta.write_text(json.dumps(data, sort_keys=True, indent=2) + '\n')
+        if 'alib6' not in names:
+            raise RuntimeError('The alib6 entry module is missing from the exported metadata')
+        owned = stage / 'share/alib6'
+        owned.mkdir(parents=True, exist_ok=True)
+        modules.rename(owned / 'modules')
+        recipe = owned / 'repository/packages/a/alib6/xmake.lua'
+        recipe.parent.mkdir(parents=True, exist_ok=True)
+        recipe.write_text('''-- Generated local package: module interfaces are rebuilt by the consumer.
+package("alib6")
+    set_description("Locally installed alib6 shared library and module interfaces")
+    on_load(function (package)
+        package:set("installdir", path.join(os.scriptdir(), "../../../.."))
+    end)
+    on_fetch(function (package)
+        local prefix = path.absolute(path.join(package:installdir(), "../.."))
+        local libdir = path.join(prefix, "lib")
+        local library = path.join(libdir, "libaaaa0ggmcLib6.so")
+        assert(os.isfile(library), "Missing alib6 shared library: " .. library)
+        return {includedirs = {path.join(prefix, "include")},
+                linkdirs = {libdir}, links = {"aaaa0ggmcLib6", "stdc++exp"},
+                libfiles = {library}, shared = true,
+                ldflags = {"-Wl,-rpath," .. libdir},
+                shflags = {"-Wl,-rpath," .. libdir}}
+    end)
+package_end()
 ''')
 
 
@@ -53,6 +101,8 @@ def main():
     if os.geteuid() == 0:
         parser.error('Run without sudo; only the final copy/cleanup step requests sudo')
     project = (args.project or (ROOT if args.library == 'AGE' else ROOT.parent / 'aaaa0ggmcLib')).resolve()
+    if not args.uninstall:
+        print(f'Source project: {project}\nInstall prefix: {prefix}', flush=True)
     with tempfile.TemporaryDirectory(prefix='ul-install-') as work:
         stage = None
         if not args.uninstall:
@@ -62,7 +112,15 @@ def main():
             if not args.no_build:
                 subprocess.run(['xmake', 'build', target], cwd=project, check=True)
             stage = Path(work) / 'stage'
-            subprocess.run(['xmake', 'install', '--packages=n', '-o', str(stage), target], cwd=project, check=True)
+            try:
+                subprocess.run(['xmake', 'install', '--packages=n', '-o', str(stage), target], cwd=project, check=True)
+            except subprocess.CalledProcessError as exc:
+                raise RuntimeError(
+                    f'xmake staging failed in {project}. Relative build paths in the error '
+                    'belong to this source project. If a .meta-info file cannot be opened, '
+                    'check its ownership and write permissions: a previous sudo xmake install '
+                    'may have left root-owned generated files. Do not run this script with sudo.'
+                ) from exc
             metadata(stage, args.library)
             # Installation hooks may stage other dependencies; never claim them.
             expected = inventory(stage, args.library)

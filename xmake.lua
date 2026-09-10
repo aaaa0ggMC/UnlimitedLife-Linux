@@ -20,7 +20,11 @@ if is_plat("linux") then
     add_rpathdirs("$ORIGIN", path.join(get_config("alib_prefix") or "/usr/local", "lib"))
 end
 
+add_repositories("local-alib6 /usr/local/share/alib6/repository")
+add_requires("alib6", {system = false})
+
 includes("xmake/alib.lua")
+includes("xmake/ave.lua")
 includes("xmake/packages.lua")
 includes("xmake/age.lua")
 if has_config("examples") then
