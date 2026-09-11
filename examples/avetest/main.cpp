@@ -1,4 +1,4 @@
-﻿#include <vulkan/vulkan.h>
+#include <vulkan/vulkan.h>
 
 import alib6;
 import std;
@@ -15,8 +15,8 @@ auto main() -> int {
         ave::Window window({
             .ctx = context,
             .title = "Hello from AVE!",
-            .width = 1920,
-            .height = 1080,
+            .width = 800,
+            .height = 600,
         });
 
         ave::ProfileWith with;
@@ -27,13 +27,6 @@ auto main() -> int {
             const VkDebugUtilsMessengerCallbackDataEXT& data
         ){
             vklg(ave::to_log_level(severity))
-                << "[" << ave::to_message_type_name(type) << "]"
-                << "[id="
-                << (data.pMessageIdName ? data.pMessageIdName : "<no id name>")
-                << ":" << data.messageIdNumber << "]"
-                << "[objects=" << data.objectCount << "]"
-                << "[queue_labels=" << data.queueLabelCount << "]"
-                << "[cmd_labels=" << data.cmdBufLabelCount << "] \n"
                 << (data.pMessage ? data.pMessage : "<no message>")
                 << std::endl;
             return false;
@@ -48,11 +41,27 @@ auto main() -> int {
         ;
         lg << alib6::to_adata(build_result) << std::endl;
 
+        auto pipeline = renderer.legacy_render->create_graphics_pipeline(
+            "avetest/shaders/simple-vert.spv",
+            "avetest/shaders/simple-frag.spv"
+        );
+        if(!pipeline) return 1;
+
+        alib6::u64 frames = 0;
+        alib6::Clock clock;
         while(!window.should_close()){
             window.poll_events();
+            auto graphics = renderer.acquire_context();
 
-            alib6::Timer(1).wait();
+            graphics.begin();
+            graphics.bind_pipeline(*pipeline);
+            graphics.draw(3);
+            graphics.end();
+        
+            ++frames;
         }
+
+        lg << frames / clock.get_all() * 1000 << std::endl;
         
     }catch(...){
         // 已经有panic了，也是直接忽略

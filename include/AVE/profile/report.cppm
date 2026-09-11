@@ -23,11 +23,15 @@ export namespace ave{
         instance_layers,
         create_instance,
         debug_messenger,
-        // 预留后续渲染阶段
         create_surface,
         select_physical_device,
         create_device,
-        create_swapchain
+        create_swapchain,
+        create_sync_objects,
+        create_render_pass,
+        create_framebuffers,
+        create_command_pool,
+        allocate_command_buffers
     };
 
     enum class RenderBuildStageStatus {
@@ -111,7 +115,13 @@ export namespace ave{
             RenderBuildStageId::debug_messenger,
             RenderBuildStageId::create_surface,
             RenderBuildStageId::select_physical_device,
-            RenderBuildStageId::create_device
+            RenderBuildStageId::create_device,
+            RenderBuildStageId::create_swapchain,
+            RenderBuildStageId::create_sync_objects,
+            RenderBuildStageId::create_render_pass,
+            RenderBuildStageId::create_framebuffers,
+            RenderBuildStageId::create_command_pool,
+            RenderBuildStageId::allocate_command_buffers
         };
 
         RenderBuildStageStatus status { RenderBuildStageStatus::not_run };

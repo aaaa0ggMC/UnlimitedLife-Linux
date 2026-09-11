@@ -199,7 +199,329 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
         return renderer;
     }
 
+    /// SurfaceRenderer 的最后一个基础阶段：创建或接收 Swapchain。
+    if(!__vk_swapchain(renderer, ew, result)){
+        return renderer;
+    }
+
+    if(!__vk_sync_objects(renderer, ew, result)){
+        return renderer;
+    }
+
+    if(!__vk_legacy_render(renderer, ew, result)){
+        return renderer;
+    }
+
+    if(!__vk_command_pool(renderer, ew, result)){
+        return renderer;
+    }
+
+    if(!__vk_command_buffers(renderer, ew, result)){
+        return renderer;
+    }
+
     return renderer;
+}
+
+bool RenderProfile::__vk_command_pool(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    if(with_data.command_pool) {
+        const bool valid =
+            static_cast<bool>(*with_data.command_pool) &&
+            with_data.command_pool->get_device() == r.device &&
+            with_data.command_pool->get_queue_family() ==
+                r.swapchain->get_graphics_queue_family();
+        if(result) {
+            auto& stage = (*result)[create_command_pool];
+            stage["source"] = "provided";
+            stage["queue_family"] = with_data.command_pool->get_queue_family();
+            if(valid) stage.succeed();
+            else stage.fail(
+                "Provided CommandPool is invalid or belongs to a different Device/queue family");
+        }
+        if(!valid) {
+            ew.report(ave_vk_create_command_pool,
+                "The provided CommandPool is invalid or belongs to a different Device/queue family.");
+            return false;
+        }
+        r.command_pool = with_data.command_pool;
+        return true;
+    }
+
+    WithCommandPoolInput input(r.device, r.swapchain);
+    CreateCommandPoolInfo ci;
+    ci.ew = ew;
+    if(with_data.configure_command_pool) {
+        with_data.configure_command_pool(input, ci);
+    }else{
+        default_configure_command_pool(input, ci);
+    }
+    const auto queue_family = ci.queue_family;
+    r.command_pool = CommandPool::create(std::move(ci));
+
+    if(result) {
+        auto& stage = (*result)[create_command_pool];
+        stage["source"] = "created";
+        stage["queue_family"] = queue_family;
+        if(r.command_pool) stage.succeed();
+        else stage.fail("Failed to create Vulkan CommandPool");
+    }
+    return static_cast<bool>(r.command_pool);
+}
+
+bool RenderProfile::__vk_command_buffers(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    if(with_data.command_buffers) {
+        const bool valid =
+            static_cast<bool>(*with_data.command_buffers) &&
+            with_data.command_buffers->get_pool() == r.command_pool &&
+            with_data.command_buffers->size() >= r.sync_objects->size();
+        if(result) {
+            auto& stage = (*result)[allocate_command_buffers];
+            stage["source"] = "provided";
+            stage["count"] = with_data.command_buffers->size();
+            if(valid) stage.succeed();
+            else stage.fail(
+                "Provided CommandBuffers is invalid, uses a different pool, or has insufficient frame buffers");
+        }
+        if(!valid) {
+            ew.report(ave_vk_allocate_command_buffers,
+                "The provided CommandBuffers is invalid, uses a different pool, or has insufficient frame buffers.");
+            return false;
+        }
+        r.command_buffers = with_data.command_buffers;
+        return true;
+    }
+
+    WithCommandBuffersInput input(r.command_pool, r.sync_objects);
+    CreateCommandBuffersInfo ci;
+    ci.ew = ew;
+    if(with_data.configure_command_buffers) {
+        with_data.configure_command_buffers(input, ci);
+    }else{
+        default_configure_command_buffers(input, ci);
+    }
+    const auto requested_count = ci.count;
+    r.command_buffers = CommandBuffers::create(std::move(ci));
+
+    if(result) {
+        auto& stage = (*result)[allocate_command_buffers];
+        stage["source"] = "allocated";
+        stage["requested_count"] = requested_count;
+        if(r.command_buffers) {
+            stage.succeed();
+            stage["count"] = r.command_buffers->size();
+        }else{
+            stage.fail("Failed to allocate Vulkan CommandBuffers");
+        }
+    }
+    return static_cast<bool>(r.command_buffers);
+}
+
+bool RenderProfile::__vk_sync_objects(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    if(with_data.sync_objects) {
+        const bool valid =
+            static_cast<bool>(*with_data.sync_objects) &&
+            with_data.sync_objects->get_device() == r.device;
+        if(result) {
+            auto& stage = (*result)[create_sync_objects];
+            stage["source"] = "provided";
+            stage["count"] = with_data.sync_objects->size();
+            if(valid) stage.succeed();
+            else stage.fail("Provided SyncObjects is invalid or belongs to a different Device");
+        }
+        if(!valid) {
+            ew.report(ave_vk_create_sync_objects,
+                "The provided SyncObjects is invalid or belongs to a different Device.");
+            return false;
+        }
+        r.sync_objects = with_data.sync_objects;
+        return true;
+    }
+
+    WithSyncObjectsInput input(r.device, r.swapchain);
+    CreateSyncObjectsInfo ci;
+    ci.device = r.device;
+    ci.ew = ew;
+    ci.count = with_data.select_sync_objects_count
+        ? with_data.select_sync_objects_count(input)
+        : default_select_sync_objects_count(input);
+    if(with_data.configure_sync_objects) {
+        with_data.configure_sync_objects(input, ci);
+    }
+    const auto configured_count = ci.count;
+    r.sync_objects = SyncObjects::create(std::move(ci));
+
+    if(result) {
+        auto& stage = (*result)[create_sync_objects];
+        stage["source"] = "created";
+        stage["requested_count"] = configured_count;
+        if(r.sync_objects) {
+            stage.succeed();
+            stage["count"] = r.sync_objects->size();
+        }else{
+            stage.fail("Failed to create Vulkan synchronization objects");
+        }
+    }
+    return static_cast<bool>(r.sync_objects);
+}
+
+bool RenderProfile::__vk_legacy_render(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    if(with_data.legacy_render) {
+        const bool valid =
+            static_cast<bool>(*with_data.legacy_render) &&
+            with_data.legacy_render->get_swapchain() == r.swapchain;
+        if(result) {
+            auto& render_pass_stage = (*result)[create_render_pass];
+            auto& framebuffer_stage = (*result)[create_framebuffers];
+            render_pass_stage["source"] = "provided";
+            framebuffer_stage["source"] = "provided";
+            framebuffer_stage["count"] =
+                with_data.legacy_render->get_framebuffers().size();
+            if(valid) {
+                render_pass_stage.succeed();
+                framebuffer_stage.succeed();
+            }else{
+                render_pass_stage.fail(
+                    "Provided LegacyRender is invalid or belongs to a different Swapchain");
+                framebuffer_stage.skip("Provided LegacyRender validation failed");
+            }
+        }
+        if(!valid) {
+            ew.report(ave_vk_create_render_pass,
+                "The provided LegacyRender is invalid or belongs to a different Swapchain.");
+            return false;
+        }
+        r.legacy_render = with_data.legacy_render;
+        return true;
+    }
+
+    WithLegacyRenderInput input(r.device, r.swapchain);
+    CreateLegacyRenderInfo ci;
+    ci.swapchain = r.swapchain;
+    ci.ew = ew;
+    if(with_data.configure_legacy_render) {
+        with_data.configure_legacy_render(input, ci);
+    }else{
+        default_configure_legacy_render(input, ci);
+    }
+
+    LegacyRenderCreateStatus status;
+    r.legacy_render = LegacyRender::create(std::move(ci), &status);
+    if(result) {
+        auto& render_pass_stage = (*result)[create_render_pass];
+        auto& framebuffer_stage = (*result)[create_framebuffers];
+        render_pass_stage["source"] = "created";
+        framebuffer_stage["source"] = "created";
+        framebuffer_stage["created_count"] = status.framebuffers_created;
+        if(status.render_pass_created) render_pass_stage.succeed();
+        else render_pass_stage.fail("Failed to create Vulkan RenderPass");
+        if(r.legacy_render) {
+            framebuffer_stage.succeed();
+            framebuffer_stage["count"] =
+                r.legacy_render->get_framebuffers().size();
+        }else if(status.render_pass_created) {
+            framebuffer_stage.fail("Failed to create all Vulkan Framebuffers");
+        }else{
+            framebuffer_stage.skip("RenderPass creation failed");
+        }
+    }
+    return static_cast<bool>(r.legacy_render);
+}
+
+bool RenderProfile::__vk_swapchain(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    if(with_data.swapchain) {
+        const bool valid =
+            with_data.swapchain->get_system_handle() != VK_NULL_HANDLE &&
+            with_data.swapchain->get_device() == r.device &&
+            with_data.swapchain->get_surface() == r.surface;
+        if(result) {
+            auto& stage = (*result)[create_swapchain];
+            stage["source"] = "provided";
+            if(valid) {
+                stage.succeed();
+                const auto extent = with_data.swapchain->get_extent();
+                stage["width"] = extent.width;
+                stage["height"] = extent.height;
+                stage["image_count"] = with_data.swapchain->get_images().size();
+            }else{
+                stage.fail(
+                    "Provided Swapchain is invalid or belongs to different Device/Surface dependencies"
+                );
+            }
+        }
+        if(!valid) {
+            ew.report(
+                ave_vk_create_swapchain,
+                "The provided Swapchain is invalid or belongs to different Device/Surface dependencies."
+            );
+            return false;
+        }
+        r.swapchain = with_data.swapchain;
+        return true;
+    }
+
+    auto with = query_swapchain_support(r.device, r.surface, ew);
+    if(!with) {
+        if(result) result->fail(
+            create_swapchain,
+            "Failed to query Swapchain support"
+        );
+        return false;
+    }
+
+    CreateSwapchainInfo ci;
+    ci.device = r.device;
+    ci.surface = r.surface;
+    ci.ew = ew;
+
+    if(with_data.configure_swapchain) {
+        with_data.configure_swapchain(*with, ci);
+    }else{
+        default_configure_swapchain(*with, ci);
+    }
+
+    const auto configured_format = ci.surface_format;
+    const auto configured_present_mode = ci.present_mode;
+    const auto configured_extent = ci.extent;
+    const auto configured_image_count = ci.image_count;
+    r.swapchain = Swapchain::create(std::move(ci), *with);
+
+    if(result) {
+        auto& stage = (*result)[create_swapchain];
+        stage["source"] = "created";
+        stage["format"] = static_cast<alib6::i64>(configured_format.format);
+        stage["color_space"] = static_cast<alib6::i64>(configured_format.colorSpace);
+        stage["present_mode"] = static_cast<alib6::i64>(configured_present_mode);
+        stage["width"] = configured_extent.width;
+        stage["height"] = configured_extent.height;
+        stage["requested_image_count"] = configured_image_count;
+        if(r.swapchain) {
+            stage.succeed();
+            stage["image_count"] = r.swapchain->get_images().size();
+        }else{
+            stage.fail("Failed to create Vulkan Swapchain or image views");
+        }
+    }
+    return static_cast<bool>(r.swapchain);
 }
 
 bool RenderProfile::__vk_device(

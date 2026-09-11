@@ -281,5 +281,55 @@ export namespace ave{
                 CreateDeviceInfo&
             )> configure_device { nullptr };
 
+        // 指定现有 Swapchain 后，下面的 Swapchain 创建配置会被忽略。
+        std::shared_ptr<Swapchain> swapchain { nullptr };
+            // 默认函数负责从 format 到 extent 以及其余创建参数的完整配置。
+            std::function<void(
+                WithSwapchain&,
+                CreateSwapchainInfo&
+            )> configure_swapchain {
+                default_configure_swapchain
+            };
+
+        // 指定现有 SyncObjects 后，下面的同步对象选择与创建配置会被忽略。
+        std::shared_ptr<SyncObjects> sync_objects { nullptr };
+            // 默认与 Swapchain image 数量一致。
+            SelectSyncObjectsCount select_sync_objects_count {
+                default_select_sync_objects_count
+            };
+            // Device 与 count 填充完成后、创建同步对象前调用。
+            std::function<void(
+                WithSyncObjectsInput&,
+                CreateSyncObjectsInfo&
+            )> configure_sync_objects { nullptr };
+
+        // 指定现有 LegacyRender 后，下面的 RenderPass/Framebuffer 配置会被忽略。
+        std::shared_ptr<LegacyRender> legacy_render { nullptr };
+            std::function<void(
+                WithLegacyRenderInput&,
+                CreateLegacyRenderInfo&
+            )> configure_legacy_render {
+                default_configure_legacy_render
+            };
+
+        // 指定现有 CommandPool 后，下面的命令池配置会被忽略。
+        std::shared_ptr<CommandPool> command_pool { nullptr };
+            std::function<void(
+                WithCommandPoolInput&,
+                CreateCommandPoolInfo&
+            )> configure_command_pool {
+                default_configure_command_pool
+            };
+
+        // 指定现有 CommandBuffers 后，下面的分配配置会被忽略。
+        std::shared_ptr<CommandBuffers> command_buffers { nullptr };
+            // 默认数量与 SyncObjects 的 frame 数量一致。
+            std::function<void(
+                WithCommandBuffersInput&,
+                CreateCommandBuffersInfo&
+            )> configure_command_buffers {
+                default_configure_command_buffers
+            };
+
     };
 };
