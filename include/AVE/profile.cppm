@@ -13,6 +13,7 @@ module;
 
 export module ave.profile;
 export import :profile;
+export import :report;
 
 import ave.window;
 import ave.render;
@@ -20,6 +21,7 @@ import ave.context;
 import alib6;
 
 import :profile;
+import :report;
 
 namespace ave{
     struct AVE_API RenderProfile {
@@ -56,11 +58,10 @@ namespace ave{
         }
 
     private: // build fns
-        bool __vk_instance(
-            Renderer & r,
-            alib6::ErrorWrapper ew,
-            RenderBuildReport * result
-        );
+        bool __vk_instance(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
+        bool __vk_create_glfw_surface(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
+        bool __vk_select_physical_device(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
+        bool __vk_device(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
     };
 
 }

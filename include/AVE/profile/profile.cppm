@@ -19,224 +19,18 @@ import ave.render;
 import alib6;
 import std;
 
+import :report;
+
 export namespace ave{
     inline constexpr std::string_view vulkan_validation_layer_name = "VK_LAYER_KHRONOS_validation";
-
-    enum class RenderBuildStageId {
-        instance_extensions,
-        instance_layers,
-        create_instance,
-        debug_messenger,
-        // 预留后续渲染阶段
-        create_surface,
-        select_physical_device,
-        create_device,
-        create_swapchain
-    };
-
-    enum class RenderBuildStageStatus {
-        not_run,
-        succeeded,
-        partial,
-        failed,
-        skipped
-    };
-
-    struct AVE_API RenderBuildStage {
-        RenderBuildStageId id { RenderBuildStageId::instance_extensions };
-        RenderBuildStageStatus status { RenderBuildStageStatus::not_run };
-        alib6::AData content;
-
-        RenderBuildStage() = default;
-        explicit RenderBuildStage(RenderBuildStageId stage_id)
-        :id(stage_id){}
-
-        inline RenderBuildStage& set_status(RenderBuildStageStatus s) noexcept {
-            status = s;
-            return *this;
-        }
-
-        inline RenderBuildStage& succeed() noexcept {
-            status = RenderBuildStageStatus::succeeded;
-            return *this;
-        }
-
-        inline RenderBuildStage& fail(std::string_view reason = {}) {
-            status = RenderBuildStageStatus::failed;
-            if(!reason.empty()) content["error"] = reason;
-            return *this;
-        }
-
-        inline RenderBuildStage& skip(std::string_view reason = {}) {
-            status = RenderBuildStageStatus::skipped;
-            if(!reason.empty()) content["reason"] = reason;
-            return *this;
-        }
-
-        inline RenderBuildStage& partial(std::string_view reason = {}) {
-            status = RenderBuildStageStatus::partial;
-            if(!reason.empty()) content["note"] = reason;
-            return *this;
-        }
-
-        inline alib6::AData& operator[](std::string_view key) {
-            return content[key];
-        }
-
-        inline const alib6::AData& operator[](std::string_view key) const {
-            return content[key];
-        }
-
-        [[nodiscard]] inline bool succeeded() const noexcept {
-            return status == RenderBuildStageStatus::succeeded;
-        }
-
-        [[nodiscard]] inline bool failed() const noexcept {
-            return status == RenderBuildStageStatus::failed;
-        }
-
-        [[nodiscard]] inline bool skipped() const noexcept {
-            return status == RenderBuildStageStatus::skipped;
-        }
-
-        [[nodiscard]] inline bool partial() const noexcept {
-            return status == RenderBuildStageStatus::partial;
-        }
-    };
-
-    struct AVE_API RenderBuildReport {
-        using StageId = RenderBuildStageId;
-        using StageStatus = RenderBuildStageStatus;
-
-        inline static constexpr std::array stage_order {
-            RenderBuildStageId::instance_extensions,
-            RenderBuildStageId::instance_layers,
-            RenderBuildStageId::create_instance,
-            RenderBuildStageId::debug_messenger
-        };
-
-        RenderBuildStageStatus status { RenderBuildStageStatus::not_run };
-        std::vector<RenderBuildStage> stages;
-
-        RenderBuildReport(){ reset(); }
-
-        void reset(){
-            status = RenderBuildStageStatus::not_run;
-            stages.clear();
-            stages.reserve(stage_order.size());
-            for(const auto id : stage_order){
-                stages.emplace_back(id);
-            }
-        }
-
-        [[nodiscard]] RenderBuildStage* find(RenderBuildStageId id) noexcept {
-            const auto it = std::ranges::find(stages, id, &RenderBuildStage::id);
-            return it == stages.end() ? nullptr : std::addressof(*it);
-        }
-
-        [[nodiscard]] const RenderBuildStage* find(RenderBuildStageId id) const noexcept {
-            const auto it = std::ranges::find(stages, id, &RenderBuildStage::id);
-            return it == stages.end() ? nullptr : std::addressof(*it);
-        }
-
-        RenderBuildStage& stage(RenderBuildStageId id){
-            return *find(id);
-        }
-
-        const RenderBuildStage& stage(RenderBuildStageId id) const {
-            return *find(id);
-        }
-
-        inline RenderBuildStage& operator[](RenderBuildStageId id) {
-            return stage(id);
-        }
-
-        inline const RenderBuildStage& operator[](RenderBuildStageId id) const {
-            return stage(id);
-        }
-
-        inline RenderBuildStage& succeed(RenderBuildStageId id) {
-            auto& s = stage(id);
-            s.succeed();
-            return s;
-        }
-
-        inline RenderBuildStage& fail(RenderBuildStageId id, std::string_view reason = {}) {
-            auto& s = stage(id);
-            s.fail(reason);
-            return s;
-        }
-
-        inline RenderBuildStage& skip(RenderBuildStageId id, std::string_view reason = {}) {
-            auto& s = stage(id);
-            s.skip(reason);
-            return s;
-        }
-
-        inline RenderBuildStage& partial(RenderBuildStageId id, std::string_view reason = {}) {
-            auto& s = stage(id);
-            s.partial(reason);
-            return s;
-        }
-
-        inline RenderBuildStage& set_status(RenderBuildStageId id, RenderBuildStageStatus s) {
-            auto& st = stage(id);
-            st.set_status(s);
-            return st;
-        }
-
-        inline void skip(std::initializer_list<RenderBuildStageId> ids, std::string_view reason = {}) {
-            for(const auto id : ids){
-                skip(id, reason);
-            }
-        }
-
-        inline RenderBuildStage* skip_if(bool condition, RenderBuildStageId id, std::string_view reason = {}) {
-            if(condition){
-                return &skip(id, reason);
-            }
-            return nullptr;
-        }
-
-        void finish(){
-            const bool has_failure = std::ranges::any_of(
-                stages,
-                [](const RenderBuildStage& stage){
-                    return stage.status == RenderBuildStageStatus::failed;
-                }
-            );
-            status = has_failure
-                ? RenderBuildStageStatus::failed
-                : RenderBuildStageStatus::succeeded;
-        }
-
-        [[nodiscard]] bool succeeded() const noexcept {
-            return status == RenderBuildStageStatus::succeeded;
-        }
-
-        [[nodiscard]] bool failed() const noexcept {
-            return status == RenderBuildStageStatus::failed;
-        }
-
-        [[nodiscard]] RenderBuildStageStatus stage_status(
-            RenderBuildStageId id
-        ) const noexcept {
-            const auto * found = find(id);
-            return found
-                ? found->status
-                : RenderBuildStageStatus::not_run;
-        }
-    };
-
-    using StageId = RenderBuildStageId;
-    using StageStatus = RenderBuildStageStatus;
     
     struct AVE_API WithGlobalInput {
     private:
         friend class RenderProfile;
+        // 可能存在
         Window * window;
 
-        WithGlobalInput(Window * w):window(w){}
+        inline WithGlobalInput(Window * w):window(w){}
     public:
         inline std::vector<std::string> get_required_extensions(){
             if(window){
@@ -311,6 +105,129 @@ export namespace ave{
         }
     };
 
+    struct AVE_API WithPhysicalDevices {
+    private:
+        friend class RenderProfile;
+        // 一定存在
+        std::shared_ptr<Instance> instance;
+        // 可能存在
+        std::shared_ptr<Surface> surface;
+        // 缓存的物理设备
+        bool physical_devices_enumerated { false };
+        std::vector<PhysicalDeviceInfo> physical_devices {};
+        std::vector<std::string> required_device_extensions {};
+
+        inline WithPhysicalDevices(
+            std::shared_ptr<Instance> i,
+            std::shared_ptr<Surface> s,
+            std::vector<std::string> required_extensions
+        )
+        :instance(std::move(i))
+        ,surface(std::move(s))
+        ,required_device_extensions(std::move(required_extensions)){}
+    public:
+        inline alib6::u32 get_physical_devices_count() noexcept {
+            uint32_t physical_device_count = 0;
+            vkEnumeratePhysicalDevices(
+                instance->get_system_handle(),
+                &physical_device_count,
+                nullptr
+            );
+            return physical_device_count;
+        }
+
+        const std::vector<PhysicalDeviceInfo>& enumerate_physical_devices(){
+            if(physical_devices_enumerated)return physical_devices;
+
+            alib6::u32 physical_device_count = get_physical_devices_count();
+
+            std::vector<VkPhysicalDevice> devices(physical_device_count);
+            vkEnumeratePhysicalDevices(instance->get_system_handle(), &physical_device_count, devices.data());
+            devices.resize(physical_device_count);
+
+            const VkSurfaceKHR surface_handle = surface
+                ? surface->get_system_handle()
+                : VK_NULL_HANDLE;
+            physical_devices.reserve(physical_device_count);
+            for(const auto device : devices) {
+                physical_devices.push_back(
+                    PhysicalDeviceInfo::query(device, surface_handle)
+                );
+            }
+            physical_devices_enumerated = true;
+            return physical_devices;
+        }
+
+        [[nodiscard]] bool supports_required_extensions(
+            const PhysicalDeviceInfo& info
+        ) const noexcept {
+            return std::ranges::all_of(
+                required_device_extensions,
+                [&info](const std::string& extension) {
+                    return info.supports_extension(extension);
+                }
+            );
+        }
+    };
+
+    using SelectPhysicalDevice = std::function<std::optional<std::size_t>(
+        WithPhysicalDevices&
+    )>;
+
+    /// LearnVulkan2 风格的默认物理设备评分与选择。
+    [[nodiscard]] inline std::optional<std::size_t>
+    default_select_physical_device(WithPhysicalDevices& input) {
+        constexpr double api_version_multiplier = 0.6;
+        constexpr double image_dimension_2d_multiplier = 0.2;
+        constexpr double discrete_gpu_multiplier = 2.0;
+
+        const auto& devices = input.enumerate_physical_devices();
+        std::optional<std::size_t> selected;
+        double highest_score = 0.0;
+
+        for(std::size_t i = 0; i < devices.size(); ++i){
+            const auto gpu = devices[i].as_gpu();
+
+            if(!gpu.geometry_shader || !gpu.support_graphics) continue;
+            if(devices[i].has_surface() && !gpu.swapchain_adequate) continue;
+            if(!input.supports_required_extensions(devices[i])) continue;
+
+            const double api_score =
+                (static_cast<double>(gpu.api_version.major) * 1024.0 +
+                 static_cast<double>(gpu.api_version.minor)) *
+                api_version_multiplier;
+            const double image_score =
+                static_cast<double>(gpu.max_image_dimension_2d) *
+                image_dimension_2d_multiplier;
+
+            double score = api_score + image_score;
+            if(gpu.discrete) score *= discrete_gpu_multiplier;
+
+            if(score > highest_score) {
+                highest_score = score;
+                selected = i;
+            }
+        }
+
+        return selected;
+    }
+
+    struct AVE_API WithSelectedPhysicalDevice {
+    private:
+        friend class RenderProfile;
+        const PhysicalDeviceInfo& info;
+
+        explicit WithSelectedPhysicalDevice(const PhysicalDeviceInfo& value)
+        :info(value){}
+    public:
+        [[nodiscard]] const PhysicalDeviceInfo& get_info() const noexcept {
+            return info;
+        }
+
+        [[nodiscard]] GPUInfo as_gpu() const {
+            return info.as_gpu();
+        }
+    };
 
     /// 按顺序会依次执行，配置实行覆盖，其中若制定了instance之类的一些配置会被忽略
     struct AVE_API ProfileWith {
@@ -339,7 +256,30 @@ export namespace ave{
             )> on_layers_resolved { nullptr };
 
         // 指定现有对象时，configure_debug_messenger 会被忽略。
-        std::shared_ptr<DebugMessenger> debug_messenger;
+        std::shared_ptr<DebugMessenger> debug_messenger { nullptr };
             std::optional<CreateDebugMessengerInfo> configure_debug_messenger { std::nullopt };
+
+        // 指定现有 Device 后，下面的物理设备选择与 Device 创建配置会被忽略。
+        std::shared_ptr<Device> device { nullptr };
+            // 返回 enumerate_physical_devices() 中的下标；置空时直接选择第一个设备。
+            SelectPhysicalDevice select_physical_device {
+                default_select_physical_device
+            };
+            // 仅在当前 Profile 拥有 Surface 时自动将 VK_KHR_swapchain 作为 required。
+            bool add_khr_swapchain { true };
+            std::vector<std::string> required_device_extensions;
+            std::vector<std::string> optional_device_extensions;
+            std::function<void(
+                bool is_required,
+                std::vector<std::string> satisfied,
+                std::vector<std::string> missing
+            )> on_device_extensions_resolved { nullptr };
+
+            // 在默认队列与扩展填充完成后、创建逻辑设备前调用。
+            std::function<void(
+                WithSelectedPhysicalDevice&,
+                CreateDeviceInfo&
+            )> configure_device { nullptr };
+
     };
 };

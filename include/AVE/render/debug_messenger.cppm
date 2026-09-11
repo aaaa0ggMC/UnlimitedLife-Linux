@@ -24,6 +24,36 @@ export namespace ave {
         const VkDebugUtilsMessengerCallbackDataEXT& data
     )>;
 
+    [[nodiscard]] constexpr alib6::log::LogLevel to_log_level(
+        VkDebugUtilsMessageSeverityFlagBitsEXT severity
+    ) noexcept {
+        if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+            return alib6::log::LogLevel::Error;
+        }
+        if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+            return alib6::log::LogLevel::Warn;
+        }
+        if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+            return alib6::log::LogLevel::Info;
+        }
+        return alib6::log::LogLevel::Debug;
+    }
+
+    [[nodiscard]] constexpr std::string_view to_message_type_name(
+        VkDebugUtilsMessageTypeFlagsEXT type
+    ) noexcept {
+        if(type & VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT) {
+            return "Performance";
+        }
+        if(type & VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT) {
+            return "Validation";
+        }
+        if(type & VK_DEBUG_UTILS_MESSAGE_TYPE_DEVICE_ADDRESS_BINDING_BIT_EXT) {
+            return "AddressBinding";
+        }
+        return "General";
+    }
+
     struct AVE_API CreateDebugMessengerInfo {
         VkDebugUtilsMessageSeverityFlagsEXT severity =
             VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |

@@ -4,9 +4,51 @@ module;
 
 module ave.profile;
 
+import ave.ecode;
+
 using namespace ave;
 using enum RenderBuildStageId;
 using enum RenderBuildStageStatus;
+
+namespace {
+    struct DeviceExtensionResolution {
+        std::vector<std::string> satisfied;
+        std::vector<std::string> missing;
+    };
+
+    std::vector<std::string> collect_required_device_extensions(
+        const ProfileWith& with,
+        bool has_surface
+    ) {
+        auto result = with.required_device_extensions;
+        const bool has_swapchain = std::ranges::any_of(
+            result,
+            [](const std::string& extension) {
+                return extension == VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+            }
+        );
+        if(has_surface && with.add_khr_swapchain && !has_swapchain) {
+            result.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+        }
+        return result;
+    }
+
+    DeviceExtensionResolution resolve_device_extensions(
+        const PhysicalDeviceInfo& device,
+        std::span<const std::string> requested
+    ) {
+        DeviceExtensionResolution result;
+        result.satisfied.reserve(requested.size());
+        result.missing.reserve(requested.size());
+        for(const auto& extension : requested) {
+            (device.supports_extension(extension)
+                ? result.satisfied
+                : result.missing
+            ).push_back(extension);
+        }
+        return result;
+    }
+}
 
 Renderer RenderProfile::build(alib6::ErrorWrapper ew){
     auto * result = std::exchange(build_report, nullptr);
@@ -19,26 +61,46 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
     } finish_result { result };
 
     Renderer renderer;
-    /// 创建好instance
-    if(!with_data.instance){
+
+    /// Instance 始终是第一阶段；仅提供 Device 时可沿依赖取得它绑定的 Instance。
+    if(!with_data.instance && !with_data.device){
         // 用户可以自己销毁这个 instance,如果不需要的话
         if(!__vk_instance(renderer, ew, result)){
             return renderer;
         }
     }else{
-        renderer.instance = with_data.instance;
+        renderer.instance = with_data.instance
+            ? with_data.instance
+            : with_data.device->get_instance();
+        const bool valid =
+            renderer.instance &&
+            renderer.instance->get_system_handle() != VK_NULL_HANDLE;
         if(result){
             result->skip({
                 instance_extensions,
                 instance_layers
-            }, "Instance was externally provided");
+            }, with_data.instance
+                ? "Instance was externally provided"
+                : "Instance was obtained from external Device");
 
-            auto & stage = result->succeed(create_instance);
-            stage["source"] = "provided";
+            auto& stage = (*result)[create_instance];
+            if(valid) stage.succeed();
+            else stage.fail("Provided Instance is not valid");
+            stage["source"] = with_data.instance
+                ? "provided"
+                : "device_dependency";
             stage["instance_handle"] = std::format("{}", static_cast<const void*>(renderer.instance.get()));
+        }
+        if(!valid){
+            ew.report(
+                ave_vk_create_instance,
+                "The provided Vulkan Instance is not valid."
+            );
+            return renderer;
         }
     }
 
+    /// debug messenger
     if(with_data.debug_messenger) {
         const bool instance_matches =
             with_data.debug_messenger->get_instance() == renderer.instance;
@@ -57,7 +119,8 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
             !instance_matches,
             "The provided debug messenger belongs to a different Vulkan instance."
         );
-        renderer.debug_messenger = with_data.debug_messenger;
+        // 不匹配别伤害好吧
+        if(instance_matches) renderer.debug_messenger = with_data.debug_messenger;
     }else if(with_data.configure_debug_messenger) {
         auto ci = *with_data.configure_debug_messenger;
         ci.ew = ew;
@@ -79,7 +142,314 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
         stage["source"] = "disabled";
     }
 
+    /// 如果存在window, 创建surface
+    if(window){
+        if(!__vk_create_glfw_surface(renderer, ew, result)){
+            return renderer;
+        }
+    }
+
+    if(with_data.device){
+        const bool valid_device =
+            with_data.device->get_system_handle() != VK_NULL_HANDLE &&
+            with_data.device->get_physical_device() != VK_NULL_HANDLE &&
+            with_data.device->get_instance() == renderer.instance;
+        if(!valid_device){
+            if(result){
+                result->skip(
+                    select_physical_device,
+                    "Physical device selection was overridden by external Device"
+                );
+                result->fail(
+                    create_device,
+                    "External Device is invalid or belongs to a different Instance"
+                );
+            }
+            ew.report(
+                ave_vk_create_device,
+                "The provided Vulkan Device is invalid or belongs to a different Instance."
+            );
+            return renderer;
+        }
+        renderer.physical_device = PhysicalDeviceInfo::query(
+            with_data.device->get_physical_device(),
+            renderer.surface
+                ? renderer.surface->get_system_handle()
+                : VK_NULL_HANDLE
+        );
+        if(result){
+            auto& stage = result->skip(
+                select_physical_device,
+                "Physical device was provided by external Device"
+            );
+            const auto gpu = renderer.physical_device->as_gpu();
+            stage["name"] = gpu.name;
+            stage["vendor_id"] = gpu.vendor_id;
+            stage["device_id"] = gpu.device_id;
+        }
+    }else{
+        /// 选择 Physical Device
+        if(!__vk_select_physical_device(renderer, ew, result)){
+            return renderer;
+        }
+    }
+
+    /// 创建或接收 Logical Device
+    if(!__vk_device(renderer, ew, result)){
+        return renderer;
+    }
+
     return renderer;
+}
+
+bool RenderProfile::__vk_device(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    if(with_data.device){
+        r.device = with_data.device;
+        if(result){
+            auto& stage = result->succeed(create_device);
+            stage["source"] = "provided";
+            stage["queue_family_count"] =
+                r.device->get_queue_requests().size();
+            stage["extensions"] = alib6::to_adata(
+                r.device->get_enabled_extensions()
+            );
+        }
+        return true;
+    }
+
+    if(!r.physical_device ||
+       r.physical_device->device == VK_NULL_HANDLE) {
+        if(result) result->fail(
+            create_device,
+            "No physical device was selected"
+        );
+        ew.report(
+            ave_vk_create_device,
+            "Cannot create a logical device before selecting a physical device."
+        );
+        return false;
+    }
+
+    const GPUInfo gpu = r.physical_device->as_gpu();
+    if(!gpu.graphics_queue_family) {
+        if(result) result->fail(
+            create_device,
+            "Selected physical device has no graphics queue"
+        );
+        ew.report(
+            ave_vk_create_device,
+            "Selected physical device has no graphics queue family."
+        );
+        return false;
+    }
+
+    CreateDeviceInfo ci;
+    ci.instance = r.instance;
+    ci.physical_device = r.physical_device->device;
+    ci.ew = ew;
+    ci.request_queue(*gpu.graphics_queue_family);
+    if(gpu.present_queue_family &&
+       *gpu.present_queue_family != *gpu.graphics_queue_family) {
+        ci.request_queue(*gpu.present_queue_family);
+    }
+    const auto required_extensions = collect_required_device_extensions(
+        with_data,
+        static_cast<bool>(r.surface)
+    );
+    const auto required_resolution = resolve_device_extensions(
+        *r.physical_device,
+        required_extensions
+    );
+    const auto optional_resolution = resolve_device_extensions(
+        *r.physical_device,
+        with_data.optional_device_extensions
+    );
+
+    if(with_data.on_device_extensions_resolved) {
+        with_data.on_device_extensions_resolved(
+            true,
+            required_resolution.satisfied,
+            required_resolution.missing
+        );
+        with_data.on_device_extensions_resolved(
+            false,
+            optional_resolution.satisfied,
+            optional_resolution.missing
+        );
+    }
+
+    if(!required_resolution.missing.empty()) {
+        if(result) {
+            auto& stage = result->fail(
+                create_device,
+                "Selected physical device is missing required device extensions"
+            );
+            stage["required_extensions"] = alib6::to_adata(required_extensions);
+            stage["missing_extensions"] = alib6::to_adata(
+                required_resolution.missing
+            );
+        }
+        ew.report(
+            ave_vk_create_device,
+            "Selected physical device is missing required device extensions."
+        );
+        return false;
+    }
+
+    for(const auto& extension : required_resolution.satisfied) {
+        ci.enable_extension(extension);
+    }
+    for(const auto& extension : optional_resolution.satisfied) {
+        ci.enable_extension(extension);
+    }
+
+    WithSelectedPhysicalDevice selected(*r.physical_device);
+    if(with_data.configure_device) {
+        with_data.configure_device(selected, ci);
+    }
+
+    const auto enabled_extensions = ci.extensions;
+    const auto queue_families = ci.queues
+        | std::views::transform(&DeviceQueueRequest::family_index)
+        | std::ranges::to<std::vector>();
+    r.device = Device::create(std::move(ci));
+
+    if(result){
+        auto& stage = (*result)[create_device];
+        stage["source"] = "created";
+        stage["extensions"] = alib6::to_adata(enabled_extensions);
+        stage["queue_families"] = alib6::to_adata(queue_families);
+        if(r.device){
+            stage.succeed();
+        }else{
+            stage.fail("Failed to create Vulkan logical device");
+        }
+    }
+    return static_cast<bool>(r.device);
+}
+
+bool RenderProfile::__vk_select_physical_device(
+    Renderer & r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport * result
+){
+    const auto required_extensions = collect_required_device_extensions(
+        with_data,
+        static_cast<bool>(r.surface)
+    );
+    WithPhysicalDevices input(
+        r.instance,
+        r.surface,
+        required_extensions
+    );
+    const auto& devices = input.enumerate_physical_devices();
+
+    std::optional<std::size_t> selected;
+    const bool custom_selector = static_cast<bool>(
+        with_data.select_physical_device
+    );
+
+    if(custom_selector){
+        selected = with_data.select_physical_device(input);
+    }else if(!devices.empty()){
+        // 显式清空 selector 时，按约定直接选择枚举到的第一个设备。
+        selected = 0;
+    }
+
+    const bool valid_index =
+        selected.has_value() &&
+        *selected < devices.size() &&
+        devices[*selected].device != VK_NULL_HANDLE;
+    const bool supports_required_extensions =
+        valid_index && input.supports_required_extensions(devices[*selected]);
+    const bool valid_selection =
+        valid_index && supports_required_extensions;
+
+    if(result){
+        auto& stage = (*result)[select_physical_device];
+        stage["device_count"] = devices.size();
+        stage["selector"] = custom_selector ? "configured" : "first";
+        stage["required_device_extensions"] = alib6::to_adata(
+            required_extensions
+        );
+
+        if(valid_selection){
+            const auto gpu = devices[*selected].as_gpu();
+            stage.succeed();
+            stage["selected_index"] = *selected;
+            stage["name"] = gpu.name;
+            stage["vendor_id"] = gpu.vendor_id;
+            stage["device_id"] = gpu.device_id;
+            stage["discrete"] = gpu.discrete;
+        }else if(devices.empty()){
+            stage.fail("No Vulkan physical devices found");
+        }else if(valid_index && !supports_required_extensions){
+            const auto resolution = resolve_device_extensions(
+                devices[*selected],
+                required_extensions
+            );
+            stage.fail("Selected physical device is missing required extensions");
+            stage["missing_device_extensions"] = alib6::to_adata(
+                resolution.missing
+            );
+        }else{
+            stage.fail("Physical device selector returned no valid device");
+        }
+    }
+
+    if(!valid_selection){
+        if(devices.empty()){
+            ew.report(
+                ave_vk_select_physical_device,
+                "No Vulkan physical devices found."
+            );
+        }else if(valid_index && !supports_required_extensions){
+            ew.report(
+                ave_vk_select_physical_device,
+                "Selected physical device is missing required device extensions."
+            );
+        }else{
+            ew.report(
+                ave_vk_select_physical_device,
+                "Physical device selector returned no valid device."
+            );
+        }
+        return false;
+    }
+
+    r.physical_device = devices[*selected];
+    return true;
+}
+
+bool RenderProfile::__vk_create_glfw_surface(
+    Renderer & r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport * result
+){
+    r.surface = Surface::create(
+        r.instance,
+        *window,
+        CreateSurfaceInfo { .ew = ew }
+    );
+
+    if(result){
+        auto & stage = (*result)[create_surface];
+        if(r.surface){
+            stage.succeed();
+            stage["surface_handle"] = std::format(
+                "{}",
+                static_cast<const void*>(r.surface->get_system_handle())
+            );
+        }else{
+            stage.fail("Failed to create Vulkan window surface");
+        }
+    }
+
+    return r.surface != VK_NULL_HANDLE;
 }
 
 bool RenderProfile::__vk_instance(
@@ -123,7 +493,6 @@ bool RenderProfile::__vk_instance(
         }
     }
 
-    // 1. 扩展协商 (instance_extensions)
     const bool need_debug_ext = (!with_data.debug_messenger && with_data.configure_debug_messenger.has_value());
     const bool has_req_ext = !with_data.required_extensions.empty();
     const bool has_opt_ext = !with_data.optional_extensions.empty();
@@ -224,7 +593,7 @@ bool RenderProfile::__vk_instance(
         }
     }
 
-    // 2. 中间层协商 (instance_layers)
+    // 中间层协商 (instance_layers)
     const bool need_val_layer = with_data.validation_layer;
     const bool has_req_layers = !with_data.required_layers.empty();
     const bool has_opt_layers = !with_data.optional_layers.empty();
@@ -328,7 +697,7 @@ bool RenderProfile::__vk_instance(
         }
     }
 
-    // 3. 真正创建 Instance (create_instance)
+    // 真正创建 Instance (create_instance)
     r.instance = std::make_shared<Instance>();
     const bool created = r.instance->create(ci);
     if(result){

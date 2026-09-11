@@ -22,6 +22,9 @@ export namespace ave{
         ave_bad_glfw           = 100'002,
         ave_already_created    = 100'003,
         ave_vk_create_instance = 100'004,
-        ave_vk_create_debug_messenger = 100'005
+        ave_vk_create_debug_messenger = 100'005,
+        ave_vk_create_surface = 100'006,
+        ave_vk_select_physical_device = 100'007,
+        ave_vk_create_device = 100'008
     };
 };

@@ -162,6 +162,7 @@ export namespace ave{
         }
     };
 
+
     template<class Target>
     void write_to_log(Target& target, const Version& version) {
         std::format_to(

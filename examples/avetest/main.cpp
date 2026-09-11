@@ -8,6 +8,7 @@ auto main() -> int {
     try{
         alib6::log::Logger logger;
         alib6::log::LogFactory lg(logger,"avetest");
+        alib6::log::LogFactory vklg(logger,"Vulkan");
         logger.append_mod<alib6::log::Console>("console");
 
         ave::Context context;
@@ -20,19 +21,21 @@ auto main() -> int {
 
         ave::ProfileWith with;
         with.configure_debug_messenger.emplace();
-        with.configure_debug_messenger->on_message = [](
+        with.configure_debug_messenger->on_message = [&vklg](
             VkDebugUtilsMessageSeverityFlagBitsEXT severity,
             VkDebugUtilsMessageTypeFlagsEXT type,
             const VkDebugUtilsMessengerCallbackDataEXT& data
-        ) {
-            std::println(
-                "[Vulkan][severity={:#x}][type={:#x}] {} ({}:{})",
-                static_cast<unsigned int>(severity),
-                static_cast<unsigned int>(type),
-                data.pMessage ? data.pMessage : "<no message>",
-                data.pMessageIdName ? data.pMessageIdName : "<no id name>",
-                data.messageIdNumber
-            );
+        ){
+            vklg(ave::to_log_level(severity))
+                << "[" << ave::to_message_type_name(type) << "]"
+                << "[id="
+                << (data.pMessageIdName ? data.pMessageIdName : "<no id name>")
+                << ":" << data.messageIdNumber << "]"
+                << "[objects=" << data.objectCount << "]"
+                << "[queue_labels=" << data.queueLabelCount << "]"
+                << "[cmd_labels=" << data.cmdBufLabelCount << "] \n"
+                << (data.pMessage ? data.pMessage : "<no message>")
+                << std::endl;
             return false;
         };
 
@@ -43,12 +46,7 @@ auto main() -> int {
             .with_result(build_result)
             .build()
         ;
-
-        lg << "Created renderer " << renderer.instance.get() << std::endl;
-        std::println(
-            "{}",
-            alib6::to_adata(build_result).str<alib6::JSON>()
-        );
+        lg << alib6::to_adata(build_result) << std::endl;
 
         while(!window.should_close()){
             window.poll_events();
