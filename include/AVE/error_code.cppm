@@ -15,17 +15,13 @@ export module ave.ecode;
 import std;
 import alib6;
 
-#define BASE 100'000 
-#define NEW_ECODE(X) inline constexpr alib6::i64 ave_##X = BASE + __LINE__ 
-
 export namespace ave{
-    inline constexpr alib6::i64 ave_success = 0;
-
-    NEW_ECODE(not_in_main_thread);
-    NEW_ECODE(bad_glfw);
-    NEW_ECODE(already_created);
-    NEW_ECODE(vk_create_instance);
+    enum ErrorCode : alib6::i64 {
+        ave_success            = 0,
+        ave_not_in_main_thread = 100'001,
+        ave_bad_glfw           = 100'002,
+        ave_already_created    = 100'003,
+        ave_vk_create_instance = 100'004,
+        ave_vk_create_debug_messenger = 100'005
+    };
 };
-
-#undef BASE
-#undef NEW_ECODE

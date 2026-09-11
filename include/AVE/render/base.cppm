@@ -11,9 +11,11 @@
 module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
+#include <cstring>
 
 export module ave.render:base;
 import alib6;
+import std;
 
 export namespace ave{
 
@@ -80,9 +82,260 @@ export namespace ave{
         }
     };
 
+    /// 扩展属性
+    struct AVE_API ExtensionProperties{
+        std::string name { "" };
+        alib6::u32 version { 0 };
+
+        inline ExtensionProperties(const VkExtensionProperties & prop){ from(prop); }
+        inline ExtensionProperties(std::string_view name = "", alib6::u32 version = 0)
+        :name(name),version(version){}
+
+        inline void from(const VkExtensionProperties & prop){
+            name = std::string(prop.extensionName, ::strnlen(prop.extensionName, VK_MAX_EXTENSION_NAME_SIZE));
+            version = prop.specVersion;
+        }
+
+        inline VkExtensionProperties to() const {
+            VkExtensionProperties prop = {};
+
+            prop.specVersion = version;
+            std::memcpy(
+                prop.extensionName,
+                name.c_str(),
+                std::min<std::size_t>(VK_MAX_EXTENSION_NAME_SIZE - 1, name.size())
+            );
+            return prop;
+        }
+    };
+
+    /// 层属性
+    struct AVE_API LayerProperties {
+        std::string name { "" };
+        ApiVersion  specVersion { 0, 1, 0, 0 };
+        alib6::u32  implementationVersion { 1 };
+        std::string description { "" };
+
+        inline LayerProperties() = default;
+
+        inline LayerProperties(const VkLayerProperties & prop) {
+            from(prop);
+        }
+
+        inline LayerProperties(
+            std::string_view name,
+            ApiVersion specVersion = { 0, 1, 0, 0 },
+            alib6::u32 implementationVersion = 1,
+            std::string_view description = ""
+        )
+        : name(name)
+        , specVersion(specVersion)
+        , implementationVersion(implementationVersion)
+        , description(description) {}
+
+        inline void from(const VkLayerProperties & prop) {
+            name = std::string(prop.layerName, ::strnlen(prop.layerName, VK_MAX_EXTENSION_NAME_SIZE));
+            specVersion.from(prop.specVersion);
+            implementationVersion = prop.implementationVersion;
+            description = prop.description;
+        }
+
+        inline VkLayerProperties to() const {
+            VkLayerProperties prop = {};
+
+            prop.specVersion = specVersion.to();
+            prop.implementationVersion = implementationVersion;
+
+            std::memcpy(
+                prop.layerName,
+                name.c_str(),
+                std::min<std::size_t>(VK_MAX_EXTENSION_NAME_SIZE - 1, name.size())
+            );
+
+            std::memcpy(
+                prop.description,
+                description.c_str(),
+                std::min<std::size_t>(VK_MAX_DESCRIPTION_SIZE - 1, description.size())
+            );
+
+            return prop;
+        }
+    };
+
+    template<class Target>
+    void write_to_log(Target& target, const Version& version) {
+        std::format_to(
+            std::back_inserter(target),
+            "{}.{}.{}",
+            version.major,
+            version.minor,
+            version.patch
+        );
+    }
+
+    template<class Target>
+    void write_to_log(Target& target, const ApiVersion& version) {
+        std::format_to(
+            std::back_inserter(target),
+            "{}.{}.{}.{}",
+            static_cast<unsigned int>(version.variant),
+            static_cast<unsigned int>(version.major),
+            version.minor,
+            version.patch
+        );
+    }
+
+    template<class Target>
+    void write_to_log(Target& target, const ExtensionProperties& properties) {
+        std::format_to(
+            std::back_inserter(target),
+            "{}@{}",
+            properties.name,
+            properties.version
+        );
+    }
+
+    template<class Target>
+    void write_to_log(Target& target, const LayerProperties& properties) {
+        std::format_to(
+            std::back_inserter(target),
+            "{}@{}.{}.{}.{}.{}",
+            properties.name,
+            static_cast<unsigned int>(properties.specVersion.variant),
+            static_cast<unsigned int>(properties.specVersion.major),
+            properties.specVersion.minor,
+            properties.specVersion.patch,
+            properties.implementationVersion
+        );
+    }
+
     inline constexpr ApiVersion ave_vk_1_0 = VK_API_VERSION_1_0;
     inline constexpr ApiVersion ave_vk_1_1 = VK_API_VERSION_1_1;
     inline constexpr ApiVersion ave_vk_1_2 = VK_API_VERSION_1_2;
     inline constexpr ApiVersion ave_vk_1_3 = VK_API_VERSION_1_3;
     inline constexpr ApiVersion ave_vk_1_4 = VK_API_VERSION_1_4;
+}
+
+export namespace std {
+    template<>
+    struct formatter<ave::Version, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const ave::Version& version, format_context& ctx) const {
+            return std::format_to(
+                ctx.out(),
+                "{}.{}.{}",
+                version.major,
+                version.minor,
+                version.patch
+            );
+        }
+    };
+
+    template<>
+    struct formatter<ave::ApiVersion, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const ave::ApiVersion& version, format_context& ctx) const {
+            return std::format_to(
+                ctx.out(),
+                "{}.{}.{}.{}",
+                static_cast<unsigned int>(version.variant),
+                static_cast<unsigned int>(version.major),
+                version.minor,
+                version.patch
+            );
+        }
+    };
+
+    template<>
+    struct formatter<ave::ExtensionProperties, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const ave::ExtensionProperties& properties, format_context& ctx) const {
+            return std::format_to(
+                ctx.out(),
+                "{}@{}",
+                properties.name,
+                properties.version
+            );
+        }
+    };
+
+    template<>
+    struct formatter<ave::LayerProperties, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const ave::LayerProperties& properties, format_context& ctx) const {
+            return std::format_to(
+                ctx.out(),
+                "{}@{}.{}",
+                properties.name,
+                properties.specVersion,
+                properties.implementationVersion
+            );
+        }
+    };
+
+    template<>
+    struct formatter<std::vector<ave::ExtensionProperties>, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(
+            const std::vector<ave::ExtensionProperties>& extensions,
+            format_context& ctx
+        ) const {
+            auto out = ctx.out();
+            *out++ = '[';
+
+            bool first = true;
+            for (const auto& extension : extensions) {
+                if (!first) {
+                    out = std::format_to(out, ", ");
+                }
+                first = false;
+                out = std::format_to(out, "{}", extension);
+            }
+
+            *out++ = ']';
+            return out;
+        }
+    };
+
+    template<>
+    struct formatter<std::vector<ave::LayerProperties>, char> {
+        constexpr auto parse(format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(
+            const std::vector<ave::LayerProperties>& layers,
+            format_context& ctx
+        ) const {
+            auto out = ctx.out();
+            *out++ = '[';
+
+            bool first = true;
+            for (const auto& layer : layers) {
+                if (!first) {
+                    out = std::format_to(out, ", ");
+                }
+                first = false;
+                out = std::format_to(out, "{}", layer);
+            }
+
+            *out++ = ']';
+            return out;
+        }
+    };
 }

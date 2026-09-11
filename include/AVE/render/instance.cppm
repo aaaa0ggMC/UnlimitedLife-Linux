@@ -21,12 +21,63 @@ import ave.ecode;
 import :base;
 
 namespace ave::detail{
-    auto get_c_span(std::span<const std::string> view) -> std::vector<const char*> {
+    auto get_c_strings(std::span<const std::string> view) -> std::vector<const char*> {
         return view
             | std::views::transform([](const std::string& str) {
                 return str.c_str();
             })
             | std::ranges::to<std::vector>();
+    }
+
+    // 去重复的加入
+    inline bool enable_target(
+        std::vector<std::string>& target,
+        std::string_view name
+    ) {
+        if(std::ranges::contains(target, name)) return false;
+        target.emplace_back(name);
+
+        return true;
+    }
+
+    inline alib6::u32 enable_target(
+        std::vector<std::string>& target,
+        std::span<const std::string_view> names
+    ) {
+        alib6::u32 enabled = 0;
+
+        for(const auto name : names){
+            enabled += enable_target(target, name);
+        }
+
+        return enabled;
+    }
+
+    inline alib6::u32 disable_target(
+        std::vector<std::string>& target,
+        std::string_view name
+    ) {
+        return static_cast<alib6::u32>(
+            std::erase_if(
+                target,
+                [name](const std::string& value) {
+                    return value == name;
+                }
+            )
+        );
+    }
+
+    inline alib6::u32 disable_target(
+        std::vector<std::string>& target,
+        std::span<const std::string_view> names
+    ) {
+        alib6::u32 disabled = 0;
+
+        for(const auto name : names){
+            disabled += disable_target(target, name);
+        }
+
+        return disabled;
     }
 }
 
@@ -41,11 +92,20 @@ export namespace ave{
         std::string engine_name = "No Engine";
         Version engine_version = {1, 0 ,0};
         ApiVersion api_version = ave_vk_1_0;
-
         // 扩展
         std::vector<std::string> extensions;
-    
+        // 层级
+        std::vector<std::string> layers;
         mutable alib6::ErrorWrapper ew = {};
+
+        inline bool enable_extension(std::string_view sv){ return detail::enable_target(extensions, sv); }
+        inline bool enable_layer(std::string_view sv){ return detail::enable_target(layers, sv); }
+        inline alib6::u32 enable_extensions(std::span<const std::string_view> svs){ return detail::enable_target(extensions, svs); }
+        inline alib6::u32 enable_layers(std::span<const std::string_view> svs){ return detail::enable_target(layers, svs); }
+        inline alib6::u32 disable_extension(std::string_view sv){ return detail::disable_target(extensions, sv); }
+        inline alib6::u32 disable_layer(std::string_view sv){ return detail::disable_target(layers, sv); }
+        inline alib6::u32 disable_extensions(std::span<const std::string_view> svs){ return detail::disable_target(extensions, svs); }
+        inline alib6::u32 disable_layers(std::span<const std::string_view> svs){ return detail::disable_target(layers, svs); }
     };
 
     struct AVE_API Instance {
@@ -59,12 +119,13 @@ export namespace ave{
         ~Instance(){ destroy(); }
 
         // move
-        Instance(Instance && i)
+        Instance(Instance && i) noexcept
         :instance(i.instance),ctx(i.ctx){
             i.instance = VK_NULL_HANDLE;
+            i.ctx = nullptr;
         }
-        void operator=(Instance && i){
-            if(&i == this)return;
+        Instance& operator=(Instance && i) noexcept {
+            if(&i == this) return *this;
             panic_debug(instance != VK_NULL_HANDLE, "Cannot move instance to an object that has an instance already.");
             if(instance != VK_NULL_HANDLE) [[unlikely]] {
                 destroy();
@@ -72,7 +133,9 @@ export namespace ave{
             
             instance = i.instance;
             ctx = i.ctx;
-            i.instance = nullptr;
+            i.instance = VK_NULL_HANDLE;
+            i.ctx = nullptr;
+            return *this;
         }
         Instance& operator=(const Instance &) = delete;
         Instance(const Instance &) = delete;
@@ -101,12 +164,14 @@ export namespace ave{
             createInfo.pApplicationInfo = &appInfo;
             
             // 扩展支持
-            auto extensions = detail::get_c_span(ci.extensions);
-            createInfo.enabledExtensionCount = extensions.size();
+            auto extensions = detail::get_c_strings(ci.extensions);
+            createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
             createInfo.ppEnabledExtensionNames = extensions.data();
 
-            // 中间层
-            createInfo.enabledLayerCount = 0;
+            // 中间层支持
+            auto layers = detail::get_c_strings(ci.layers);
+            createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+            createInfo.ppEnabledLayerNames = layers.data();
 
             if(auto code = vkCreateInstance(&createInfo, ctx->get_vk_allocator(), &instance); code != VK_SUCCESS){
                 ci.ew.report(
@@ -122,8 +187,13 @@ export namespace ave{
         inline void destroy() noexcept {
             if(!instance) return;
             vkDestroyInstance(instance, ctx->get_vk_allocator());
-            instance = nullptr;
+            instance = VK_NULL_HANDLE;
+            ctx = nullptr;
+        }
+
+        VkInstance get_system_handle() const noexcept { return instance; }
+        auto get_vk_allocator() const noexcept {
+            return ctx ? ctx->get_vk_allocator() : nullptr;
         }
     };
 }
-

@@ -1,3 +1,5 @@
+﻿#include <vulkan/vulkan.h>
+
 import alib6;
 import std;
 import ave;
@@ -16,12 +18,37 @@ auto main() -> int {
             .height = 1080,
         });
 
-        ave::Renderer renderer = 
+        ave::ProfileWith with;
+        with.configure_debug_messenger.emplace();
+        with.configure_debug_messenger->on_message = [](
+            VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+            VkDebugUtilsMessageTypeFlagsEXT type,
+            const VkDebugUtilsMessengerCallbackDataEXT& data
+        ) {
+            std::println(
+                "[Vulkan][severity={:#x}][type={:#x}] {} ({}:{})",
+                static_cast<unsigned int>(severity),
+                static_cast<unsigned int>(type),
+                data.pMessage ? data.pMessage : "<no message>",
+                data.pMessageIdName ? data.pMessageIdName : "<no id name>",
+                data.messageIdNumber
+            );
+            return false;
+        };
+
+        ave::RenderBuildReport build_result;
+        ave::Renderer renderer =
             ave::RenderProfile::from_window(context, window)
-            .build()    
+            .with(std::move(with))
+            .with_result(build_result)
+            .build()
         ;
 
         lg << "Created renderer " << renderer.instance.get() << std::endl;
+        std::println(
+            "{}",
+            alib6::to_adata(build_result).str<alib6::JSON>()
+        );
 
         while(!window.should_close()){
             window.poll_events();

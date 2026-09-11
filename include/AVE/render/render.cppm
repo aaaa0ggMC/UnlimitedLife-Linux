@@ -17,10 +17,12 @@ import alib6;
 
 import :base;
 import :instance;
+import :debug_messenger;
 
 export namespace ave{
     struct AVE_API Renderer {
         std::shared_ptr<Instance> instance;
+        std::shared_ptr<DebugMessenger> debug_messenger;
         // std::shared_ptr<Device> device;
     };
 };

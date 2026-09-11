@@ -31,6 +31,7 @@ namespace ave{
         Type type;
         Window * window;
         ProfileWith with_data;
+        RenderBuildReport * build_report { nullptr };
     public:
         RenderProfile(Context& ctx,Window & win)
         :ctx(ctx)
@@ -49,8 +50,17 @@ namespace ave{
             return *this;
         }
 
+        inline RenderProfile & with_result(RenderBuildReport & result){
+            build_report = std::addressof(result);
+            return *this;
+        }
+
     private: // build fns
-        bool __vk_instance(Renderer & r, alib6::ErrorWrapper ew);
+        bool __vk_instance(
+            Renderer & r,
+            alib6::ErrorWrapper ew,
+            RenderBuildReport * result
+        );
     };
 
 }

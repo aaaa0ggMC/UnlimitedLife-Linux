@@ -24,7 +24,7 @@ export namespace ave{
     private:
         inline static bool glfw_inited = false;
     public:
-        /// 初始化后调用将不会受到县城拘束
+        /// 初始化后调用将不再受到线程约束
         static bool init(
             alib6::ErrorWrapper ew = alib6::ErrorWrapper()
         ){
@@ -40,13 +40,13 @@ export namespace ave{
             if(glfwInit() == GL_FALSE){
                 // 初始化失败，获取错误
                 if(ew){
-                    const char * description;
-                    int code = glfwGetError(&description);
+                    const char* description = nullptr;
+                    glfwGetError(&description);
 
                     ew.report(
                         ave_bad_glfw,
                         "Fatal Error: cannot initialize GLFW for {}.",
-                        description
+                        description ? description : "unknown GLFW error"
                     );
                 }
                 return false;
@@ -69,9 +69,7 @@ export namespace ave{
         /// 获取glfw扩展
         inline static auto get_required_instance_extensions() -> std::span<const char* const> {
             alib6::u32 count = 0;
-            const char ** exts = nullptr;
-
-            exts = glfwGetRequiredInstanceExtensions(&count);
+            const char** exts = glfwGetRequiredInstanceExtensions(&count);
 
             return { exts, count};
         }
