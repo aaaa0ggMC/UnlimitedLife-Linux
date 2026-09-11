@@ -24,19 +24,19 @@ export namespace ave {
         const VkDebugUtilsMessengerCallbackDataEXT& data
     )>;
 
-    [[nodiscard]] constexpr alib6::log::LogLevel to_log_level(
+    [[nodiscard]] constexpr alib6::LogLevel to_log_level(
         VkDebugUtilsMessageSeverityFlagBitsEXT severity
     ) noexcept {
         if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-            return alib6::log::LogLevel::Error;
+            return alib6::LogLevel::Error;
         }
         if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
-            return alib6::log::LogLevel::Warn;
+            return alib6::LogLevel::Warn;
         }
         if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
-            return alib6::log::LogLevel::Info;
+            return alib6::LogLevel::Info;
         }
-        return alib6::log::LogLevel::Debug;
+        return alib6::LogLevel::Debug;
     }
 
     [[nodiscard]] constexpr std::string_view to_message_type_name(

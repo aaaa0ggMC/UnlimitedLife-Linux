@@ -6,10 +6,10 @@ import ave;
 
 auto main() -> int {
     try{
-        alib6::log::Logger logger;
-        alib6::log::LogFactory lg(logger,"avetest");
-        alib6::log::LogFactory vklg(logger,"Vulkan");
-        logger.append_mod<alib6::log::Console>("console");
+        alib6::Logger logger;
+        alib6::LogFactory lg(logger,"avetest");
+        alib6::LogFactory vklg(logger,"Vulkan");
+        logger.append_mod<alib6::lot::Console>("console");
 
         ave::Context context;
         ave::Window window({
@@ -46,6 +46,7 @@ auto main() -> int {
             "avetest/shaders/simple-frag.spv"
         );
         if(!pipeline) return 1;
+        int stage = 0;
 
         alib6::u64 frames = 0;
         alib6::Clock clock;
@@ -62,7 +63,6 @@ auto main() -> int {
         }
 
         lg << frames / clock.get_all() * 1000 << std::endl;
-        
     }catch(...){
         // 已经有panic了，也是直接忽略
         return 1;
