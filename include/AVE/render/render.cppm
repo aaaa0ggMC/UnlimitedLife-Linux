@@ -17,7 +17,7 @@ import ave.context;
 import alib6;
 import std;
 
-import :base;
+import ave.render.base;
 import :instance;
 import :debug_messenger;
 import :surface;

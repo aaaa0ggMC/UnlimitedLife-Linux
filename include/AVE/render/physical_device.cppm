@@ -15,7 +15,7 @@ export module ave.render:physical_device;
 
 import std;
 import alib6;
-import :base;
+import ave.render.base;
 
 export namespace ave {
 

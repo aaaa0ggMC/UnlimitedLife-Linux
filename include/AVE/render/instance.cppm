@@ -16,9 +16,10 @@ module;
 export module ave.render:instance;
 
 import std;
+import alib6;
 import ave.context;
 import ave.ecode;
-import :base;
+import ave.render.base;
 
 namespace ave::detail{
     auto get_c_strings(std::span<const std::string> view) -> std::vector<const char*> {

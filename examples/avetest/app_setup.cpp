@@ -56,17 +56,13 @@ void App::setup() {
 
     setup_vertex_data();
 
+    auto vertex_input = ave::vertex_layout<Vertex>().build();
     // 使用聚合 GraphicsPipelineConfig 配置管线（错误由 ErrorWrapper 自动处理）
     pipeline = renderer->create_graphics_pipeline({
         .vert = "avetest/shaders/vertex-vert.spv",
         .frag = "avetest/shaders/simple-frag.spv",
-        .bindings = {
-            { .stride = sizeof(Vertex) }
-        },
-        .attributes = {
-            { .location = 0, .format = VK_FORMAT_R32G32_SFLOAT,    .offset = offsetof(Vertex, pos) },
-            { .location = 1, .format = VK_FORMAT_R32G32B32_SFLOAT, .offset = offsetof(Vertex, color) }
-        }
+        .bindings = vertex_input.bindings,
+        .attributes = vertex_input.attributes
     });
 }
 

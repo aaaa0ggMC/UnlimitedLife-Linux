@@ -12,6 +12,7 @@ export module ave.render:pipeline_fwd;
 
 import std;
 import alib6;
+import ave.render.base;
 
 export namespace ave {
     enum class PipelineType : alib6::u8 {
@@ -87,38 +88,6 @@ export namespace ave {
     using ConfigureDynamicPipeline = std::function<void(
         CreatePipelineInfo<pipeline_type::Dynamic>&
     )>;
-
-    /// 包装好的顶点绑定描述，带默认值
-    struct AVE_API VertexBinding {
-        alib6::u32 binding { 0 };
-        alib6::u32 stride { 0 };
-        VkVertexInputRate input_rate { VK_VERTEX_INPUT_RATE_VERTEX };
-
-        constexpr operator VkVertexInputBindingDescription() const noexcept {
-            return VkVertexInputBindingDescription{
-                .binding = binding,
-                .stride = stride,
-                .inputRate = input_rate
-            };
-        }
-    };
-
-    /// 包装好的顶点属性描述，带默认值
-    struct AVE_API VertexAttribute {
-        alib6::u32 location { 0 };
-        alib6::u32 binding { 0 };
-        VkFormat format { VK_FORMAT_R32G32B32A32_SFLOAT };
-        alib6::u32 offset { 0 };
-
-        constexpr operator VkVertexInputAttributeDescription() const noexcept {
-            return VkVertexInputAttributeDescription{
-                .location = location,
-                .binding = binding,
-                .format = format,
-                .offset = offset
-            };
-        }
-    };
 
     /// 简化版聚合图形管线配置（仅 vert 与 frag 无默认值）
     struct AVE_API GraphicsPipelineConfig {

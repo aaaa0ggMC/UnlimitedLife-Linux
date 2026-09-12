@@ -13,7 +13,7 @@ module;
 #include <vulkan/vulkan.h>
 #include <cstring>
 
-export module ave.render:base;
+export module ave.render.base;
 import alib6;
 import std;
 
@@ -215,6 +215,38 @@ export namespace ave{
     inline constexpr ApiVersion ave_vk_1_2 = VK_API_VERSION_1_2;
     inline constexpr ApiVersion ave_vk_1_3 = VK_API_VERSION_1_3;
     inline constexpr ApiVersion ave_vk_1_4 = VK_API_VERSION_1_4;
+
+    /// @brief 包装好的顶点绑定描述，带默认值
+    struct AVE_API VertexBinding {
+        alib6::u32 binding { 0 };
+        alib6::u32 stride { 0 };
+        VkVertexInputRate input_rate { VK_VERTEX_INPUT_RATE_VERTEX };
+
+        constexpr operator VkVertexInputBindingDescription() const noexcept {
+            return VkVertexInputBindingDescription{
+                .binding = binding,
+                .stride = stride,
+                .inputRate = input_rate
+            };
+        }
+    };
+
+    /// @brief 包装好的顶点属性描述，带默认值
+    struct AVE_API VertexAttribute {
+        alib6::u32 location { 0 };
+        alib6::u32 binding { 0 };
+        VkFormat format { VK_FORMAT_R32G32B32A32_SFLOAT };
+        alib6::u32 offset { 0 };
+
+        constexpr operator VkVertexInputAttributeDescription() const noexcept {
+            return VkVertexInputAttributeDescription{
+                .location = location,
+                .binding = binding,
+                .format = format,
+                .offset = offset
+            };
+        }
+    };
 }
 
 export namespace std {

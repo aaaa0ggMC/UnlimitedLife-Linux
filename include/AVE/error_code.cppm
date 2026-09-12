@@ -38,6 +38,7 @@ export namespace ave{
         ave_vk_draw_frame = 100'018,
         ave_vk_create_image = 100'019,
         ave_vk_create_buffer = 100'020,
-        ave_vk_map_buffer = 100'021
+        ave_vk_map_buffer = 100'021,
+        ave_invalid_vertex_layout = 100'022
     };
 };
