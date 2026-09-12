@@ -18,11 +18,11 @@ void App::setup() {
     });
 
     window->on<ave::AfterWindowFramebufferResizeEvent>(
-    [&,this](ave::AfterWindowFramebufferResizeEvent& ev) {
+    [this](ave::AfterWindowFramebufferResizeEvent& ev) {
         if(ev.width > 0 && ev.height > 0 && renderer.has_value()) {
-            ave::RenderBuildReport report;    
-            ave::recreate_swapchain_from_window(*renderer, *window, &report);  
-            lg << "Recreated swapchain." << std::endl;        
+            if(ave::recreate_swapchain_from_window(*renderer, *window)) {
+                lg << "Recreated swapchain." << std::endl;
+            }
         }
     });
 

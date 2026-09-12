@@ -355,17 +355,19 @@ bool RenderProfile::__vk_sync_objects(
     if(with_data.sync_objects) {
         const bool valid =
             static_cast<bool>(*with_data.sync_objects) &&
-            with_data.sync_objects->get_device() == r.device;
+            with_data.sync_objects->get_device() == r.device &&
+            with_data.sync_objects->size() >= r.swapchain->get_image_count();
         if(result) {
             auto& stage = (*result)[create_sync_objects];
             stage["source"] = "provided";
             stage["count"] = with_data.sync_objects->size();
             if(valid) stage.succeed();
-            else stage.fail("Provided SyncObjects is invalid or belongs to a different Device");
+            else stage.fail(
+                "Provided SyncObjects is invalid, belongs to a different Device, or has insufficient frame slots");
         }
         if(!valid) {
             ew.report(ave_vk_create_sync_objects,
-                "The provided SyncObjects is invalid or belongs to a different Device.");
+                "The provided SyncObjects is invalid, belongs to a different Device, or has insufficient frame slots.");
             return false;
         }
         r.sync_objects = with_data.sync_objects;
@@ -1343,22 +1345,33 @@ bool RenderProfile::recreate_swapchain_from_window(
         ew.report(ave_vk_create_swapchain, "Cannot recreate swapchain: Renderer has no valid Surface.");
         return false;
     }
-
     const auto [width, height] = window.get_framebuffer_size();
     if(width <= 0 || height <= 0){
         return false;
     }
+    if(!r.invalidate_graphics_cache()){
+        ew.report(ave_vk_create_swapchain,
+            "Cannot recreate swapchain while a GraphicsContext is active.");
+        return false;
+    }
 
-    vkDeviceWaitIdle(r.device->get_system_handle());
+    const VkResult idle_code = vkDeviceWaitIdle(r.device->get_system_handle());
+    if(idle_code != VK_SUCCESS){
+        ew.report(ave_vk_create_swapchain,
+            "Failed waiting for the Device before swapchain recreation ({}).",
+            static_cast<int>(idle_code));
+        return false;
+    }
 
     ProfileWith pw = std::move(user_with);
     pw.instance        = r.instance;
     pw.debug_messenger = r.debug_messenger;
     pw.surface         = r.surface;
     pw.device          = r.device;
-    pw.command_pool    = r.command_pool;
-    pw.command_buffers = r.command_buffers;
-    pw.sync_objects    = r.sync_objects;
+    // Command buffers and synchronization objects depend on the swapchain image
+    // count. Recreate them by default so a capability/image-count change cannot
+    // leave Renderer with a cache that only fails on the following frame.
+    if(!pw.command_pool) pw.command_pool = r.command_pool;
     pw.swapchain       = nullptr;
 
     auto original_configure_swapchain = pw.configure_swapchain;
@@ -1381,7 +1394,7 @@ bool RenderProfile::recreate_swapchain_from_window(
     }
 
     Renderer new_r = profile.build(ew);
-    if(!new_r.swapchain){
+    if(!new_r.swapchain || !new_r.sync_objects || !new_r.command_buffers){
         return false;
     }
 
@@ -1389,8 +1402,10 @@ bool RenderProfile::recreate_swapchain_from_window(
     r.images = std::move(new_r.images);
     if(new_r.dynamic_render) r.dynamic_render = std::move(new_r.dynamic_render);
     if(new_r.legacy_render) r.legacy_render = std::move(new_r.legacy_render);
+    r.sync_objects = std::move(new_r.sync_objects);
+    r.command_pool = std::move(new_r.command_pool);
+    r.command_buffers = std::move(new_r.command_buffers);
     r.default_clear_values = std::move(new_r.default_clear_values);
 
-    (void)r.invalidate_graphics_cache();
     return true;
 }
