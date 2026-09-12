@@ -14,6 +14,7 @@ export namespace ave {
         WindowClose,
         WindowResize,
         WindowFramebufferResize,
+        AfterWindowFramebufferResize,
         WindowMove,
         WindowFocus,
         WindowIconify,
@@ -32,7 +33,9 @@ export namespace ave {
         // Char
         CharInput,
         // Drop
-        FileDrop
+        FileDrop,
+
+        Count
     };
 
     enum class EventCategory : alib6::u32 {
@@ -99,6 +102,21 @@ export namespace ave {
         static constexpr EventType get_static_type() noexcept { return EventType::WindowFramebufferResize; }
         EventType get_type() const noexcept override { return get_static_type(); }
         std::string_view get_name() const noexcept override { return "WindowFramebufferResize"; }
+        alib6::u32 get_category_flags() const noexcept override {
+            return static_cast<alib6::u32>(EventCategory::Window);
+        }
+    };
+
+    class AVE_API AfterWindowFramebufferResizeEvent : public Event {
+    public:
+        int width { 0 };
+        int height { 0 };
+
+        constexpr AfterWindowFramebufferResizeEvent(int w, int h) noexcept : width(w), height(h) {}
+
+        static constexpr EventType get_static_type() noexcept { return EventType::AfterWindowFramebufferResize; }
+        EventType get_type() const noexcept override { return get_static_type(); }
+        std::string_view get_name() const noexcept override { return "AfterWindowFramebufferResize"; }
         alib6::u32 get_category_flags() const noexcept override {
             return static_cast<alib6::u32>(EventCategory::Window);
         }

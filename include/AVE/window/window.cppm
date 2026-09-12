@@ -66,22 +66,32 @@ export namespace ave {
         WindowStyle style = WindowStyle::FollowGLFW;
         GLFWmonitor* monitor = nullptr;
         std::optional<std::pair<int, int>> position;
+        double resize_debounce_time = 0.5; ///< 窗口拉伸防抖时间 (秒)，默认 0.5s
 
         mutable alib6::ErrorWrapper ew = {};
+    };
+
+    template<typename EventT>
+    struct Listener {
+        alib6::usize index { 0 };
+        static constexpr EventType type = EventT::get_static_type();
     };
 
     struct AVE_API Window {
     private:
         GLFWwindow * window { nullptr };
 
+        using EventCallbackStorage = alib6::storage::FreelistLinearStorage<std::function<void(Event&)>>;
+        std::array<EventCallbackStorage, static_cast<size_t>(EventType::Count)> m_event_storages;
+        alib6::u64 m_active_event_mask { 0 };
+
         std::function<void(Event&)> m_event_callback;
 
-        struct ListenerEntry {
-            alib6::u64 id;
-            std::function<void(Event&)> callback;
-        };
-        std::vector<ListenerEntry> m_listeners;
-        alib6::u64 m_next_listener_id { 1 };
+        alib6::Clock m_resize_clock { false };
+        bool m_need_after_resize_event { false };
+        int m_pending_fb_width { 0 };
+        int m_pending_fb_height { 0 };
+        double m_after_resize_timeout_ms { 500.0 };
 
         Input* m_bound_input { nullptr };
 
@@ -237,12 +247,19 @@ export namespace ave {
         /// 提供移动
         Window(Window && win) noexcept
             : window(win.window)
+            , m_event_storages(std::move(win.m_event_storages))
+            , m_active_event_mask(win.m_active_event_mask)
             , m_event_callback(std::move(win.m_event_callback))
-            , m_listeners(std::move(win.m_listeners))
-            , m_next_listener_id(win.m_next_listener_id)
+            , m_resize_clock(std::move(win.m_resize_clock))
+            , m_need_after_resize_event(win.m_need_after_resize_event)
+            , m_pending_fb_width(win.m_pending_fb_width)
+            , m_pending_fb_height(win.m_pending_fb_height)
+            , m_after_resize_timeout_ms(win.m_after_resize_timeout_ms)
             , m_bound_input(win.m_bound_input) {
             win.window = nullptr;
             win.m_bound_input = nullptr;
+            win.m_active_event_mask = 0;
+            win.m_need_after_resize_event = false;
             if (window) {
                 glfwSetWindowUserPointer(window, this);
             }
@@ -256,13 +273,20 @@ export namespace ave {
             }
             
             window = win.window;
+            m_event_storages = std::move(win.m_event_storages);
+            m_active_event_mask = win.m_active_event_mask;
             m_event_callback = std::move(win.m_event_callback);
-            m_listeners = std::move(win.m_listeners);
-            m_next_listener_id = win.m_next_listener_id;
+            m_resize_clock = std::move(win.m_resize_clock);
+            m_need_after_resize_event = win.m_need_after_resize_event;
+            m_pending_fb_width = win.m_pending_fb_width;
+            m_pending_fb_height = win.m_pending_fb_height;
+            m_after_resize_timeout_ms = win.m_after_resize_timeout_ms;
             m_bound_input = win.m_bound_input;
 
             win.window = nullptr;
             win.m_bound_input = nullptr;
+            win.m_active_event_mask = 0;
+            win.m_need_after_resize_event = false;
 
             if (window) {
                 glfwSetWindowUserPointer(window, this);
@@ -332,6 +356,7 @@ export namespace ave {
                 glfwSetWindowPos(window, ci.position->first, ci.position->second);
             }
 
+            m_after_resize_timeout_ms = ci.resize_debounce_time * 1000.0;
             glfwSetWindowUserPointer(window, this);
             setup_callbacks();
 
@@ -347,28 +372,79 @@ export namespace ave {
         }
 
         // ==========================================
-        // 事件系统接口 (Event System API)
+        // 强类型事件系统接口 (Typed Event System API)
         // ==========================================
 
-        inline void set_event_callback(std::function<void(Event&)> cb) {
-            m_event_callback = std::move(cb);
+        template<typename EventT, typename Func>
+        inline Listener<EventT> on(Func&& callback) {
+            constexpr auto type = EventT::get_static_type();
+            constexpr auto idx = static_cast<size_t>(type);
+            static_assert(idx < static_cast<size_t>(EventType::Count), "Invalid EventType index");
+
+            bool is_new = false;
+            alib6::usize slot_index = 0;
+            m_event_storages[idx].try_next_with_index(
+                is_new,
+                slot_index,
+                [cb = std::forward<Func>(callback)](Event& e) {
+                    cb(static_cast<EventT&>(e));
+                }
+            );
+
+            m_active_event_mask |= (1ULL << idx);
+            return Listener<EventT>{ slot_index };
         }
 
-        inline alib6::u64 add_event_listener(std::function<void(Event&)> cb) {
-            alib6::u64 id = m_next_listener_id++;
-            m_listeners.push_back({ id, std::move(cb) });
-            return id;
-        }
+        template<typename EventT>
+        inline bool delete_listener(Listener<EventT> listener) {
+            constexpr auto type = EventT::get_static_type();
+            constexpr auto idx = static_cast<size_t>(type);
+            static_assert(idx < static_cast<size_t>(EventType::Count), "Invalid EventType index");
 
-        inline bool remove_event_listener(alib6::u64 id) {
-            auto it = std::remove_if(m_listeners.begin(), m_listeners.end(), [id](const auto& entry) {
-                return entry.id == id;
-            });
-            if (it != m_listeners.end()) {
-                m_listeners.erase(it, m_listeners.end());
+            auto& storage = m_event_storages[idx];
+            if (storage.is_occupied(listener.index)) {
+                storage.remove(listener.index);
+                if (storage.occupied_count() == 0) {
+                    m_active_event_mask &= ~(1ULL << idx);
+                }
                 return true;
             }
             return false;
+        }
+
+        template<typename EventT>
+        [[nodiscard]] inline bool has_listener() const noexcept {
+            constexpr auto idx = static_cast<size_t>(EventT::get_static_type());
+            return (m_active_event_mask & (1ULL << idx)) != 0;
+        }
+
+        template<typename EventT>
+        [[nodiscard]] inline size_t get_listener_count() const noexcept {
+            constexpr auto idx = static_cast<size_t>(EventT::get_static_type());
+            return m_event_storages[idx].occupied_count();
+        }
+
+        inline void set_resize_debounce_time(double seconds) noexcept {
+            m_after_resize_timeout_ms = seconds * 1000.0;
+        }
+
+        [[nodiscard]] inline double get_resize_debounce_time() const noexcept {
+            return m_after_resize_timeout_ms / 1000.0;
+        }
+
+        inline void process_events() {
+            if (!has_listener<AfterWindowFramebufferResizeEvent>()) return;
+            if (!m_need_after_resize_event) return;
+
+            if (m_resize_clock.now().first >= m_after_resize_timeout_ms) {
+                m_need_after_resize_event = false;
+                AfterWindowFramebufferResizeEvent ev(m_pending_fb_width, m_pending_fb_height);
+                dispatch_event(ev);
+            }
+        }
+
+        inline void set_event_callback(std::function<void(Event&)> cb) {
+            m_event_callback = std::move(cb);
         }
 
         inline void bind_input(Input& input) noexcept {
@@ -394,10 +470,24 @@ export namespace ave {
                 m_event_callback(e);
             }
 
-            // 多监听器（支持消费拦截）
-            for (auto& listener : m_listeners) {
-                if (e.handled) break;
-                listener.callback(e);
+            // 若为 FramebufferResize 且有 After 事件监听器，更新消抖时钟
+            if (e.get_type() == EventType::WindowFramebufferResize &&
+                has_listener<AfterWindowFramebufferResizeEvent>()) {
+                auto& rev = static_cast<WindowFramebufferResizeEvent&>(e);
+                m_pending_fb_width = rev.width;
+                m_pending_fb_height = rev.height;
+                m_resize_clock.reset();
+                m_need_after_resize_event = true;
+            }
+
+            // 强类型分桶监听器（由 alib6.storage 驱动）
+            const auto idx = static_cast<size_t>(e.get_type());
+            if (idx < m_event_storages.size() && (m_active_event_mask & (1ULL << idx)) != 0) {
+                m_event_storages[idx].for_each([&](std::function<void(Event&)>& cb) {
+                    if (!e.handled) {
+                        cb(e);
+                    }
+                });
             }
         }
 

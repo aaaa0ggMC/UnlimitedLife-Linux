@@ -17,16 +17,13 @@ void App::setup() {
         .height = 600,
     });
 
-    window->add_event_listener([&](ave::Event& e) {
-        ave::EventDispatcher dispatcher(e);
-
-        dispatcher.dispatch<ave::WindowFramebufferResizeEvent>(
-        [&](ave::WindowFramebufferResizeEvent& ev){
-            if(ev.width > 0 && ev.height > 0 && renderer.has_value()) {
-                ave::recreate_swapchain_from_window(*renderer, *window);                
-            }
-            return true;
-        });
+    window->on<ave::AfterWindowFramebufferResizeEvent>(
+    [&,this](ave::AfterWindowFramebufferResizeEvent& ev) {
+        if(ev.width > 0 && ev.height > 0 && renderer.has_value()) {
+            ave::RenderBuildReport report;    
+            ave::recreate_swapchain_from_window(*renderer, *window, &report);  
+            lg << "Recreated swapchain." << std::endl;        
+        }
     });
 
     ave::ProfileWith with;
@@ -35,7 +32,7 @@ void App::setup() {
         ci.api_version = ave::ave_vk_1_4;
     };
     with.configure_debug_messenger.emplace();
-    with.try_dynamic_rendering = true;
+    with.try_dynamic_rendering = false;
     with.configure_debug_messenger->on_message = [this](
         VkDebugUtilsMessageSeverityFlagBitsEXT severity,
         VkDebugUtilsMessageTypeFlagsEXT,

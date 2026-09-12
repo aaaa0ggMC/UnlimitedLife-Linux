@@ -2,6 +2,9 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <thread>
+#include <chrono>
+#include <cmath>
 
 import ave;
 import alib6;
@@ -56,41 +59,70 @@ int main() {
     }
 
     // ========================================================
-    // 3. 测试 Window 多监听器与消费拦截 (handled)
+    // 3. 测试 Window 强类型监听器、句柄索引稳定性与消费拦截 (handled)
     // ========================================================
     {
         ave::Window window;
         int listener1_calls = 0;
         int listener2_calls = 0;
+        int listener3_calls = 0;
 
-        auto id1 = window.add_event_listener([&](ave::Event& e) {
+        assert(!window.has_listener<ave::WindowCloseEvent>());
+        assert(window.get_listener_count<ave::WindowCloseEvent>() == 0);
+
+        auto id1 = window.on<ave::WindowCloseEvent>([&](ave::WindowCloseEvent& e) {
             ++listener1_calls;
             // 标记为消费
             e.handled = true;
         });
 
-        auto id2 = window.add_event_listener([&](ave::Event& e) {
+        auto id2 = window.on<ave::WindowCloseEvent>([&](ave::WindowCloseEvent& e) {
             // 不应执行，因为上一层已经 handled
             ++listener2_calls;
         });
+
+        auto id3 = window.on<ave::WindowCloseEvent>([&](ave::WindowCloseEvent& e) {
+            ++listener3_calls;
+        });
+
+        assert(window.has_listener<ave::WindowCloseEvent>());
+        assert(window.get_listener_count<ave::WindowCloseEvent>() == 3);
 
         ave::WindowCloseEvent close_ev;
         window.dispatch_event(close_ev);
 
         assert(listener1_calls == 1);
         assert(listener2_calls == 0); // 验证拦截成功
+        assert(listener3_calls == 0);
 
-        // 移除监听器测试
-        bool removed = window.remove_event_listener(id1);
+        // 移除 id1 (索引 0)
+        auto saved_id3_index = id3.index;
+        bool removed = window.delete_listener(id1);
         assert(removed);
+        // 再次移除相同句柄应该返回 false
+        assert(!window.delete_listener(id1));
 
+        // 验证 id3 索引完全没有被移动/破坏 (FreelistLinearStorage 句柄稳定性)
+        assert(id3.index == saved_id3_index);
+        assert(window.get_listener_count<ave::WindowCloseEvent>() == 2);
+
+        // 重置 close_ev.handled
+        close_ev.handled = false;
         window.dispatch_event(close_ev);
-        // 现在 listener1 移除了，listener2 应该被调用
+        // 现在 listener1 移除了，listener2 和 listener3 应该被调用 (因为 listener2 没设置 handled)
         assert(listener1_calls == 1);
         assert(listener2_calls == 1);
+        assert(listener3_calls == 1);
 
-        std::cout << "[PASS] Window multi-listeners & event interception verified." << std::endl;
+        // 移除剩余的 listener
+        assert(window.delete_listener(id2));
+        assert(window.delete_listener(id3));
+        assert(!window.has_listener<ave::WindowCloseEvent>());
+        assert(window.get_listener_count<ave::WindowCloseEvent>() == 0);
+
+        std::cout << "[PASS] Window typed listeners, handle stability & event interception verified." << std::endl;
     }
+
 
     // ========================================================
     // 4. 测试 Input 状态轮询体系 (按键生命周期)
@@ -269,8 +301,68 @@ int main() {
         std::cout << "[PASS] recreate_swapchain_from_window safety & ProfileWith surface bypass verified." << std::endl;
     }
 
+    // ========================================================
+    // 9. 测试 AfterWindowFramebufferResizeEvent 防抖机制与 process_events
+    // ========================================================
+    {
+        ave::Window window;
+        // 验证初始状态无 listener
+        assert(!window.has_listener<ave::AfterWindowFramebufferResizeEvent>());
+        assert(window.get_listener_count<ave::AfterWindowFramebufferResizeEvent>() == 0);
+
+        int after_resize_calls = 0;
+        int last_w = 0, last_h = 0;
+
+        // 设置防抖时长为 50ms (0.05s) 以便快速测试
+        window.set_resize_debounce_time(0.05);
+        assert(std::abs(window.get_resize_debounce_time() - 0.05) < 1e-5);
+
+        auto handle = window.on<ave::AfterWindowFramebufferResizeEvent>([&](ave::AfterWindowFramebufferResizeEvent& e) {
+            ++after_resize_calls;
+            last_w = e.width;
+            last_h = e.height;
+        });
+        assert(window.has_listener<ave::AfterWindowFramebufferResizeEvent>());
+        assert(window.get_listener_count<ave::AfterWindowFramebufferResizeEvent>() == 1);
+
+        // 模拟连续高频 FramebufferResize 事件 (例如拖拽窗口调整大小)
+        for (int i = 0; i < 5; ++i) {
+            ave::WindowFramebufferResizeEvent ev(800 + i * 10, 600 + i * 10);
+            window.dispatch_event(ev);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            // 每次 process_events() 都不应该触发，因为间隔小于 50ms 超时
+            window.process_events();
+            assert(after_resize_calls == 0);
+        }
+
+        // 等待超过防抖超时时间 (例如 60ms)
+        std::this_thread::sleep_for(std::chrono::milliseconds(60));
+
+        // 此时调用 process_events 应该触发一次且仅触发一次
+        window.process_events();
+        assert(after_resize_calls == 1);
+        assert(last_w == 840 && last_h == 640);
+
+        // 再次调用 process_events 不会重复触发
+        window.process_events();
+        assert(after_resize_calls == 1);
+
+        // 删除监听器后，即使收到 resize 事件并等待超时，也不会触发任何 after_resize 回调 (0 CPU 开销)
+        assert(window.delete_listener(handle));
+        assert(!window.has_listener<ave::AfterWindowFramebufferResizeEvent>());
+
+        ave::WindowFramebufferResizeEvent ev2(1000, 800);
+        window.dispatch_event(ev2);
+        std::this_thread::sleep_for(std::chrono::milliseconds(60));
+        window.process_events();
+        assert(after_resize_calls == 1);
+
+        std::cout << "[PASS] AfterWindowFramebufferResizeEvent debounce & process_events verified." << std::endl;
+    }
+
     std::cout << "\n==============================================" << std::endl;
     std::cout << "  ALL AVE EVENT & INPUT SYSTEM TESTS PASSED!  " << std::endl;
     std::cout << "==============================================" << std::endl;
     return 0;
 }
+

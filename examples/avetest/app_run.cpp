@@ -14,6 +14,8 @@ void App::run() {
 
     while (!window->should_close()) {
         window->poll_events();
+        window->process_events();
+
         render_frame(rc);
         detective.next_frame();
     }
