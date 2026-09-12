@@ -87,4 +87,70 @@ export namespace ave {
     using ConfigureDynamicPipeline = std::function<void(
         CreatePipelineInfo<pipeline_type::Dynamic>&
     )>;
+
+    /// 包装好的顶点绑定描述，带默认值
+    struct AVE_API VertexBinding {
+        alib6::u32 binding { 0 };
+        alib6::u32 stride { 0 };
+        VkVertexInputRate input_rate { VK_VERTEX_INPUT_RATE_VERTEX };
+
+        constexpr operator VkVertexInputBindingDescription() const noexcept {
+            return VkVertexInputBindingDescription{
+                .binding = binding,
+                .stride = stride,
+                .inputRate = input_rate
+            };
+        }
+    };
+
+    /// 包装好的顶点属性描述，带默认值
+    struct AVE_API VertexAttribute {
+        alib6::u32 location { 0 };
+        alib6::u32 binding { 0 };
+        VkFormat format { VK_FORMAT_R32G32B32A32_SFLOAT };
+        alib6::u32 offset { 0 };
+
+        constexpr operator VkVertexInputAttributeDescription() const noexcept {
+            return VkVertexInputAttributeDescription{
+                .location = location,
+                .binding = binding,
+                .format = format,
+                .offset = offset
+            };
+        }
+    };
+
+    /// 简化版聚合图形管线配置（仅 vert 与 frag 无默认值）
+    struct AVE_API GraphicsPipelineConfig {
+        std::string_view vert;
+        std::string_view frag;
+        std::string_view geom {};
+        std::string entry_point { "main" };
+
+        std::vector<VertexBinding> bindings {};
+        std::vector<VertexAttribute> attributes {};
+
+        VkPrimitiveTopology topology { VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST };
+        VkPolygonMode polygon_mode { VK_POLYGON_MODE_FILL };
+        VkCullModeFlags cull_mode { VK_CULL_MODE_BACK_BIT };
+        VkFrontFace front_face { VK_FRONT_FACE_CLOCKWISE };
+
+        bool depth_test { false };
+        bool depth_write { false };
+        VkCompareOp depth_compare_op { VK_COMPARE_OP_LESS };
+
+        bool blend_enable { true };
+        VkBlendFactor src_color_blend { VK_BLEND_FACTOR_SRC_ALPHA };
+        VkBlendFactor dst_color_blend { VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA };
+        VkBlendOp color_blend_op { VK_BLEND_OP_ADD };
+        VkBlendFactor src_alpha_blend { VK_BLEND_FACTOR_ONE };
+        VkBlendFactor dst_alpha_blend { VK_BLEND_FACTOR_ZERO };
+        VkBlendOp alpha_blend_op { VK_BLEND_OP_ADD };
+
+        std::vector<VkDescriptorSetLayout> descriptor_set_layouts {};
+        std::vector<VkPushConstantRange> push_constant_ranges {};
+
+        ConfigureGraphicsPipeline configure { nullptr };
+        mutable alib6::ErrorWrapper ew {};
+    };
 }

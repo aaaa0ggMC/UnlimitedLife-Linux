@@ -14,6 +14,7 @@ import std;
 import alib6;
 import ave.ecode;
 import :instance;
+import :physical_device;
 
 export namespace ave {
 
@@ -62,6 +63,7 @@ export namespace ave {
         bool dynamic_rendering { false };
         PFN_vkCmdBeginRendering pfn_cmd_begin_rendering { nullptr };
         PFN_vkCmdEndRendering pfn_cmd_end_rendering { nullptr };
+        PhysicalDeviceInfo physical_device_info {};
 
         Device() = default;
 
@@ -189,6 +191,9 @@ export namespace ave {
             physical_device = ci.physical_device;
             queues = std::move(ci.queues);
             extensions = std::move(ci.extensions);
+
+            physical_device_info = PhysicalDeviceInfo::query(physical_device);
+
             return true;
         }
 
@@ -218,7 +223,24 @@ export namespace ave {
             dynamic_rendering = false;
             pfn_cmd_begin_rendering = nullptr;
             pfn_cmd_end_rendering = nullptr;
+            physical_device_info = {};
             instance.reset();
+        }
+
+        [[nodiscard]] const PhysicalDeviceInfo& get_physical_device_info() const noexcept {
+            return physical_device_info;
+        }
+
+        [[nodiscard]] const VkPhysicalDeviceProperties& get_physical_device_properties() const noexcept {
+            return physical_device_info.properties;
+        }
+
+        [[nodiscard]] const VkPhysicalDeviceLimits& get_physical_device_limits() const noexcept {
+            return physical_device_info.properties.limits;
+        }
+
+        [[nodiscard]] VkDeviceSize get_non_coherent_atom_size() const noexcept {
+            return physical_device_info.properties.limits.nonCoherentAtomSize;
         }
 
         [[nodiscard]] VkDevice get_system_handle() const noexcept {

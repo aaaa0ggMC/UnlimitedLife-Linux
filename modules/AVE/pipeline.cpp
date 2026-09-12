@@ -313,7 +313,10 @@ namespace {
         pipeline_info.pViewportState = &viewport;
         pipeline_info.pRasterizationState = &rasterization;
         pipeline_info.pMultisampleState = &multisample;
-        pipeline_info.pDepthStencilState = ci.use_depth_stencil_state
+        const bool require_depth_stencil = ci.use_depth_stencil_state ||
+            (rendering_info && (rendering_info->depthAttachmentFormat != VK_FORMAT_UNDEFINED ||
+                                rendering_info->stencilAttachmentFormat != VK_FORMAT_UNDEFINED));
+        pipeline_info.pDepthStencilState = require_depth_stencil
             ? &depth_stencil : nullptr;
         pipeline_info.pColorBlendState = &color_blend;
         pipeline_info.pDynamicState = ci.dynamic_states.empty()
@@ -931,4 +934,63 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     }, std::move(configure));
 }
 
+std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
+    GraphicsPipelineConfig config
+) {
+    GraphicsShaderPaths paths {
+        .vertex = config.vert,
+        .fragment = config.frag,
+        .geometry = config.geom,
+        .entry_point = config.entry_point
+    };
+
+    return create_graphics_pipeline(paths, [cfg = std::move(config)](CreatePipelineCommonInfo& ci) {
+        ci.vertex_bindings.clear();
+        ci.vertex_bindings.reserve(cfg.bindings.size());
+        for(const auto& b : cfg.bindings) {
+            ci.vertex_bindings.push_back(static_cast<VkVertexInputBindingDescription>(b));
+        }
+
+        ci.vertex_attributes.clear();
+        ci.vertex_attributes.reserve(cfg.attributes.size());
+        for(const auto& a : cfg.attributes) {
+            ci.vertex_attributes.push_back(static_cast<VkVertexInputAttributeDescription>(a));
+        }
+
+        ci.input_assembly.topology = cfg.topology;
+        ci.rasterization.polygonMode = cfg.polygon_mode;
+        ci.rasterization.cullMode = cfg.cull_mode;
+        ci.rasterization.frontFace = cfg.front_face;
+
+        ci.depth_stencil.depthTestEnable = cfg.depth_test ? VK_TRUE : VK_FALSE;
+        ci.depth_stencil.depthWriteEnable = cfg.depth_write ? VK_TRUE : VK_FALSE;
+        ci.depth_stencil.depthCompareOp = cfg.depth_compare_op;
+        ci.use_depth_stencil_state = ci.use_depth_stencil_state || cfg.depth_test || cfg.depth_write;
+
+        if(!ci.color_blend_attachments.empty()) {
+            for(auto& att : ci.color_blend_attachments) {
+                att.blendEnable = cfg.blend_enable ? VK_TRUE : VK_FALSE;
+                att.srcColorBlendFactor = cfg.src_color_blend;
+                att.dstColorBlendFactor = cfg.dst_color_blend;
+                att.colorBlendOp = cfg.color_blend_op;
+                att.srcAlphaBlendFactor = cfg.src_alpha_blend;
+                att.dstAlphaBlendFactor = cfg.dst_alpha_blend;
+                att.alphaBlendOp = cfg.alpha_blend_op;
+            }
+        }
+
+        if(!cfg.descriptor_set_layouts.empty()) {
+            ci.descriptor_set_layouts = cfg.descriptor_set_layouts;
+        }
+        if(!cfg.push_constant_ranges.empty()) {
+            ci.push_constant_ranges = cfg.push_constant_ranges;
+        }
+
+        if(cfg.configure) {
+            cfg.configure(ci);
+        }
+    });
 }
+
+}
+

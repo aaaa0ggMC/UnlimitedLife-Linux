@@ -36,6 +36,8 @@ export namespace ave{
         ave_vk_create_command_pool = 100'016,
         ave_vk_allocate_command_buffers = 100'017,
         ave_vk_draw_frame = 100'018,
-        ave_vk_create_image = 100'019
+        ave_vk_create_image = 100'019,
+        ave_vk_create_buffer = 100'020,
+        ave_vk_map_buffer = 100'021
     };
 };

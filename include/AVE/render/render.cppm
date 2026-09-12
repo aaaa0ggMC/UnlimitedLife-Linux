@@ -30,6 +30,8 @@ import :legacy_render;
 import :dynamic_render;
 import :pipeline;
 import :command;
+import :buffer;
+import :buffer_slice;
 
 export namespace ave{
     struct Renderer;
@@ -89,11 +91,69 @@ export namespace ave{
         );
         void begin(std::span<const VkClearValue> clear_values);
         void bind_pipeline(const Pipeline& pipeline);
+        void bind_vertex_buffer(
+            const Buffer& buffer,
+            VkDeviceSize offset = 0,
+            alib6::u32 binding = 0
+        ) noexcept;
+        void bind_vertex_buffer(
+            const BufferSlice& slice,
+            alib6::u32 binding = 0
+        ) noexcept;
+        void bind_vertex_buffers(
+            alib6::u32 first_binding,
+            std::span<const VkBuffer> buffers,
+            std::span<const VkDeviceSize> offsets
+        ) noexcept;
+
+        void bind_index_buffer(
+            const Buffer& buffer,
+            VkDeviceSize offset = 0,
+            VkIndexType index_type = VK_INDEX_TYPE_UINT32
+        ) noexcept;
+        void bind_index_buffer(
+            const BufferSlice& slice,
+            VkIndexType index_type = VK_INDEX_TYPE_UINT32
+        ) noexcept;
+
+        inline void bind_indice_buffer(
+            const Buffer& buffer,
+            VkDeviceSize offset = 0,
+            VkIndexType index_type = VK_INDEX_TYPE_UINT32
+        ) noexcept {
+            bind_index_buffer(buffer, offset, index_type);
+        }
+        inline void bind_indice_buffer(
+            const BufferSlice& slice,
+            VkIndexType index_type = VK_INDEX_TYPE_UINT32
+        ) noexcept {
+            bind_index_buffer(slice, index_type);
+        }
+
         void draw(
             alib6::u32 vertex_count,
             alib6::u32 instance_count = 1,
             alib6::u32 first_vertex = 0,
             alib6::u32 first_instance = 0
+        ) noexcept;
+        void draw_indexed(
+            alib6::u32 index_count,
+            alib6::u32 instance_count = 1,
+            alib6::u32 first_index = 0,
+            alib6::i32 vertex_offset = 0,
+            alib6::u32 first_instance = 0
+        ) noexcept;
+        void draw_indirect(
+            const Buffer& buffer,
+            VkDeviceSize offset = 0,
+            alib6::u32 draw_count = 1,
+            alib6::u32 stride = sizeof(VkDrawIndirectCommand)
+        ) noexcept;
+        void draw_indexed_indirect(
+            const Buffer& buffer,
+            VkDeviceSize offset = 0,
+            alib6::u32 draw_count = 1,
+            alib6::u32 stride = sizeof(VkDrawIndexedIndirectCommand)
         ) noexcept;
         void end();
 
@@ -218,6 +278,9 @@ export namespace ave{
             std::string_view geometry = {},
             TessellationShaderPaths tessellation = {},
             ConfigureGraphicsPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
+            GraphicsPipelineConfig config
         );
 
     private:
