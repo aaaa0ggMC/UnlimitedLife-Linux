@@ -17,6 +17,18 @@ void App::setup() {
         .height = 600,
     });
 
+    window->add_event_listener([&](ave::Event& e) {
+        ave::EventDispatcher dispatcher(e);
+
+        dispatcher.dispatch<ave::WindowFramebufferResizeEvent>(
+        [&](ave::WindowFramebufferResizeEvent& ev){
+            if(ev.width > 0 && ev.height > 0 && renderer.has_value()) {
+                ave::recreate_swapchain_from_window(*renderer, *window);                
+            }
+            return true;
+        });
+    });
+
     ave::ProfileWith with;
     with.configure_instance = [](ave::WithGlobalInput&, ave::CreateInstanceInfo& ci) {
         ci.application_name = "avetest";

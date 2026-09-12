@@ -142,8 +142,19 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
         stage["source"] = "disabled";
     }
 
-    /// 如果存在window, 创建surface
-    if(window){
+    /// surface: 支持使用已提供的 Surface bypass 创建
+    if(with_data.surface) {
+        renderer.surface = with_data.surface;
+        if(result) {
+            auto & stage = (*result)[create_surface];
+            stage["source"] = "provided";
+            stage["surface_handle"] = std::format(
+                "{}",
+                static_cast<const void*>(renderer.surface->get_system_handle())
+            );
+            stage.succeed();
+        }
+    }else if(window){
         if(!__vk_create_glfw_surface(renderer, ew, result)){
             return renderer;
         }
@@ -1315,4 +1326,71 @@ bool RenderProfile::__vk_instance(
     }
 
     return created;
+}
+
+bool RenderProfile::recreate_swapchain_from_window(
+    Renderer & r,
+    Window & window,
+    RenderBuildReport * report,
+    ProfileWith user_with,
+    alib6::ErrorWrapper ew
+){
+    if(!r.device || r.device->get_system_handle() == VK_NULL_HANDLE){
+        ew.report(ave_vk_create_swapchain, "Cannot recreate swapchain: Renderer has no valid Device.");
+        return false;
+    }
+    if(!r.surface || r.surface->get_system_handle() == VK_NULL_HANDLE){
+        ew.report(ave_vk_create_swapchain, "Cannot recreate swapchain: Renderer has no valid Surface.");
+        return false;
+    }
+
+    const auto [width, height] = window.get_framebuffer_size();
+    if(width <= 0 || height <= 0){
+        return false;
+    }
+
+    vkDeviceWaitIdle(r.device->get_system_handle());
+
+    ProfileWith pw = std::move(user_with);
+    pw.instance        = r.instance;
+    pw.debug_messenger = r.debug_messenger;
+    pw.surface         = r.surface;
+    pw.device          = r.device;
+    pw.command_pool    = r.command_pool;
+    pw.command_buffers = r.command_buffers;
+    pw.sync_objects    = r.sync_objects;
+    pw.swapchain       = nullptr;
+
+    auto original_configure_swapchain = pw.configure_swapchain;
+    pw.configure_swapchain = [old_sc = r.swapchain, original_configure_swapchain](
+        WithSwapchain& with_sw, CreateSwapchainInfo& ci
+    ){
+        ci.old_swapchain = old_sc;
+        if(original_configure_swapchain){
+            original_configure_swapchain(with_sw, ci);
+        }else{
+            default_configure_swapchain(with_sw, ci);
+        }
+    };
+
+    static Context fallback_ctx;
+    auto profile = RenderProfile::from_window(fallback_ctx, window);
+    profile.with(std::move(pw));
+    if(report){
+        profile.with_result(*report);
+    }
+
+    Renderer new_r = profile.build(ew);
+    if(!new_r.swapchain){
+        return false;
+    }
+
+    r.swapchain = std::move(new_r.swapchain);
+    r.images = std::move(new_r.images);
+    if(new_r.dynamic_render) r.dynamic_render = std::move(new_r.dynamic_render);
+    if(new_r.legacy_render) r.legacy_render = std::move(new_r.legacy_render);
+    r.default_clear_values = std::move(new_r.default_clear_values);
+
+    (void)r.invalidate_graphics_cache();
+    return true;
 }

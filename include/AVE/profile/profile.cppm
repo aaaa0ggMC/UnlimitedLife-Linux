@@ -255,6 +255,9 @@ export namespace ave{
                 std::vector<std::string> missing
             )> on_layers_resolved { nullptr };
 
+        // 指定现有对象时，Surface 创建会被忽略。
+        std::shared_ptr<Surface> surface { nullptr };
+
         // 指定现有对象时，configure_debug_messenger 会被忽略。
         std::shared_ptr<DebugMessenger> debug_messenger { nullptr };
             std::optional<CreateDebugMessengerInfo> configure_debug_messenger { std::nullopt };

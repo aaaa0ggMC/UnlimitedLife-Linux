@@ -11,7 +11,7 @@ for _, name in ipairs({"agetest", "age_simptest"}) do
 end
 
 --- AGE Vulkan
-for _, name in ipairs({"avetest"}) do
+for _, name in ipairs({"avetest", "ave_event_test"}) do
     target(name)
         set_kind("binary")
         add_files("../examples/" .. name .. "/**.cpp")
