@@ -51,18 +51,6 @@ export namespace ave {
         };
         bool clipped { true };
 
-        VkImageViewCreateFlags image_view_flags { 0 };
-        VkImageViewType image_view_type { VK_IMAGE_VIEW_TYPE_2D };
-        VkComponentMapping image_view_components {
-            VK_COMPONENT_SWIZZLE_IDENTITY,
-            VK_COMPONENT_SWIZZLE_IDENTITY,
-            VK_COMPONENT_SWIZZLE_IDENTITY,
-            VK_COMPONENT_SWIZZLE_IDENTITY
-        };
-        VkImageSubresourceRange image_view_subresource_range {
-            VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1
-        };
-
         std::shared_ptr<Swapchain> old_swapchain;
         mutable alib6::ErrorWrapper ew {};
     };
@@ -85,8 +73,8 @@ export namespace ave {
         std::shared_ptr<Device> device;
         std::shared_ptr<Surface> surface;
         VkSwapchainKHR swapchain { VK_NULL_HANDLE };
-        std::vector<VkImage> images;
-        std::vector<VkImageView> image_views;
+        alib6::u32 image_count { 0 };
+        VkImageUsageFlags image_usage { 0 };
         VkSurfaceFormatKHR surface_format {};
         VkPresentModeKHR present_mode { VK_PRESENT_MODE_FIFO_KHR };
         VkExtent2D extent {};
@@ -115,8 +103,11 @@ export namespace ave {
         [[nodiscard]] VkSwapchainKHR get_system_handle() const noexcept;
         [[nodiscard]] const std::shared_ptr<Device>& get_device() const noexcept;
         [[nodiscard]] const std::shared_ptr<Surface>& get_surface() const noexcept;
-        [[nodiscard]] const std::vector<VkImage>& get_images() const noexcept;
-        [[nodiscard]] const std::vector<VkImageView>& get_image_views() const noexcept;
+        [[nodiscard]] alib6::u32 get_image_count() const noexcept;
+        [[nodiscard]] VkImageUsageFlags get_image_usage() const noexcept;
+        [[nodiscard]] std::optional<std::vector<VkImage>> enumerate_images(
+            alib6::ErrorWrapper ew = {}
+        ) const;
         [[nodiscard]] VkSurfaceFormatKHR get_surface_format() const noexcept;
         [[nodiscard]] VkPresentModeKHR get_present_mode() const noexcept;
         [[nodiscard]] VkExtent2D get_extent() const noexcept;

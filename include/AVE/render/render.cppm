@@ -24,8 +24,10 @@ import :surface;
 import :physical_device;
 import :device;
 import :swapchain;
+import :image;
 import :sync_objects;
 import :legacy_render;
+import :dynamic_render;
 import :pipeline;
 import :command;
 
@@ -56,6 +58,18 @@ export namespace ave{
         VkSemaphore render_finished { VK_NULL_HANDLE };
         VkFence in_flight { VK_NULL_HANDLE };
         VkExtent2D extent {};
+        std::span<const VkClearValue> default_clear_values {};
+        VkFence* images_in_flight { nullptr };
+
+        bool dynamic_rendering { false };
+        PFN_vkCmdBeginRendering pfn_cmd_begin_rendering { nullptr };
+        PFN_vkCmdEndRendering pfn_cmd_end_rendering { nullptr };
+        VkImage swapchain_image { VK_NULL_HANDLE };
+        VkImageView swapchain_view { VK_NULL_HANDLE };
+        VkImage depth_image { VK_NULL_HANDLE };
+        VkImageView depth_view { VK_NULL_HANDLE };
+        VkFormat depth_format { VK_FORMAT_UNDEFINED };
+        VkImageAspectFlags depth_aspect { 0 };
 
         bool recording { false };
         bool finished { false };
@@ -69,10 +83,12 @@ export namespace ave{
         GraphicsContext(GraphicsContext&& other) noexcept;
         GraphicsContext& operator=(GraphicsContext&&) = delete;
 
+        void begin();
         void begin(
-            VkClearColorValue clear_color = {{ 0.02f, 0.02f, 0.03f, 1.0f }}
+            VkClearColorValue clear_color
         );
-        void bind_pipeline(const LegacyPipeline& pipeline);
+        void begin(std::span<const VkClearValue> clear_values);
+        void bind_pipeline(const Pipeline& pipeline);
         void draw(
             alib6::u32 vertex_count,
             alib6::u32 instance_count = 1,
@@ -93,15 +109,116 @@ export namespace ave{
         std::optional<PhysicalDeviceInfo> physical_device;
         std::shared_ptr<Device> device;
         std::shared_ptr<Swapchain> swapchain;
+        std::vector<std::shared_ptr<Image>> images;
         std::shared_ptr<SyncObjects> sync_objects;
         std::shared_ptr<LegacyRender> legacy_render;
+        std::shared_ptr<DynamicRender> dynamic_render;
         std::shared_ptr<CommandPool> command_pool;
         std::shared_ptr<CommandBuffers> command_buffers;
+        std::vector<VkClearValue> default_clear_values;
+
+        [[nodiscard]] bool supports_dynamic_rendering() const noexcept {
+            return device && device->supports_dynamic_rendering();
+        }
 
         [[nodiscard]] GraphicsContext acquire_context(
             alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] bool invalidate_graphics_cache() noexcept;
+
+        // Render backend creation
+        std::shared_ptr<LegacyRender> create_legacy_render(
+            ConfigureLegacyRender configure = default_configure_legacy_render,
+            LegacyRenderCreateStatus* status = nullptr,
+            alib6::ErrorWrapper ew = {}
+        );
+
+        std::shared_ptr<DynamicRender> create_dynamic_render(
+            ConfigureDynamicRender configure = default_configure_dynamic_render,
+            alib6::ErrorWrapper ew = {}
+        );
+
+        // Dynamic graphics pipeline creation (forwards to dynamic_render, panics if not in dynamic mode)
+        [[nodiscard]] std::shared_ptr<DynamicPipeline> create_dynamic_graphics_pipeline(
+            GraphicsShaderBytecode shaders,
+            ConfigureDynamicPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<DynamicPipeline> create_dynamic_graphics_pipeline(
+            ShaderBytecode vertex,
+            ShaderBytecode fragment,
+            ShaderBytecode geometry = {},
+            TessellationShaderBytecode tessellation = {},
+            ConfigureDynamicPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<DynamicPipeline> create_dynamic_graphics_pipeline(
+            GraphicsShaderPaths shaders,
+            ConfigureDynamicPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<DynamicPipeline> create_dynamic_graphics_pipeline(
+            std::string_view vertex,
+            std::string_view fragment,
+            std::string_view geometry = {},
+            TessellationShaderPaths tessellation = {},
+            ConfigureDynamicPipeline configure = nullptr
+        );
+
+        template<typename... Args>
+        [[nodiscard]] auto create_dynamic_pipeline(Args&&... args) {
+            return create_dynamic_graphics_pipeline(std::forward<Args>(args)...);
+        }
+
+        // Legacy graphics pipeline creation (forwards to legacy_render, panics if not in legacy mode)
+        [[nodiscard]] std::shared_ptr<LegacyPipeline> create_legacy_graphics_pipeline(
+            GraphicsShaderBytecode shaders,
+            ConfigureLegacyPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<LegacyPipeline> create_legacy_graphics_pipeline(
+            ShaderBytecode vertex,
+            ShaderBytecode fragment,
+            ShaderBytecode geometry = {},
+            TessellationShaderBytecode tessellation = {},
+            ConfigureLegacyPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<LegacyPipeline> create_legacy_graphics_pipeline(
+            GraphicsShaderPaths shaders,
+            ConfigureLegacyPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<LegacyPipeline> create_legacy_graphics_pipeline(
+            std::string_view vertex,
+            std::string_view fragment,
+            std::string_view geometry = {},
+            TessellationShaderPaths tessellation = {},
+            ConfigureLegacyPipeline configure = nullptr
+        );
+
+        template<typename... Args>
+        [[nodiscard]] auto create_legacy_pipeline(Args&&... args) {
+            return create_legacy_graphics_pipeline(std::forward<Args>(args)...);
+        }
+
+        // Graceful-degradation graphics pipeline creation (returns Pipeline base, dynamically branches)
+        [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
+            GraphicsShaderBytecode shaders,
+            ConfigureGraphicsPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
+            ShaderBytecode vertex,
+            ShaderBytecode fragment,
+            ShaderBytecode geometry = {},
+            TessellationShaderBytecode tessellation = {},
+            ConfigureGraphicsPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
+            GraphicsShaderPaths shaders,
+            ConfigureGraphicsPipeline configure = nullptr
+        );
+        [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
+            std::string_view vertex,
+            std::string_view fragment,
+            std::string_view geometry = {},
+            TessellationShaderPaths tessellation = {},
+            ConfigureGraphicsPipeline configure = nullptr
+        );
 
     private:
         friend class GraphicsContext;
@@ -115,9 +232,19 @@ export namespace ave{
             VkRenderPass render_pass { VK_NULL_HANDLE };
             VkExtent2D extent {};
             std::size_t image_count { 0 };
+            std::vector<VkClearValue> default_clear_values;
             std::vector<FrameSyncObjects> frames;
             std::vector<VkFramebuffer> framebuffers;
             std::vector<VkCommandBuffer> command_buffers;
+            bool dynamic_rendering { false };
+            PFN_vkCmdBeginRendering pfn_cmd_begin_rendering { nullptr };
+            PFN_vkCmdEndRendering pfn_cmd_end_rendering { nullptr };
+            std::vector<VkImage> swapchain_images;
+            std::vector<VkImageView> swapchain_views;
+            VkImage depth_image { VK_NULL_HANDLE };
+            VkImageView depth_view { VK_NULL_HANDLE };
+            VkFormat depth_format { VK_FORMAT_UNDEFINED };
+            VkImageAspectFlags depth_aspect { 0 };
         } graphics_cache;
 
         [[nodiscard]] bool prepare_graphics_cache(

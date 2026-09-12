@@ -1,8 +1,8 @@
 /**
  * @file pipeline.cppm
- * @brief Legacy and dynamic graphics pipeline template
+ * @brief Base and specialized graphics pipeline classes
  * @version 5.0
- * @date 2026-09-11
+ * @date 2026-09-12
  */
 module;
 #include <AVE/config.h>
@@ -77,34 +77,68 @@ export namespace ave {
         alib6::u32 color_attachment_count = 1
     );
 
-    template<PipelineType Type>
-    class AVE_API Pipeline final {
-    private:
+    class AVE_API Pipeline {
+    protected:
         std::shared_ptr<Device> device;
         VkPipelineLayout layout { VK_NULL_HANDLE };
         VkPipeline pipeline { VK_NULL_HANDLE };
+        VkPipelineBindPoint bind_point { VK_PIPELINE_BIND_POINT_GRAPHICS };
+        PipelineType type { PipelineType::DynamicGraphics };
 
         Pipeline() = default;
-        [[nodiscard]] bool initialize(CreatePipelineInfo<Type> ci);
 
     public:
-        ~Pipeline();
+        virtual ~Pipeline();
         Pipeline(const Pipeline&) = delete;
         Pipeline& operator=(const Pipeline&) = delete;
         Pipeline(Pipeline&&) = delete;
         Pipeline& operator=(Pipeline&&) = delete;
 
-        [[nodiscard]] static std::shared_ptr<Pipeline> create(
-            CreatePipelineInfo<Type> ci
-        );
         void destroy() noexcept;
 
-        [[nodiscard]] const std::shared_ptr<Device>& get_device() const noexcept;
-        [[nodiscard]] VkPipelineLayout get_layout() const noexcept;
-        [[nodiscard]] VkPipeline get_system_handle() const noexcept;
-        [[nodiscard]] explicit operator bool() const noexcept;
+        [[nodiscard]] inline const std::shared_ptr<Device>& get_device() const noexcept { return device; }
+        [[nodiscard]] inline VkPipelineLayout get_layout() const noexcept { return layout; }
+        [[nodiscard]] inline VkPipeline get_system_handle() const noexcept { return pipeline; }
+        [[nodiscard]] inline VkPipelineBindPoint get_bind_point() const noexcept { return bind_point; }
+        [[nodiscard]] inline PipelineType get_type() const noexcept { return type; }
+        [[nodiscard]] inline bool is_dynamic() const noexcept { return type == PipelineType::DynamicGraphics; }
+        [[nodiscard]] inline bool is_legacy() const noexcept { return type == PipelineType::LegacyGraphics; }
+        [[nodiscard]] inline bool is_graphics() const noexcept {
+            return type == PipelineType::DynamicGraphics || type == PipelineType::LegacyGraphics;
+        }
+        [[nodiscard]] inline bool is_compute() const noexcept { return type == PipelineType::Compute; }
+        [[nodiscard]] inline explicit operator bool() const noexcept { return pipeline != VK_NULL_HANDLE; }
+
+        inline void bind(VkCommandBuffer command_buffer) const noexcept {
+            vkCmdBindPipeline(command_buffer, bind_point, pipeline);
+        }
     };
 
-    extern template class AVE_API Pipeline<pipeline_type::Dynamic>;
-    extern template class AVE_API Pipeline<pipeline_type::Legacy>;
+    class AVE_API DynamicPipeline final : public Pipeline {
+    private:
+        friend class Pipeline;
+        DynamicPipeline();
+        [[nodiscard]] bool initialize(CreatePipelineInfo<pipeline_type::Dynamic> ci);
+
+    public:
+        ~DynamicPipeline() override = default;
+
+        [[nodiscard]] static std::shared_ptr<DynamicPipeline> create(
+            CreatePipelineInfo<pipeline_type::Dynamic> ci
+        );
+    };
+
+    class AVE_API LegacyPipeline final : public Pipeline {
+    private:
+        friend class Pipeline;
+        LegacyPipeline();
+        [[nodiscard]] bool initialize(CreatePipelineInfo<pipeline_type::Legacy> ci);
+
+    public:
+        ~LegacyPipeline() override = default;
+
+        [[nodiscard]] static std::shared_ptr<LegacyPipeline> create(
+            CreatePipelineInfo<pipeline_type::Legacy> ci
+        );
+    };
 }

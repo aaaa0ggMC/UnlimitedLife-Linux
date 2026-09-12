@@ -26,6 +26,8 @@ export namespace ave {
     struct AVE_API CreateDeviceInfo {
         std::shared_ptr<Instance> instance;
         VkPhysicalDevice physical_device { VK_NULL_HANDLE };
+        const void* next { nullptr };
+        bool enable_dynamic_rendering { false };
         std::vector<DeviceQueueRequest> queues;
         std::vector<std::string> extensions;
         VkPhysicalDeviceFeatures features {};
@@ -57,6 +59,9 @@ export namespace ave {
         VkDevice device { VK_NULL_HANDLE };
         std::vector<DeviceQueueRequest> queues;
         std::vector<std::string> extensions;
+        bool dynamic_rendering { false };
+        PFN_vkCmdBeginRendering pfn_cmd_begin_rendering { nullptr };
+        PFN_vkCmdEndRendering pfn_cmd_end_rendering { nullptr };
 
         Device() = default;
 
@@ -129,6 +134,7 @@ export namespace ave {
 
             VkDeviceCreateInfo create_info {};
             create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+            create_info.pNext = ci.next;
             create_info.queueCreateInfoCount = static_cast<alib6::u32>(
                 queue_infos.size()
             );
@@ -152,6 +158,31 @@ export namespace ave {
                     static_cast<int>(code)
                 );
                 return false;
+            }
+
+            if(ci.enable_dynamic_rendering) {
+                pfn_cmd_begin_rendering = reinterpret_cast<PFN_vkCmdBeginRendering>(
+                    vkGetDeviceProcAddr(device, "vkCmdBeginRendering")
+                );
+                if(!pfn_cmd_begin_rendering) {
+                    pfn_cmd_begin_rendering = reinterpret_cast<PFN_vkCmdBeginRendering>(
+                        vkGetDeviceProcAddr(device, "vkCmdBeginRenderingKHR")
+                    );
+                }
+                pfn_cmd_end_rendering = reinterpret_cast<PFN_vkCmdEndRendering>(
+                    vkGetDeviceProcAddr(device, "vkCmdEndRendering")
+                );
+                if(!pfn_cmd_end_rendering) {
+                    pfn_cmd_end_rendering = reinterpret_cast<PFN_vkCmdEndRendering>(
+                        vkGetDeviceProcAddr(device, "vkCmdEndRenderingKHR")
+                    );
+                }
+                dynamic_rendering = (pfn_cmd_begin_rendering != nullptr &&
+                                     pfn_cmd_end_rendering != nullptr);
+            } else {
+                dynamic_rendering = false;
+                pfn_cmd_begin_rendering = nullptr;
+                pfn_cmd_end_rendering = nullptr;
             }
 
             instance = std::move(ci.instance);
@@ -184,6 +215,9 @@ export namespace ave {
             physical_device = VK_NULL_HANDLE;
             queues.clear();
             extensions.clear();
+            dynamic_rendering = false;
+            pfn_cmd_begin_rendering = nullptr;
+            pfn_cmd_end_rendering = nullptr;
             instance.reset();
         }
 
@@ -233,6 +267,35 @@ export namespace ave {
             VkQueue result = VK_NULL_HANDLE;
             vkGetDeviceQueue(device, family_index, queue_index, &result);
             return result;
+        }
+
+        [[nodiscard]] bool supports_dynamic_rendering() const noexcept {
+            return dynamic_rendering;
+        }
+
+        [[nodiscard]] PFN_vkCmdBeginRendering get_cmd_begin_rendering() const noexcept {
+            return pfn_cmd_begin_rendering;
+        }
+
+        [[nodiscard]] PFN_vkCmdEndRendering get_cmd_end_rendering() const noexcept {
+            return pfn_cmd_end_rendering;
+        }
+
+        void cmd_begin_rendering(
+            VkCommandBuffer command_buffer,
+            const VkRenderingInfo* rendering_info
+        ) const noexcept {
+            if(pfn_cmd_begin_rendering) {
+                pfn_cmd_begin_rendering(command_buffer, rendering_info);
+            }
+        }
+
+        void cmd_end_rendering(
+            VkCommandBuffer command_buffer
+        ) const noexcept {
+            if(pfn_cmd_end_rendering) {
+                pfn_cmd_end_rendering(command_buffer);
+            }
         }
     };
 }

@@ -35,6 +35,7 @@ export namespace ave{
         ave_vk_create_shader_module = 100'015,
         ave_vk_create_command_pool = 100'016,
         ave_vk_allocate_command_buffers = 100'017,
-        ave_vk_draw_frame = 100'018
+        ave_vk_draw_frame = 100'018,
+        ave_vk_create_image = 100'019
     };
 };

@@ -281,13 +281,15 @@ bool Swapchain::initialize(CreateSwapchainInfo ci, const WithSwapchain& with) {
     }
 
     alib6::u32 actual_count = 0;
+    std::vector<VkImage> queried_images;
     do {
         code = vkGetSwapchainImagesKHR(
             device->get_system_handle(), swapchain, &actual_count, nullptr);
         if(code != VK_SUCCESS) break;
-        images.resize(actual_count);
+        queried_images.resize(actual_count);
         code = vkGetSwapchainImagesKHR(
-            device->get_system_handle(), swapchain, &actual_count, images.data());
+            device->get_system_handle(), swapchain, &actual_count,
+            queried_images.data());
     } while(code == VK_INCOMPLETE);
     if(code != VK_SUCCESS || actual_count == 0) {
         ci.ew.report(ave_vk_create_swapchain,
@@ -295,29 +297,8 @@ bool Swapchain::initialize(CreateSwapchainInfo ci, const WithSwapchain& with) {
         destroy();
         return false;
     }
-    images.resize(actual_count);
-
-    image_views.reserve(images.size());
-    for(const auto image : images) {
-        VkImageViewCreateInfo view_info {};
-        view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        view_info.flags = ci.image_view_flags;
-        view_info.image = image;
-        view_info.viewType = ci.image_view_type;
-        view_info.format = ci.surface_format.format;
-        view_info.components = ci.image_view_components;
-        view_info.subresourceRange = ci.image_view_subresource_range;
-        VkImageView view = VK_NULL_HANDLE;
-        code = vkCreateImageView(
-            device->get_system_handle(), &view_info, allocator, &view);
-        if(code != VK_SUCCESS) {
-            ci.ew.report(ave_vk_create_swapchain,
-                "Failed to create a Swapchain image view ({}).", static_cast<int>(code));
-            destroy();
-            return false;
-        }
-        image_views.push_back(view);
-    }
+    image_count = actual_count;
+    image_usage = ci.image_usage;
 
     surface_format = ci.surface_format;
     present_mode = ci.present_mode;
@@ -341,17 +322,12 @@ void Swapchain::destroy() noexcept {
     if(device && device->get_system_handle() != VK_NULL_HANDLE) {
         vkDeviceWaitIdle(device->get_system_handle());
         const auto allocator = device->get_instance()->get_vk_allocator();
-        for(const auto view : image_views) {
-            if(view != VK_NULL_HANDLE) {
-                vkDestroyImageView(device->get_system_handle(), view, allocator);
-            }
-        }
         if(swapchain != VK_NULL_HANDLE) {
             vkDestroySwapchainKHR(device->get_system_handle(), swapchain, allocator);
         }
     }
-    image_views.clear();
-    images.clear();
+    image_count = 0;
+    image_usage = 0;
     swapchain = VK_NULL_HANDLE;
     surface_format = {};
     present_mode = VK_PRESENT_MODE_FIFO_KHR;
@@ -365,8 +341,39 @@ void Swapchain::destroy() noexcept {
 VkSwapchainKHR Swapchain::get_system_handle() const noexcept { return swapchain; }
 const std::shared_ptr<Device>& Swapchain::get_device() const noexcept { return device; }
 const std::shared_ptr<Surface>& Swapchain::get_surface() const noexcept { return surface; }
-const std::vector<VkImage>& Swapchain::get_images() const noexcept { return images; }
-const std::vector<VkImageView>& Swapchain::get_image_views() const noexcept { return image_views; }
+alib6::u32 Swapchain::get_image_count() const noexcept { return image_count; }
+VkImageUsageFlags Swapchain::get_image_usage() const noexcept {
+    return image_usage;
+}
+
+std::optional<std::vector<VkImage>> Swapchain::enumerate_images(
+    alib6::ErrorWrapper ew
+) const {
+    if(!device || device->get_system_handle() == VK_NULL_HANDLE ||
+       swapchain == VK_NULL_HANDLE) {
+        ew.report(ave_vk_create_image,
+            "Cannot enumerate Images from an invalid Swapchain.");
+        return std::nullopt;
+    }
+    alib6::u32 count = 0;
+    std::vector<VkImage> result;
+    VkResult code = VK_SUCCESS;
+    do {
+        code = vkGetSwapchainImagesKHR(
+            device->get_system_handle(), swapchain, &count, nullptr);
+        if(code != VK_SUCCESS) break;
+        result.resize(count);
+        code = vkGetSwapchainImagesKHR(
+            device->get_system_handle(), swapchain, &count, result.data());
+    } while(code == VK_INCOMPLETE);
+    if(code != VK_SUCCESS || count == 0) {
+        ew.report(ave_vk_create_image,
+            "Failed to enumerate Swapchain Images ({}).", static_cast<int>(code));
+        return std::nullopt;
+    }
+    result.resize(count);
+    return result;
+}
 VkSurfaceFormatKHR Swapchain::get_surface_format() const noexcept { return surface_format; }
 VkPresentModeKHR Swapchain::get_present_mode() const noexcept { return present_mode; }
 VkExtent2D Swapchain::get_extent() const noexcept { return extent; }

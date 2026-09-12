@@ -267,6 +267,8 @@ export namespace ave{
             };
             // 仅在当前 Profile 拥有 Surface 时自动将 VK_KHR_swapchain 作为 required。
             bool add_khr_swapchain { true };
+            // 是否优先尝试启用 dynamic rendering（优先 Vulkan 1.3 核心，其次 KHR 扩展，不支持则优雅降级为 LegacyRender）。
+            bool try_dynamic_rendering { true };
             std::vector<std::string> required_device_extensions;
             std::vector<std::string> optional_device_extensions;
             std::function<void(
@@ -291,6 +293,16 @@ export namespace ave{
                 default_configure_swapchain
             };
 
+        // 指定现有 Images（包括显式空集合）后，configure_images 会被忽略。
+        // 这些是 swapchain 之外由应用拥有的 attachment/texture images。
+        std::optional<std::vector<std::shared_ptr<Image>>> images { std::nullopt };
+            std::function<void(
+                WithImagesInput&,
+                CreateImagesInfo&
+            )> configure_images {
+                default_configure_images
+            };
+
         // 指定现有 SyncObjects 后，下面的同步对象选择与创建配置会被忽略。
         std::shared_ptr<SyncObjects> sync_objects { nullptr };
             // 默认与 Swapchain image 数量一致。
@@ -310,6 +322,12 @@ export namespace ave{
                 CreateLegacyRenderInfo&
             )> configure_legacy_render {
                 default_configure_legacy_render
+            };
+
+        // 指定现有 DynamicRender 后，下面的 DynamicRender 配置会被忽略。
+        std::shared_ptr<DynamicRender> dynamic_render { nullptr };
+            ConfigureDynamicRender configure_dynamic_render {
+                default_configure_dynamic_render
             };
 
         // 指定现有 CommandPool 后，下面的命令池配置会被忽略。

@@ -1,6 +1,7 @@
 module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
+#include <alib6/debug.h>
 
 module ave.render;
 
@@ -38,6 +39,17 @@ GraphicsContext::GraphicsContext(GraphicsContext&& other) noexcept
 ,render_finished(other.render_finished)
 ,in_flight(other.in_flight)
 ,extent(other.extent)
+,default_clear_values(other.default_clear_values)
+,images_in_flight(other.images_in_flight)
+,dynamic_rendering(other.dynamic_rendering)
+,pfn_cmd_begin_rendering(other.pfn_cmd_begin_rendering)
+,pfn_cmd_end_rendering(other.pfn_cmd_end_rendering)
+,swapchain_image(other.swapchain_image)
+,swapchain_view(other.swapchain_view)
+,depth_image(other.depth_image)
+,depth_view(other.depth_view)
+,depth_format(other.depth_format)
+,depth_aspect(other.depth_aspect)
 ,recording(other.recording)
 ,finished(other.finished) {
     other.recording = false;
@@ -45,15 +57,19 @@ GraphicsContext::GraphicsContext(GraphicsContext&& other) noexcept
 }
 
 bool Renderer::prepare_graphics_cache(alib6::ErrorWrapper& ew) {
+    const bool dynamic_rendering = device && device->supports_dynamic_rendering();
+    const bool valid_legacy = !dynamic_rendering && legacy_render &&
+        legacy_render->get_framebuffers().size() == swapchain->get_image_count();
+    const bool valid_dynamic = dynamic_rendering;
     const bool valid =
-        device && swapchain && sync_objects && legacy_render &&
+        device && swapchain && sync_objects &&
         command_pool && command_buffers &&
         command_pool->get_device() == device &&
         command_buffers->get_pool() == command_pool &&
         command_buffers->size() >= sync_objects->size() &&
         !sync_objects->get_frames().empty() &&
-        sync_objects->size() >= swapchain->get_images().size() &&
-        legacy_render->get_framebuffers().size() == swapchain->get_images().size();
+        sync_objects->size() >= swapchain->get_image_count() &&
+        (valid_dynamic || valid_legacy);
     if(!valid) {
         ew.report(ave_vk_draw_frame,
             "Cannot prepare GraphicsContext cache from incomplete or mismatched Renderer resources.");
@@ -69,12 +85,71 @@ bool Renderer::prepare_graphics_cache(alib6::ErrorWrapper& ew) {
         swapchain->get_present_queue_family()
     );
     graphics_cache.swapchain = swapchain->get_system_handle();
-    graphics_cache.render_pass = legacy_render->get_render_pass();
     graphics_cache.extent = swapchain->get_extent();
-    graphics_cache.image_count = swapchain->get_images().size();
+    graphics_cache.image_count = swapchain->get_image_count();
+    graphics_cache.dynamic_rendering = dynamic_rendering;
+    graphics_cache.pfn_cmd_begin_rendering = dynamic_rendering
+        ? device->get_cmd_begin_rendering() : nullptr;
+    graphics_cache.pfn_cmd_end_rendering = dynamic_rendering
+        ? device->get_cmd_end_rendering() : nullptr;
     graphics_cache.frames = sync_objects->get_frames();
-    graphics_cache.framebuffers = legacy_render->get_framebuffers();
     graphics_cache.command_buffers = command_buffers->get_buffers();
+
+    if(dynamic_rendering) {
+        graphics_cache.render_pass = VK_NULL_HANDLE;
+        graphics_cache.framebuffers.clear();
+        graphics_cache.default_clear_values = default_clear_values;
+
+        graphics_cache.swapchain_images.clear();
+        graphics_cache.swapchain_views.clear();
+        const auto handles = swapchain->enumerate_images(ew);
+        if(!handles || handles->size() != swapchain->get_image_count()) {
+            ew.report(ave_vk_draw_frame,
+                "Cannot enumerate Swapchain images for dynamic rendering.");
+            return false;
+        }
+        for(const auto handle : *handles) {
+            const auto it = std::ranges::find_if(images, [&](const auto& img) {
+                return img && img->get_swapchain() == swapchain &&
+                    img->get_system_handle() == handle &&
+                    img->get_image_view() != VK_NULL_HANDLE;
+            });
+            if(it == images.end()) {
+                ew.report(ave_vk_draw_frame,
+                    "A Swapchain image has no matching Image view wrapper.");
+                return false;
+            }
+            graphics_cache.swapchain_images.push_back(handle);
+            graphics_cache.swapchain_views.push_back((*it)->get_image_view());
+        }
+
+        graphics_cache.depth_image = VK_NULL_HANDLE;
+        graphics_cache.depth_view = VK_NULL_HANDLE;
+        graphics_cache.depth_format = VK_FORMAT_UNDEFINED;
+        graphics_cache.depth_aspect = 0;
+        for(const auto& img : images) {
+            if(img && (img->get_usage() & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) &&
+               img->get_image_view() != VK_NULL_HANDLE) {
+                graphics_cache.depth_image = img->get_system_handle();
+                graphics_cache.depth_view = img->get_image_view();
+                graphics_cache.depth_format = img->get_format();
+                graphics_cache.depth_aspect = img->get_aspect_mask();
+                break;
+            }
+        }
+    } else {
+        graphics_cache.render_pass = legacy_render->get_render_pass();
+        graphics_cache.framebuffers = legacy_render->get_framebuffers();
+        graphics_cache.default_clear_values =
+            legacy_render->get_default_clear_values();
+        graphics_cache.swapchain_images.clear();
+        graphics_cache.swapchain_views.clear();
+        graphics_cache.depth_image = VK_NULL_HANDLE;
+        graphics_cache.depth_view = VK_NULL_HANDLE;
+        graphics_cache.depth_format = VK_FORMAT_UNDEFINED;
+        graphics_cache.depth_aspect = 0;
+    }
+
     graphics_cache.ready = true;
     images_in_flight.assign(graphics_cache.image_count, VK_NULL_HANDLE);
     current_frame = 0;
@@ -174,17 +249,46 @@ GraphicsContext Renderer::acquire_context(alib6::ErrorWrapper ew) {
     context.present_queue = cache.present_queue;
     context.swapchain = cache.swapchain;
     context.render_pass = cache.render_pass;
-    context.framebuffer = cache.framebuffers[image_index];
     context.command_buffer = command_buffer;
     context.image_available = frame.image_available;
     context.render_finished = cache.frames[image_index].render_finished;
     context.in_flight = frame.in_flight;
     context.extent = cache.extent;
+    context.default_clear_values = cache.default_clear_values;
+    context.images_in_flight = images_in_flight.data();
+    context.dynamic_rendering = cache.dynamic_rendering;
+    if(cache.dynamic_rendering) {
+        context.pfn_cmd_begin_rendering = cache.pfn_cmd_begin_rendering;
+        context.pfn_cmd_end_rendering = cache.pfn_cmd_end_rendering;
+        context.swapchain_image = cache.swapchain_images[image_index];
+        context.swapchain_view = cache.swapchain_views[image_index];
+        context.depth_image = cache.depth_image;
+        context.depth_view = cache.depth_view;
+        context.depth_format = cache.depth_format;
+        context.depth_aspect = cache.depth_aspect;
+    } else {
+        context.framebuffer = cache.framebuffers[image_index];
+    }
     context_acquired = true;
     return context;
 }
 
+void GraphicsContext::begin() {
+    begin(default_clear_values);
+}
+
 void GraphicsContext::begin(VkClearColorValue clear_color) {
+    std::array<VkClearValue, 2> stack_clears {};
+    alib6::u32 count = 1;
+    stack_clears[0].color = clear_color;
+    if(default_clear_values.size() > 1) {
+        stack_clears[1] = default_clear_values[1];
+        count = 2;
+    }
+    begin(std::span<const VkClearValue>(stack_clears.data(), count));
+}
+
+void GraphicsContext::begin(std::span<const VkClearValue> clear_values) {
     if(!renderer) return;
     if(recording || finished) {
         result_code = VK_ERROR_INITIALIZATION_FAILED;
@@ -204,19 +308,111 @@ void GraphicsContext::begin(VkClearColorValue clear_color) {
         return;
     }
 
-    VkClearValue clear_value {};
-    clear_value.color = clear_color;
-    VkRenderPassBeginInfo render_pass_info {};
-    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_info.renderPass = render_pass;
-    render_pass_info.framebuffer = framebuffer;
-    render_pass_info.renderArea.offset = { 0, 0 };
-    render_pass_info.renderArea.extent = extent;
-    render_pass_info.clearValueCount = 1;
-    render_pass_info.pClearValues = &clear_value;
-    vkCmdBeginRenderPass(
-        command_buffer, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE
-    );
+    if(dynamic_rendering) {
+        VkImageMemoryBarrier color_barrier {};
+        color_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        color_barrier.srcAccessMask = 0;
+        color_barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        color_barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        color_barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        color_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        color_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        color_barrier.image = swapchain_image;
+        color_barrier.subresourceRange = {
+            VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1
+        };
+
+        VkPipelineStageFlags src_stages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        VkPipelineStageFlags dst_stages =
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        alib6::u32 barrier_count = 1;
+        std::array<VkImageMemoryBarrier, 2> barriers { color_barrier };
+
+        if(depth_image != VK_NULL_HANDLE) {
+            VkImageMemoryBarrier depth_barrier {};
+            depth_barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+            depth_barrier.srcAccessMask = 0;
+            depth_barrier.dstAccessMask =
+                VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+            depth_barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            depth_barrier.newLayout =
+                VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            depth_barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            depth_barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+            depth_barrier.image = depth_image;
+            depth_barrier.subresourceRange = { depth_aspect, 0, 1, 0, 1 };
+            barriers[1] = depth_barrier;
+            barrier_count = 2;
+            dst_stages |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        }
+
+        vkCmdPipelineBarrier(
+            command_buffer,
+            src_stages,
+            dst_stages,
+            0,
+            0, nullptr,
+            0, nullptr,
+            barrier_count, barriers.data()
+        );
+
+        VkRenderingAttachmentInfo color_attachment {};
+        color_attachment.sType =
+            VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        color_attachment.imageView = swapchain_view;
+        color_attachment.imageLayout =
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        color_attachment.clearValue = !clear_values.empty()
+            ? clear_values[0]
+            : VkClearValue { .color = {{ 0.02f, 0.02f, 0.03f, 1.0f }} };
+
+        VkRenderingAttachmentInfo depth_attachment {};
+        if(depth_view != VK_NULL_HANDLE) {
+            depth_attachment.sType =
+                VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+            depth_attachment.imageView = depth_view;
+            depth_attachment.imageLayout =
+                VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+            depth_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            depth_attachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            if(clear_values.size() > 1) {
+                depth_attachment.clearValue = clear_values[1];
+            } else {
+                depth_attachment.clearValue.depthStencil = { 1.0f, 0 };
+            }
+        }
+
+        VkRenderingInfo rendering_info {};
+        rendering_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+        rendering_info.renderArea.offset = { 0, 0 };
+        rendering_info.renderArea.extent = extent;
+        rendering_info.layerCount = 1;
+        rendering_info.colorAttachmentCount = 1;
+        rendering_info.pColorAttachments = &color_attachment;
+        if(depth_view != VK_NULL_HANDLE) {
+            rendering_info.pDepthAttachment = &depth_attachment;
+            if(depth_aspect & VK_IMAGE_ASPECT_STENCIL_BIT) {
+                rendering_info.pStencilAttachment = &depth_attachment;
+            }
+        }
+        pfn_cmd_begin_rendering(command_buffer, &rendering_info);
+    } else {
+        VkRenderPassBeginInfo render_pass_info {};
+        render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        render_pass_info.renderPass = render_pass;
+        render_pass_info.framebuffer = framebuffer;
+        render_pass_info.renderArea.offset = { 0, 0 };
+        render_pass_info.renderArea.extent = extent;
+        render_pass_info.clearValueCount = static_cast<alib6::u32>(
+            clear_values.size()
+        );
+        render_pass_info.pClearValues = clear_values.data();
+        vkCmdBeginRenderPass(
+            command_buffer, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE
+        );
+    }
 
     VkViewport viewport {};
     viewport.width = static_cast<float>(extent.width);
@@ -228,19 +424,14 @@ void GraphicsContext::begin(VkClearColorValue clear_color) {
     recording = true;
 }
 
-void GraphicsContext::bind_pipeline(const LegacyPipeline& pipeline) {
-    if(!renderer) return;
-    if(!recording || pipeline.get_device().get() != device_owner) {
-        result_code = VK_ERROR_INITIALIZATION_FAILED;
-        ew.report(ave_vk_draw_frame,
-            "Cannot bind this LegacyPipeline to the current GraphicsContext.");
-        return;
-    }
-    vkCmdBindPipeline(
-        command_buffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        pipeline.get_system_handle()
+void GraphicsContext::bind_pipeline(const Pipeline& pipeline) {
+    panic_debug(!recording || !pipeline.is_graphics() || pipeline.get_device().get() != device_owner,
+        "Cannot bind this Pipeline to the current GraphicsContext.");
+    panic_debug(
+        dynamic_rendering != pipeline.is_dynamic(),
+        "Pipeline mode does not match current GraphicsContext rendering mode."
     );
+    pipeline.bind(command_buffer);
 }
 
 void GraphicsContext::draw(
@@ -268,7 +459,34 @@ void GraphicsContext::end() {
         return;
     }
 
-    vkCmdEndRenderPass(command_buffer);
+    if(dynamic_rendering) {
+        pfn_cmd_end_rendering(command_buffer);
+
+        VkImageMemoryBarrier barrier {};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        barrier.dstAccessMask = 0;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = swapchain_image;
+        barrier.subresourceRange = {
+            VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1
+        };
+
+        vkCmdPipelineBarrier(
+            command_buffer,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+        );
+    } else {
+        vkCmdEndRenderPass(command_buffer);
+    }
     recording = false;
     result_code = vkEndCommandBuffer(command_buffer);
     if(result_code != VK_SUCCESS) {
@@ -285,7 +503,9 @@ void GraphicsContext::end() {
             static_cast<int>(result_code));
         return;
     }
-    renderer->images_in_flight[image_index] = in_flight;
+    if(images_in_flight) {
+        images_in_flight[image_index] = in_flight;
+    }
 
     const VkPipelineStageFlags wait_stage =
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;

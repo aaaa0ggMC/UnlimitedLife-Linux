@@ -1,6 +1,7 @@
 module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
+#include <alib6/debug.h>
 #include <cstring>
 
 module ave.render;
@@ -9,6 +10,10 @@ import std;
 import alib6;
 import ave.ecode;
 import :pipeline;
+import :legacy_render;
+import :dynamic_render;
+import :swapchain;
+import :render;
 
 namespace ave {
 
@@ -188,185 +193,169 @@ namespace {
             value.size()
         };
     }
-}
 
-template<PipelineType Type>
-bool Pipeline<Type>::initialize(CreatePipelineInfo<Type> ci) {
-    if constexpr(std::same_as<Type, pipeline_type::Legacy>) {
-        if(!ci.render || !*ci.render) {
+    bool create_graphics_pipeline_common(
+        CreatePipelineCommonInfo& ci,
+        VkPipelineRenderingCreateInfo* rendering_info,
+        VkRenderPass render_pass,
+        alib6::u32 subpass,
+        std::shared_ptr<Device>& out_device,
+        VkPipelineLayout& out_layout,
+        VkPipeline& out_pipeline
+    ) {
+        if(!ci.device || ci.device->get_system_handle() == VK_NULL_HANDLE ||
+           ci.shader_stages.empty()) {
             ci.ew.report(ave_vk_create_graphics_pipeline,
-                "A LegacyPipeline requires a valid LegacyRender.");
+                "Cannot create a Graphics Pipeline without a valid Device and shader stages.");
             return false;
         }
-        ci.device = ci.render->get_device();
-    }
 
-    if(!ci.device || ci.device->get_system_handle() == VK_NULL_HANDLE ||
-       ci.shader_stages.empty()) {
-        ci.ew.report(ave_vk_create_graphics_pipeline,
-            "Cannot create a Graphics Pipeline without a valid Device and shader stages.");
-        return false;
-    }
-
-    const bool has_vertex = has_stage(ci.shader_stages, VK_SHADER_STAGE_VERTEX_BIT);
-    const bool has_fragment = has_stage(ci.shader_stages, VK_SHADER_STAGE_FRAGMENT_BIT);
-    const bool has_tess_control = has_stage(
-        ci.shader_stages, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
-    const bool has_tess_evaluation = has_stage(
-        ci.shader_stages, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
-    const bool unique_stages = std::ranges::all_of(
-        ci.shader_stages,
-        [&](const auto& stage) {
-            return stage.module != VK_NULL_HANDLE && !stage.entry_point.empty() &&
-                std::ranges::count(ci.shader_stages, stage.stage,
-                    &PipelineShaderStageInfo::stage) == 1;
+        const bool has_vertex = has_stage(ci.shader_stages, VK_SHADER_STAGE_VERTEX_BIT);
+        const bool has_fragment = has_stage(ci.shader_stages, VK_SHADER_STAGE_FRAGMENT_BIT);
+        const bool has_tess_control = has_stage(
+            ci.shader_stages, VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT);
+        const bool has_tess_evaluation = has_stage(
+            ci.shader_stages, VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT);
+        const bool unique_stages = std::ranges::all_of(
+            ci.shader_stages,
+            [&](const auto& stage) {
+                return stage.module != VK_NULL_HANDLE && !stage.entry_point.empty() &&
+                    std::ranges::count(ci.shader_stages, stage.stage,
+                        &PipelineShaderStageInfo::stage) == 1;
+            }
+        );
+        if(!has_vertex || !has_fragment ||
+           has_tess_control != has_tess_evaluation || !unique_stages) {
+            ci.ew.report(ave_vk_create_graphics_pipeline,
+                "Graphics Pipeline requires unique vertex/fragment stages and a complete tessellation pair.");
+            return false;
         }
-    );
-    if(!has_vertex || !has_fragment ||
-       has_tess_control != has_tess_evaluation || !unique_stages) {
-        ci.ew.report(ave_vk_create_graphics_pipeline,
-            "Graphics Pipeline requires unique vertex/fragment stages and a complete tessellation pair.");
-        return false;
+
+        std::vector<VkPipelineShaderStageCreateInfo> stages;
+        stages.reserve(ci.shader_stages.size());
+        for(const auto& source : ci.shader_stages) {
+            VkPipelineShaderStageCreateInfo stage {};
+            stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            stage.flags = source.flags;
+            stage.stage = source.stage;
+            stage.module = source.module;
+            stage.pName = source.entry_point.c_str();
+            stage.pSpecializationInfo = source.specialization_info;
+            stages.push_back(stage);
+        }
+
+        VkPipelineLayoutCreateInfo layout_info {};
+        layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        layout_info.flags = ci.layout_flags;
+        layout_info.setLayoutCount = static_cast<alib6::u32>(
+            ci.descriptor_set_layouts.size());
+        layout_info.pSetLayouts = ci.descriptor_set_layouts.data();
+        layout_info.pushConstantRangeCount = static_cast<alib6::u32>(
+            ci.push_constant_ranges.size());
+        layout_info.pPushConstantRanges = ci.push_constant_ranges.data();
+
+        const auto handle = ci.device->get_system_handle();
+        const auto allocator = ci.device->get_instance()->get_vk_allocator();
+        VkPipelineLayout layout = VK_NULL_HANDLE;
+        VkResult code = vkCreatePipelineLayout(handle, &layout_info, allocator, &layout);
+        if(code != VK_SUCCESS) {
+            ci.ew.report(ave_vk_create_pipeline_layout,
+                "Failed to create Vulkan PipelineLayout ({}).", static_cast<int>(code));
+            return false;
+        }
+
+        VkPipelineVertexInputStateCreateInfo vertex_input {};
+        vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+        vertex_input.vertexBindingDescriptionCount = static_cast<alib6::u32>(
+            ci.vertex_bindings.size());
+        vertex_input.pVertexBindingDescriptions = ci.vertex_bindings.data();
+        vertex_input.vertexAttributeDescriptionCount = static_cast<alib6::u32>(
+            ci.vertex_attributes.size());
+        vertex_input.pVertexAttributeDescriptions = ci.vertex_attributes.data();
+
+        auto input_assembly = ci.input_assembly;
+        input_assembly.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+        auto tessellation = ci.tessellation;
+        tessellation.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+        auto viewport = ci.viewport;
+        viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        auto rasterization = ci.rasterization;
+        rasterization.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+        auto multisample = ci.multisample;
+        multisample.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+        auto depth_stencil = ci.depth_stencil;
+        depth_stencil.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        auto color_blend = ci.color_blend;
+        color_blend.sType =
+            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+        color_blend.attachmentCount = static_cast<alib6::u32>(
+            ci.color_blend_attachments.size());
+        color_blend.pAttachments = ci.color_blend_attachments.data();
+        VkPipelineDynamicStateCreateInfo dynamic_state {};
+        dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+        dynamic_state.dynamicStateCount = static_cast<alib6::u32>(
+            ci.dynamic_states.size());
+        dynamic_state.pDynamicStates = ci.dynamic_states.data();
+
+        VkGraphicsPipelineCreateInfo pipeline_info {};
+        pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        pipeline_info.flags = ci.flags;
+        pipeline_info.stageCount = static_cast<alib6::u32>(stages.size());
+        pipeline_info.pStages = stages.data();
+        pipeline_info.pVertexInputState = &vertex_input;
+        pipeline_info.pInputAssemblyState = &input_assembly;
+        pipeline_info.pTessellationState = has_tess_control ? &tessellation : nullptr;
+        pipeline_info.pViewportState = &viewport;
+        pipeline_info.pRasterizationState = &rasterization;
+        pipeline_info.pMultisampleState = &multisample;
+        pipeline_info.pDepthStencilState = ci.use_depth_stencil_state
+            ? &depth_stencil : nullptr;
+        pipeline_info.pColorBlendState = &color_blend;
+        pipeline_info.pDynamicState = ci.dynamic_states.empty()
+            ? nullptr : &dynamic_state;
+        pipeline_info.layout = layout;
+        pipeline_info.basePipelineHandle = ci.base_pipeline;
+        pipeline_info.basePipelineIndex = ci.base_pipeline_index;
+
+        if(rendering_info) {
+            pipeline_info.pNext = rendering_info;
+            pipeline_info.renderPass = VK_NULL_HANDLE;
+            pipeline_info.subpass = 0;
+        } else {
+            pipeline_info.pNext = nullptr;
+            pipeline_info.renderPass = render_pass;
+            pipeline_info.subpass = subpass;
+        }
+
+        VkPipeline pipeline = VK_NULL_HANDLE;
+        code = vkCreateGraphicsPipelines(
+            handle, ci.cache, 1, &pipeline_info, allocator, &pipeline);
+        if(code != VK_SUCCESS) {
+            ci.ew.report(ave_vk_create_graphics_pipeline,
+                "Failed to create Vulkan Graphics Pipeline ({}).", static_cast<int>(code));
+            vkDestroyPipelineLayout(handle, layout, allocator);
+            return false;
+        }
+
+        out_device = ci.device;
+        out_layout = layout;
+        out_pipeline = pipeline;
+        return true;
     }
-
-    std::vector<VkPipelineShaderStageCreateInfo> stages;
-    stages.reserve(ci.shader_stages.size());
-    for(const auto& source : ci.shader_stages) {
-        VkPipelineShaderStageCreateInfo stage {};
-        stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        stage.flags = source.flags;
-        stage.stage = source.stage;
-        stage.module = source.module;
-        stage.pName = source.entry_point.c_str();
-        stage.pSpecializationInfo = source.specialization_info;
-        stages.push_back(stage);
-    }
-
-    VkPipelineLayoutCreateInfo layout_info {};
-    layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    layout_info.flags = ci.layout_flags;
-    layout_info.setLayoutCount = static_cast<alib6::u32>(
-        ci.descriptor_set_layouts.size());
-    layout_info.pSetLayouts = ci.descriptor_set_layouts.data();
-    layout_info.pushConstantRangeCount = static_cast<alib6::u32>(
-        ci.push_constant_ranges.size());
-    layout_info.pPushConstantRanges = ci.push_constant_ranges.data();
-
-    device = ci.device;
-    const auto handle = device->get_system_handle();
-    const auto allocator = device->get_instance()->get_vk_allocator();
-    VkResult code = vkCreatePipelineLayout(handle, &layout_info, allocator, &layout);
-    if(code != VK_SUCCESS) {
-        ci.ew.report(ave_vk_create_pipeline_layout,
-            "Failed to create Vulkan PipelineLayout ({}).", static_cast<int>(code));
-        device.reset();
-        return false;
-    }
-
-    VkPipelineVertexInputStateCreateInfo vertex_input {};
-    vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertex_input.vertexBindingDescriptionCount = static_cast<alib6::u32>(
-        ci.vertex_bindings.size());
-    vertex_input.pVertexBindingDescriptions = ci.vertex_bindings.data();
-    vertex_input.vertexAttributeDescriptionCount = static_cast<alib6::u32>(
-        ci.vertex_attributes.size());
-    vertex_input.pVertexAttributeDescriptions = ci.vertex_attributes.data();
-
-    auto input_assembly = ci.input_assembly;
-    input_assembly.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    auto tessellation = ci.tessellation;
-    tessellation.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
-    auto viewport = ci.viewport;
-    viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    auto rasterization = ci.rasterization;
-    rasterization.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    auto multisample = ci.multisample;
-    multisample.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    auto depth_stencil = ci.depth_stencil;
-    depth_stencil.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    auto color_blend = ci.color_blend;
-    color_blend.sType =
-        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    color_blend.attachmentCount = static_cast<alib6::u32>(
-        ci.color_blend_attachments.size());
-    color_blend.pAttachments = ci.color_blend_attachments.data();
-    VkPipelineDynamicStateCreateInfo dynamic_state {};
-    dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamic_state.dynamicStateCount = static_cast<alib6::u32>(
-        ci.dynamic_states.size());
-    dynamic_state.pDynamicStates = ci.dynamic_states.data();
-
-    VkGraphicsPipelineCreateInfo pipeline_info {};
-    pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    pipeline_info.flags = ci.flags;
-    pipeline_info.stageCount = static_cast<alib6::u32>(stages.size());
-    pipeline_info.pStages = stages.data();
-    pipeline_info.pVertexInputState = &vertex_input;
-    pipeline_info.pInputAssemblyState = &input_assembly;
-    pipeline_info.pTessellationState = has_tess_control ? &tessellation : nullptr;
-    pipeline_info.pViewportState = &viewport;
-    pipeline_info.pRasterizationState = &rasterization;
-    pipeline_info.pMultisampleState = &multisample;
-    pipeline_info.pDepthStencilState = ci.use_depth_stencil_state
-        ? &depth_stencil : nullptr;
-    pipeline_info.pColorBlendState = &color_blend;
-    pipeline_info.pDynamicState = ci.dynamic_states.empty()
-        ? nullptr : &dynamic_state;
-    pipeline_info.layout = layout;
-    pipeline_info.basePipelineHandle = ci.base_pipeline;
-    pipeline_info.basePipelineIndex = ci.base_pipeline_index;
-
-    VkPipelineRenderingCreateInfo rendering_info {};
-    if constexpr(std::same_as<Type, pipeline_type::Legacy>) {
-        pipeline_info.renderPass = ci.render->get_render_pass();
-        pipeline_info.subpass = ci.subpass;
-    }else{
-        rendering_info.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
-        rendering_info.viewMask = ci.view_mask;
-        rendering_info.colorAttachmentCount = static_cast<alib6::u32>(
-            ci.color_attachment_formats.size());
-        rendering_info.pColorAttachmentFormats =
-            ci.color_attachment_formats.data();
-        rendering_info.depthAttachmentFormat = ci.depth_attachment_format;
-        rendering_info.stencilAttachmentFormat = ci.stencil_attachment_format;
-        pipeline_info.pNext = &rendering_info;
-        pipeline_info.renderPass = VK_NULL_HANDLE;
-        pipeline_info.subpass = 0;
-    }
-
-    code = vkCreateGraphicsPipelines(
-        handle, ci.cache, 1, &pipeline_info, allocator, &pipeline);
-    if(code != VK_SUCCESS) {
-        ci.ew.report(ave_vk_create_graphics_pipeline,
-            "Failed to create Vulkan Graphics Pipeline ({}).", static_cast<int>(code));
-        destroy();
-        return false;
-    }
-    return true;
 }
 
-template<PipelineType Type>
-Pipeline<Type>::~Pipeline() {
+// ---------------- Pipeline base implementation ----------------
+
+Pipeline::~Pipeline() {
     destroy();
 }
 
-template<PipelineType Type>
-std::shared_ptr<Pipeline<Type>> Pipeline<Type>::create(
-    CreatePipelineInfo<Type> ci
-) {
-    auto result = std::shared_ptr<Pipeline<Type>>(new Pipeline<Type>());
-    if(!result->initialize(std::move(ci))) return {};
-    return result;
-}
-
-template<PipelineType Type>
-void Pipeline<Type>::destroy() noexcept {
+void Pipeline::destroy() noexcept {
     if(device && device->get_system_handle() != VK_NULL_HANDLE) {
         vkDeviceWaitIdle(device->get_system_handle());
         const auto handle = device->get_system_handle();
@@ -383,25 +372,74 @@ void Pipeline<Type>::destroy() noexcept {
     device.reset();
 }
 
-template<PipelineType Type>
-const std::shared_ptr<Device>& Pipeline<Type>::get_device() const noexcept {
-    return device;
+// ---------------- DynamicPipeline implementation ----------------
+
+DynamicPipeline::DynamicPipeline() {
+    type = PipelineType::DynamicGraphics;
+    bind_point = VK_PIPELINE_BIND_POINT_GRAPHICS;
 }
 
-template<PipelineType Type>
-VkPipelineLayout Pipeline<Type>::get_layout() const noexcept {
-    return layout;
+bool DynamicPipeline::initialize(CreatePipelineInfo<pipeline_type::Dynamic> ci) {
+    if(!ci.device || !ci.device->supports_dynamic_rendering()) {
+        ci.ew.report(ave_vk_create_graphics_pipeline,
+            "A DynamicPipeline requires a valid Device supporting dynamic rendering.");
+        return false;
+    }
+
+    VkPipelineRenderingCreateInfo rendering_info {};
+    rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+    rendering_info.viewMask = ci.view_mask;
+    rendering_info.colorAttachmentCount = static_cast<alib6::u32>(
+        ci.color_attachment_formats.size());
+    rendering_info.pColorAttachmentFormats =
+        ci.color_attachment_formats.data();
+    rendering_info.depthAttachmentFormat = ci.depth_attachment_format;
+    rendering_info.stencilAttachmentFormat = ci.stencil_attachment_format;
+
+    return create_graphics_pipeline_common(
+        ci, &rendering_info, VK_NULL_HANDLE, 0,
+        device, layout, pipeline
+    );
 }
 
-template<PipelineType Type>
-VkPipeline Pipeline<Type>::get_system_handle() const noexcept {
-    return pipeline;
+std::shared_ptr<DynamicPipeline> DynamicPipeline::create(
+    CreatePipelineInfo<pipeline_type::Dynamic> ci
+) {
+    auto result = std::shared_ptr<DynamicPipeline>(new DynamicPipeline());
+    if(!result->initialize(std::move(ci))) return {};
+    return result;
 }
 
-template<PipelineType Type>
-Pipeline<Type>::operator bool() const noexcept {
-    return pipeline != VK_NULL_HANDLE;
+// ---------------- LegacyPipeline implementation ----------------
+
+LegacyPipeline::LegacyPipeline() {
+    type = PipelineType::LegacyGraphics;
+    bind_point = VK_PIPELINE_BIND_POINT_GRAPHICS;
 }
+
+bool LegacyPipeline::initialize(CreatePipelineInfo<pipeline_type::Legacy> ci) {
+    if(!ci.render || !*ci.render) {
+        ci.ew.report(ave_vk_create_graphics_pipeline,
+            "A LegacyPipeline requires a valid LegacyRender.");
+        return false;
+    }
+    ci.device = ci.render->get_device();
+
+    return create_graphics_pipeline_common(
+        ci, nullptr, ci.render->get_render_pass(), ci.subpass,
+        device, layout, pipeline
+    );
+}
+
+std::shared_ptr<LegacyPipeline> LegacyPipeline::create(
+    CreatePipelineInfo<pipeline_type::Legacy> ci
+) {
+    auto result = std::shared_ptr<LegacyPipeline>(new LegacyPipeline());
+    if(!result->initialize(std::move(ci))) return {};
+    return result;
+}
+
+// ---------------- LegacyRender::create_graphics_pipeline ----------------
 
 std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     GraphicsShaderBytecode shaders,
@@ -415,6 +453,12 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
         ci,
         get_subpass_color_attachment_count(ci.subpass)
     );
+    if(subpass_has_depth_stencil(ci.subpass)) {
+        ci.depth_stencil.depthTestEnable = VK_TRUE;
+        ci.depth_stencil.depthWriteEnable = VK_TRUE;
+        ci.depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
+        ci.use_depth_stencil_state = true;
+    }
     const bool incomplete_tessellation =
         shaders.tessellation.control.empty() !=
         shaders.tessellation.evaluation.empty();
@@ -528,7 +572,363 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     }, std::move(configure));
 }
 
-template class Pipeline<pipeline_type::Dynamic>;
-template class Pipeline<pipeline_type::Legacy>;
+// ---------------- DynamicRender::create_graphics_pipeline ----------------
+
+std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
+    GraphicsShaderBytecode shaders,
+    ConfigureDynamicPipeline configure
+) {
+    CreatePipelineInfo<pipeline_type::Dynamic> ci;
+    ci.device = get_device();
+    ci.color_attachment_formats = color_attachment_formats;
+    ci.depth_attachment_format = depth_attachment_format;
+    ci.stencil_attachment_format = stencil_attachment_format;
+    default_configure_graphics_pipeline(
+        ci,
+        static_cast<alib6::u32>(ci.color_attachment_formats.size())
+    );
+    if(ci.depth_attachment_format != VK_FORMAT_UNDEFINED) {
+        ci.depth_stencil.depthTestEnable = VK_TRUE;
+        ci.depth_stencil.depthWriteEnable = VK_TRUE;
+        ci.depth_stencil.depthCompareOp = VK_COMPARE_OP_LESS;
+        ci.use_depth_stencil_state = true;
+    }
+    const bool incomplete_tessellation =
+        shaders.tessellation.control.empty() !=
+        shaders.tessellation.evaluation.empty();
+    if(shaders.vertex.empty() || shaders.fragment.empty() ||
+       incomplete_tessellation || shaders.entry_point.empty()) {
+        ci.ew.report(ave_vk_create_shader_module,
+            "Graphics shader bytecode requires vertex/fragment and a complete tessellation pair.");
+        return {};
+    }
+
+    ShaderModuleScope module_scope(get_device());
+    CreatedShaderModules modules;
+    modules.vertex = module_scope.create(shaders.vertex, ci.ew);
+    modules.fragment = module_scope.create(shaders.fragment, ci.ew);
+    modules.geometry = module_scope.create(shaders.geometry, ci.ew);
+    modules.tessellation_control = module_scope.create(
+        shaders.tessellation.control, ci.ew);
+    modules.tessellation_evaluation = module_scope.create(
+        shaders.tessellation.evaluation, ci.ew);
+    if(modules.vertex == VK_NULL_HANDLE || modules.fragment == VK_NULL_HANDLE ||
+       (!shaders.geometry.empty() && modules.geometry == VK_NULL_HANDLE) ||
+       (shaders.tessellation.complete() &&
+        (modules.tessellation_control == VK_NULL_HANDLE ||
+         modules.tessellation_evaluation == VK_NULL_HANDLE))) {
+        return {};
+    }
+
+    append_shader_stages(ci, modules, shaders.entry_point);
+    if(shaders.tessellation.complete()) {
+        ci.input_assembly.topology = VK_PRIMITIVE_TOPOLOGY_PATCH_LIST;
+        ci.tessellation.patchControlPoints =
+            shaders.tessellation.patch_control_points;
+    }
+    if(configure) configure(ci);
+    return DynamicPipeline::create(std::move(ci));
+}
+
+std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
+    ShaderBytecode vertex,
+    ShaderBytecode fragment,
+    ShaderBytecode geometry,
+    TessellationShaderBytecode tessellation,
+    ConfigureDynamicPipeline configure
+) {
+    return create_graphics_pipeline(GraphicsShaderBytecode {
+        .vertex = vertex,
+        .fragment = fragment,
+        .geometry = geometry,
+        .tessellation = tessellation
+    }, std::move(configure));
+}
+
+std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
+    GraphicsShaderPaths shaders,
+    ConfigureDynamicPipeline configure
+) {
+    const bool incomplete_tessellation =
+        shaders.tessellation.control.empty() !=
+        shaders.tessellation.evaluation.empty();
+    if(shaders.vertex.empty() || shaders.fragment.empty() || incomplete_tessellation) {
+        alib6::ErrorWrapper{}.report(ave_vk_create_shader_module,
+            "Graphics shader paths require vertex/fragment and a complete tessellation pair.");
+        return {};
+    }
+
+    std::string vertex;
+    std::string fragment;
+    std::string geometry;
+    std::string tessellation_control;
+    std::string tessellation_evaluation;
+    const auto read = [](std::string_view path, std::string& output) {
+        if(path.empty()) return true;
+        return alib6::io::read_all(path, output) !=
+            std::numeric_limits<alib6::usize>::max();
+    };
+    if(!read(shaders.vertex, vertex) ||
+       !read(shaders.fragment, fragment) ||
+       !read(shaders.geometry, geometry) ||
+       !read(shaders.tessellation.control, tessellation_control) ||
+       !read(shaders.tessellation.evaluation, tessellation_evaluation)) {
+        alib6::ErrorWrapper{}.report(ave_vk_create_shader_module,
+            "Failed to read one or more SPIR-V shader files.");
+        return {};
+    }
+
+    return create_graphics_pipeline(GraphicsShaderBytecode {
+        .vertex = as_bytecode(vertex),
+        .fragment = as_bytecode(fragment),
+        .geometry = as_bytecode(geometry),
+        .tessellation = {
+            .control = as_bytecode(tessellation_control),
+            .evaluation = as_bytecode(tessellation_evaluation),
+            .patch_control_points = shaders.tessellation.patch_control_points
+        },
+        .entry_point = std::move(shaders.entry_point)
+    }, std::move(configure));
+}
+
+std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
+    std::string_view vertex,
+    std::string_view fragment,
+    std::string_view geometry,
+    TessellationShaderPaths tessellation,
+    ConfigureDynamicPipeline configure
+) {
+    return create_graphics_pipeline(GraphicsShaderPaths {
+        .vertex = vertex,
+        .fragment = fragment,
+        .geometry = geometry,
+        .tessellation = tessellation
+    }, std::move(configure));
+}
+
+// ---------------- Renderer render backend creation ----------------
+
+std::shared_ptr<LegacyRender> Renderer::create_legacy_render(
+    ConfigureLegacyRender configure,
+    LegacyRenderCreateStatus* status,
+    alib6::ErrorWrapper ew
+) {
+    if(!device || !swapchain) {
+        ew.report(ave_vk_create_render_pass,
+            "Cannot create LegacyRender without a valid Device and Swapchain.");
+        return nullptr;
+    }
+    WithLegacyRenderInput input(device, swapchain, images);
+    CreateLegacyRenderInfo ci;
+    ci.swapchain = swapchain;
+    ci.ew = ew;
+    if(configure) {
+        configure(input, ci);
+    } else {
+        default_configure_legacy_render(input, ci);
+    }
+    legacy_render = LegacyRender::create(std::move(ci), status);
+    if(legacy_render) {
+        (void)invalidate_graphics_cache();
+    }
+    return legacy_render;
+}
+
+std::shared_ptr<DynamicRender> Renderer::create_dynamic_render(
+    ConfigureDynamicRender configure,
+    alib6::ErrorWrapper ew
+) {
+    if(!device || !swapchain) {
+        ew.report(ave_vk_create_device,
+            "Cannot create DynamicRender without a valid Device and Swapchain.");
+        return nullptr;
+    }
+    WithDynamicRenderInput input(device, swapchain, images);
+    CreateDynamicRenderInfo ci;
+    ci.swapchain = swapchain;
+    ci.ew = ew;
+    if(configure) {
+        configure(input, ci);
+    } else {
+        default_configure_dynamic_render(input, ci);
+    }
+    dynamic_render = DynamicRender::create(std::move(ci));
+    if(dynamic_render) {
+        (void)invalidate_graphics_cache();
+    }
+    return dynamic_render;
+}
+
+// ---------------- Renderer::create_dynamic_graphics_pipeline ----------------
+
+std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
+    GraphicsShaderBytecode shaders,
+    ConfigureDynamicPipeline configure
+) {
+    panic_debug(!dynamic_render,
+        "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+    return dynamic_render->create_graphics_pipeline(std::move(shaders), std::move(configure));
+}
+
+std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
+    ShaderBytecode vertex,
+    ShaderBytecode fragment,
+    ShaderBytecode geometry,
+    TessellationShaderBytecode tessellation,
+    ConfigureDynamicPipeline configure
+) {
+    panic_debug(!dynamic_render,
+        "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+    return dynamic_render->create_graphics_pipeline(
+        vertex, fragment, geometry, tessellation, std::move(configure));
+}
+
+std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
+    GraphicsShaderPaths shaders,
+    ConfigureDynamicPipeline configure
+) {
+    panic_debug(!dynamic_render,
+        "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+    return dynamic_render->create_graphics_pipeline(shaders, std::move(configure));
+}
+
+std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
+    std::string_view vertex,
+    std::string_view fragment,
+    std::string_view geometry,
+    TessellationShaderPaths tessellation,
+    ConfigureDynamicPipeline configure
+) {
+    panic_debug(!dynamic_render,
+        "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+    return dynamic_render->create_graphics_pipeline(
+        vertex, fragment, geometry, tessellation, std::move(configure));
+}
+
+// ---------------- Renderer::create_legacy_graphics_pipeline ----------------
+
+std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
+    GraphicsShaderBytecode shaders,
+    ConfigureLegacyPipeline configure
+) {
+    panic_debug(!legacy_render,
+        "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+    return legacy_render->create_graphics_pipeline(std::move(shaders), std::move(configure));
+}
+
+std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
+    ShaderBytecode vertex,
+    ShaderBytecode fragment,
+    ShaderBytecode geometry,
+    TessellationShaderBytecode tessellation,
+    ConfigureLegacyPipeline configure
+) {
+    panic_debug(!legacy_render,
+        "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+    return legacy_render->create_graphics_pipeline(
+        vertex, fragment, geometry, tessellation, std::move(configure));
+}
+
+std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
+    GraphicsShaderPaths shaders,
+    ConfigureLegacyPipeline configure
+) {
+    panic_debug(!legacy_render,
+        "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+    return legacy_render->create_graphics_pipeline(shaders, std::move(configure));
+}
+
+std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
+    std::string_view vertex,
+    std::string_view fragment,
+    std::string_view geometry,
+    TessellationShaderPaths tessellation,
+    ConfigureLegacyPipeline configure
+) {
+    panic_debug(!legacy_render,
+        "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+    return legacy_render->create_graphics_pipeline(
+        vertex, fragment, geometry, tessellation, std::move(configure));
+}
+
+// ---------------- Renderer::create_graphics_pipeline (graceful degradation) ----------------
+
+std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
+    GraphicsShaderBytecode shaders,
+    ConfigureGraphicsPipeline configure
+) {
+    if(dynamic_render) {
+        return dynamic_render->create_graphics_pipeline(
+            std::move(shaders),
+            configure ? ConfigureDynamicPipeline([configure](CreatePipelineInfo<pipeline_type::Dynamic>& ci) {
+                configure(ci);
+            }) : ConfigureDynamicPipeline{}
+        );
+    }
+    if(legacy_render) {
+        return legacy_render->create_graphics_pipeline(
+            std::move(shaders),
+            configure ? ConfigureLegacyPipeline([configure](CreatePipelineInfo<pipeline_type::Legacy>& ci) {
+                configure(ci);
+            }) : ConfigureLegacyPipeline{}
+        );
+    }
+    panic_debug(false, "Renderer has neither dynamic_render nor legacy_render initialized.");
+    return {};
+}
+
+std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
+    ShaderBytecode vertex,
+    ShaderBytecode fragment,
+    ShaderBytecode geometry,
+    TessellationShaderBytecode tessellation,
+    ConfigureGraphicsPipeline configure
+) {
+    return create_graphics_pipeline(GraphicsShaderBytecode {
+        .vertex = vertex,
+        .fragment = fragment,
+        .geometry = geometry,
+        .tessellation = tessellation
+    }, std::move(configure));
+}
+
+std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
+    GraphicsShaderPaths shaders,
+    ConfigureGraphicsPipeline configure
+) {
+    if(dynamic_render) {
+        return dynamic_render->create_graphics_pipeline(
+            shaders,
+            configure ? ConfigureDynamicPipeline([configure](CreatePipelineInfo<pipeline_type::Dynamic>& ci) {
+                configure(ci);
+            }) : ConfigureDynamicPipeline{}
+        );
+    }
+    if(legacy_render) {
+        return legacy_render->create_graphics_pipeline(
+            shaders,
+            configure ? ConfigureLegacyPipeline([configure](CreatePipelineInfo<pipeline_type::Legacy>& ci) {
+                configure(ci);
+            }) : ConfigureLegacyPipeline{}
+        );
+    }
+    panic_debug(false, "Renderer has neither dynamic_render nor legacy_render initialized.");
+    return {};
+}
+
+std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
+    std::string_view vertex,
+    std::string_view fragment,
+    std::string_view geometry,
+    TessellationShaderPaths tessellation,
+    ConfigureGraphicsPipeline configure
+) {
+    return create_graphics_pipeline(GraphicsShaderPaths {
+        .vertex = vertex,
+        .fragment = fragment,
+        .geometry = geometry,
+        .tessellation = tessellation
+    }, std::move(configure));
+}
 
 }

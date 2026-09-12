@@ -1,3 +1,9 @@
+/**
+ * @file pipeline_fwd.cppm
+ * @brief Forward declarations and common types for Pipeline hierarchy
+ * @version 5.0
+ * @date 2026-09-12
+ */
 module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
@@ -8,24 +14,29 @@ import std;
 import alib6;
 
 export namespace ave {
+    enum class PipelineType : alib6::u8 {
+        DynamicGraphics,
+        LegacyGraphics,
+        Compute,
+        RayTracing
+    };
+
     namespace pipeline_type {
         struct Dynamic {};
         struct Legacy {};
     }
 
-    template<class Type>
-    concept PipelineType =
-        std::same_as<Type, pipeline_type::Dynamic> ||
-        std::same_as<Type, pipeline_type::Legacy>;
-
-    template<PipelineType Type = pipeline_type::Dynamic>
     class Pipeline;
+    class DynamicPipeline;
+    class LegacyPipeline;
 
-    template<PipelineType Type>
+    struct CreatePipelineCommonInfo;
+
+    template<class Type>
     struct CreatePipelineInfo;
 
-    using DynamicPipeline = Pipeline<pipeline_type::Dynamic>;
-    using LegacyPipeline = Pipeline<pipeline_type::Legacy>;
+    using CreateDynamicPipelineInfo = CreatePipelineInfo<pipeline_type::Dynamic>;
+    using CreateLegacyPipelineInfo = CreatePipelineInfo<pipeline_type::Legacy>;
 
     using ShaderBytecode = std::span<const alib6::u8>;
 
@@ -65,7 +76,15 @@ export namespace ave {
         std::string entry_point { "main" };
     };
 
+    using ConfigureGraphicsPipeline = std::function<void(
+        CreatePipelineCommonInfo&
+    )>;
+
     using ConfigureLegacyPipeline = std::function<void(
         CreatePipelineInfo<pipeline_type::Legacy>&
+    )>;
+
+    using ConfigureDynamicPipeline = std::function<void(
+        CreatePipelineInfo<pipeline_type::Dynamic>&
     )>;
 }

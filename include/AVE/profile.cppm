@@ -63,8 +63,10 @@ namespace ave{
         bool __vk_select_physical_device(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
         bool __vk_device(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
         bool __vk_swapchain(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
+        bool __vk_images(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
         bool __vk_sync_objects(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
         bool __vk_legacy_render(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
+        bool __vk_dynamic_render(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
         bool __vk_command_pool(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
         bool __vk_command_buffers(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
     };

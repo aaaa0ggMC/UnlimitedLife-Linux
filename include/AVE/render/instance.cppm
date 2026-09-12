@@ -112,6 +112,7 @@ export namespace ave{
     private:
         VkInstance instance { nullptr };
         Context * ctx { nullptr };
+        ApiVersion api_version { ave_vk_1_0 };
 
     public:
         Instance() = default;
@@ -120,9 +121,10 @@ export namespace ave{
 
         // move
         Instance(Instance && i) noexcept
-        :instance(i.instance),ctx(i.ctx){
+        :instance(i.instance),ctx(i.ctx),api_version(i.api_version){
             i.instance = VK_NULL_HANDLE;
             i.ctx = nullptr;
+            i.api_version = ave_vk_1_0;
         }
         Instance& operator=(Instance && i) noexcept {
             if(&i == this) return *this;
@@ -133,8 +135,10 @@ export namespace ave{
             
             instance = i.instance;
             ctx = i.ctx;
+            api_version = i.api_version;
             i.instance = VK_NULL_HANDLE;
             i.ctx = nullptr;
+            i.api_version = ave_vk_1_0;
             return *this;
         }
         Instance& operator=(const Instance &) = delete;
@@ -181,6 +185,7 @@ export namespace ave{
                 );
                 return false;
             }
+            api_version = ci.api_version;
             return true;
         }
 
@@ -189,11 +194,15 @@ export namespace ave{
             vkDestroyInstance(instance, ctx->get_vk_allocator());
             instance = VK_NULL_HANDLE;
             ctx = nullptr;
+            api_version = ave_vk_1_0;
         }
 
         VkInstance get_system_handle() const noexcept { return instance; }
         auto get_vk_allocator() const noexcept {
             return ctx ? ctx->get_vk_allocator() : nullptr;
+        }
+        [[nodiscard]] ApiVersion get_api_version() const noexcept {
+            return api_version;
         }
     };
 }

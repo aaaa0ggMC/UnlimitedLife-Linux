@@ -204,12 +204,24 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
         return renderer;
     }
 
+    if(!__vk_images(renderer, ew, result)){
+        return renderer;
+    }
+
     if(!__vk_sync_objects(renderer, ew, result)){
         return renderer;
     }
 
-    if(!__vk_legacy_render(renderer, ew, result)){
-        return renderer;
+    const bool use_dynamic = !with_data.legacy_render &&
+        renderer.device && renderer.device->supports_dynamic_rendering();
+    if(use_dynamic) {
+        if(!__vk_dynamic_render(renderer, ew, result)){
+            return renderer;
+        }
+    }else{
+        if(!__vk_legacy_render(renderer, ew, result)){
+            return renderer;
+        }
     }
 
     if(!__vk_command_pool(renderer, ew, result)){
@@ -410,7 +422,7 @@ bool RenderProfile::__vk_legacy_render(
         return true;
     }
 
-    WithLegacyRenderInput input(r.device, r.swapchain);
+    WithLegacyRenderInput input(r.device, r.swapchain, r.images);
     CreateLegacyRenderInfo ci;
     ci.swapchain = r.swapchain;
     ci.ew = ew;
@@ -443,6 +455,169 @@ bool RenderProfile::__vk_legacy_render(
     return static_cast<bool>(r.legacy_render);
 }
 
+bool RenderProfile::__vk_dynamic_render(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    if(result) {
+        result->skip(create_render_pass, "Dynamic rendering is active");
+        result->skip(create_framebuffers, "Dynamic rendering is active");
+    }
+
+    if(with_data.dynamic_render) {
+        const bool valid =
+            static_cast<bool>(*with_data.dynamic_render) &&
+            with_data.dynamic_render->get_swapchain() == r.swapchain;
+        if(!valid) {
+            ew.report(ave_vk_create_device,
+                "The provided DynamicRender is invalid or belongs to a different Swapchain.");
+            return false;
+        }
+        r.dynamic_render = with_data.dynamic_render;
+        r.default_clear_values = r.dynamic_render->get_default_clear_values();
+        return true;
+    }
+
+    WithDynamicRenderInput input(r.device, r.swapchain, r.images);
+    CreateDynamicRenderInfo ci;
+    ci.swapchain = r.swapchain;
+    ci.ew = ew;
+    if(with_data.configure_dynamic_render) {
+        with_data.configure_dynamic_render(input, ci);
+    } else {
+        default_configure_dynamic_render(input, ci);
+    }
+
+    r.dynamic_render = DynamicRender::create(std::move(ci));
+    if(r.dynamic_render) {
+        r.default_clear_values = r.dynamic_render->get_default_clear_values();
+    }
+    return static_cast<bool>(r.dynamic_render);
+}
+
+bool RenderProfile::__vk_images(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    const auto swapchain_handles = r.swapchain->enumerate_images(ew);
+    if(!swapchain_handles) {
+        if(result) result->fail(
+            create_images, "Failed to enumerate Swapchain Images");
+        return false;
+    }
+
+    if(with_data.images) {
+        const bool dependencies_valid = std::ranges::all_of(
+            *with_data.images,
+            [&](const auto& image) {
+                return image && *image && image->get_device() == r.device;
+            }
+        );
+        const bool swapchain_images_valid = std::ranges::all_of(
+            *swapchain_handles,
+            [&](VkImage handle) {
+                return std::ranges::any_of(
+                    *with_data.images,
+                    [&](const auto& image) {
+                        return image && image->get_swapchain() == r.swapchain &&
+                            image->get_system_handle() == handle &&
+                            image->get_image_view() != VK_NULL_HANDLE;
+                    }
+                );
+            }
+        );
+        const bool valid = dependencies_valid && swapchain_images_valid;
+        if(result) {
+            auto& stage = (*result)[create_images];
+            stage["source"] = "provided";
+            stage["count"] = with_data.images->size();
+            stage["swapchain_image_count"] = swapchain_handles->size();
+            if(valid) stage.succeed();
+            else stage.fail(
+                "A provided Image is invalid or belongs to a different Device"
+            );
+        }
+        if(!valid) {
+            ew.report(ave_vk_create_image,
+                "Provided Images are invalid, belong to another Device, or do not wrap every Swapchain Image.");
+            return false;
+        }
+        r.images = *with_data.images;
+        return true;
+    }
+
+    WithImagesInput input(r.device, r.swapchain);
+    CreateImagesInfo ci;
+    ci.device = r.device;
+    ci.ew = ew;
+    if(with_data.configure_images) {
+        with_data.configure_images(input, ci);
+    }else{
+        default_configure_images(input, ci);
+    }
+
+    const auto requested_count = ci.images.size();
+    std::vector<std::shared_ptr<Image>> created;
+    created.reserve(swapchain_handles->size() + requested_count);
+    for(std::size_t i = 0; i < swapchain_handles->size(); ++i) {
+        auto image = Image::create_swapchain_image({
+            .swapchain = r.swapchain,
+            .image = (*swapchain_handles)[i],
+            .image_view_next = ci.swapchain_image_view_next,
+            .image_view_flags = ci.swapchain_image_view_flags,
+            .image_view_type = ci.swapchain_image_view_type,
+            .image_view_components = ci.swapchain_image_view_components,
+            .image_view_subresource_range =
+                ci.swapchain_image_view_subresource_range,
+            .ew = ci.ew
+        });
+        if(!image) {
+            if(result) {
+                auto& stage = (*result)[create_images];
+                stage["source"] = "created";
+                stage["swapchain_image_count"] = swapchain_handles->size();
+                stage["failed_swapchain_image_index"] = i;
+                stage.fail("Failed to wrap a Swapchain Image");
+            }
+            return false;
+        }
+        created.push_back(std::move(image));
+    }
+    for(std::size_t i = 0; i < ci.images.size(); ++i) {
+        auto request = std::move(ci.images[i]);
+        if(!request.device) request.device = ci.device;
+        request.ew = ci.ew;
+        auto image = Image::create(std::move(request));
+        if(!image || image->get_device() != r.device) {
+            if(result) {
+                auto& stage = (*result)[create_images];
+                stage["source"] = "created";
+                stage["requested_count"] = requested_count;
+                stage["swapchain_image_count"] = swapchain_handles->size();
+                stage["created_auxiliary_count"] =
+                    created.size() - swapchain_handles->size();
+                stage["failed_auxiliary_index"] = i;
+                stage.fail("Failed to create a configured Vulkan Image");
+            }
+            return false;
+        }
+        created.push_back(std::move(image));
+    }
+    r.images = std::move(created);
+
+    if(result) {
+        auto& stage = (*result)[create_images];
+        stage["source"] = "created";
+        stage["requested_auxiliary_count"] = requested_count;
+        stage["swapchain_image_count"] = swapchain_handles->size();
+        stage["created_count"] = r.images.size();
+        stage.succeed();
+    }
+    return true;
+}
+
 bool RenderProfile::__vk_swapchain(
     Renderer& r,
     alib6::ErrorWrapper ew,
@@ -461,7 +636,7 @@ bool RenderProfile::__vk_swapchain(
                 const auto extent = with_data.swapchain->get_extent();
                 stage["width"] = extent.width;
                 stage["height"] = extent.height;
-                stage["image_count"] = with_data.swapchain->get_images().size();
+                stage["image_count"] = with_data.swapchain->get_image_count();
             }else{
                 stage.fail(
                     "Provided Swapchain is invalid or belongs to different Device/Surface dependencies"
@@ -516,7 +691,7 @@ bool RenderProfile::__vk_swapchain(
         stage["requested_image_count"] = configured_image_count;
         if(r.swapchain) {
             stage.succeed();
-            stage["image_count"] = r.swapchain->get_images().size();
+            stage["image_count"] = r.swapchain->get_image_count();
         }else{
             stage.fail("Failed to create Vulkan Swapchain or image views");
         }
@@ -539,6 +714,8 @@ bool RenderProfile::__vk_device(
             stage["extensions"] = alib6::to_adata(
                 r.device->get_enabled_extensions()
             );
+            stage["dynamic_rendering"] = r.device->supports_dynamic_rendering()
+                ? "provided" : "disabled";
         }
         return true;
     }
@@ -629,6 +806,91 @@ bool RenderProfile::__vk_device(
         ci.enable_extension(extension);
     }
 
+    VkPhysicalDeviceDynamicRenderingFeatures dynamic_rendering_feature {};
+    dynamic_rendering_feature.sType =
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+    dynamic_rendering_feature.dynamicRendering = VK_TRUE;
+
+    std::string dynamic_rendering_mode = "disabled";
+    if(with_data.try_dynamic_rendering) {
+        const auto app_version = r.instance
+            ? r.instance->get_api_version() : ave_vk_1_0;
+        const auto gpu_version = r.physical_device->properties.apiVersion;
+        const bool app_is_1_3_plus = (app_version.major > 1 ||
+            (app_version.major == 1 && app_version.minor >= 3));
+        const bool gpu_is_1_3_plus = (gpu_version >= VK_API_VERSION_1_3);
+
+        VkPhysicalDeviceDynamicRenderingFeatures query_feature {};
+        query_feature.sType =
+            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+        VkPhysicalDeviceFeatures2 features2 {};
+        features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+        features2.pNext = &query_feature;
+
+        auto pfnGetFeatures2 = reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
+            vkGetInstanceProcAddr(
+                r.instance->get_system_handle(), "vkGetPhysicalDeviceFeatures2"
+            )
+        );
+        if(!pfnGetFeatures2) {
+            pfnGetFeatures2 = reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
+                vkGetInstanceProcAddr(
+                    r.instance->get_system_handle(),
+                    "vkGetPhysicalDeviceFeatures2KHR"
+                )
+            );
+        }
+        if(!pfnGetFeatures2) {
+            pfnGetFeatures2 = reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
+                vkGetInstanceProcAddr(
+                    nullptr, "vkGetPhysicalDeviceFeatures2"
+                )
+            );
+        }
+        if(!pfnGetFeatures2) {
+            pfnGetFeatures2 = reinterpret_cast<PFN_vkGetPhysicalDeviceFeatures2>(
+                vkGetInstanceProcAddr(
+                    nullptr, "vkGetPhysicalDeviceFeatures2KHR"
+                )
+            );
+        }
+        if(pfnGetFeatures2) {
+            pfnGetFeatures2(r.physical_device->device, &features2);
+        }
+
+        if(app_is_1_3_plus && gpu_is_1_3_plus &&
+           query_feature.dynamicRendering == VK_TRUE) {
+            dynamic_rendering_mode = "core_1_3";
+            dynamic_rendering_feature.pNext = const_cast<void*>(ci.next);
+            ci.next = &dynamic_rendering_feature;
+            ci.enable_dynamic_rendering = true;
+        }else if(r.physical_device->supports_extension(
+                     VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME) &&
+                 query_feature.dynamicRendering == VK_TRUE) {
+            dynamic_rendering_mode = "extension_khr";
+            ci.enable_extension(VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME);
+            const bool app_is_1_2_plus = (app_version.major > 1 ||
+                (app_version.major == 1 && app_version.minor >= 2));
+            if(!app_is_1_2_plus || gpu_version < VK_API_VERSION_1_2) {
+                if(r.physical_device->supports_extension(
+                       VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME)) {
+                    ci.enable_extension(
+                        VK_KHR_DEPTH_STENCIL_RESOLVE_EXTENSION_NAME
+                    );
+                }
+                if(r.physical_device->supports_extension(
+                       VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME)) {
+                    ci.enable_extension(
+                        VK_KHR_CREATE_RENDERPASS_2_EXTENSION_NAME
+                    );
+                }
+            }
+            dynamic_rendering_feature.pNext = const_cast<void*>(ci.next);
+            ci.next = &dynamic_rendering_feature;
+            ci.enable_dynamic_rendering = true;
+        }
+    }
+
     WithSelectedPhysicalDevice selected(*r.physical_device);
     if(with_data.configure_device) {
         with_data.configure_device(selected, ci);
@@ -647,6 +909,8 @@ bool RenderProfile::__vk_device(
         stage["queue_families"] = alib6::to_adata(queue_families);
         if(r.device){
             stage.succeed();
+            stage["dynamic_rendering"] = r.device->supports_dynamic_rendering()
+                ? dynamic_rendering_mode : "disabled";
         }else{
             stage.fail("Failed to create Vulkan logical device");
         }
@@ -818,7 +1082,9 @@ bool RenderProfile::__vk_instance(
     const bool need_debug_ext = (!with_data.debug_messenger && with_data.configure_debug_messenger.has_value());
     const bool has_req_ext = !with_data.required_extensions.empty();
     const bool has_opt_ext = !with_data.optional_extensions.empty();
-    const bool should_enumerate_exts = (result != nullptr) || need_debug_ext || has_req_ext || has_opt_ext;
+    const bool need_dyn_render_prop2 = with_data.try_dynamic_rendering &&
+        (ci.api_version.major < 1 || (ci.api_version.major == 1 && ci.api_version.minor < 1));
+    const bool should_enumerate_exts = (result != nullptr) || need_debug_ext || has_req_ext || has_opt_ext || need_dyn_render_prop2;
 
     if(should_enumerate_exts){
         const auto extensions = gi.enumerate_extension_properties();
@@ -896,6 +1162,12 @@ bool RenderProfile::__vk_instance(
                 with_data.optional_extensions,
                 true,
                 "optional"
+            );
+        }
+        if(need_dyn_render_prop2 &&
+           has_extension(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME)) {
+            ci.enable_extension(
+                VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
             );
         }
 

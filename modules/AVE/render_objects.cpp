@@ -30,7 +30,7 @@ WithSyncObjectsInput::get_swapchain() const noexcept {
 
 alib6::u32 WithSyncObjectsInput::get_swapchain_image_count() const noexcept {
     return swapchain
-        ? static_cast<alib6::u32>(swapchain->get_images().size())
+        ? swapchain->get_image_count()
         : 0;
 }
 
@@ -139,10 +139,29 @@ SyncObjects::operator bool() const noexcept {
 
 WithLegacyRenderInput::WithLegacyRenderInput(
     std::shared_ptr<Device> target_device,
-    std::shared_ptr<Swapchain> target_swapchain
+    std::shared_ptr<Swapchain> target_swapchain,
+    std::vector<std::shared_ptr<Image>> target_images
 )
 :device(std::move(target_device))
-,swapchain(std::move(target_swapchain)){}
+,swapchain(std::move(target_swapchain))
+,images(std::move(target_images)){
+    const auto handles = swapchain ? swapchain->enumerate_images() : std::nullopt;
+    if(handles) {
+        swapchain_image_views.reserve(handles->size());
+        for(const auto handle : *handles) {
+            const auto found = std::ranges::find_if(images, [&](const auto& image) {
+                return image && image->get_swapchain() == swapchain &&
+                    image->get_system_handle() == handle &&
+                    image->get_image_view() != VK_NULL_HANDLE;
+            });
+            if(found == images.end()) {
+                swapchain_image_views.clear();
+                break;
+            }
+            swapchain_image_views.push_back((*found)->get_image_view());
+        }
+    }
+}
 
 const std::shared_ptr<Device>& WithLegacyRenderInput::get_device() const noexcept {
     return device;
@@ -163,8 +182,12 @@ VkExtent2D WithLegacyRenderInput::get_extent() const noexcept {
 
 const std::vector<VkImageView>&
 WithLegacyRenderInput::get_image_views() const noexcept {
-    static const std::vector<VkImageView> empty;
-    return swapchain ? swapchain->get_image_views() : empty;
+    return swapchain_image_views;
+}
+
+const std::vector<std::shared_ptr<Image>>&
+WithLegacyRenderInput::get_images() const noexcept {
+    return images;
 }
 
 void default_configure_legacy_render(
@@ -172,6 +195,7 @@ void default_configure_legacy_render(
     CreateLegacyRenderInfo& ci
 ) {
     ci.swapchain = input.get_swapchain();
+    ci.image_dependencies = input.get_images();
     ci.render_pass_flags = 0;
     ci.attachments = {{
         .flags = 0,
@@ -191,23 +215,82 @@ void default_configure_legacy_render(
         .attachment = 0,
         .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
     });
+
+    const auto target_extent = input.get_extent();
+    std::vector<std::shared_ptr<Image>> depth_images;
+    for(const auto& image : input.get_images()) {
+        if(!image || !*image || image->get_image_view() == VK_NULL_HANDLE ||
+           (image->get_usage() & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) == 0)
+            continue;
+        const auto image_extent = image->get_extent();
+        if(image_extent.width == target_extent.width &&
+           image_extent.height == target_extent.height) {
+            depth_images.push_back(image);
+        }
+    }
+    const bool use_depth =
+        depth_images.size() == input.get_image_views().size() &&
+        !depth_images.empty() &&
+        std::ranges::all_of(depth_images, [&](const auto& image) {
+            return image->get_format() == depth_images.front()->get_format();
+        });
+    if(use_depth) {
+        const auto aspect = depth_images.front()->get_aspect_mask();
+        const bool has_stencil = (aspect & VK_IMAGE_ASPECT_STENCIL_BIT) != 0;
+        ci.attachments.push_back({
+            .flags = 0,
+            .format = depth_images.front()->get_format(),
+            .samples = VK_SAMPLE_COUNT_1_BIT,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            .stencilLoadOp = has_stencil
+                ? VK_ATTACHMENT_LOAD_OP_CLEAR : VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+            .stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE,
+            .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+            .finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        });
+        subpass.depth_stencil_attachment = VkAttachmentReference {
+            .attachment = 1,
+            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+        };
+    }
     ci.subpasses.clear();
     ci.subpasses.push_back(std::move(subpass));
+    VkPipelineStageFlags attachment_stages =
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkAccessFlags attachment_access = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    if(use_depth) {
+        attachment_stages |= VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        attachment_access |= VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    }
     ci.dependencies = {{
         .srcSubpass = VK_SUBPASS_EXTERNAL,
         .dstSubpass = 0,
-        .srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-        .dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        .srcStageMask = attachment_stages,
+        .dstStageMask = attachment_stages,
         .srcAccessMask = 0,
-        .dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        .dstAccessMask = attachment_access,
         .dependencyFlags = 0
     }};
+
+    VkClearValue color_clear {};
+    color_clear.color = {{ 0.02f, 0.02f, 0.03f, 1.0f }};
+    ci.default_clear_values = { color_clear };
+    if(use_depth) {
+        VkClearValue depth_clear {};
+        depth_clear.depthStencil = { 1.0f, 0 };
+        ci.default_clear_values.push_back(depth_clear);
+    }
 
     ci.framebuffer_flags = 0;
     ci.framebuffer_attachments.clear();
     ci.framebuffer_attachments.reserve(input.get_image_views().size());
-    for(const auto view : input.get_image_views()) {
-        ci.framebuffer_attachments.push_back({ view });
+    for(std::size_t i = 0; i < input.get_image_views().size(); ++i) {
+        ci.framebuffer_attachments.push_back({ input.get_image_views()[i] });
+        if(use_depth) {
+            ci.framebuffer_attachments.back().push_back(
+                depth_images[i]->get_image_view());
+        }
     }
     ci.framebuffer_extent = input.get_extent();
     ci.framebuffer_layers = 1;
@@ -221,11 +304,18 @@ bool LegacyRender::initialize(
     if(!ci.swapchain || !*ci.swapchain ||
        ci.attachments.empty() || ci.subpasses.empty() ||
        ci.framebuffer_attachments.empty() ||
-       ci.framebuffer_attachments.size() != ci.swapchain->get_image_views().size() ||
+       ci.framebuffer_attachments.size() != ci.swapchain->get_image_count() ||
        ci.framebuffer_extent.width == 0 || ci.framebuffer_extent.height == 0 ||
        ci.framebuffer_layers == 0) {
         ci.ew.report(ave_vk_create_render_pass,
             "CreateLegacyRenderInfo is incomplete or incompatible with its Swapchain.");
+        return false;
+    }
+    if(!std::ranges::all_of(ci.image_dependencies, [&](const auto& image) {
+           return image && *image && image->get_device() == ci.swapchain->get_device();
+       })) {
+        ci.ew.report(ave_vk_create_render_pass,
+            "A LegacyRender Image dependency is invalid or belongs to another Device.");
         return false;
     }
 
@@ -268,6 +358,7 @@ bool LegacyRender::initialize(
     render_pass_info.pDependencies = ci.dependencies.data();
 
     swapchain = ci.swapchain;
+    image_dependencies = std::move(ci.image_dependencies);
     const auto device = swapchain->get_device();
     const auto handle = device->get_system_handle();
     const auto allocator = device->get_instance()->get_vk_allocator();
@@ -281,11 +372,15 @@ bool LegacyRender::initialize(
     }
     if(status) status->render_pass_created = true;
     subpass_color_attachment_counts.reserve(ci.subpasses.size());
+    subpass_uses_depth_stencil.reserve(ci.subpasses.size());
     for(const auto& subpass : ci.subpasses) {
         subpass_color_attachment_counts.push_back(
             static_cast<alib6::u32>(subpass.color_attachments.size())
         );
+        subpass_uses_depth_stencil.push_back(
+            subpass.depth_stencil_attachment.has_value());
     }
+    default_clear_values = std::move(ci.default_clear_values);
 
     framebuffers.reserve(ci.framebuffer_attachments.size());
     for(alib6::u32 i = 0; i < ci.framebuffer_attachments.size(); ++i) {
@@ -350,7 +445,10 @@ void LegacyRender::destroy() noexcept {
     }
     framebuffers.clear();
     subpass_color_attachment_counts.clear();
+    subpass_uses_depth_stencil.clear();
+    default_clear_values.clear();
     render_pass = VK_NULL_HANDLE;
+    image_dependencies.clear();
     swapchain.reset();
 }
 
@@ -361,6 +459,11 @@ const std::shared_ptr<Swapchain>& LegacyRender::get_swapchain() const noexcept {
 const std::shared_ptr<Device>& LegacyRender::get_device() const noexcept {
     static const std::shared_ptr<Device> empty;
     return swapchain ? swapchain->get_device() : empty;
+}
+
+const std::vector<std::shared_ptr<Image>>&
+LegacyRender::get_image_dependencies() const noexcept {
+    return image_dependencies;
 }
 
 VkRenderPass LegacyRender::get_render_pass() const noexcept { return render_pass; }
@@ -375,6 +478,16 @@ alib6::u32 LegacyRender::get_subpass_color_attachment_count(
     return subpass < subpass_color_attachment_counts.size()
         ? subpass_color_attachment_counts[subpass]
         : 0;
+}
+
+bool LegacyRender::subpass_has_depth_stencil(alib6::u32 subpass) const noexcept {
+    return subpass < subpass_uses_depth_stencil.size()
+        ? subpass_uses_depth_stencil[subpass] : false;
+}
+
+const std::vector<VkClearValue>&
+LegacyRender::get_default_clear_values() const noexcept {
+    return default_clear_values;
 }
 
 LegacyRender::operator bool() const noexcept {
