@@ -3,9 +3,7 @@
 auto main() -> int {
     try {
         avetest::App app;
-        if (!app.setup()) {
-            return 1;
-        }
+        app.setup();
         app.run();
     } catch (...) {
         return 1;

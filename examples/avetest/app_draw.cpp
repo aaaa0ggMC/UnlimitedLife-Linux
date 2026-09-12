@@ -7,7 +7,7 @@ void App::render_frame(RenderCache rc) {
     graphics.begin();
     graphics.bind_pipeline(rc.pipeline);
     graphics.bind_vertex_buffer(rc.buffer);
-    graphics.draw(3);
+    graphics.draw(rc.vertex_count);
     graphics.end();
 }
 

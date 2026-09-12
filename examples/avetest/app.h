@@ -16,6 +16,7 @@ struct Vertex {
 struct RenderCache {
     ave::Pipeline & pipeline;
     ave::Buffer & buffer;
+    uint32_t vertex_count { 3 };
 };
 
 struct App {
@@ -28,12 +29,13 @@ struct App {
     std::optional<ave::Buffer> vertex_buffer;
     std::shared_ptr<ave::Pipeline> pipeline;
     std::optional<ave::Renderer> renderer;
+    uint32_t vertex_count { 0 };
 
     App();
     ~App() = default;
 
-    bool setup();
-    bool setup_vertex_data();
+    void setup();
+    void setup_vertex_data();
     void run();
     void render_frame(RenderCache rc);
 };

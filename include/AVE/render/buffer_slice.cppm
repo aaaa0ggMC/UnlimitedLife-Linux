@@ -73,18 +73,22 @@ export namespace ave {
 
         /// 映射、写入并立即上传/刷新单个 POD 对象或 POD 连续区间（如 std::vector, std::span, std::array）至该切片区域（dst_offset 相对于当前切片起始位置）
         template<typename T>
-        bool upload(const T& val, VkDeviceSize dst_offset = 0) const {
+        bool upload(const T& val, VkDeviceSize dst_offset = 0, alib6::ErrorWrapper ew = {}) const {
             const auto span = detail::extract_pod_span(val);
             if(span.bytes == 0) return true;
-            auto mapped = this->map({ .offset = dst_offset, .size = span.bytes });
+            if(!*this) {
+                ew.report(ave_vk_map_buffer, "Cannot upload to an uninitialized BufferSlice.");
+                return false;
+            }
+            auto mapped = this->map({ .offset = dst_offset, .size = span.bytes, .ew = ew });
             if(!mapped) return false;
             mapped.memcpy(0, span.ptr, span.bytes);
             return true;
         }
 
         template<typename T>
-        bool upload(VkDeviceSize dst_offset, const T& val) const {
-            return this->upload(val, dst_offset);
+        bool upload(VkDeviceSize dst_offset, const T& val, alib6::ErrorWrapper ew = {}) const {
+            return this->upload(val, dst_offset, ew);
         }
 
         [[nodiscard]] explicit operator bool() const noexcept {

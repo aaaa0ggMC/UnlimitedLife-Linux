@@ -244,16 +244,24 @@ export namespace ave {
         /// 写入单个 POD 对象或 POD 连续区间（如 std::vector, std::span, std::array, C 数组）至 mapped 内存
         /// 自动标记对应 chunk 为 dirty，不立即触发 GPU Upload/Flush
         template<typename T>
-        void write(const T& val, alib6::usize dst_offset = 0) {
+        bool write(const T& val, alib6::usize dst_offset = 0, alib6::ErrorWrapper ew = {}) {
             const auto span = detail::extract_pod_span(val);
-            if(span.bytes > 0 && span.ptr) {
-                this->memcpy(dst_offset, span.ptr, span.bytes);
+            if(span.bytes == 0 || !span.ptr) return true;
+            if(dst_offset + span.bytes > map_size) {
+                ew.report(
+                    ave_vk_map_buffer,
+                    "BufferData::write out of bounds: dst_offset ({}) + bytes ({}) > map_size ({}).",
+                    dst_offset, span.bytes, map_size
+                );
+                return false;
             }
+            this->memcpy(dst_offset, span.ptr, span.bytes);
+            return true;
         }
 
         template<typename T>
-        void write(alib6::usize dst_offset, const T& val) {
-            this->write(val, dst_offset);
+        bool write(alib6::usize dst_offset, const T& val, alib6::ErrorWrapper ew = {}) {
+            return this->write(val, dst_offset, ew);
         }
 
         [[nodiscard]] ByteProxy operator[](alib6::usize byte_offset);
@@ -336,18 +344,22 @@ export namespace ave {
 
         /// 映射、写入并立即上传/刷新单个 POD 对象或 POD 连续区间（如 std::vector, std::span, std::array）至 GPU 显存
         template<typename T>
-        bool upload(const T& val, VkDeviceSize dst_offset = 0) {
+        bool upload(const T& val, VkDeviceSize dst_offset = 0, alib6::ErrorWrapper ew = {}) {
             const auto span = detail::extract_pod_span(val);
             if(span.bytes == 0) return true;
-            auto mapped = this->map({ .offset = dst_offset, .size = span.bytes });
+            if(!*this) {
+                ew.report(ave_vk_map_buffer, "Cannot upload to an uninitialized buffer.");
+                return false;
+            }
+            auto mapped = this->map({ .offset = dst_offset, .size = span.bytes, .ew = ew });
             if(!mapped) return false;
             mapped.memcpy(0, span.ptr, span.bytes);
             return true; // mapped 析构时自动 upload() 并 unmap()
         }
 
         template<typename T>
-        bool upload(VkDeviceSize dst_offset, const T& val) {
-            return this->upload(val, dst_offset);
+        bool upload(VkDeviceSize dst_offset, const T& val, alib6::ErrorWrapper ew = {}) {
+            return this->upload(val, dst_offset, ew);
         }
 
         [[nodiscard]] const std::shared_ptr<Device>& get_device() const noexcept {
