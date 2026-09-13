@@ -202,6 +202,9 @@ export namespace ave{
         auto get_vk_allocator() const noexcept {
             return ctx ? ctx->get_vk_allocator() : nullptr;
         }
+        [[nodiscard]] Context* get_context() const noexcept {
+            return ctx;
+        }
         [[nodiscard]] ApiVersion get_api_version() const noexcept {
             return api_version;
         }

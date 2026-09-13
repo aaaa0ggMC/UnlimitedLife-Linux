@@ -163,6 +163,7 @@ export namespace ave{
     };
 
     struct AVE_API Renderer {
+        Context* context { nullptr };
         std::shared_ptr<Instance> instance;
         std::shared_ptr<DebugMessenger> debug_messenger;
         std::shared_ptr<Surface> surface;

@@ -45,6 +45,35 @@ export namespace ave{
         inline static RenderProfile from_window(Context & ctx, Window & window){ return RenderProfile(ctx, window); }
 
         static bool recreate_swapchain_from_window(
+            Context & ctx,
+            Renderer & r,
+            Window & window,
+            RenderBuildReport * report = nullptr,
+            ProfileWith with = {},
+            alib6::ErrorWrapper ew = {}
+        );
+
+        inline static bool recreate_swapchain_from_window(
+            Context & ctx,
+            Renderer & r,
+            Window & window,
+            ProfileWith with,
+            alib6::ErrorWrapper ew = {}
+        ){
+            return recreate_swapchain_from_window(ctx, r, window, nullptr, std::move(with), ew);
+        }
+
+        inline static bool recreate_swapchain_from_window(
+            Context & ctx,
+            Renderer & r,
+            Window & window,
+            RenderBuildReport * report,
+            alib6::ErrorWrapper ew
+        ){
+            return recreate_swapchain_from_window(ctx, r, window, report, ProfileWith{}, ew);
+        }
+
+        static bool recreate_swapchain_from_window(
             Renderer & r,
             Window & window,
             RenderBuildReport * report = nullptr,
@@ -97,6 +126,37 @@ export namespace ave{
         bool __vk_command_buffers(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
     };
     
+    inline bool recreate_swapchain_from_window(
+        Context & ctx,
+        Renderer & r,
+        Window & window,
+        RenderBuildReport * report = nullptr,
+        ProfileWith with = {},
+        alib6::ErrorWrapper ew = {}
+    ){
+        return RenderProfile::recreate_swapchain_from_window(ctx, r, window, report, std::move(with), ew);
+    }
+
+    inline bool recreate_swapchain_from_window(
+        Context & ctx,
+        Renderer & r,
+        Window & window,
+        ProfileWith with,
+        alib6::ErrorWrapper ew = {}
+    ){
+        return RenderProfile::recreate_swapchain_from_window(ctx, r, window, std::move(with), ew);
+    }
+
+    inline bool recreate_swapchain_from_window(
+        Context & ctx,
+        Renderer & r,
+        Window & window,
+        RenderBuildReport * report,
+        alib6::ErrorWrapper ew
+    ){
+        return RenderProfile::recreate_swapchain_from_window(ctx, r, window, report, ProfileWith{}, ew);
+    }
+
     inline bool recreate_swapchain_from_window(
         Renderer & r,
         Window & window,

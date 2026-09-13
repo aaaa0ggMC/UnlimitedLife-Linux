@@ -61,6 +61,7 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
     } finish_result { result };
 
     Renderer renderer;
+    renderer.context = &ctx;
 
     /// Instance 始终是第一阶段；仅提供 Device 时可沿依赖取得它绑定的 Instance。
     if(!with_data.instance && !with_data.device){
@@ -1331,6 +1332,7 @@ bool RenderProfile::__vk_instance(
 }
 
 bool RenderProfile::recreate_swapchain_from_window(
+    Context & ctx,
     Renderer & r,
     Window & window,
     RenderBuildReport * report,
@@ -1369,10 +1371,12 @@ bool RenderProfile::recreate_swapchain_from_window(
     pw.surface         = r.surface;
     pw.device          = r.device;
     // Command buffers and synchronization objects depend on the swapchain image
-    // count. Recreate them by default so a capability/image-count change cannot
-    // leave Renderer with a cache that only fails on the following frame.
+    // count. Recreate them directly so a capability/image-count change cannot
+    // leave Renderer with a stale cache or mismatched synchronizations.
     if(!pw.command_pool) pw.command_pool = r.command_pool;
     pw.swapchain       = nullptr;
+    pw.sync_objects    = nullptr;
+    pw.command_buffers = nullptr;
 
     auto original_configure_swapchain = pw.configure_swapchain;
     pw.configure_swapchain = [old_sc = r.swapchain, original_configure_swapchain](
@@ -1386,8 +1390,7 @@ bool RenderProfile::recreate_swapchain_from_window(
         }
     };
 
-    static Context fallback_ctx;
-    auto profile = RenderProfile::from_window(fallback_ctx, window);
+    auto profile = RenderProfile::from_window(ctx, window);
     profile.with(std::move(pw));
     if(report){
         profile.with_result(*report);
@@ -1398,6 +1401,7 @@ bool RenderProfile::recreate_swapchain_from_window(
         return false;
     }
 
+    r.context = new_r.context;
     r.swapchain = std::move(new_r.swapchain);
     r.images = std::move(new_r.images);
     if(new_r.dynamic_render) r.dynamic_render = std::move(new_r.dynamic_render);
@@ -1408,4 +1412,30 @@ bool RenderProfile::recreate_swapchain_from_window(
     r.default_clear_values = std::move(new_r.default_clear_values);
 
     return true;
+}
+
+bool RenderProfile::recreate_swapchain_from_window(
+    Renderer & r,
+    Window & window,
+    RenderBuildReport * report,
+    ProfileWith user_with,
+    alib6::ErrorWrapper ew
+){
+    if(!r.device || r.device->get_system_handle() == VK_NULL_HANDLE){
+        ew.report(ave_vk_create_swapchain, "Cannot recreate swapchain: Renderer has no valid Device.");
+        return false;
+    }
+    if(!r.surface || r.surface->get_system_handle() == VK_NULL_HANDLE){
+        ew.report(ave_vk_create_swapchain, "Cannot recreate swapchain: Renderer has no valid Surface.");
+        return false;
+    }
+    Context* ctx = r.context;
+    if(!ctx && r.instance){
+        ctx = r.instance->get_context();
+    }
+    if(!ctx){
+        ew.report(ave_vk_create_swapchain, "Cannot recreate swapchain: Renderer has no valid Context.");
+        return false;
+    }
+    return recreate_swapchain_from_window(*ctx, r, window, report, std::move(user_with), ew);
 }

@@ -277,6 +277,9 @@ int main() {
         ave::Window window;
         ave::Renderer empty_renderer;
 
+        // 验证 Renderer 默认 context 为空
+        assert(empty_renderer.context == nullptr);
+
         // 使用 alib6::Error 捕获错误报告，验证无效 Renderer 调用时安全报告错误并返回 false
         alib6::Error err;
         alib6::ErrorWrapper ew(err);
@@ -292,6 +295,15 @@ int main() {
         // 验证带有 report 指针的快捷重载
         bool res3 = ave::recreate_swapchain_from_window(empty_renderer, window, &report, ew);
         assert(!res3);
+
+        // 验证显式传入 Context& 的重载
+        ave::Context ctx;
+        bool res_ctx1 = ave::recreate_swapchain_from_window(ctx, empty_renderer, window, {}, ew);
+        assert(!res_ctx1);
+        bool res_ctx2 = ave::recreate_swapchain_from_window(ctx, empty_renderer, window, &report, {}, ew);
+        assert(!res_ctx2);
+        bool res_ctx3 = ave::recreate_swapchain_from_window(ctx, empty_renderer, window, &report, ew);
+        assert(!res_ctx3);
 
         // 验证 ProfileWith surface bypass 字段存在且可赋空/非空
         ave::ProfileWith pw;

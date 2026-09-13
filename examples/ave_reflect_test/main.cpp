@@ -30,7 +30,10 @@ struct VectorsBlock {
 // 3. 错误的三分量向量未对齐示范
 struct BadVec3Block {
     float a; // offset 0
-    struct UnalignedVec3 { float x, y, z; } v; // C++ offset 4, 但 GLSL 要求 offset 16
+    struct UnalignedVec3 {
+        using is_shader_vector = void;
+        float x, y, z;
+    } v; // C++ offset 4, 但 GLSL 要求 offset 16
 };
 
 // 4. 标量数组 (std430 允许连续 4 字节，std140 强制 16 字节步长)
@@ -50,6 +53,17 @@ struct UnpaddedStruct {
     float a;
     float b;
     float c; // 12 字节
+};
+
+// 6b. 布尔类型示范：C++ bool (1B) vs glsl_bool (4B)
+struct BadBoolBlock {
+    bool flag;
+    float val;
+};
+
+struct ValidBoolBlock {
+    ave::glsl_bool flag;
+    float val;
 };
 
 // 7. 矩阵块
@@ -128,6 +142,17 @@ int main() {
         assert(rep.members[1].actual_offset == 4);
         assert(rep.members[1].expected_offset == 16);
         assert(!rep.members[1].is_valid);
+        // 验证 ShaderVector Concept 识别能力 (AVE原生, 侵入式Tag, GLM类似类型)
+        struct GlmLikeVec3 {
+            using value_type = float;
+            static constexpr int length() noexcept { return 3; }
+            float x{0.0f}, y{0.0f}, z{0.0f};
+        };
+        static_assert(ave::ShaderVector<ave::vec3>);
+        static_assert(ave::ShaderVector<BadVec3Block::UnalignedVec3>);
+        static_assert(ave::ShaderVector<GlmLikeVec3>);
+        static_assert(!ave::ShaderVector<BadVec3Block>);
+
         std::cout << "[PASS] Unaligned vec3 detection & diagnostic verified." << std::endl;
     }
 
@@ -180,6 +205,28 @@ int main() {
         assert(rep430.is_valid());
         assert(rep430.actual_size == 12 && rep430.expected_size == 12);
         std::cout << "[PASS] Struct 16-byte multiple padding divergence verified." << std::endl;
+    }
+
+    // ========================================================
+    // 6b. 布尔类型规范验证 (C++ bool vs glsl_bool)
+    // ========================================================
+    {
+        // C++ bool 为 1 字节，GLSL 规范要求为 4 字节，故直接使用 bool 应被拦截
+        static_assert(!ave::is_std140_compatible_v<BadBoolBlock>);
+        static_assert(!ave::is_std430_compatible_v<BadBoolBlock>);
+
+        constexpr auto rep_bad_bool = ave::verify_std140<BadBoolBlock>();
+        assert(!rep_bad_bool.is_valid());
+        assert(rep_bad_bool.members[0].actual_size == 1);
+        assert(rep_bad_bool.members[0].expected_size == 4);
+
+        // 使用 ave::glsl_bool (4 字节) 的结构体符合对齐与大小
+        static_assert(ave::is_std430_compatible_v<ValidBoolBlock>);
+        constexpr auto rep_valid_bool = ave::verify_std430<ValidBoolBlock>();
+        assert(rep_valid_bool.is_valid());
+        assert(rep_valid_bool.members[0].actual_size == 4);
+        assert(rep_valid_bool.members[0].expected_size == 4);
+        std::cout << "[PASS] C++ bool (1B) rejection & glsl_bool (4B) compatibility verified." << std::endl;
     }
 
     // ========================================================

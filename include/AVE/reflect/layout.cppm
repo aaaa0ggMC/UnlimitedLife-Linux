@@ -50,6 +50,13 @@ export namespace ave {
     struct dvec3 { alib6::f64 x{0.0}, y{0.0}, z{0.0}; };
     struct alignas(32) dvec4 { alib6::f64 x{0.0}, y{0.0}, z{0.0}, w{0.0}; };
 
+    /// @brief 4字节对齐与大小的 GLSL 兼容标量布尔类型 (对应 GLSL bool / SPIR-V 32-bit 布尔 / VkBool32)
+    using glsl_bool = alib6::u32;
+
+    struct alignas(8) bvec2 { glsl_bool x{0}, y{0}; };
+    struct bvec3 { glsl_bool x{0}, y{0}, z{0}; };
+    struct alignas(16) bvec4 { glsl_bool x{0}, y{0}, z{0}, w{0}; };
+
     /// @brief 2x2 矩阵 (列主序)
     struct alignas(8) mat2 { vec2 cols[2]; };
     /// @brief 3x3 矩阵 (列主序，在 std140 下每列按 vec4 步长 16 字节对齐)
@@ -58,20 +65,116 @@ export namespace ave {
     struct alignas(16) mat4 { vec4 cols[4]; };
 
     template<typename T>
-    struct is_vector_trait : std::false_type {};
+    struct vector_traits {
+        static constexpr bool is_vector = false;
+        using component_type = void;
+        static constexpr std::size_t components = 0;
+    };
 
-    template<> struct is_vector_trait<vec2> : std::true_type {};
-    template<> struct is_vector_trait<vec3> : std::true_type {};
-    template<> struct is_vector_trait<vec4> : std::true_type {};
-    template<> struct is_vector_trait<ivec2> : std::true_type {};
-    template<> struct is_vector_trait<ivec3> : std::true_type {};
-    template<> struct is_vector_trait<ivec4> : std::true_type {};
-    template<> struct is_vector_trait<uvec2> : std::true_type {};
-    template<> struct is_vector_trait<uvec3> : std::true_type {};
-    template<> struct is_vector_trait<uvec4> : std::true_type {};
-    template<> struct is_vector_trait<dvec2> : std::true_type {};
-    template<> struct is_vector_trait<dvec3> : std::true_type {};
-    template<> struct is_vector_trait<dvec4> : std::true_type {};
+    template<> struct vector_traits<vec2> {
+        static constexpr bool is_vector = true;
+        using component_type = float;
+        static constexpr std::size_t components = 2;
+    };
+    template<> struct vector_traits<vec3> {
+        static constexpr bool is_vector = true;
+        using component_type = float;
+        static constexpr std::size_t components = 3;
+    };
+    template<> struct vector_traits<vec4> {
+        static constexpr bool is_vector = true;
+        using component_type = float;
+        static constexpr std::size_t components = 4;
+    };
+
+    template<> struct vector_traits<ivec2> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::i32;
+        static constexpr std::size_t components = 2;
+    };
+    template<> struct vector_traits<ivec3> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::i32;
+        static constexpr std::size_t components = 3;
+    };
+    template<> struct vector_traits<ivec4> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::i32;
+        static constexpr std::size_t components = 4;
+    };
+
+    template<> struct vector_traits<uvec2> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::u32;
+        static constexpr std::size_t components = 2;
+    };
+    template<> struct vector_traits<uvec3> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::u32;
+        static constexpr std::size_t components = 3;
+    };
+    template<> struct vector_traits<uvec4> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::u32;
+        static constexpr std::size_t components = 4;
+    };
+
+    template<> struct vector_traits<dvec2> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::f64;
+        static constexpr std::size_t components = 2;
+    };
+    template<> struct vector_traits<dvec3> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::f64;
+        static constexpr std::size_t components = 3;
+    };
+    template<> struct vector_traits<dvec4> {
+        static constexpr bool is_vector = true;
+        using component_type = alib6::f64;
+        static constexpr std::size_t components = 4;
+    };
+
+    template<> struct vector_traits<bvec2> {
+        static constexpr bool is_vector = true;
+        using component_type = glsl_bool;
+        static constexpr std::size_t components = 2;
+    };
+    template<> struct vector_traits<bvec3> {
+        static constexpr bool is_vector = true;
+        using component_type = glsl_bool;
+        static constexpr std::size_t components = 3;
+    };
+    template<> struct vector_traits<bvec4> {
+        static constexpr bool is_vector = true;
+        using component_type = glsl_bool;
+        static constexpr std::size_t components = 4;
+    };
+
+    template<typename T>
+    struct is_vector_trait : std::bool_constant<vector_traits<std::remove_cvref_t<T>>::is_vector> {};
+
+    template<typename T>
+    inline constexpr bool is_vector_v = is_vector_trait<T>::value;
+
+    /**
+     * @brief 着色器向量类型 Concept
+     * 满足以下任一条件即判定为着色器向量：
+     * 1. 显式特化了 vector_traits<T> 或 is_vector_trait<T>
+     * 2. 内部定义了类型标签 `using is_shader_vector = void;` 或 `using is_vector = void;`
+     * 3. 兼容常见数学库（如 GLM），具有 `value_type`、`length()` 且标量为算术类型
+     */
+    template<typename T>
+    concept ShaderVector =
+        vector_traits<std::remove_cvref_t<T>>::is_vector ||
+        is_vector_trait<std::remove_cvref_t<T>>::value ||
+        requires { typename std::remove_cvref_t<T>::is_shader_vector; } ||
+        requires { typename std::remove_cvref_t<T>::is_vector; } ||
+        requires {
+            typename std::remove_cvref_t<T>::value_type;
+            { std::remove_cvref_t<T>::length() } -> std::convertible_to<int>;
+            requires std::is_arithmetic_v<typename std::remove_cvref_t<T>::value_type>;
+        };
 
     // ========================================================================
     // 诊断报告数据结构
@@ -211,19 +314,7 @@ namespace ave::detail::reflect {
     template<std::meta::info Type>
     consteval bool is_vector_type() noexcept {
         using T = [: std::meta::dealias(Type) :];
-        if constexpr (is_vector_trait<T>::value) {
-            return true;
-        }
-        constexpr std::string_view name = std::meta::identifier_of(Type);
-        if (name.ends_with("vec2") || name.ends_with("Vec2") ||
-            name.ends_with("vec3") || name.ends_with("Vec3") ||
-            name.ends_with("vec4") || name.ends_with("Vec4") ||
-            name.ends_with("dvec2") || name.ends_with("dvec3") || name.ends_with("dvec4") ||
-            name.ends_with("ivec2") || name.ends_with("ivec3") || name.ends_with("ivec4") ||
-            name.ends_with("uvec2") || name.ends_with("uvec3") || name.ends_with("uvec4")) {
-            return true;
-        }
-        return false;
+        return ShaderVector<T>;
     }
 
     template<BufferLayoutStandard Standard, std::meta::info Type>
@@ -278,8 +369,16 @@ namespace ave::detail::reflect {
         constexpr auto dealiased = std::meta::dealias(Type);
         using T = [: dealiased :];
 
-        // 1. 标量类型 (整型、浮点型、布尔型)
-        if constexpr (std::is_arithmetic_v<T>) {
+        // 1. 布尔标量 (GLSL 规范中无论 std140 还是 std430，bool 均为 4 字节对齐且占 4 字节)
+        if constexpr (std::is_same_v<T, bool>) {
+            constexpr std::size_t sz = 4;
+            constexpr std::size_t al = 4;
+            constexpr std::size_t stride = (Standard == BufferLayoutStandard::Std140) ? 16 : 4;
+            return TypeLayout{ .size = sz, .alignment = al, .array_stride = stride };
+        }
+
+        // 2. 其余标量类型 (整型、浮点型)
+        else if constexpr (std::is_arithmetic_v<T>) {
             constexpr std::size_t sz = sizeof(T);
             constexpr std::size_t al = alignof(T);
             constexpr std::size_t stride = (Standard == BufferLayoutStandard::Std140) ? round_up(sz, 16) : sz;
@@ -334,10 +433,29 @@ namespace ave::detail::reflect {
             
             // 检查是否为向量类型
             if constexpr (is_vector_type<dealiased>()) {
-                constexpr auto first_t = std::meta::dealias(std::meta::type_of(members[0]));
-                using FirstT = [: first_t :];
-                constexpr std::size_t scalar_sz = sizeof(FirstT);
-                constexpr std::size_t num_components = members.size();
+                constexpr std::size_t num_components = []() consteval -> std::size_t {
+                    using RawT = std::remove_cvref_t<T>;
+                    if constexpr (vector_traits<RawT>::components > 0) {
+                        return vector_traits<RawT>::components;
+                    } else if constexpr (requires { { RawT::length() } -> std::convertible_to<int>; }) {
+                        return static_cast<std::size_t>(RawT::length());
+                    } else {
+                        return members.size();
+                    }
+                }();
+
+                constexpr std::size_t scalar_sz = []() consteval -> std::size_t {
+                    using RawT = std::remove_cvref_t<T>;
+                    if constexpr (!std::is_same_v<typename vector_traits<RawT>::component_type, void>) {
+                        return sizeof(typename vector_traits<RawT>::component_type);
+                    } else if constexpr (requires { typename RawT::value_type; }) {
+                        return sizeof(typename RawT::value_type);
+                    } else {
+                        using FirstT = [: std::meta::dealias(std::meta::type_of(members[0])) :];
+                        return sizeof(FirstT);
+                    }
+                }();
+
                 std::size_t vec_align = (num_components == 2) ? (2 * scalar_sz) : (4 * scalar_sz);
                 std::size_t vec_size = num_components * scalar_sz;
                 std::size_t stride = (Standard == BufferLayoutStandard::Std140) ? round_up(vec_align, 16) : vec_align;
@@ -410,7 +528,12 @@ export namespace ave {
                         report.members_match = false;
                     } else if (m_rep.actual_size != m_rep.expected_size) {
                         m_rep.is_valid = false;
-                        m_rep.mismatch_reason = "Size mismatch with standard stride/padding";
+                        using MT = [: std::meta::dealias(m_type) :];
+                        if constexpr (std::is_same_v<MT, bool>) {
+                            m_rep.mismatch_reason = "C++ bool is 1-byte, but GLSL requires 4-byte (use ave::glsl_bool)";
+                        } else {
+                            m_rep.mismatch_reason = "Size mismatch with standard stride/padding";
+                        }
                         report.members_match = false;
                     } else {
                         m_rep.is_valid = true;
