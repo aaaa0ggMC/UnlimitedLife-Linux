@@ -117,6 +117,7 @@ export namespace ave {
         VkBlendOp alpha_blend_op { VK_BLEND_OP_ADD };
 
         std::vector<VkDescriptorSetLayout> descriptor_set_layouts {};
+        std::vector<ConstantAttribute> constant_attributes {};
         std::vector<VkPushConstantRange> push_constant_ranges {};
 
         ConfigureGraphicsPipeline configure { nullptr };

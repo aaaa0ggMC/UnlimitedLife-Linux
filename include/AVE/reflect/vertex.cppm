@@ -18,6 +18,7 @@ module;
 #include <type_traits>
 #include <format>
 #include <algorithm>
+#include <glm/glm.hpp>
 
 export module ave.reflect:vertex;
 
@@ -199,6 +200,238 @@ export namespace ave {
     template<> struct vertex_format_trait<std::array<float, 2>> : vertex_format_trait<vec2> {};
     template<> struct vertex_format_trait<std::array<float, 3>> : vertex_format_trait<vec3> {};
     template<> struct vertex_format_trait<std::array<float, 4>> : vertex_format_trait<vec4> {};
+
+    // ========================================================================
+    // GLM 向量与矩阵类型映射特征 (GLM Format Traits)
+    // ========================================================================
+
+    // GLM 浮点向量 (float)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<1, float, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32_SFLOAT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(float);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<2, float, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32_SFLOAT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, float, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<3, float, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32B32_SFLOAT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, float, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<4, float, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, float, Q>);
+    };
+
+    // GLM 双精度向量 (double)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<1, double, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R64_SFLOAT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(double);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<2, double, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R64G64_SFLOAT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, double, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<3, double, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R64G64B64_SFLOAT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, double, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<4, double, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R64G64B64A64_SFLOAT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, double, Q>);
+    };
+
+    // GLM 32位有符号整型向量 (int32)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<1, int32_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(int32_t);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<2, int32_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, int32_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<3, int32_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32B32_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, int32_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<4, int32_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32B32A32_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, int32_t, Q>);
+    };
+
+    // GLM 32位无符号整型向量 (uint32)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<1, uint32_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(uint32_t);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<2, uint32_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, uint32_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<3, uint32_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32B32_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, uint32_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<4, uint32_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32B32A32_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, uint32_t, Q>);
+    };
+
+    // GLM 16位有符号整型向量 (int16)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<1, int16_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R16_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(int16_t);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<2, int16_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R16G16_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, int16_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<3, int16_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R16G16B16_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, int16_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<4, int16_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R16G16B16A16_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, int16_t, Q>);
+    };
+
+    // GLM 16位无符号整型向量 (uint16)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<1, uint16_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R16_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(uint16_t);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<2, uint16_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R16G16_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, uint16_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<3, uint16_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R16G16B16_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, uint16_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<4, uint16_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R16G16B16A16_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, uint16_t, Q>);
+    };
+
+    // GLM 8位有符号整型向量 (int8)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<1, int8_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R8_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(int8_t);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<2, int8_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R8G8_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, int8_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<3, int8_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R8G8B8_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, int8_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<4, int8_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R8G8B8A8_SINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, int8_t, Q>);
+    };
+
+    // GLM 8位无符号整型向量 (uint8)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<1, uint8_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R8_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(uint8_t);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<2, uint8_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R8G8_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, uint8_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<3, uint8_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R8G8B8_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, uint8_t, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::vec<4, uint8_t, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R8G8B8A8_UINT;
+        static constexpr uint32_t slots = 1;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, uint8_t, Q>);
+    };
+
+    // GLM 矩阵类型 (每个列占用 1 个 location 插槽)
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::mat<2, 2, float, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32_SFLOAT;
+        static constexpr uint32_t slots = 2;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<2, float, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::mat<3, 3, float, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32B32_SFLOAT;
+        static constexpr uint32_t slots = 3;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<3, float, Q>);
+    };
+    template<glm::qualifier Q>
+    struct vertex_format_trait<glm::mat<4, 4, float, Q>> {
+        static constexpr VkFormat format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        static constexpr uint32_t slots = 4;
+        static constexpr uint32_t slot_stride = sizeof(glm::vec<4, float, Q>);
+    };
 
     /// @brief 将 VkFormat 转换为易读的字符串名称
     inline constexpr std::string_view vk_format_to_string(VkFormat format) noexcept {

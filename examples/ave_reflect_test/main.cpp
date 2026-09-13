@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <vulkan/vulkan.h>
+#include <glm/glm.hpp>
 
 import ave;
 import alib6;
@@ -413,6 +414,214 @@ int main() {
                     << full_state.to_table() << alib6::endlog;
 
         std::cout << "[PASS] Multi-stream operator+ and CreateInfo pipeline integration verified." << std::endl;
+    }
+
+    // ========================================================
+    // 15. Push Constant 反射 (constant_layout) 与属性提取
+    // ========================================================
+    {
+        struct PushBlock {
+            ave::vec4 color;
+            ave::mat4 model;
+            float time;
+            ave::glsl_bool enable_lighting;
+        };
+
+        // 用户在结构体定义处使用 assert 校验布局规范
+        static_assert(ave::is_std430_compatible_v<PushBlock>);
+        static_assert(sizeof(PushBlock) % 4 == 0);
+
+        auto layout = ave::constant_layout<PushBlock>().build();
+        assert(layout.total_size == sizeof(PushBlock));
+        assert(layout.attributes.size() == 4);
+
+        assert(layout.attributes[0].name == "color");
+        assert(layout.attributes[0].offset == 0);
+        assert(layout.attributes[0].size == sizeof(ave::vec4));
+        assert(layout.attributes[0].stage_flags == VK_SHADER_STAGE_ALL_GRAPHICS);
+
+        assert(layout.attributes[1].name == "model");
+        assert(layout.attributes[1].offset == offsetof(PushBlock, model));
+        assert(layout.attributes[1].size == sizeof(ave::mat4));
+
+        assert(layout.attributes[2].name == "time");
+        assert(layout.attributes[2].offset == offsetof(PushBlock, time));
+        assert(layout.attributes[2].size == sizeof(float));
+
+        assert(layout.attributes[3].name == "enable_lighting");
+        assert(layout.attributes[3].offset == offsetof(PushBlock, enable_lighting));
+        assert(layout.attributes[3].size == sizeof(ave::glsl_bool));
+
+        // 单一范围 Vulkan VkPushConstantRange 生成测试
+        VkPushConstantRange range = layout.to_range();
+        assert(range.offset == 0);
+        assert(range.size == sizeof(PushBlock));
+        assert(range.stageFlags == VK_SHADER_STAGE_ALL_GRAPHICS);
+
+        // 打印精美的表格
+        alib6::aout << "\nPush Constant Layout Table (PushBlock):\n"
+                    << layout.to_table() << alib6::endlog;
+
+        std::cout << "[PASS] Basic push constant reflection (constant_layout) verified." << std::endl;
+    }
+
+    // ========================================================
+    // 16. Push Constant 多阶段覆盖 (Stage Override) 与多 Ranges 聚合
+    // ========================================================
+    {
+        struct MultiStageBlock {
+            ave::mat4 view_proj; // 阶段: VERTEX
+            ave::vec4 tint;      // 阶段: FRAGMENT
+        };
+        static_assert(sizeof(MultiStageBlock) % 4 == 0);
+
+        auto custom = ave::constant_layout<MultiStageBlock>()
+            .with_stage(VK_SHADER_STAGE_VERTEX_BIT)
+            .with_stage<&MultiStageBlock::tint>(VK_SHADER_STAGE_FRAGMENT_BIT)
+            .build();
+
+        assert(custom.attributes.size() == 2);
+        assert(custom.attributes[0].stage_flags == VK_SHADER_STAGE_VERTEX_BIT);
+        assert(custom.attributes[1].stage_flags == VK_SHADER_STAGE_FRAGMENT_BIT);
+
+        auto ranges = custom.to_ranges();
+        assert(ranges.size() == 2);
+
+        // 验证 GraphicsPipelineConfig 能够接收 constant_attributes
+        ave::GraphicsPipelineConfig cfg {
+            .vert = "shader.vert",
+            .frag = "shader.frag",
+            .constant_attributes = custom.attributes
+        };
+        assert(cfg.constant_attributes.size() == 2);
+        assert(cfg.constant_attributes[0].name == "view_proj");
+
+        alib6::aout << "\nMulti-Stage Push Constant Table:\n"
+                    << custom.to_table() << alib6::endlog;
+
+        std::cout << "[PASS] Multi-stage push constant layout & pipeline config verified." << std::endl;
+    }
+
+    // ========================================================
+    // 17. 编译期成员与区间反射 (get_member_info & get_member_range_info)
+    // ========================================================
+    {
+        struct RangeTestBlock {
+            ave::vec4 a;     // offset: 0,  size: 16
+            ave::mat4 b;     // offset: 16, size: 64
+            float c;         // offset: 80, size: 4
+            ave::glsl_bool d;// offset: 84, size: 4
+            float pad[2];    // offset: 88, size: 8
+        };
+        static_assert(sizeof(RangeTestBlock) == 96);
+
+        // 1. 单成员测试 (get_member_info)
+        constexpr auto info_a = ave::get_member_info<&RangeTestBlock::a>();
+        static_assert(info_a.offset == 0);
+        static_assert(info_a.size == 16);
+
+        constexpr auto info_b = ave::get_member_info<&RangeTestBlock::b>();
+        static_assert(info_b.offset == 16);
+        static_assert(info_b.size == 64);
+
+        constexpr auto info_c = ave::get_member_info<&RangeTestBlock::c>();
+        static_assert(info_c.offset == 80);
+        static_assert(info_c.size == 4);
+
+        // 2. 闭区间范围测试 (get_member_range_info)
+        // 区间 [a, b]: 从 a 开始到 b 结束 (0 ~ 16+64=80)
+        constexpr auto range_ab = ave::get_member_range_info<&RangeTestBlock::a, &RangeTestBlock::b>();
+        static_assert(range_ab.offset == 0);
+        static_assert(range_ab.size == 80);
+
+        // 区间 [b, c]: 从 b 开始到 c 结束 (16 ~ 80+4=84, size = 68)
+        constexpr auto range_bc = ave::get_member_range_info<&RangeTestBlock::b, &RangeTestBlock::c>();
+        static_assert(range_bc.offset == 16);
+        static_assert(range_bc.size == 68);
+
+        // 区间 [c, d]: 80 ~ 88, size = 8
+        constexpr auto range_cd = ave::get_member_range_info<&RangeTestBlock::c, &RangeTestBlock::d>();
+        static_assert(range_cd.offset == 80);
+        static_assert(range_cd.size == 8);
+
+        // 区间 [a, pad]: 全范围 0 ~ 96
+        constexpr auto range_all = ave::get_member_range_info<&RangeTestBlock::a, &RangeTestBlock::pad>();
+        static_assert(range_all.offset == 0);
+        static_assert(range_all.size == sizeof(RangeTestBlock));
+
+        std::cout << "[PASS] Compile-time member & range reflection (ave.reflect) verified." << std::endl;
+    }
+
+    // ========================================================
+    // 18. 多配置偏移平移与基准偏移校验 (Multi-Config Base Offset)
+    // ========================================================
+    {
+        struct CameraConfig {
+            ave::mat4 view_proj; // 64B, [0, 64)
+        };
+        struct MaterialConfig {
+            ave::vec4 color;     // 16B, [0, 16)
+            float roughness;     // 4B,  [16, 20)
+            float metallic;      // 4B,  [20, 24)
+            float pad[2];        // 8B,  [24, 32)
+        };
+        static_assert(sizeof(CameraConfig) == 64);
+        static_assert(sizeof(MaterialConfig) == 32);
+
+        // 模拟多配置场景：CameraConfig 占 [0, 64)，MaterialConfig 占 [64, 96)
+        constexpr uint32_t camera_base_offset = 0;
+        constexpr uint32_t material_base_offset = sizeof(CameraConfig); // 64
+        constexpr uint32_t total_push_size = camera_base_offset + sizeof(CameraConfig) + sizeof(MaterialConfig);
+        static_assert(total_push_size == 96);
+
+        // 1. 验证 MaterialConfig 内部各成员在平移后的全局物理偏移
+        constexpr auto color_info = ave::get_member_info<&MaterialConfig::color>();
+        static_assert(color_info.offset == 0);
+        static_assert(color_info.size == 16);
+        static_assert(material_base_offset + color_info.offset == 64);
+
+        constexpr auto roughness_info = ave::get_member_info<&MaterialConfig::roughness>();
+        static_assert(roughness_info.offset == 16);
+        static_assert(roughness_info.size == 4);
+        static_assert(material_base_offset + roughness_info.offset == 80);
+
+        // 2. 验证 MaterialConfig 区间在平移后的全局物理偏移与范围
+        constexpr auto range_rm = ave::get_member_range_info<&MaterialConfig::roughness, &MaterialConfig::metallic>();
+        static_assert(range_rm.offset == 16);
+        static_assert(range_rm.size == 8);
+        static_assert(material_base_offset + range_rm.offset == 80);
+        static_assert((material_base_offset + range_rm.offset) % 4 == 0);
+        static_assert(range_rm.size % 4 == 0);
+        static_assert(material_base_offset + range_rm.offset + range_rm.size <= total_push_size);
+
+        std::cout << "[PASS] Multi-config base offset calculation & sub-range validation verified." << std::endl;
+    }
+
+    // ========================================================
+    // 19. GLM 类型反射与兼容性测试 (GLM Types Reflection)
+    // ========================================================
+    {
+        struct GLMPushConstant {
+            alignas(16) glm::mat4 mvp;
+        };
+        static_assert(ave::is_std140_compatible_v<GLMPushConstant>);
+        static_assert(ave::is_std430_compatible_v<GLMPushConstant>);
+
+        struct GLMVertex {
+            glm::vec3 pos;
+            glm::vec3 color;
+            glm::vec2 uv;
+        };
+        auto v_layout = ave::vertex_layout<GLMVertex>().build();
+        assert(v_layout.attributes.size() == 3);
+        assert(v_layout.attributes[0].format == VK_FORMAT_R32G32B32_SFLOAT);
+        assert(v_layout.attributes[0].offset == 0);
+        assert(v_layout.attributes[1].format == VK_FORMAT_R32G32B32_SFLOAT);
+        assert(v_layout.attributes[1].offset == 12);
+        assert(v_layout.attributes[2].format == VK_FORMAT_R32G32_SFLOAT);
+        assert(v_layout.attributes[2].offset == 24);
+
+        std::cout << "[PASS] GLM vertex and buffer layout reflection verified." << std::endl;
     }
 
     std::cout << "\n========================================================" << std::endl;

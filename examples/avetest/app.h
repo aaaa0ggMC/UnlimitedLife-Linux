@@ -1,5 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 import alib6;
 import std;
@@ -8,15 +10,20 @@ import ave;
 namespace avetest {
 
 struct Vertex {
-    float pos[2];
-    float color[3];
+    glm::vec3 pos;
+    glm::vec3 color;
 };
+
+struct alignas(16) PushConstant {
+    glm::mat4 mvp;
+};
+static_assert(ave::is_std430_compatible_v<PushConstant>);
 
 // 小朋友们不要学我偶
 struct RenderCache {
     ave::Pipeline & pipeline;
     ave::Buffer & buffer;
-    uint32_t vertex_count { 3 };
+    uint32_t vertex_count { 36 };
 };
 
 struct App {
@@ -37,7 +44,7 @@ struct App {
     void setup();
     void setup_vertex_data();
     void run();
-    void render_frame(RenderCache rc);
+    void render_frame(RenderCache rc, const PushConstant& pc);
 };
 
 

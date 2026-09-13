@@ -65,6 +65,87 @@ export namespace ave {
     struct alignas(16) mat4 { vec4 cols[4]; };
 
     template<typename T>
+    struct matrix_traits {
+        static constexpr bool is_matrix = false;
+        using col_type = void;
+        static constexpr std::size_t columns = 0;
+        static constexpr std::size_t rows = 0;
+    };
+
+    template<> struct matrix_traits<mat2> {
+        static constexpr bool is_matrix = true;
+        using col_type = vec2;
+        static constexpr std::size_t columns = 2;
+        static constexpr std::size_t rows = 2;
+    };
+    template<> struct matrix_traits<mat3> {
+        static constexpr bool is_matrix = true;
+        using col_type = vec4;
+        static constexpr std::size_t columns = 3;
+        static constexpr std::size_t rows = 3;
+    };
+    template<> struct matrix_traits<mat4> {
+        static constexpr bool is_matrix = true;
+        using col_type = vec4;
+        static constexpr std::size_t columns = 4;
+        static constexpr std::size_t rows = 4;
+    };
+
+    template<typename T>
+    struct is_matrix_trait : std::bool_constant<matrix_traits<std::remove_cvref_t<T>>::is_matrix> {};
+
+    template<typename T>
+    inline constexpr bool is_matrix_v = is_matrix_trait<T>::value;
+
+    /**
+     * @brief 着色器矩阵类型 Concept
+     * 满足以下任一条件即判定为着色器矩阵：
+     * 1. 显式特化了 matrix_traits<T> 或 is_matrix_trait<T>
+     * 2. 内部定义了类型标签 `using is_shader_matrix = void;` 或 `using is_matrix = void;`
+     * 3. 兼容常见数学库（如 GLM），具有 `col_type`、`row_type`、`length()`
+     */
+    template<typename T>
+    concept ShaderMatrix =
+        matrix_traits<std::remove_cvref_t<T>>::is_matrix ||
+        is_matrix_trait<std::remove_cvref_t<T>>::value ||
+        requires { typename std::remove_cvref_t<T>::is_shader_matrix; } ||
+        requires { typename std::remove_cvref_t<T>::is_matrix; } ||
+        requires {
+            typename std::remove_cvref_t<T>::col_type;
+            typename std::remove_cvref_t<T>::row_type;
+            { std::remove_cvref_t<T>::length() } -> std::convertible_to<int>;
+        };
+
+    template<typename T, bool = matrix_traits<std::remove_cvref_t<T>>::is_matrix>
+    struct matrix_col_type;
+
+    template<typename T>
+    struct matrix_col_type<T, true> {
+        using type = typename matrix_traits<std::remove_cvref_t<T>>::col_type;
+    };
+
+    template<typename T>
+    struct matrix_col_type<T, false> {
+        using type = typename std::remove_cvref_t<T>::col_type;
+    };
+
+    template<typename T>
+    using matrix_col_t = typename matrix_col_type<T>::type;
+
+    template<typename T, bool = matrix_traits<std::remove_cvref_t<T>>::is_matrix>
+    struct matrix_cols_count;
+
+    template<typename T>
+    struct matrix_cols_count<T, true> {
+        static constexpr std::size_t value = matrix_traits<std::remove_cvref_t<T>>::columns;
+    };
+
+    template<typename T>
+    struct matrix_cols_count<T, false> {
+        static constexpr std::size_t value = static_cast<std::size_t>(std::remove_cvref_t<T>::length());
+    };
+
+    template<typename T>
     struct vector_traits {
         static constexpr bool is_vector = false;
         using component_type = void;
@@ -159,22 +240,24 @@ export namespace ave {
 
     /**
      * @brief 着色器向量类型 Concept
-     * 满足以下任一条件即判定为着色器向量：
+     * 满足以下任一条件且不为矩阵即判定为着色器向量：
      * 1. 显式特化了 vector_traits<T> 或 is_vector_trait<T>
      * 2. 内部定义了类型标签 `using is_shader_vector = void;` 或 `using is_vector = void;`
      * 3. 兼容常见数学库（如 GLM），具有 `value_type`、`length()` 且标量为算术类型
      */
     template<typename T>
     concept ShaderVector =
-        vector_traits<std::remove_cvref_t<T>>::is_vector ||
-        is_vector_trait<std::remove_cvref_t<T>>::value ||
-        requires { typename std::remove_cvref_t<T>::is_shader_vector; } ||
-        requires { typename std::remove_cvref_t<T>::is_vector; } ||
-        requires {
-            typename std::remove_cvref_t<T>::value_type;
-            { std::remove_cvref_t<T>::length() } -> std::convertible_to<int>;
-            requires std::is_arithmetic_v<typename std::remove_cvref_t<T>::value_type>;
-        };
+        !ShaderMatrix<T> && (
+            vector_traits<std::remove_cvref_t<T>>::is_vector ||
+            is_vector_trait<std::remove_cvref_t<T>>::value ||
+            requires { typename std::remove_cvref_t<T>::is_shader_vector; } ||
+            requires { typename std::remove_cvref_t<T>::is_vector; } ||
+            requires {
+                typename std::remove_cvref_t<T>::value_type;
+                { std::remove_cvref_t<T>::length() } -> std::convertible_to<int>;
+                requires std::is_arithmetic_v<typename std::remove_cvref_t<T>::value_type>;
+            }
+        );
 
     // ========================================================================
     // 诊断报告数据结构
@@ -312,6 +395,12 @@ namespace ave::detail::reflect {
     };
 
     template<std::meta::info Type>
+    consteval bool is_matrix_type() noexcept {
+        using T = [: std::meta::dealias(Type) :];
+        return ShaderMatrix<T>;
+    }
+
+    template<std::meta::info Type>
     consteval bool is_vector_type() noexcept {
         using T = [: std::meta::dealias(Type) :];
         return ShaderVector<T>;
@@ -431,8 +520,31 @@ namespace ave::detail::reflect {
             constexpr auto ctx = std::meta::access_context::unchecked();
             static constexpr auto members = std::define_static_array(std::meta::nonstatic_data_members_of(dealiased, ctx));
             
+            // 检查是否为矩阵类型
+            if constexpr (is_matrix_type<dealiased>()) {
+                using RawT = std::remove_cvref_t<T>;
+                using ColT = matrix_col_t<RawT>;
+                constexpr std::size_t num_cols = matrix_cols_count<RawT>::value;
+
+                constexpr auto col_layout = compute_type_layout<Standard, ^^ColT>();
+                std::size_t col_align = col_layout.alignment;
+                std::size_t col_stride = col_layout.size;
+                if constexpr (Standard == BufferLayoutStandard::Std140) {
+                    col_align = round_up(col_align, 16);
+                    col_stride = round_up(col_layout.size, 16);
+                } else {
+                    col_stride = col_align;
+                }
+                std::size_t total_size = num_cols * col_stride;
+                return TypeLayout{
+                    .size = total_size,
+                    .alignment = col_align,
+                    .array_stride = total_size
+                };
+            }
+
             // 检查是否为向量类型
-            if constexpr (is_vector_type<dealiased>()) {
+            else if constexpr (is_vector_type<dealiased>()) {
                 constexpr std::size_t num_components = []() consteval -> std::size_t {
                     using RawT = std::remove_cvref_t<T>;
                     if constexpr (vector_traits<RawT>::components > 0) {

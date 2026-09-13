@@ -32,6 +32,7 @@ import :pipeline;
 import :command;
 import :buffer;
 import :buffer_slice;
+import ave.reflect;
 
 export namespace ave{
     struct Renderer;
@@ -44,6 +45,7 @@ export namespace ave{
         alib6::ErrorWrapper ew {};
         VkResult result_code { VK_ERROR_INITIALIZATION_FAILED };
         VkResult acquire_result { VK_ERROR_INITIALIZATION_FAILED };
+        VkResult present_result { VK_NOT_READY };
         alib6::u32 image_index { 0 };
         std::size_t frame_index { 0 };
         std::size_t frame_count { 0 };
@@ -75,6 +77,7 @@ export namespace ave{
 
         bool recording { false };
         bool finished { false };
+        const Pipeline* bound_pipeline { nullptr };
 
         explicit GraphicsContext(alib6::ErrorWrapper target_ew);
 
@@ -156,6 +159,127 @@ export namespace ave{
             alib6::u32 stride = sizeof(VkDrawIndexedIndirectCommand)
         ) noexcept;
         void end();
+
+        /// @brief 获取最后一次执行操作的综合 VkResult 结果码 (Acquire / Submit / Present)
+        [[nodiscard]] inline VkResult get_result() const noexcept { return result_code; }
+
+        /// @brief 获取 vkAcquireNextImageKHR 的原始结果码
+        [[nodiscard]] inline VkResult get_acquire_result() const noexcept { return acquire_result; }
+
+        /// @brief 获取 vkQueuePresentKHR 的原始结果码 (若尚未呈现则为 VK_NOT_READY)
+        [[nodiscard]] inline VkResult get_present_result() const noexcept { return present_result; }
+
+        /// @brief 当前帧上下文是否有效可用 (可安全开始录制并提交渲染)
+        [[nodiscard]] inline bool is_valid() const noexcept {
+            return renderer != nullptr && (acquire_result == VK_SUCCESS || acquire_result == VK_SUBOPTIMAL_KHR);
+        }
+
+        /// @brief 隐式布尔转换 (等价于 is_valid())
+        [[nodiscard]] inline explicit operator bool() const noexcept {
+            return is_valid();
+        }
+
+        /// @brief 检查交换链是否因窗口尺寸变化或表面失效而过时 (VK_ERROR_OUT_OF_DATE_KHR)
+        [[nodiscard]] inline bool is_out_of_date() const noexcept {
+            return acquire_result == VK_ERROR_OUT_OF_DATE_KHR ||
+                   present_result == VK_ERROR_OUT_OF_DATE_KHR ||
+                   result_code == VK_ERROR_OUT_OF_DATE_KHR;
+        }
+
+        /// @brief 检查是否处于亚最优状态 (VK_SUBOPTIMAL_KHR，建议在合适时机重建交换链)
+        [[nodiscard]] inline bool is_suboptimal() const noexcept {
+            return acquire_result == VK_SUBOPTIMAL_KHR ||
+                   present_result == VK_SUBOPTIMAL_KHR ||
+                   result_code == VK_SUBOPTIMAL_KHR;
+        }
+
+        /// @brief 检查本帧整体流程是否完全成功 (VK_SUCCESS)
+        [[nodiscard]] inline bool is_success() const noexcept {
+            return result_code == VK_SUCCESS;
+        }
+
+        [[nodiscard]] inline const Pipeline* get_bound_pipeline() const noexcept { return bound_pipeline; }
+        [[nodiscard]] inline alib6::u32 get_push_constant_size() const noexcept {
+            return bound_pipeline ? bound_pipeline->get_push_constant_size() : 0;
+        }
+
+        void push_constant_raw(
+            VkShaderStageFlags stage_flags,
+            alib6::u32 offset,
+            alib6::u32 size,
+            const void* data
+        ) noexcept;
+
+        template<typename T>
+        inline void push_constant(
+            const T& data,
+            VkShaderStageFlags stage_flags = 0,
+            alib6::u32 offset = 0
+        ) noexcept {
+            push_constant_raw(stage_flags, offset, static_cast<alib6::u32>(sizeof(T)), std::addressof(data));
+        }
+
+        /// @brief 上传单个成员 (通过成员指针自动反射其偏移与大小，支持 base offset 平移)
+        template<auto MemberPtr, typename T>
+        inline void push_constant(
+            const T& data,
+            VkShaderStageFlags stage_flags = 0,
+            alib6::u32 offset = 0
+        ) noexcept {
+            using Traits = member_pointer_traits<decltype(MemberPtr)>;
+            using ClassType = typename Traits::class_type;
+            constexpr auto info = get_member_range_info<MemberPtr, MemberPtr>();
+            const auto target_offset = static_cast<alib6::u32>(offset + info.offset);
+
+            if constexpr (std::is_same_v<std::remove_cvref_t<T>, ClassType>) {
+                const void* ptr = reinterpret_cast<const char*>(std::addressof(data)) + info.offset;
+                push_constant_raw(stage_flags, target_offset, static_cast<alib6::u32>(info.size), ptr);
+            } else {
+                static_assert(sizeof(T) == info.size, "Passed data size must match the push constant member size.");
+                push_constant_raw(stage_flags, target_offset, static_cast<alib6::u32>(info.size), std::addressof(data));
+            }
+        }
+
+        /// @brief 上传连续成员闭区间 [BeginPtr, EndPtr] (支持 base offset 平移)
+        template<auto BeginPtr, auto EndPtr, typename T>
+        inline void push_constant(
+            const T& data,
+            VkShaderStageFlags stage_flags = 0,
+            alib6::u32 offset = 0
+        ) noexcept {
+            using BeginTraits = member_pointer_traits<decltype(BeginPtr)>;
+            using ClassType = typename BeginTraits::class_type;
+            constexpr auto info = get_member_range_info<BeginPtr, EndPtr>();
+            const auto target_offset = static_cast<alib6::u32>(offset + info.offset);
+
+            if constexpr (std::is_same_v<std::remove_cvref_t<T>, ClassType>) {
+                const void* ptr = reinterpret_cast<const char*>(std::addressof(data)) + info.offset;
+                push_constant_raw(stage_flags, target_offset, static_cast<alib6::u32>(info.size), ptr);
+            } else {
+                static_assert(sizeof(T) == info.size, "Passed data size must match the push constant range size.");
+                push_constant_raw(stage_flags, target_offset, static_cast<alib6::u32>(info.size), std::addressof(data));
+            }
+        }
+
+        /// @brief 显式别名：上传单个成员 (支持 base offset 平移)
+        template<auto MemberPtr, typename T>
+        inline void push_constant_member(
+            const T& data,
+            VkShaderStageFlags stage_flags = 0,
+            alib6::u32 offset = 0
+        ) noexcept {
+            push_constant<MemberPtr>(data, stage_flags, offset);
+        }
+
+        /// @brief 显式别名：上传连续成员闭区间 (支持 base offset 平移)
+        template<auto BeginPtr, auto EndPtr, typename T>
+        inline void push_constant_range(
+            const T& data,
+            VkShaderStageFlags stage_flags = 0,
+            alib6::u32 offset = 0
+        ) noexcept {
+            push_constant<BeginPtr, EndPtr>(data, stage_flags, offset);
+        }
 
         [[nodiscard]] alib6::u32 get_image_index() const noexcept;
         [[nodiscard]] VkExtent2D get_extent() const noexcept;

@@ -247,6 +247,22 @@ export namespace ave{
             };
         }
     };
+
+    /// @brief Push Constant 成员属性描述
+    struct AVE_API ConstantAttribute {
+        std::string name {};
+        alib6::u32 offset { 0 };
+        alib6::u32 size { 0 };
+        VkShaderStageFlags stage_flags { VK_SHADER_STAGE_ALL_GRAPHICS };
+
+        constexpr operator VkPushConstantRange() const noexcept {
+            return VkPushConstantRange{
+                .stageFlags = stage_flags,
+                .offset = offset,
+                .size = size
+            };
+        }
+    };
 }
 
 export namespace std {

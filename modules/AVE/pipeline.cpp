@@ -199,9 +199,7 @@ namespace {
         VkPipelineRenderingCreateInfo* rendering_info,
         VkRenderPass render_pass,
         alib6::u32 subpass,
-        std::shared_ptr<Device>& out_device,
-        VkPipelineLayout& out_layout,
-        VkPipeline& out_pipeline
+        Pipeline& target
     ) {
         if(!ci.device || ci.device->get_system_handle() == VK_NULL_HANDLE ||
            ci.shader_stages.empty()) {
@@ -229,6 +227,83 @@ namespace {
             ci.ew.report(ave_vk_create_graphics_pipeline,
                 "Graphics Pipeline requires unique vertex/fragment stages and a complete tessellation pair.");
             return false;
+        }
+
+        // 若未显式配置 push_constant_ranges，但提供了 constant_attributes，自动聚合并生成 ranges
+        if(ci.push_constant_ranges.empty() && !ci.constant_attributes.empty()) {
+            VkShaderStageFlags common_stage = 0;
+            bool all_same_stage = true;
+            for(const auto& attr : ci.constant_attributes) {
+                if(common_stage == 0) {
+                    common_stage = attr.stage_flags;
+                } else if(common_stage != attr.stage_flags) {
+                    all_same_stage = false;
+                }
+            }
+
+            if(all_same_stage) {
+                alib6::u32 min_off = 0;
+                alib6::u32 max_end = 0;
+                bool first = true;
+                for(const auto& attr : ci.constant_attributes) {
+                    if(first) {
+                        min_off = attr.offset;
+                        max_end = attr.offset + attr.size;
+                        first = false;
+                    } else {
+                        min_off = std::min(min_off, attr.offset);
+                        max_end = std::max(max_end, attr.offset + attr.size);
+                    }
+                }
+                alib6::u32 total_sz = max_end - min_off;
+                if(total_sz % 4 != 0) {
+                    total_sz = (total_sz + 3) & ~3u;
+                }
+                ci.push_constant_ranges.push_back(VkPushConstantRange{
+                    .stageFlags = common_stage ? common_stage : VK_SHADER_STAGE_ALL_GRAPHICS,
+                    .offset = min_off,
+                    .size = total_sz
+                });
+            } else {
+                std::unordered_map<VkShaderStageFlags, std::pair<alib6::u32, alib6::u32>> stage_map;
+                for(const auto& attr : ci.constant_attributes) {
+                    auto it = stage_map.find(attr.stage_flags);
+                    if(it == stage_map.end()) {
+                        stage_map[attr.stage_flags] = { attr.offset, attr.offset + attr.size };
+                    } else {
+                        it->second.first = std::min(it->second.first, attr.offset);
+                        it->second.second = std::max(it->second.second, attr.offset + attr.size);
+                    }
+                }
+                for(const auto& [stg, r] : stage_map) {
+                    alib6::u32 sz = r.second - r.first;
+                    if(sz % 4 != 0) {
+                        sz = (sz + 3) & ~3u;
+                    }
+                    ci.push_constant_ranges.push_back(VkPushConstantRange{
+                        .stageFlags = stg,
+                        .offset = r.first,
+                        .size = sz
+                    });
+                }
+            }
+        }
+
+        alib6::u32 total_pc_size = 0;
+        VkShaderStageFlags combined_pc_stages = 0;
+        for(const auto& r : ci.push_constant_ranges) {
+            total_pc_size = std::max(total_pc_size, r.offset + r.size);
+            combined_pc_stages |= r.stageFlags;
+        }
+
+        if(total_pc_size > 0 && ci.device) {
+            const auto max_allowed = ci.device->get_physical_device_limits().maxPushConstantsSize;
+            if(max_allowed > 0 && total_pc_size > max_allowed) {
+                ci.ew.report(ave_vk_create_pipeline_layout,
+                    "Requested push constant size ({}B) exceeds physical device limit ({}B).",
+                    total_pc_size, max_allowed);
+                return false;
+            }
         }
 
         std::vector<VkPipelineShaderStageCreateInfo> stages;
@@ -345,9 +420,15 @@ namespace {
             return false;
         }
 
-        out_device = ci.device;
-        out_layout = layout;
-        out_pipeline = pipeline;
+        target.set_created_state(
+            ci.device,
+            layout,
+            pipeline,
+            total_pc_size,
+            combined_pc_stages,
+            std::move(ci.push_constant_ranges),
+            std::move(ci.constant_attributes)
+        );
         return true;
     }
 }
@@ -400,8 +481,7 @@ bool DynamicPipeline::initialize(CreatePipelineInfo<pipeline_type::Dynamic> ci) 
     rendering_info.stencilAttachmentFormat = ci.stencil_attachment_format;
 
     return create_graphics_pipeline_common(
-        ci, &rendering_info, VK_NULL_HANDLE, 0,
-        device, layout, pipeline
+        ci, &rendering_info, VK_NULL_HANDLE, 0, *this
     );
 }
 
@@ -429,8 +509,7 @@ bool LegacyPipeline::initialize(CreatePipelineInfo<pipeline_type::Legacy> ci) {
     ci.device = ci.render->get_device();
 
     return create_graphics_pipeline_common(
-        ci, nullptr, ci.render->get_render_pass(), ci.subpass,
-        device, layout, pipeline
+        ci, nullptr, ci.render->get_render_pass(), ci.subpass, *this
     );
 }
 
@@ -981,6 +1060,9 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
 
         if(!cfg.descriptor_set_layouts.empty()) {
             ci.descriptor_set_layouts = cfg.descriptor_set_layouts;
+        }
+        if(!cfg.constant_attributes.empty()) {
+            ci.constant_attributes = cfg.constant_attributes;
         }
         if(!cfg.push_constant_ranges.empty()) {
             ci.push_constant_ranges = cfg.push_constant_ranges;

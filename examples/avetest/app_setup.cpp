@@ -57,36 +57,74 @@ void App::setup() {
     setup_vertex_data();
 
     auto vertex_input = ave::vertex_layout<Vertex>().build();
+    auto push_layout = ave::constant_layout<PushConstant>().build();
+
+    lg << "Vertex Input Layout Table:\n" << vertex_input.to_table() << std::endl;
+    lg << "Push Constant Layout Table:\n" << push_layout.to_table() << std::endl;
+
     // 使用聚合 GraphicsPipelineConfig 配置管线（错误由 ErrorWrapper 自动处理）
     pipeline = renderer->create_graphics_pipeline({
         .vert = "avetest/shaders/vertex-vert.spv",
         .frag = "avetest/shaders/simple-frag.spv",
         .bindings = vertex_input.bindings,
-        .attributes = vertex_input.attributes
+        .attributes = vertex_input.attributes,
+        .cull_mode = VK_CULL_MODE_NONE,
+        .depth_test = true,
+        .depth_write = true,
+        .depth_compare_op = VK_COMPARE_OP_LESS,
+        .constant_attributes = push_layout.attributes
     });
 }
 
 void App::setup_vertex_data() {
     const std::vector<Vertex> vertices = {
-        // 三角形 1（上方正立）
-        { {  0.0f,  -0.75f }, { 1.0f, 0.2f, 0.2f } }, // 顶：红
-        { {  0.35f, -0.15f }, { 1.0f, 0.9f, 0.1f } }, // 右下：黄
-        { { -0.35f, -0.15f }, { 1.0f, 0.5f, 0.1f } }, // 左下：橙
+        // 前表面 (+Z, normal: 0, 0, 1)
+        { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
+        { {  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
+        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
+        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
+        { { -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f } },
+        { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
 
-        // 三角形 2（右下方正立）
-        { {  0.55f,  0.05f }, { 0.1f, 0.9f, 1.0f } }, // 顶：浅蓝
-        { {  0.90f,  0.75f }, { 0.1f, 0.3f, 1.0f } }, // 右下：深蓝
-        { {  0.20f,  0.75f }, { 0.1f, 1.0f, 0.4f } }, // 左下：青绿
+        // 后表面 (-Z, normal: 0, 0, -1)
+        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
+        { { -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
+        { {  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f, 0.0f } },
+        { {  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f, 0.0f } },
+        { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
 
-        // 三角形 3（左下方正立）
-        { { -0.55f,  0.05f }, { 0.7f, 0.2f, 1.0f } }, // 顶：紫罗兰
-        { { -0.20f,  0.75f }, { 1.0f, 0.3f, 0.7f } }, // 右下：粉红
-        { { -0.90f,  0.75f }, { 0.4f, 0.1f, 0.8f } }, // 左下：深紫
+        // 左表面 (-X, normal: -1, 0, 0)
+        { { -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f } },
+        { { -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
+        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
+        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
+        { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
+        { { -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f } },
 
-        // 三角形 4（中央倒立）
-        { { -0.25f,  0.05f }, { 0.2f, 0.8f, 0.8f } }, // 左上：蓝绿
-        { {  0.25f,  0.05f }, { 0.8f, 1.0f, 0.2f } }, // 右上：黄绿
-        { {  0.00f,  0.55f }, { 1.0f, 1.0f, 1.0f } }, // 底：白
+        // 右表面 (+X, normal: 1, 0, 0)
+        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
+        { {  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
+        { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+        { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+        { {  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f, 0.0f } },
+        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
+
+        // 上表面 (+Y, normal: 0, 1, 0)
+        { { -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
+        { { -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f } },
+        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
+        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
+        { {  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f, 0.0f } },
+        { { -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
+
+        // 下表面 (-Y, normal: 0, -1, 0)
+        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
+        { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+        { {  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
+        { {  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
+        { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
+        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
     };
 
     vertex_count = static_cast<uint32_t>(vertices.size());

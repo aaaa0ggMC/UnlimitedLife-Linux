@@ -26,6 +26,7 @@ GraphicsContext::GraphicsContext(GraphicsContext&& other) noexcept
 ,ew(std::move(other.ew))
 ,result_code(other.result_code)
 ,acquire_result(other.acquire_result)
+,present_result(other.present_result)
 ,image_index(other.image_index)
 ,frame_index(other.frame_index)
 ,frame_count(other.frame_count)
@@ -53,7 +54,8 @@ GraphicsContext::GraphicsContext(GraphicsContext&& other) noexcept
 ,depth_format(other.depth_format)
 ,depth_aspect(other.depth_aspect)
 ,recording(other.recording)
-,finished(other.finished) {
+,finished(other.finished)
+,bound_pipeline(std::exchange(other.bound_pipeline, nullptr)) {
     other.recording = false;
     other.finished = true;
 }
@@ -433,6 +435,7 @@ void GraphicsContext::bind_pipeline(const Pipeline& pipeline) {
         dynamic_rendering != pipeline.is_dynamic(),
         "Pipeline mode does not match current GraphicsContext rendering mode."
     );
+    bound_pipeline = &pipeline;
     pipeline.bind(command_buffer);
 }
 
@@ -674,6 +677,7 @@ void GraphicsContext::end() {
     present_info.pSwapchains = &swapchain;
     present_info.pImageIndices = &image_index;
     const VkResult present_code = vkQueuePresentKHR(present_queue, &present_info);
+    present_result = present_code;
     if(present_code != VK_SUCCESS && present_code != VK_SUBOPTIMAL_KHR &&
        present_code != VK_ERROR_OUT_OF_DATE_KHR) {
         result_code = present_code;
@@ -688,6 +692,49 @@ void GraphicsContext::end() {
     renderer = nullptr;
     finished = true;
     result_code = present_code != VK_SUCCESS ? present_code : acquire_result;
+}
+
+void GraphicsContext::push_constant_raw(
+    VkShaderStageFlags stage_flags,
+    alib6::u32 offset,
+    alib6::u32 size,
+    const void* data
+) noexcept {
+    panic_debug(!recording, "Cannot push constant outside of an active recording scope.");
+    panic_debug(!bound_pipeline, "Cannot push constant without a bound pipeline.");
+    if(!bound_pipeline || !recording) return;
+
+    const auto expected_size = bound_pipeline->get_push_constant_size();
+    panic_debug(
+        expected_size == 0,
+        "Bound pipeline does not have any push constant ranges configured."
+    );
+    panic_debug(
+        (offset % 4 != 0) || (size % 4 != 0),
+        "Push constant offset ({}) and size ({}) must both be multiples of 4.",
+        offset, size
+    );
+    panic_debug(
+        offset + size > expected_size,
+        "Push constant write range [{}, {}) exceeds pipeline push constant layout size ({}).",
+        offset, offset + size, expected_size
+    );
+
+    if(stage_flags == 0) {
+        stage_flags = bound_pipeline->get_push_constant_stage_flags();
+    }
+    if(stage_flags == 0) {
+        stage_flags = VK_SHADER_STAGE_ALL_GRAPHICS;
+    }
+
+    vkCmdPushConstants(
+        command_buffer,
+        bound_pipeline->get_layout(),
+        stage_flags,
+        offset,
+        size,
+        data
+    );
 }
 
 alib6::u32 GraphicsContext::get_image_index() const noexcept { return image_index; }

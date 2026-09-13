@@ -31,6 +31,7 @@ export namespace ave {
 
         VkPipelineLayoutCreateFlags layout_flags { 0 };
         std::vector<VkDescriptorSetLayout> descriptor_set_layouts;
+        std::vector<ConstantAttribute> constant_attributes;
         std::vector<VkPushConstantRange> push_constant_ranges;
 
         VkPipelineCreateFlags flags { 0 };
@@ -84,10 +85,32 @@ export namespace ave {
         VkPipeline pipeline { VK_NULL_HANDLE };
         VkPipelineBindPoint bind_point { VK_PIPELINE_BIND_POINT_GRAPHICS };
         PipelineType type { PipelineType::DynamicGraphics };
+        alib6::u32 push_constant_size { 0 };
+        VkShaderStageFlags push_constant_stage_flags { 0 };
+        std::vector<VkPushConstantRange> push_constant_ranges;
+        std::vector<ConstantAttribute> constant_attributes;
 
         Pipeline() = default;
 
     public:
+        void set_created_state(
+            std::shared_ptr<Device> dev,
+            VkPipelineLayout lay,
+            VkPipeline pipe,
+            alib6::u32 pc_size,
+            VkShaderStageFlags pc_stages,
+            std::vector<VkPushConstantRange> pc_ranges,
+            std::vector<ConstantAttribute> const_attrs
+        ) noexcept {
+            device = std::move(dev);
+            layout = lay;
+            pipeline = pipe;
+            push_constant_size = pc_size;
+            push_constant_stage_flags = pc_stages;
+            push_constant_ranges = std::move(pc_ranges);
+            constant_attributes = std::move(const_attrs);
+        }
+
         virtual ~Pipeline();
         Pipeline(const Pipeline&) = delete;
         Pipeline& operator=(const Pipeline&) = delete;
@@ -108,6 +131,10 @@ export namespace ave {
         }
         [[nodiscard]] inline bool is_compute() const noexcept { return type == PipelineType::Compute; }
         [[nodiscard]] inline explicit operator bool() const noexcept { return pipeline != VK_NULL_HANDLE; }
+        [[nodiscard]] inline alib6::u32 get_push_constant_size() const noexcept { return push_constant_size; }
+        [[nodiscard]] inline VkShaderStageFlags get_push_constant_stage_flags() const noexcept { return push_constant_stage_flags; }
+        [[nodiscard]] inline std::span<const VkPushConstantRange> get_push_constant_ranges() const noexcept { return push_constant_ranges; }
+        [[nodiscard]] inline const std::vector<ConstantAttribute>& get_constant_attributes() const noexcept { return constant_attributes; }
 
         inline void bind(VkCommandBuffer command_buffer) const noexcept {
             vkCmdBindPipeline(command_buffer, bind_point, pipeline);
