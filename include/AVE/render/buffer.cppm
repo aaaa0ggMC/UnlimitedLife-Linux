@@ -18,6 +18,7 @@ export module ave.render:buffer;
 import std;
 import alib6;
 import ave.ecode;
+import ave.reflect;
 import :device;
 import :upload_context;
 
@@ -26,6 +27,7 @@ export namespace ave {
     template<class MemoryPolicy> class BasicBuffer;
     template<class MemoryPolicy> class BasicBufferData;
     template<class MemoryPolicy> class BasicBufferSlice;
+    template<class MemoryPolicy> class BasicBufferSlices;
     class UploadContext;
     class UploadTicket;
 
@@ -528,6 +530,41 @@ export namespace ave {
         [[nodiscard]] BasicBufferSlice<MemoryPolicy> alloc(const T& data, AllocateBufferInfo ai = {})
             requires std::same_as<MemoryPolicy, VmaMemoryPolicy>;
 
+        /// 将当前 Buffer 按指定元素大小及对齐等距切分为 count 个切片（步长为 align_up(element_size, alignment)）
+        [[nodiscard]] BasicBufferSlices<MemoryPolicy> slice_n(
+            std::size_t count,
+            VkDeviceSize element_size,
+            VkDeviceSize alignment = 1,
+            VkDeviceSize start_offset = 0
+        ) const;
+
+        template<typename T>
+        [[nodiscard]] BasicBufferSlices<MemoryPolicy> slice_n(
+            std::size_t count,
+            VkDeviceSize alignment = 1,
+            VkDeviceSize start_offset = 0
+        ) const;
+
+        /// 在现有容量内自动分配一段包含 count 个槽位的连续区域，切分为 count 个切片（步长按 ai.alignment 对齐），所有切片共享同一次分配的生命周期。
+        [[nodiscard]] BasicBufferSlices<MemoryPolicy> alloc_n(
+            std::size_t count,
+            VkDeviceSize element_size,
+            AllocateBufferInfo ai = {}
+        ) requires std::same_as<MemoryPolicy, VmaMemoryPolicy>;
+
+        template<class T>
+        [[nodiscard]] BasicBufferSlices<MemoryPolicy> alloc_n(
+            std::size_t count,
+            AllocateBufferInfo ai = {}
+        ) requires std::same_as<MemoryPolicy, VmaMemoryPolicy>;
+
+        template<class T>
+        [[nodiscard]] BasicBufferSlices<MemoryPolicy> alloc_n(
+            std::size_t count,
+            const T& initial_data,
+            AllocateBufferInfo ai = {}
+        ) requires std::same_as<MemoryPolicy, VmaMemoryPolicy>;
+
         BasicBuffer() = default;
         explicit BasicBuffer(CreateInfo ci) { (void)create(std::move(ci)); }
         ~BasicBuffer() = default;
@@ -649,18 +686,23 @@ export namespace ave {
             }
         }
 
+        /// 底层连续字节写入
+        bool upload_bytes(const void* ptr, VkDeviceSize bytes, VkDeviceSize dst_offset = 0, MapBufferInfo mi = {}) {
+            if(bytes == 0) return true;
+            mi.offset = dst_offset;
+            mi.size = bytes;
+            auto mapped = map(mi);
+            if(!mapped) return false;
+            mapped.memcpy(0, ptr, bytes);
+            mapped.cancel_auto_upload();
+            return mapped.flush(mi.ew);
+        }
+
         /// 仅映射写入；DeviceOnly 内存需要显式 staging copy。
         template<typename T>
         bool upload(const T& val, VkDeviceSize dst_offset = 0, MapBufferInfo mi = {}) {
             const auto span = detail::extract_pod_span(val);
-            if(span.bytes == 0) return true;
-            mi.offset = dst_offset;
-            mi.size = span.bytes;
-            auto mapped = map(mi);
-            if(!mapped) return false;
-            mapped.memcpy(0, span.ptr, span.bytes);
-            mapped.cancel_auto_upload();
-            return mapped.flush(mi.ew);
+            return upload_bytes(span.ptr, span.bytes, dst_offset, mi);
         }
 
         template<typename T>
@@ -671,6 +713,84 @@ export namespace ave {
         template<typename T>
         bool upload(VkDeviceSize dst_offset, const T& val, alib6::ErrorWrapper ew = {}) {
             return upload(val, dst_offset, MapBufferInfo{ .ew = ew });
+        }
+
+        /// @brief 通过成员指针自动反射其偏移与大小上传单个成员 (支持 base_offset 平移)
+        template<auto MemberPtr, typename T>
+        bool upload(
+            const T& data,
+            VkDeviceSize base_offset = 0,
+            MapBufferInfo mi = {}
+        ) {
+            using Traits = member_pointer_traits<decltype(MemberPtr)>;
+            using ClassType = typename Traits::class_type;
+            constexpr auto info = get_member_range_info<MemberPtr, MemberPtr>();
+            const auto target_offset = base_offset + info.offset;
+
+            if constexpr (std::is_same_v<std::remove_cvref_t<T>, ClassType>) {
+                const void* ptr = reinterpret_cast<const char*>(std::addressof(data)) + info.offset;
+                return upload_bytes(ptr, info.size, target_offset, mi);
+            } else {
+                static_assert(sizeof(T) == info.size, "Passed data size must match the reflected member size.");
+                return upload_bytes(std::addressof(data), info.size, target_offset, mi);
+            }
+        }
+
+        template<auto MemberPtr, typename T>
+        bool upload(const T& data, VkDeviceSize base_offset, alib6::ErrorWrapper ew) {
+            return upload<MemberPtr>(data, base_offset, MapBufferInfo{ .ew = ew });
+        }
+
+        template<auto MemberPtr, typename T>
+        bool upload(const T& data, alib6::ErrorWrapper ew) {
+            return upload<MemberPtr>(data, 0, MapBufferInfo{ .ew = ew });
+        }
+
+        /// @brief 显式别名：上传单个成员 (通过成员指针自动反射偏移与大小)
+        template<auto MemberPtr, typename T>
+        bool upload_member(const T& data, VkDeviceSize base_offset = 0, MapBufferInfo mi = {}) {
+            return upload<MemberPtr>(data, base_offset, mi);
+        }
+
+        template<auto MemberPtr, typename T>
+        bool upload_member(const T& data, VkDeviceSize base_offset, alib6::ErrorWrapper ew) {
+            return upload<MemberPtr>(data, base_offset, MapBufferInfo{ .ew = ew });
+        }
+
+        template<auto MemberPtr, typename T>
+        bool upload_member(const T& data, alib6::ErrorWrapper ew) {
+            return upload<MemberPtr>(data, 0, MapBufferInfo{ .ew = ew });
+        }
+
+        /// @brief 上传连续成员闭区间 [BeginPtr, EndPtr] (支持 base_offset 平移)
+        template<auto BeginPtr, auto EndPtr, typename T>
+        bool upload_range(
+            const T& data,
+            VkDeviceSize base_offset = 0,
+            MapBufferInfo mi = {}
+        ) {
+            using BeginTraits = member_pointer_traits<decltype(BeginPtr)>;
+            using ClassType = typename BeginTraits::class_type;
+            constexpr auto info = get_member_range_info<BeginPtr, EndPtr>();
+            const auto target_offset = base_offset + info.offset;
+
+            if constexpr (std::is_same_v<std::remove_cvref_t<T>, ClassType>) {
+                const void* ptr = reinterpret_cast<const char*>(std::addressof(data)) + info.offset;
+                return upload_bytes(ptr, info.size, target_offset, mi);
+            } else {
+                static_assert(sizeof(T) == info.size, "Passed data size must match the reflected range size.");
+                return upload_bytes(std::addressof(data), info.size, target_offset, mi);
+            }
+        }
+
+        template<auto BeginPtr, auto EndPtr, typename T>
+        bool upload_range(const T& data, VkDeviceSize base_offset, alib6::ErrorWrapper ew) {
+            return upload_range<BeginPtr, EndPtr>(data, base_offset, MapBufferInfo{ .ew = ew });
+        }
+
+        template<auto BeginPtr, auto EndPtr, typename T>
+        bool upload_range(const T& data, alib6::ErrorWrapper ew) {
+            return upload_range<BeginPtr, EndPtr>(data, 0, MapBufferInfo{ .ew = ew });
         }
 
         [[nodiscard]] const std::shared_ptr<Device>& get_device() const noexcept {

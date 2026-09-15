@@ -82,6 +82,13 @@ static void exercise_dirty_tracking(const std::shared_ptr<ave::Device>& device) 
     check(TrackingPolicy::current.expired(), "tracking allocation released");
 }
 
+struct TestUbo {
+    uint32_t a { 0 };
+    uint32_t b { 0 };
+    uint32_t c { 0 };
+    uint32_t d { 0 };
+};
+
 template<class Policy>
 static void exercise(typename Policy::CreateInfo ci) {
     using Buffer = ave::BasicBuffer<Policy>;
@@ -113,6 +120,90 @@ static void exercise(typename Policy::CreateInfo ci) {
     check(!sub.map({.offset = 6, .size = 2, .ew = error}), "slice bounds");
     check(!buffer->map({.offset = 1, .size = std::numeric_limits<VkDeviceSize>::max() - 1,
                         .ew = error}), "mapping overflow rejection");
+
+    // Test slice_n on Buffer
+    auto slices = buffer->template slice_n<uint32_t>(3, 64, 0);
+    check(slices.size() == 3, "buffer slice_n count");
+    check(slices.get_stride() == 64, "buffer slice_n stride");
+    check(slices.get_element_size() == sizeof(uint32_t), "buffer slice_n element size");
+    check(slices[0].get_offset() == 0 && slices[1].get_offset() == 64 && slices[2].get_offset() == 128, "buffer slice_n offsets");
+    check(slices.upload_all(uint32_t{42}, error), "buffer slice_n upload_all");
+    {
+        auto map0 = slices[0].map({.ew = error});
+        auto map1 = slices[1].map({.ew = error});
+        auto map2 = slices[2].map({.ew = error});
+        check(map0.invalidate(0, VK_WHOLE_SIZE, error), "invalidate slice 0");
+        check(map1.invalidate(0, VK_WHOLE_SIZE, error), "invalidate slice 1");
+        check(map2.invalidate(0, VK_WHOLE_SIZE, error), "invalidate slice 2");
+        check(*reinterpret_cast<const uint32_t*>(map0.raw_data()) == 42, "slice 0 readback");
+        check(*reinterpret_cast<const uint32_t*>(map1.raw_data()) == 42, "slice 1 readback");
+        check(*reinterpret_cast<const uint32_t*>(map2.raw_data()) == 42, "slice 2 readback");
+    }
+    check(slices[1].upload(uint32_t{999}, VkDeviceSize{0}, error), "slices[1] upload");
+    {
+        auto map0 = slices[0].map({.ew = error});
+        auto map1 = slices[1].map({.ew = error});
+        check(map0.invalidate(0, VK_WHOLE_SIZE, error), "invalidate slice 0");
+        check(map1.invalidate(0, VK_WHOLE_SIZE, error), "invalidate slice 1");
+        check(*reinterpret_cast<const uint32_t*>(map0.raw_data()) == 42, "slice 0 unchanged");
+        check(*reinterpret_cast<const uint32_t*>(map1.raw_data()) == 999, "slice 1 updated");
+    }
+    auto oob_slices = buffer->template slice_n<uint32_t>(10, 64, 0);
+    check(!oob_slices && oob_slices.empty(), "buffer slice_n oob rejection");
+
+    // Test slice_n on Slice
+    Slice parent_slice(buffer, 0, 192);
+    auto sub_slices = parent_slice.template slice_n<uint32_t>(3, 64, 0);
+    check(sub_slices.size() == 3, "slice slice_n count");
+    check(sub_slices[0].get_offset() == 0 && sub_slices[1].get_offset() == 64 && sub_slices[2].get_offset() == 128, "slice slice_n offsets");
+
+    // Test reflection-based partial updates (upload<&MemberPtr> and upload_range)
+    {
+        auto ubo_slices = buffer->template slice_n<TestUbo>(3, 64, 0);
+        check(ubo_slices.size() == 3, "ubo_slices count");
+        check(ubo_slices[0].get_size() == sizeof(TestUbo), "ubo_slices element size");
+
+        TestUbo init_data { 10, 20, 30, 40 };
+        check(ubo_slices[0].upload(init_data, VkDeviceSize{0}, error), "upload initial struct");
+
+        // 1. Upload single member by value
+        check(ubo_slices[0].template upload<&TestUbo::b>(uint32_t{222}, VkDeviceSize{0}, error), "upload member b");
+
+        // 2. Upload single member by full struct instance
+        TestUbo update_c {};
+        update_c.c = 333;
+        check(ubo_slices[0].template upload<&TestUbo::c>(update_c, VkDeviceSize{0}, error), "upload member c via struct");
+
+        // 3. Upload range of members [b, c]
+        TestUbo range_update {};
+        range_update.b = 888;
+        range_update.c = 999;
+        check((ubo_slices[0].template upload_range<&TestUbo::b, &TestUbo::c>(range_update, VkDeviceSize{0}, error)), "upload_range b to c");
+
+        {
+            auto map0 = ubo_slices[0].map({.ew = error});
+            check(map0.invalidate(0, VK_WHOLE_SIZE, error), "invalidate ubo_slices 0");
+            auto* readback = reinterpret_cast<const TestUbo*>(map0.raw_data());
+            check(readback->a == 10, "a untouched");
+            check(readback->b == 888, "b updated via range");
+            check(readback->c == 999, "c updated via range");
+            check(readback->d == 40, "d untouched");
+        }
+
+        // 4. Test upload_all<&MemberPtr> on BasicBufferSlices
+        check(ubo_slices.template upload_all<TestUbo>(TestUbo{ 1, 2, 3, 4 }, VkDeviceSize{0}, error), "upload_all initial TestUbo");
+        check(ubo_slices.template upload_all<&TestUbo::b>(uint32_t{777}, VkDeviceSize{0}, error), "upload_all member b");
+        for (std::size_t i = 0; i < ubo_slices.size(); ++i) {
+            auto m = ubo_slices[i].map({.ew = error});
+            check(m.invalidate(0, VK_WHOLE_SIZE, error), "invalidate slice");
+            auto* readback = reinterpret_cast<const TestUbo*>(m.raw_data());
+            check(readback->a == 1, "slice a untouched");
+            check(readback->b == 777, "slice b broadcast updated");
+            check(readback->c == 3, "slice c untouched");
+            check(readback->d == 4, "slice d untouched");
+        }
+    }
+
     auto mapping = buffer->map({.offset = 3, .size = 7, .ew = error});
     check(bool(mapping), "lifetime mapping");
     buffer->destroy();
@@ -175,6 +266,33 @@ static void exercise_regions(const std::shared_ptr<ave::VMAAllocator>& allocator
     ave::VMABuffer tiny({.allocator = allocator, .size = 1, .ew = error});
     auto byte = tiny.alloc(uint8_t{9}, {.ew = error});
     check(bool(byte) && byte.get_size() == 1, "partial final atom remains allocatable");
+
+    // Test alloc_n on VMABuffer
+    ave::VMABuffer ubo_arena({.allocator = allocator, .size = 8 * atom,
+        .host_access = ave::BufferHostAccess::RandomAccess, .ew = error});
+    auto ubo_slices = ubo_arena.alloc_n(3, uint32_t{1234}, {.alignment = 2 * atom, .ew = error});
+    check(bool(ubo_slices) && ubo_slices.size() == 3, "alloc_n with initial data");
+    check(ubo_slices.get_stride() == 2 * atom, "alloc_n stride");
+    check(ubo_slices[0].get_offset() % (2 * atom) == 0, "alloc_n alignment");
+    check(ubo_slices[1].get_offset() == ubo_slices[0].get_offset() + 2 * atom, "alloc_n offset spacing");
+    {
+        auto m0 = ubo_slices[0].map({.ew = error});
+        auto m2 = ubo_slices[2].map({.ew = error});
+        check(*reinterpret_cast<const uint32_t*>(m0.raw_data()) == 1234, "alloc_n m0 readback");
+        check(*reinterpret_cast<const uint32_t*>(m2.raw_data()) == 1234, "alloc_n m2 readback");
+    }
+    // Test shared region lifetime across all slices
+    auto s0 = ubo_slices[0];
+    auto s1 = ubo_slices[1];
+    auto s2 = ubo_slices[2];
+    ubo_slices.clear();
+    check(!ubo_arena.alloc_bytes(8 * atom, {.ew = error}), "shared region_lifetime prevents reuse");
+    s0.reset();
+    s1.reset();
+    check(!ubo_arena.alloc_bytes(8 * atom, {.ew = error}), "partial release still prevents reuse");
+    s2.reset();
+    auto full_reuse = ubo_arena.alloc_bytes(8 * atom, {.ew = error});
+    check(bool(full_reuse), "all slices released triggers region reuse");
 }
 
 static void exercise_staging_upload(const std::shared_ptr<ave::Device>& device,
