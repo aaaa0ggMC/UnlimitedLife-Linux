@@ -323,10 +323,14 @@ void compile_draw_calls(ave::GraphicsContext& context, const ave::BasicBuffer<Po
                         const ave::BasicBufferSlice<Policy>& slice) {
     context.bind_vertex_buffer(buffer);
     context.bind_vertex_buffer(slice);
-    context.bind_index_buffer(buffer);
-    context.bind_index_buffer(slice);
-    context.bind_indice_buffer(buffer);
-    context.bind_indice_buffer(slice);
+    context.bind_index_buffer_raw(buffer, VK_INDEX_TYPE_UINT32);
+    context.bind_index_buffer_raw(slice, VK_INDEX_TYPE_UINT16);
+    context.bind_index_buffer<uint32_t>(buffer);
+    context.bind_index_buffer<uint16_t>(slice);
+    context.bind_indice_buffer_raw(buffer, VK_INDEX_TYPE_UINT32);
+    context.bind_indice_buffer_raw(slice, VK_INDEX_TYPE_UINT16);
+    context.bind_indice_buffer<uint32_t>(buffer);
+    context.bind_indice_buffer<uint16_t>(slice);
     context.draw_indirect(buffer);
     context.draw_indexed_indirect(buffer);
 }

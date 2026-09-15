@@ -37,6 +37,34 @@ import :buffer_slice;
 import ave.reflect;
 
 export namespace ave{
+    template<typename T>
+    concept ValidIndexType = 
+        std::same_as<std::remove_cvref_t<T>, std::uint16_t> ||
+        std::same_as<std::remove_cvref_t<T>, std::uint32_t>
+#if defined(VK_INDEX_TYPE_UINT8_KHR) || defined(VK_INDEX_TYPE_UINT8_EXT)
+        || std::same_as<std::remove_cvref_t<T>, std::uint8_t>
+#endif
+    ;
+
+    template<ValidIndexType T>
+    [[nodiscard]] consteval VkIndexType to_vk_index_type() noexcept {
+        using CleanT = std::remove_cvref_t<T>;
+        if constexpr (std::is_same_v<CleanT, std::uint16_t>) {
+            return VK_INDEX_TYPE_UINT16;
+        } else if constexpr (std::is_same_v<CleanT, std::uint32_t>) {
+            return VK_INDEX_TYPE_UINT32;
+        }
+#if defined(VK_INDEX_TYPE_UINT8_KHR)
+        else if constexpr (std::is_same_v<CleanT, std::uint8_t>) {
+            return VK_INDEX_TYPE_UINT8_KHR;
+        }
+#elif defined(VK_INDEX_TYPE_UINT8_EXT)
+        else if constexpr (std::is_same_v<CleanT, std::uint8_t>) {
+            return VK_INDEX_TYPE_UINT8_EXT;
+        }
+#endif
+    }
+
     struct Renderer;
 
     class AVE_API GraphicsContext final {
@@ -137,10 +165,10 @@ export namespace ave{
         ) noexcept;
 
         template<class MemoryPolicy>
-        void bind_index_buffer(
+        void bind_index_buffer_raw(
             const BasicBuffer<MemoryPolicy>& buffer,
-            VkDeviceSize offset = 0,
-            VkIndexType index_type = VK_INDEX_TYPE_UINT32
+            VkIndexType index_type,
+            VkDeviceSize offset = 0
         ) noexcept {
             panic_debug(!recording, "Cannot bind index buffer outside of an active recording scope.");
             panic_debug(
@@ -154,9 +182,9 @@ export namespace ave{
             }
         }
         template<class MemoryPolicy>
-        void bind_index_buffer(
+        void bind_index_buffer_raw(
             const BasicBufferSlice<MemoryPolicy>& slice,
-            VkIndexType index_type = VK_INDEX_TYPE_UINT32
+            VkIndexType index_type
         ) noexcept {
             panic_debug(!recording, "Cannot bind index buffer outside of an active recording scope.");
             panic_debug(
@@ -171,20 +199,48 @@ export namespace ave{
             }
         }
 
-        template<class MemoryPolicy>
-        inline void bind_indice_buffer(
+        template<ValidIndexType IndexType, class MemoryPolicy>
+        inline void bind_index_buffer(
             const BasicBuffer<MemoryPolicy>& buffer,
-            VkDeviceSize offset = 0,
-            VkIndexType index_type = VK_INDEX_TYPE_UINT32
+            VkDeviceSize offset = 0
         ) noexcept {
-            bind_index_buffer(buffer, offset, index_type);
+            bind_index_buffer_raw(buffer, to_vk_index_type<IndexType>(), offset);
+        }
+        template<ValidIndexType IndexType, class MemoryPolicy>
+        inline void bind_index_buffer(
+            const BasicBufferSlice<MemoryPolicy>& slice
+        ) noexcept {
+            bind_index_buffer_raw(slice, to_vk_index_type<IndexType>());
+        }
+
+        template<class MemoryPolicy>
+        inline void bind_indice_buffer_raw(
+            const BasicBuffer<MemoryPolicy>& buffer,
+            VkIndexType index_type,
+            VkDeviceSize offset = 0
+        ) noexcept {
+            bind_index_buffer_raw(buffer, index_type, offset);
         }
         template<class MemoryPolicy>
-        inline void bind_indice_buffer(
+        inline void bind_indice_buffer_raw(
             const BasicBufferSlice<MemoryPolicy>& slice,
-            VkIndexType index_type = VK_INDEX_TYPE_UINT32
+            VkIndexType index_type
         ) noexcept {
-            bind_index_buffer(slice, index_type);
+            bind_index_buffer_raw(slice, index_type);
+        }
+
+        template<ValidIndexType IndexType, class MemoryPolicy>
+        inline void bind_indice_buffer(
+            const BasicBuffer<MemoryPolicy>& buffer,
+            VkDeviceSize offset = 0
+        ) noexcept {
+            bind_index_buffer<IndexType>(buffer, offset);
+        }
+        template<ValidIndexType IndexType, class MemoryPolicy>
+        inline void bind_indice_buffer(
+            const BasicBufferSlice<MemoryPolicy>& slice
+        ) noexcept {
+            bind_index_buffer<IndexType>(slice);
         }
 
         void draw(
