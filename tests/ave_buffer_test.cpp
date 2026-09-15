@@ -449,11 +449,95 @@ void compile_draw_calls(ave::GraphicsContext& context, const ave::BasicBuffer<Po
     context.bind_indice_buffer_raw(slice, VK_INDEX_TYPE_UINT16);
     context.bind_indice_buffer<uint32_t>(buffer);
     context.bind_indice_buffer<uint16_t>(slice);
+
+    VkDescriptorSet dummy_set = VK_NULL_HANDLE;
+    uint32_t offset = 0;
+    std::array<uint32_t, 1> offsets = { offset };
+    std::array<VkDescriptorSet, 1> sets = { dummy_set };
+    context.bind_descriptor_set(0, dummy_set);
+    context.bind_descriptor_set(0, dummy_set, offset);
+    context.bind_descriptor_set(0, dummy_set, offsets);
+    context.bind_descriptor_sets(0, sets);
+    context.bind_descriptor_sets(0, sets, offsets);
+    context.set_dynamic_buffer_offset(0, offset);
+    context.set_dynamic_buffer_offsets(0, offsets);
+
     context.draw_indirect(buffer);
     context.draw_indexed_indirect(buffer);
 }
 template void compile_draw_calls(ave::GraphicsContext&, const ave::Buffer&, const ave::BufferSlice&);
 template void compile_draw_calls(ave::GraphicsContext&, const ave::VMABuffer&, const ave::VMABufferSlice&);
+
+static void exercise_descriptor_binding_and_sets(const std::shared_ptr<ave::Device>& device) {
+    // 1. Check DescriptorBinding fields and factories
+    auto ubo_b = ave::DescriptorBinding::ubo(0);
+    check(ubo_b.binding == 0, "ubo binding");
+    check(ubo_b.descriptor_type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, "ubo type");
+    check(ubo_b.descriptor_count == 1, "ubo count");
+    check(ubo_b.stage_flags == VK_SHADER_STAGE_ALL_GRAPHICS, "ubo stages");
+    check(ubo_b.immutable_samplers == nullptr, "ubo immutable_samplers");
+    check(ubo_b.binding_flags == 0, "ubo binding_flags");
+
+    VkDescriptorSetLayoutBinding vk_b = ubo_b;
+    check(vk_b.binding == 0 && vk_b.descriptorType == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, "vk_b conversion");
+
+    auto dyn_ubo_b = ave::DescriptorBinding::dynamic_ubo(1, VK_SHADER_STAGE_VERTEX_BIT, 2, VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT);
+    check(dyn_ubo_b.binding == 1, "dynamic_ubo binding");
+    check(dyn_ubo_b.descriptor_type == VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, "dynamic_ubo type");
+    check(dyn_ubo_b.descriptor_count == 2, "dynamic_ubo count");
+    check(dyn_ubo_b.stage_flags == VK_SHADER_STAGE_VERTEX_BIT, "dynamic_ubo stages");
+    check(dyn_ubo_b.binding_flags == VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT, "dynamic_ubo binding_flags");
+
+    auto ssbo_b = ave::DescriptorBinding::ssbo(2);
+    check(ssbo_b.descriptor_type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, "ssbo type");
+
+    auto dyn_ssbo_b = ave::DescriptorBinding::dynamic_ssbo(3);
+    check(dyn_ssbo_b.descriptor_type == VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, "dynamic_ssbo type");
+
+    // 2. Check DescriptorSetLayoutInfo constructors
+    ave::DescriptorSetLayoutInfo set_info {
+        {
+            ave::DescriptorBinding::ubo(0),
+            ave::DescriptorBinding::dynamic_ubo(1)
+        },
+        VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT
+    };
+    check(set_info.bindings.size() == 2, "set_info bindings size");
+    check(set_info.flags == VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT, "set_info flags");
+    check(set_info.p_next == nullptr, "set_info p_next");
+
+    // Custom pNext test
+    VkBaseInStructure custom_next {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+        .pNext = nullptr
+    };
+    set_info.p_next = &custom_next;
+    check(set_info.p_next == &custom_next, "set_info custom p_next");
+
+    // 3. Test actual Vulkan descriptor set layout creation via device using DescriptorBinding
+    std::vector<VkDescriptorSetLayoutBinding> bindings;
+    bindings.push_back(ubo_b);
+    bindings.push_back(dyn_ubo_b);
+
+    VkDescriptorSetLayoutCreateInfo layout_ci {};
+    layout_ci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layout_ci.bindingCount = static_cast<uint32_t>(bindings.size());
+    layout_ci.pBindings = bindings.data();
+
+    VkDescriptorSetLayout set_layout = VK_NULL_HANDLE;
+    VkResult res = vkCreateDescriptorSetLayout(
+        device->get_system_handle(),
+        &layout_ci,
+        device->get_instance()->get_vk_allocator(),
+        &set_layout
+    );
+    check(res == VK_SUCCESS && set_layout != VK_NULL_HANDLE, "vkCreateDescriptorSetLayout via DescriptorBinding");
+    vkDestroyDescriptorSetLayout(
+        device->get_system_handle(),
+        set_layout,
+        device->get_instance()->get_vk_allocator()
+    );
+}
 
 int main() {
     ave::Context context;
@@ -472,6 +556,7 @@ int main() {
     dci.request_queue(0);
     auto device = ave::Device::create(dci);
     check(bool(device), "device");
+    exercise_descriptor_binding_and_sets(device);
     exercise_dirty_tracking(device);
     exercise<ave::NativeMemoryPolicy>({.device = device});
     auto allocator = ave::VMAAllocator::create_shared({.device = device, .ew = error});

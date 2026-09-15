@@ -55,7 +55,8 @@ GraphicsContext::GraphicsContext(GraphicsContext&& other) noexcept
 ,depth_aspect(other.depth_aspect)
 ,recording(other.recording)
 ,finished(other.finished)
-,bound_pipeline(std::exchange(other.bound_pipeline, nullptr)) {
+,bound_pipeline(std::exchange(other.bound_pipeline, nullptr))
+,bound_descriptor_sets(std::exchange(other.bound_descriptor_sets, {})) {
     other.recording = false;
     other.finished = true;
 }
@@ -437,6 +438,114 @@ void GraphicsContext::bind_pipeline(const Pipeline& pipeline) {
     );
     bound_pipeline = &pipeline;
     pipeline.bind(command_buffer);
+}
+
+void GraphicsContext::bind_descriptor_set(
+    const Pipeline& pipeline,
+    alib6::u32 set_index,
+    VkDescriptorSet set,
+    std::span<const alib6::u32> dynamic_offsets
+) noexcept {
+    panic_debug(!recording, "Cannot bind descriptor set outside of an active recording scope.");
+    panic_debug(set_index >= bound_descriptor_sets.size(), "Descriptor set index out of range.");
+    if(!recording || set == VK_NULL_HANDLE || set_index >= bound_descriptor_sets.size()) return;
+
+    bound_descriptor_sets[set_index] = set;
+    vkCmdBindDescriptorSets(
+        command_buffer,
+        pipeline.get_bind_point(),
+        pipeline.get_layout(),
+        set_index,
+        1,
+        &set,
+        static_cast<uint32_t>(dynamic_offsets.size()),
+        dynamic_offsets.data()
+    );
+}
+
+void GraphicsContext::bind_descriptor_set(
+    alib6::u32 set_index,
+    VkDescriptorSet set,
+    std::span<const alib6::u32> dynamic_offsets
+) noexcept {
+    panic_debug(!recording, "Cannot bind descriptor set outside of an active recording scope.");
+    panic_debug(!bound_pipeline, "Cannot bind descriptor set without an active bound pipeline.");
+    if(!bound_pipeline) return;
+    bind_descriptor_set(*bound_pipeline, set_index, set, dynamic_offsets);
+}
+
+void GraphicsContext::bind_descriptor_sets(
+    const Pipeline& pipeline,
+    alib6::u32 first_set,
+    std::span<const VkDescriptorSet> sets,
+    std::span<const alib6::u32> dynamic_offsets
+) noexcept {
+    panic_debug(!recording, "Cannot bind descriptor sets outside of an active recording scope.");
+    panic_debug(first_set + sets.size() > bound_descriptor_sets.size(), "Descriptor set range out of bounds.");
+    if(!recording || sets.empty()) return;
+
+    for(std::size_t i = 0; i < sets.size(); ++i) {
+        if(first_set + i < bound_descriptor_sets.size()) {
+            bound_descriptor_sets[first_set + i] = sets[i];
+        }
+    }
+
+    vkCmdBindDescriptorSets(
+        command_buffer,
+        pipeline.get_bind_point(),
+        pipeline.get_layout(),
+        first_set,
+        static_cast<uint32_t>(sets.size()),
+        sets.data(),
+        static_cast<uint32_t>(dynamic_offsets.size()),
+        dynamic_offsets.data()
+    );
+}
+
+void GraphicsContext::bind_descriptor_sets(
+    alib6::u32 first_set,
+    std::span<const VkDescriptorSet> sets,
+    std::span<const alib6::u32> dynamic_offsets
+) noexcept {
+    panic_debug(!recording, "Cannot bind descriptor sets outside of an active recording scope.");
+    panic_debug(!bound_pipeline, "Cannot bind descriptor sets without an active bound pipeline.");
+    if(!bound_pipeline) return;
+    bind_descriptor_sets(*bound_pipeline, first_set, sets, dynamic_offsets);
+}
+
+void GraphicsContext::set_dynamic_buffer_offsets(
+    const Pipeline& pipeline,
+    alib6::u32 set_index,
+    std::span<const alib6::u32> dynamic_offsets
+) noexcept {
+    panic_debug(!recording, "Cannot set dynamic buffer offsets outside of an active recording scope.");
+    panic_debug(set_index >= bound_descriptor_sets.size(), "Descriptor set index out of range.");
+    panic_debug(bound_descriptor_sets[set_index] == VK_NULL_HANDLE, "No descriptor set bound at set_index.");
+    if(!recording || set_index >= bound_descriptor_sets.size()) return;
+
+    const VkDescriptorSet set = bound_descriptor_sets[set_index];
+    if(set == VK_NULL_HANDLE) return;
+
+    vkCmdBindDescriptorSets(
+        command_buffer,
+        pipeline.get_bind_point(),
+        pipeline.get_layout(),
+        set_index,
+        1,
+        &set,
+        static_cast<uint32_t>(dynamic_offsets.size()),
+        dynamic_offsets.data()
+    );
+}
+
+void GraphicsContext::set_dynamic_buffer_offsets(
+    alib6::u32 set_index,
+    std::span<const alib6::u32> dynamic_offsets
+) noexcept {
+    panic_debug(!recording, "Cannot set dynamic buffer offsets outside of an active recording scope.");
+    panic_debug(!bound_pipeline, "Cannot set dynamic buffer offsets without an active bound pipeline.");
+    if(!bound_pipeline) return;
+    set_dynamic_buffer_offsets(*bound_pipeline, set_index, dynamic_offsets);
 }
 
 void GraphicsContext::bind_vertex_buffers(

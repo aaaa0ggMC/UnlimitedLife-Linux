@@ -12,6 +12,7 @@ export module ave.render:pipeline;
 
 import std;
 import alib6;
+import ave.render.base;
 import :device;
 import :legacy_render;
 import :pipeline_fwd;
@@ -31,6 +32,8 @@ export namespace ave {
 
         VkPipelineLayoutCreateFlags layout_flags { 0 };
         std::vector<VkDescriptorSetLayout> descriptor_set_layouts;
+        std::vector<DescriptorBinding> descriptor_bindings;
+        std::vector<DescriptorSetLayoutInfo> descriptor_sets;
         std::vector<ConstantAttribute> constant_attributes;
         std::vector<VkPushConstantRange> push_constant_ranges;
 
@@ -89,6 +92,8 @@ export namespace ave {
         VkShaderStageFlags push_constant_stage_flags { 0 };
         std::vector<VkPushConstantRange> push_constant_ranges;
         std::vector<ConstantAttribute> constant_attributes;
+        std::vector<VkDescriptorSetLayout> descriptor_set_layouts;
+        std::vector<VkDescriptorSetLayout> owned_descriptor_set_layouts;
 
         Pipeline() = default;
 
@@ -100,7 +105,9 @@ export namespace ave {
             alib6::u32 pc_size,
             VkShaderStageFlags pc_stages,
             std::vector<VkPushConstantRange> pc_ranges,
-            std::vector<ConstantAttribute> const_attrs
+            std::vector<ConstantAttribute> const_attrs,
+            std::vector<VkDescriptorSetLayout> set_layouts = {},
+            std::vector<VkDescriptorSetLayout> owned_layouts = {}
         ) noexcept {
             device = std::move(dev);
             layout = lay;
@@ -109,6 +116,8 @@ export namespace ave {
             push_constant_stage_flags = pc_stages;
             push_constant_ranges = std::move(pc_ranges);
             constant_attributes = std::move(const_attrs);
+            descriptor_set_layouts = std::move(set_layouts);
+            owned_descriptor_set_layouts = std::move(owned_layouts);
         }
 
         virtual ~Pipeline();
@@ -135,6 +144,11 @@ export namespace ave {
         [[nodiscard]] inline VkShaderStageFlags get_push_constant_stage_flags() const noexcept { return push_constant_stage_flags; }
         [[nodiscard]] inline std::span<const VkPushConstantRange> get_push_constant_ranges() const noexcept { return push_constant_ranges; }
         [[nodiscard]] inline const std::vector<ConstantAttribute>& get_constant_attributes() const noexcept { return constant_attributes; }
+        [[nodiscard]] inline const std::vector<VkDescriptorSetLayout>& get_descriptor_set_layouts() const noexcept { return descriptor_set_layouts; }
+        [[nodiscard]] inline VkDescriptorSetLayout get_descriptor_set_layout(alib6::u32 set_index = 0) const noexcept {
+            return set_index < descriptor_set_layouts.size() ? descriptor_set_layouts[set_index] : VK_NULL_HANDLE;
+        }
+        [[nodiscard]] inline const std::vector<VkDescriptorSetLayout>& get_owned_descriptor_set_layouts() const noexcept { return owned_descriptor_set_layouts; }
 
         inline void bind(VkCommandBuffer command_buffer) const noexcept {
             vkCmdBindPipeline(command_buffer, bind_point, pipeline);

@@ -9,6 +9,7 @@ module ave.render;
 import std;
 import alib6;
 import ave.ecode;
+import ave.render.base;
 import :pipeline;
 import :legacy_render;
 import :dynamic_render;
@@ -319,23 +320,81 @@ namespace {
             stages.push_back(stage);
         }
 
+        // 若未显式配置 descriptor_sets，但提供了 descriptor_bindings，自动归入 Set 0
+        if(ci.descriptor_sets.empty() && !ci.descriptor_bindings.empty()) {
+            ci.descriptor_sets.push_back(DescriptorSetLayoutInfo{ std::move(ci.descriptor_bindings) });
+        }
+
+        const auto handle = ci.device->get_system_handle();
+        const auto allocator = ci.device->get_instance()->get_vk_allocator();
+
+        std::vector<VkDescriptorSetLayout> owned_descriptor_set_layouts;
+        std::vector<VkDescriptorSetLayout> all_descriptor_set_layouts = ci.descriptor_set_layouts;
+
+        for(const auto& set_info : ci.descriptor_sets) {
+            std::vector<VkDescriptorSetLayoutBinding> vk_bindings;
+            vk_bindings.reserve(set_info.bindings.size());
+            std::vector<VkDescriptorBindingFlags> binding_flags;
+            binding_flags.reserve(set_info.bindings.size());
+            bool has_binding_flags = false;
+
+            for(const auto& b : set_info.bindings) {
+                vk_bindings.push_back(static_cast<VkDescriptorSetLayoutBinding>(b));
+                binding_flags.push_back(b.binding_flags);
+                if(b.binding_flags != 0) {
+                    has_binding_flags = true;
+                }
+            }
+
+            VkDescriptorSetLayoutBindingFlagsCreateInfo flags_info {};
+            flags_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+            flags_info.bindingCount = static_cast<uint32_t>(binding_flags.size());
+            flags_info.pBindingFlags = binding_flags.data();
+
+            VkDescriptorSetLayoutCreateInfo layout_ci {};
+            layout_ci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+            layout_ci.flags = set_info.flags;
+            layout_ci.bindingCount = static_cast<uint32_t>(vk_bindings.size());
+            layout_ci.pBindings = vk_bindings.data();
+
+            if(set_info.p_next != nullptr) {
+                layout_ci.pNext = set_info.p_next;
+            } else if(has_binding_flags) {
+                layout_ci.pNext = &flags_info;
+            }
+
+            VkDescriptorSetLayout set_layout = VK_NULL_HANDLE;
+            VkResult res = vkCreateDescriptorSetLayout(handle, &layout_ci, allocator, &set_layout);
+            if(res != VK_SUCCESS) {
+                ci.ew.report(ave_vk_create_pipeline_layout,
+                    "Failed to create Vulkan DescriptorSetLayout ({}).", static_cast<int>(res));
+                for(auto l : owned_descriptor_set_layouts) {
+                    vkDestroyDescriptorSetLayout(handle, l, allocator);
+                }
+                return false;
+            }
+            owned_descriptor_set_layouts.push_back(set_layout);
+            all_descriptor_set_layouts.push_back(set_layout);
+        }
+
         VkPipelineLayoutCreateInfo layout_info {};
         layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         layout_info.flags = ci.layout_flags;
         layout_info.setLayoutCount = static_cast<alib6::u32>(
-            ci.descriptor_set_layouts.size());
-        layout_info.pSetLayouts = ci.descriptor_set_layouts.data();
+            all_descriptor_set_layouts.size());
+        layout_info.pSetLayouts = all_descriptor_set_layouts.data();
         layout_info.pushConstantRangeCount = static_cast<alib6::u32>(
             ci.push_constant_ranges.size());
         layout_info.pPushConstantRanges = ci.push_constant_ranges.data();
 
-        const auto handle = ci.device->get_system_handle();
-        const auto allocator = ci.device->get_instance()->get_vk_allocator();
         VkPipelineLayout layout = VK_NULL_HANDLE;
         VkResult code = vkCreatePipelineLayout(handle, &layout_info, allocator, &layout);
         if(code != VK_SUCCESS) {
             ci.ew.report(ave_vk_create_pipeline_layout,
                 "Failed to create Vulkan PipelineLayout ({}).", static_cast<int>(code));
+            for(auto l : owned_descriptor_set_layouts) {
+                vkDestroyDescriptorSetLayout(handle, l, allocator);
+            }
             return false;
         }
 
@@ -417,6 +476,9 @@ namespace {
             ci.ew.report(ave_vk_create_graphics_pipeline,
                 "Failed to create Vulkan Graphics Pipeline ({}).", static_cast<int>(code));
             vkDestroyPipelineLayout(handle, layout, allocator);
+            for(auto l : owned_descriptor_set_layouts) {
+                vkDestroyDescriptorSetLayout(handle, l, allocator);
+            }
             return false;
         }
 
@@ -427,7 +489,9 @@ namespace {
             total_pc_size,
             combined_pc_stages,
             std::move(ci.push_constant_ranges),
-            std::move(ci.constant_attributes)
+            std::move(ci.constant_attributes),
+            std::move(all_descriptor_set_layouts),
+            std::move(owned_descriptor_set_layouts)
         );
         return true;
     }
@@ -450,6 +514,13 @@ void Pipeline::destroy() noexcept {
         if(layout != VK_NULL_HANDLE) {
             vkDestroyPipelineLayout(handle, layout, allocator);
         }
+        for(const auto set_layout : owned_descriptor_set_layouts) {
+            if(set_layout != VK_NULL_HANDLE) {
+                vkDestroyDescriptorSetLayout(handle, set_layout, allocator);
+            }
+        }
+        owned_descriptor_set_layouts.clear();
+        descriptor_set_layouts.clear();
     }
     pipeline = VK_NULL_HANDLE;
     layout = VK_NULL_HANDLE;
@@ -1060,6 +1131,12 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
 
         if(!cfg.descriptor_set_layouts.empty()) {
             ci.descriptor_set_layouts = cfg.descriptor_set_layouts;
+        }
+        if(!cfg.descriptor_bindings.empty()) {
+            ci.descriptor_bindings = cfg.descriptor_bindings;
+        }
+        if(!cfg.descriptor_sets.empty()) {
+            ci.descriptor_sets = cfg.descriptor_sets;
         }
         if(!cfg.constant_attributes.empty()) {
             ci.constant_attributes = cfg.constant_attributes;

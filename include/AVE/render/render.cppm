@@ -108,6 +108,7 @@ export namespace ave{
         bool recording { false };
         bool finished { false };
         const Pipeline* bound_pipeline { nullptr };
+        std::array<VkDescriptorSet, 8> bound_descriptor_sets {};
 
         explicit GraphicsContext(alib6::ErrorWrapper target_ew);
 
@@ -241,6 +242,79 @@ export namespace ave{
             const BasicBufferSlice<MemoryPolicy>& slice
         ) noexcept {
             bind_index_buffer<IndexType>(slice);
+        }
+
+        void bind_descriptor_set(
+            alib6::u32 set_index,
+            VkDescriptorSet set,
+            std::span<const alib6::u32> dynamic_offsets = {}
+        ) noexcept;
+
+        void bind_descriptor_set(
+            alib6::u32 set_index,
+            VkDescriptorSet set,
+            alib6::u32 dynamic_offset
+        ) noexcept {
+            const alib6::u32 offsets[1] = { dynamic_offset };
+            bind_descriptor_set(set_index, set, std::span<const alib6::u32>(offsets, 1));
+        }
+
+        void bind_descriptor_set(
+            const Pipeline& pipeline,
+            alib6::u32 set_index,
+            VkDescriptorSet set,
+            std::span<const alib6::u32> dynamic_offsets = {}
+        ) noexcept;
+
+        void bind_descriptor_set(
+            const Pipeline& pipeline,
+            alib6::u32 set_index,
+            VkDescriptorSet set,
+            alib6::u32 dynamic_offset
+        ) noexcept {
+            const alib6::u32 offsets[1] = { dynamic_offset };
+            bind_descriptor_set(pipeline, set_index, set, std::span<const alib6::u32>(offsets, 1));
+        }
+
+        void bind_descriptor_sets(
+            alib6::u32 first_set,
+            std::span<const VkDescriptorSet> sets,
+            std::span<const alib6::u32> dynamic_offsets = {}
+        ) noexcept;
+
+        void bind_descriptor_sets(
+            const Pipeline& pipeline,
+            alib6::u32 first_set,
+            std::span<const VkDescriptorSet> sets,
+            std::span<const alib6::u32> dynamic_offsets = {}
+        ) noexcept;
+
+        void set_dynamic_buffer_offsets(
+            alib6::u32 set_index,
+            std::span<const alib6::u32> dynamic_offsets
+        ) noexcept;
+
+        inline void set_dynamic_buffer_offset(
+            alib6::u32 set_index,
+            alib6::u32 dynamic_offset
+        ) noexcept {
+            const alib6::u32 offsets[1] = { dynamic_offset };
+            set_dynamic_buffer_offsets(set_index, std::span<const alib6::u32>(offsets, 1));
+        }
+
+        void set_dynamic_buffer_offsets(
+            const Pipeline& pipeline,
+            alib6::u32 set_index,
+            std::span<const alib6::u32> dynamic_offsets
+        ) noexcept;
+
+        inline void set_dynamic_buffer_offset(
+            const Pipeline& pipeline,
+            alib6::u32 set_index,
+            alib6::u32 dynamic_offset
+        ) noexcept {
+            const alib6::u32 offsets[1] = { dynamic_offset };
+            set_dynamic_buffer_offsets(pipeline, set_index, std::span<const alib6::u32>(offsets, 1));
         }
 
         void draw(

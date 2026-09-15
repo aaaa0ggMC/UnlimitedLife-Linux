@@ -263,6 +263,111 @@ export namespace ave{
             };
         }
     };
+
+    /// @brief 包装好的描述符布局绑定描述，带默认值与工厂方法
+    struct AVE_API DescriptorBinding {
+        alib6::u32 binding { 0 };
+        VkDescriptorType descriptor_type { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER };
+        alib6::u32 descriptor_count { 1 };
+        VkShaderStageFlags stage_flags { VK_SHADER_STAGE_ALL_GRAPHICS };
+        const VkSampler* immutable_samplers { nullptr };
+        VkDescriptorBindingFlags binding_flags { 0 };
+
+        constexpr operator VkDescriptorSetLayoutBinding() const noexcept {
+            return VkDescriptorSetLayoutBinding{
+                .binding = binding,
+                .descriptorType = descriptor_type,
+                .descriptorCount = descriptor_count,
+                .stageFlags = stage_flags,
+                .pImmutableSamplers = immutable_samplers
+            };
+        }
+
+        static constexpr DescriptorBinding ubo(
+            alib6::u32 binding,
+            VkShaderStageFlags stages = VK_SHADER_STAGE_ALL_GRAPHICS,
+            alib6::u32 count = 1,
+            VkDescriptorBindingFlags flags = 0
+        ) noexcept {
+            return DescriptorBinding{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .descriptor_count = count,
+                .stage_flags = stages,
+                .immutable_samplers = nullptr,
+                .binding_flags = flags
+            };
+        }
+
+        static constexpr DescriptorBinding dynamic_ubo(
+            alib6::u32 binding,
+            VkShaderStageFlags stages = VK_SHADER_STAGE_ALL_GRAPHICS,
+            alib6::u32 count = 1,
+            VkDescriptorBindingFlags flags = 0
+        ) noexcept {
+            return DescriptorBinding{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                .descriptor_count = count,
+                .stage_flags = stages,
+                .immutable_samplers = nullptr,
+                .binding_flags = flags
+            };
+        }
+
+        static constexpr DescriptorBinding ssbo(
+            alib6::u32 binding,
+            VkShaderStageFlags stages = VK_SHADER_STAGE_ALL_GRAPHICS,
+            alib6::u32 count = 1,
+            VkDescriptorBindingFlags flags = 0
+        ) noexcept {
+            return DescriptorBinding{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                .descriptor_count = count,
+                .stage_flags = stages,
+                .immutable_samplers = nullptr,
+                .binding_flags = flags
+            };
+        }
+
+        static constexpr DescriptorBinding dynamic_ssbo(
+            alib6::u32 binding,
+            VkShaderStageFlags stages = VK_SHADER_STAGE_ALL_GRAPHICS,
+            alib6::u32 count = 1,
+            VkDescriptorBindingFlags flags = 0
+        ) noexcept {
+            return DescriptorBinding{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC,
+                .descriptor_count = count,
+                .stage_flags = stages,
+                .immutable_samplers = nullptr,
+                .binding_flags = flags
+            };
+        }
+    };
+
+    /// @brief 描述符集布局信息，支持多 binding、自定义 flags 与用户扩展 pNext 挂载
+    struct AVE_API DescriptorSetLayoutInfo {
+        std::vector<DescriptorBinding> bindings {};
+        VkDescriptorSetLayoutCreateFlags flags { 0 };
+        const void* p_next { nullptr };
+
+        DescriptorSetLayoutInfo() = default;
+
+        DescriptorSetLayoutInfo(
+            std::vector<DescriptorBinding> target_bindings,
+            VkDescriptorSetLayoutCreateFlags target_flags = 0,
+            const void* target_p_next = nullptr
+        ) : bindings(std::move(target_bindings)), flags(target_flags), p_next(target_p_next) {}
+
+        DescriptorSetLayoutInfo(
+            std::initializer_list<DescriptorBinding> init_bindings,
+            VkDescriptorSetLayoutCreateFlags target_flags = 0,
+            const void* target_p_next = nullptr
+        ) : bindings(init_bindings), flags(target_flags), p_next(target_p_next) {}
+    };
 }
 
 export namespace std {
