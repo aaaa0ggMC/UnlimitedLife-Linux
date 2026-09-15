@@ -111,23 +111,30 @@ export namespace ave {
 
         /// 映射、写入并立即上传/刷新单个 POD 对象或 POD 连续区间（如 std::vector, std::span, std::array）至该切片区域（dst_offset 相对于当前切片起始位置）
         template<typename T>
-        bool upload(const T& val, VkDeviceSize dst_offset = 0, alib6::ErrorWrapper ew = {}) const {
+        bool upload(const T& val, VkDeviceSize dst_offset = 0, MapBufferInfo mi = {}) const {
             const auto span = detail::extract_pod_span(val);
             if(span.bytes == 0) return true;
             if(!*this) {
-                ew.report(ave_vk_map_buffer, "Cannot upload to an uninitialized BasicBufferSlice.");
+                mi.ew.report(ave_vk_map_buffer, "Cannot upload to an uninitialized BasicBufferSlice.");
                 return false;
             }
-            auto mapped = this->map({ .offset = dst_offset, .size = span.bytes, .ew = ew });
+            mi.offset = dst_offset;
+            mi.size = span.bytes;
+            auto mapped = this->map(mi);
             if(!mapped) return false;
             mapped.memcpy(0, span.ptr, span.bytes);
             mapped.cancel_auto_upload();
-            return mapped.flush(ew);
+            return mapped.flush(mi.ew);
+        }
+
+        template<typename T>
+        bool upload(const T& val, VkDeviceSize dst_offset, alib6::ErrorWrapper ew) const {
+            return this->upload(val, dst_offset, MapBufferInfo{ .ew = ew });
         }
 
         template<typename T>
         bool upload(VkDeviceSize dst_offset, const T& val, alib6::ErrorWrapper ew = {}) const {
-            return this->upload(val, dst_offset, ew);
+            return this->upload(val, dst_offset, MapBufferInfo{ .ew = ew });
         }
 
         [[nodiscard]] explicit operator bool() const noexcept {
@@ -159,14 +166,26 @@ export namespace ave {
         const auto span = detail::extract_pod_span(data);
         auto result = alloc_bytes(span.bytes, ai);
         if(!result) return {};
-        auto mapped = result.map({.ew = ai.ew});
-        if(!mapped) return {};
-        mapped.memcpy(0, span.ptr, span.bytes);
-        mapped.cancel_auto_upload();
-        if(!mapped.flush(ai.ew)) return {};
+        auto mi = ai.map_info;
+        if(ai.ew) mi.ew = ai.ew;
+        if(!result.upload(data, 0, mi)) return {};
         return result;
     }
 
     using BufferSlice = BasicBufferSlice<NativeMemoryPolicy>;
     using VMABufferSlice = BasicBufferSlice<VmaMemoryPolicy>;
+
+    template<class MemoryPolicy>
+    StagingSource::StagingSource(BasicBufferSlice<MemoryPolicy>& s) {
+        buffer = s.get_system_handle();
+        offset = s.get_offset();
+        capacity = s.get_size();
+        if(s.get_buffer() && (s.get_buffer()->get_usage() & VK_BUFFER_USAGE_TRANSFER_SRC_BIT) && s.get_buffer()->is_host_visible()) {
+            auto mapped = s.map();
+            if(mapped) {
+                mapped_ptr = mapped.raw_data();
+                lifetime = std::make_shared<BasicBufferData<MemoryPolicy>>(std::move(mapped));
+            }
+        }
+    }
 }

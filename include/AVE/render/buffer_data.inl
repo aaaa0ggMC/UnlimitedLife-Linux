@@ -13,6 +13,22 @@ BasicBufferData<P>::BasicBufferData(
 }
 
 template<class P>
+BasicBufferData<P>::BasicBufferData(
+    std::shared_ptr<typename P::State> resource,
+    std::shared_ptr<StagingSession> session,
+    void* ptr,
+    VkDeviceSize offset, VkDeviceSize size, VkDeviceSize capacity,
+    VkDeviceSize alloc_size, VkDeviceSize c_size
+) : state(std::move(resource)), staging_session(std::move(session)),
+    mapped_ptr(ptr), map_offset(offset), map_size(size),
+    mapped_capacity(capacity), allocation_size(alloc_size),
+    chunk_size(c_size), chunk_count(size / c_size + (size % c_size != 0)),
+    is_coherent(false), dirty_mask(chunk_count) {
+    dirty_mask.ensure(chunk_count);
+    dirty_mask.fill(false);
+}
+
+template<class P>
 void BasicBufferData<P>::release() noexcept {
     if(mapped_ptr && state) {
         if(auto_upload) {
@@ -22,10 +38,14 @@ void BasicBufferData<P>::release() noexcept {
                 (void)flush(ignored);
             } catch(...) {}
         }
-        P::unmap(*state);
+        if(!staging_session) {
+            P::unmap(*state);
+        }
     }
     mapped_ptr = nullptr;
     state.reset();
+    staging_session.reset();
+    last_ticket = {};
     region_lifetime.reset();
 }
 
@@ -35,6 +55,8 @@ BasicBufferData<P>::~BasicBufferData() noexcept { release(); }
 template<class P>
 BasicBufferData<P>::BasicBufferData(BasicBufferData&& other) noexcept
     : state(std::move(other.state)),
+      staging_session(std::move(other.staging_session)),
+      last_ticket(std::move(other.last_ticket)),
       region_lifetime(std::move(other.region_lifetime)),
       mapped_ptr(std::exchange(other.mapped_ptr, nullptr)),
       map_offset(other.map_offset), map_size(other.map_size),
@@ -48,6 +70,8 @@ BasicBufferData<P>& BasicBufferData<P>::operator=(BasicBufferData&& other) noexc
     if(this == &other) return *this;
     release();
     state = std::move(other.state);
+    staging_session = std::move(other.staging_session);
+    last_ticket = std::move(other.last_ticket);
     region_lifetime = std::move(other.region_lifetime);
     mapped_ptr = std::exchange(other.mapped_ptr, nullptr);
     map_offset = other.map_offset;
@@ -106,10 +130,54 @@ uint8_t BasicBufferData<P>::operator[](alib6::usize offset) const noexcept {
 }
 
 template<class P>
+UploadTicket BasicBufferData<P>::submit(alib6::ErrorWrapper ew) {
+    if(!staging_session) {
+        ew.report(ave_vk_map_buffer, "submit() is only available on staging mappings.");
+        return {};
+    }
+    if(!staging_session->upload_context) {
+        ew.report(ave_vk_map_buffer, "Missing UploadContext for staging submit.");
+        return {};
+    }
+    if(dirty_mask.none()) {
+        return last_ticket;
+    }
+
+    const auto first = dirty_mask.find_next_1(0);
+    if(!first || *first >= chunk_count) return last_ticket;
+
+    alib6::usize last = *first;
+    for(alib6::usize i = *first; i < chunk_count; ++i) {
+        if(dirty_mask.test(i)) last = i;
+    }
+
+    const VkDeviceSize begin = *first * chunk_size;
+    const VkDeviceSize end = std::min(map_size, (last + 1) * chunk_size);
+    const VkDeviceSize bytes = end - begin;
+
+    last_ticket = staging_session->upload_context->submit_copy(
+        staging_session->src_buffer, staging_session->src_offset + begin,
+        staging_session->dst_buffer, staging_session->dst_offset + begin,
+        bytes,
+        staging_session,
+        ew
+    );
+    if(last_ticket) {
+        dirty_mask.fill(false);
+    }
+    return last_ticket;
+}
+
+template<class P>
 bool BasicBufferData<P>::flush(alib6::ErrorWrapper ew) {
     if(!mapped_ptr || !state) {
         ew.report(ave_vk_map_buffer, "Cannot flush an empty mapping.");
         return false;
+    }
+    if(staging_session) {
+        auto ticket = submit(ew);
+        if(!ticket) return false;
+        return ticket.wait(std::numeric_limits<uint64_t>::max(), ew);
     }
     if(is_coherent || dirty_mask.none()) return true;
     alib6::usize cursor = 0;
@@ -136,6 +204,10 @@ void BasicBufferData<P>::upload_raw(VkDeviceSize offset, VkDeviceSize size) {
     const auto bytes = size == VK_WHOLE_SIZE ? map_size - offset : size;
     if(bytes == 0 || bytes > map_size - offset) return;
     mark_range_dirty(static_cast<alib6::usize>(offset), static_cast<alib6::usize>(bytes));
+    if(staging_session) {
+        (void)submit();
+        return;
+    }
     const auto code = P::flush(*state, map_offset + offset, bytes);
     // Preserve dirty tracking on failure; do not clear partially covered chunks.
     if(code == VK_SUCCESS && offset == 0 && bytes == map_size) dirty_mask.fill(false);
@@ -144,6 +216,10 @@ void BasicBufferData<P>::upload_raw(VkDeviceSize offset, VkDeviceSize size) {
 template<class P>
 bool BasicBufferData<P>::invalidate(VkDeviceSize offset, VkDeviceSize size,
                                     alib6::ErrorWrapper ew) {
+    if(staging_session) {
+        ew.report(ave_vk_map_buffer, "Staging mappings are write-only and do not support invalidate().");
+        return false;
+    }
     if(!mapped_ptr || !state || offset >= map_size) {
         ew.report(ave_vk_map_buffer, "Invalid invalidate mapping or offset.");
         return false;
@@ -159,4 +235,18 @@ bool BasicBufferData<P>::invalidate(VkDeviceSize offset, VkDeviceSize size,
         return false;
     }
     return true;
+}
+
+template<class MemoryPolicy>
+StagingSource::StagingSource(BasicBuffer<MemoryPolicy>& b) {
+    buffer = b.get_system_handle();
+    offset = 0;
+    capacity = b.get_size();
+    if((b.get_usage() & VK_BUFFER_USAGE_TRANSFER_SRC_BIT) && b.is_host_visible()) {
+        auto mapped = b.map();
+        if(mapped) {
+            mapped_ptr = mapped.raw_data();
+            lifetime = std::make_shared<BasicBufferData<MemoryPolicy>>(std::move(mapped));
+        }
+    }
 }

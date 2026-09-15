@@ -67,6 +67,7 @@ struct VmaMemoryPolicy::State {
     BufferHostAccess host_access { BufferHostAccess::DeviceOnly };
     VmaVirtualBlock regions { VK_NULL_HANDLE };
     std::mutex region_mutex;
+    std::atomic<const void*> stagedby { nullptr };
 
     struct Region {
         std::shared_ptr<State> state;
@@ -203,5 +204,27 @@ VkResult VmaMemoryPolicy::flush(State& s, VkDeviceSize offset, VkDeviceSize size
 
 VkResult VmaMemoryPolicy::invalidate(State& s, VkDeviceSize offset, VkDeviceSize size) {
     return vmaInvalidateAllocation(s.owner->impl->handle, s.allocation, offset, size);
+}
+
+bool VmaMemoryPolicy::try_acquire_stagedby(State& s, const void* session_ptr) {
+    const void* expected = nullptr;
+    return s.stagedby.compare_exchange_strong(
+        expected, session_ptr,
+        std::memory_order_acq_rel,
+        std::memory_order_acquire
+    );
+}
+
+void VmaMemoryPolicy::release_stagedby(State& s, const void* session_ptr) noexcept {
+    const void* expected = session_ptr;
+    s.stagedby.compare_exchange_strong(
+        expected, nullptr,
+        std::memory_order_release,
+        std::memory_order_relaxed
+    );
+}
+
+const void* VmaMemoryPolicy::get_stagedby(const State& s) noexcept {
+    return s.stagedby.load(std::memory_order_acquire);
 }
 }

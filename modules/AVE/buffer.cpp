@@ -17,6 +17,7 @@ struct NativeMemoryPolicy::State {
     std::mutex mutex;
     void* mapped { nullptr };
     size_t map_count { 0 };
+    std::atomic<const void*> stagedby { nullptr };
 
     ~State() {
         if(!info.device) return;
@@ -123,5 +124,27 @@ VkResult NativeMemoryPolicy::flush(State& s, VkDeviceSize offset, VkDeviceSize s
 }
 VkResult NativeMemoryPolicy::invalidate(State& s, VkDeviceSize offset, VkDeviceSize size) {
     return s.sync(offset, size, true);
+}
+
+bool NativeMemoryPolicy::try_acquire_stagedby(State& s, const void* session_ptr) {
+    const void* expected = nullptr;
+    return s.stagedby.compare_exchange_strong(
+        expected, session_ptr,
+        std::memory_order_acq_rel,
+        std::memory_order_acquire
+    );
+}
+
+void NativeMemoryPolicy::release_stagedby(State& s, const void* session_ptr) noexcept {
+    const void* expected = session_ptr;
+    s.stagedby.compare_exchange_strong(
+        expected, nullptr,
+        std::memory_order_release,
+        std::memory_order_relaxed
+    );
+}
+
+const void* NativeMemoryPolicy::get_stagedby(const State& s) noexcept {
+    return s.stagedby.load(std::memory_order_acquire);
 }
 }

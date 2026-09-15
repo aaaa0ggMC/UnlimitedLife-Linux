@@ -605,12 +605,12 @@ void GraphicsContext::push_constant_raw(
         expected_size == 0,
         "Bound pipeline does not have any push constant ranges configured."
     );
-    panic_debug(
+    panicf_debug(
         (offset % 4 != 0) || (size % 4 != 0),
         "Push constant offset ({}) and size ({}) must both be multiples of 4.",
         offset, size
     );
-    panic_debug(
+    panicf_debug(
         offset + size > expected_size,
         "Push constant write range [{}, {}) exceeds pipeline push constant layout size ({}).",
         offset, offset + size, expected_size

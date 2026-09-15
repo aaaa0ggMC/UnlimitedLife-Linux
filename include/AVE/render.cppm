@@ -18,5 +18,6 @@ export import :legacy_render;
 export import :dynamic_render;
 export import :pipeline;
 export import :command;
+export import :upload_context;
 export import :buffer;
 export import :buffer_slice;

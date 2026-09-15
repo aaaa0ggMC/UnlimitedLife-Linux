@@ -272,6 +272,8 @@ export namespace ave{
             bool add_khr_swapchain { true };
             // 是否优先尝试启用 dynamic rendering（优先 Vulkan 1.3 核心，其次 KHR 扩展，不支持则优雅降级为 LegacyRender）。
             bool try_dynamic_rendering { true };
+            // 是否在 Renderer 构建时默认创建并初始化 UploadContext（复用图形队列）
+            bool create_upload_context { true };
             std::vector<std::string> required_device_extensions;
             std::vector<std::string> optional_device_extensions;
             std::function<void(

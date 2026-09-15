@@ -33,6 +33,7 @@ struct App {
     ave::Context context;
     std::unique_ptr<ave::Window> window;
     std::shared_ptr<ave::VMAAllocator> allocator;
+    std::unique_ptr<ave::VMABuffer> staging_buffer;
     std::optional<ave::VMABuffer> buffer;
     ave::VMABufferSlice vertices_data;
     std::shared_ptr<ave::Pipeline> pipeline;

@@ -244,6 +244,14 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
         return renderer;
     }
 
+    if(with_data.create_upload_context && renderer.device && renderer.swapchain) {
+        renderer.upload_context = UploadContext::create({
+            .device = renderer.device,
+            .queue_family = renderer.swapchain->get_graphics_queue_family(),
+            .ew = ew
+        });
+    }
+
     return renderer;
 }
 

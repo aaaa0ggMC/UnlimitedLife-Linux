@@ -31,6 +31,7 @@ import :legacy_render;
 import :dynamic_render;
 import :pipeline;
 import :command;
+import :upload_context;
 import :buffer;
 import :buffer_slice;
 import ave.reflect;
@@ -377,7 +378,15 @@ export namespace ave{
         std::shared_ptr<DynamicRender> dynamic_render;
         std::shared_ptr<CommandPool> command_pool;
         std::shared_ptr<CommandBuffers> command_buffers;
+        std::shared_ptr<UploadContext> upload_context;
         std::vector<VkClearValue> default_clear_values;
+
+        [[nodiscard]] UploadContext* get_upload_context() noexcept {
+            return upload_context.get();
+        }
+        [[nodiscard]] const UploadContext* get_upload_context() const noexcept {
+            return upload_context.get();
+        }
 
         [[nodiscard]] bool supports_dynamic_rendering() const noexcept {
             return device && device->supports_dynamic_rendering();

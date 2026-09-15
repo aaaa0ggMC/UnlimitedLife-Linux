@@ -19,18 +19,15 @@ import std;
 import alib6;
 import ave.ecode;
 import :device;
+import :upload_context;
 
 export namespace ave {
 
     template<class MemoryPolicy> class BasicBuffer;
     template<class MemoryPolicy> class BasicBufferData;
     template<class MemoryPolicy> class BasicBufferSlice;
-
-    struct AVE_API AllocateBufferInfo {
-        /// 区域起点对齐（2 的幂）；内部还会满足 nonCoherentAtomSize。
-        VkDeviceSize alignment { 1 };
-        mutable alib6::ErrorWrapper ew {};
-    };
+    class UploadContext;
+    class UploadTicket;
 
     struct AVE_API CreateBufferInfo {
         std::shared_ptr<Device> device;
@@ -76,6 +73,40 @@ export namespace ave {
         }
     };
 
+    struct StagingSource {
+        VkBuffer buffer { VK_NULL_HANDLE };
+        VkDeviceSize offset { 0 };
+        VkDeviceSize capacity { 0 };
+        void* mapped_ptr { nullptr };
+        std::shared_ptr<void> lifetime;
+
+        constexpr StagingSource() = default;
+        constexpr StagingSource(std::nullptr_t) noexcept {}
+
+        template<class MemoryPolicy>
+        StagingSource(BasicBuffer<MemoryPolicy>& b);
+        template<class MemoryPolicy>
+        StagingSource(BasicBuffer<MemoryPolicy>* b) {
+            if(b) *this = StagingSource(*b);
+        }
+        template<class MemoryPolicy>
+        StagingSource(BasicBufferSlice<MemoryPolicy>& s);
+        template<class MemoryPolicy>
+        StagingSource(BasicBufferSlice<MemoryPolicy>* s) {
+            if(s) *this = StagingSource(*s);
+        }
+
+        [[nodiscard]] explicit operator bool() const noexcept {
+            return buffer != VK_NULL_HANDLE && mapped_ptr != nullptr;
+        }
+        bool operator==(std::nullptr_t) const noexcept {
+            return buffer == VK_NULL_HANDLE;
+        }
+        bool operator!=(std::nullptr_t) const noexcept {
+            return buffer != VK_NULL_HANDLE;
+        }
+    };
+
     struct AVE_API MapBufferInfo {
         /// 多少倍硬件最低 nonCoherentAtomSize（每个 chunk 的尺寸为 nonCoherentAtomSize * chunk_multiply）
         alib6::u32 chunk_multiply { 16 };
@@ -84,6 +115,19 @@ export namespace ave {
         VkDeviceSize offset { 0 };
         VkDeviceSize size { VK_WHOLE_SIZE };
 
+        /// 可选 Staging 暂存缓冲源；启用时写入重定向至 staging，并在 submit/upload 时复制到目标 Buffer
+        StagingSource staging {};
+
+        /// 启用 staging 时必须提供，负责分配单次命令并提交至图形/传输队列
+        UploadContext* upload_context { nullptr };
+
+        mutable alib6::ErrorWrapper ew {};
+    };
+
+    struct AVE_API AllocateBufferInfo {
+        /// 区域起点对齐（2 的幂）；内部还会满足 nonCoherentAtomSize。
+        VkDeviceSize alignment { 1 };
+        MapBufferInfo map_info {};
         mutable alib6::ErrorWrapper ew {};
     };
 
@@ -171,6 +215,9 @@ export namespace ave {
         static void unmap(State&) noexcept;
         static VkResult flush(State&, VkDeviceSize offset, VkDeviceSize size);
         static VkResult invalidate(State&, VkDeviceSize offset, VkDeviceSize size);
+        static bool try_acquire_stagedby(State&, const void* session_ptr);
+        static void release_stagedby(State&, const void* session_ptr) noexcept;
+        static const void* get_stagedby(const State&) noexcept;
     };
 
     struct AVE_API VmaMemoryPolicy {
@@ -182,6 +229,9 @@ export namespace ave {
         static void unmap(State&) noexcept;
         static VkResult flush(State&, VkDeviceSize offset, VkDeviceSize size);
         static VkResult invalidate(State&, VkDeviceSize offset, VkDeviceSize size);
+        static bool try_acquire_stagedby(State&, const void* session_ptr);
+        static void release_stagedby(State&, const void* session_ptr) noexcept;
+        static const void* get_stagedby(const State&) noexcept;
         static detail::BufferRegion allocate_region(const std::shared_ptr<State>&,
             VkDeviceSize bytes, AllocateBufferInfo);
     };
@@ -322,6 +372,29 @@ export namespace ave {
 
         alib6::storage::MonoBitSet dirty_mask;
 
+    public:
+        struct StagingSession {
+            std::shared_ptr<typename MemoryPolicy::State> target_state;
+            VkBuffer dst_buffer { VK_NULL_HANDLE };
+            VkDeviceSize dst_offset { 0 };
+            VkBuffer src_buffer { VK_NULL_HANDLE };
+            VkDeviceSize src_offset { 0 };
+            VkDeviceSize size { 0 };
+            UploadContext* upload_context { nullptr };
+            std::shared_ptr<void> staging_lifetime;
+            ~StagingSession() {
+                if(target_state) {
+                    if constexpr (requires { MemoryPolicy::release_stagedby(*target_state, this); }) {
+                        MemoryPolicy::release_stagedby(*target_state, this);
+                    }
+                }
+            }
+        };
+
+    private:
+        std::shared_ptr<StagingSession> staging_session;
+        UploadTicket last_ticket;
+
         void release() noexcept;
 
         BasicBufferData(
@@ -333,6 +406,17 @@ export namespace ave {
             VkDeviceSize alloc_size,
             VkDeviceSize c_size,
             bool coherent
+        );
+
+        BasicBufferData(
+            std::shared_ptr<typename MemoryPolicy::State> resource,
+            std::shared_ptr<StagingSession> session,
+            void* ptr,
+            VkDeviceSize offset,
+            VkDeviceSize size,
+            VkDeviceSize capacity,
+            VkDeviceSize alloc_size,
+            VkDeviceSize c_size
         );
 
     public:
@@ -399,7 +483,9 @@ export namespace ave {
         [[nodiscard]] bool invalidate(VkDeviceSize offset = 0,
                                       VkDeviceSize size = VK_WHOLE_SIZE,
                                       alib6::ErrorWrapper ew = {});
-        void upload() { (void)flush(); }
+        /// 仅在 staging 映射时可用：录制并提交 vkCmdCopyBuffer，返回异步凭据
+        [[nodiscard]] UploadTicket submit(alib6::ErrorWrapper ew = {});
+        [[nodiscard]] bool is_staging() const noexcept { return bool(staging_session); }
 
         /// 强制上传（忽略脏位图，直接按指定区间或全量上传）
         void upload_raw(VkDeviceSize raw_offset = 0, VkDeviceSize raw_size = VK_WHOLE_SIZE);
@@ -468,9 +554,17 @@ export namespace ave {
         /// 调用方须保证 GPU 已不再使用该资源（不隐式 vkDeviceWaitIdle）。
         void destroy() noexcept { state.reset(); }
 
+        [[nodiscard]] const void* get_stagedby() const noexcept {
+            if constexpr (requires { MemoryPolicy::get_stagedby(*state); }) {
+                return state ? MemoryPolicy::get_stagedby(*state) : nullptr;
+            } else {
+                return nullptr;
+            }
+        }
+
         [[nodiscard]] Data map(MapBufferInfo mi = {}) {
-            if(!state || !is_host_visible()) {
-                mi.ew.report(ave_vk_map_buffer, "Buffer is uninitialized or not host visible.");
+            if(!state) {
+                mi.ew.report(ave_vk_map_buffer, "Buffer is uninitialized.");
                 return {};
             }
             const auto total = get_size();
@@ -481,6 +575,60 @@ export namespace ave {
             const auto bytes = mi.size == VK_WHOLE_SIZE ? total - mi.offset : mi.size;
             if(bytes == 0 || bytes > total - mi.offset) {
                 mi.ew.report(ave_vk_map_buffer, "Buffer mapping size is out of bounds.");
+                return {};
+            }
+
+            if(mi.staging != nullptr) {
+                if(!mi.upload_context) {
+                    mi.ew.report(ave_vk_map_buffer, "Staging mapping requires a valid UploadContext.");
+                    return {};
+                }
+                if(!mi.staging) {
+                    mi.ew.report(ave_vk_map_buffer,
+                        "Staging buffer must be valid, host-visible, and have VK_BUFFER_USAGE_TRANSFER_SRC_BIT.");
+                    return {};
+                }
+                if((get_usage() & VK_BUFFER_USAGE_TRANSFER_DST_BIT) == 0) {
+                    mi.ew.report(ave_vk_map_buffer,
+                        "Target buffer requires VK_BUFFER_USAGE_TRANSFER_DST_BIT for staging mapping.");
+                    return {};
+                }
+                if(mi.staging.capacity < bytes) {
+                    mi.ew.report(ave_vk_map_buffer,
+                        "Staging buffer capacity ({}) is smaller than mapped size ({}).",
+                        mi.staging.capacity, bytes);
+                    return {};
+                }
+
+                auto session = std::make_shared<typename Data::StagingSession>();
+                session->target_state = state;
+                session->dst_buffer = get_system_handle();
+                session->dst_offset = mi.offset;
+                session->src_buffer = mi.staging.buffer;
+                session->src_offset = mi.staging.offset;
+                session->size = bytes;
+                session->upload_context = mi.upload_context;
+                session->staging_lifetime = mi.staging.lifetime;
+
+                if constexpr (requires { MemoryPolicy::try_acquire_stagedby(*state, session.get()); }) {
+                    if(!MemoryPolicy::try_acquire_stagedby(*state, session.get())) {
+                        mi.ew.report(ave_vk_map_buffer,
+                            "Buffer conflict: Buffer is already being staged by another staging session.");
+                        return {};
+                    }
+                } else {
+                    mi.ew.report(ave_vk_map_buffer, "Memory policy does not support staging mapping.");
+                    return {};
+                }
+
+                const auto chunk = get_device()->get_non_coherent_atom_size()
+                                 * std::max(1u, mi.chunk_multiply);
+                return Data(state, session, static_cast<uint8_t*>(mi.staging.mapped_ptr) + mi.staging.offset,
+                            mi.offset, bytes, bytes, bytes, chunk);
+            }
+
+            if(!is_host_visible()) {
+                mi.ew.report(ave_vk_map_buffer, "Buffer is uninitialized or not host visible.");
                 return {};
             }
             void* base = nullptr;
@@ -503,19 +651,26 @@ export namespace ave {
 
         /// 仅映射写入；DeviceOnly 内存需要显式 staging copy。
         template<typename T>
-        bool upload(const T& val, VkDeviceSize dst_offset = 0, alib6::ErrorWrapper ew = {}) {
+        bool upload(const T& val, VkDeviceSize dst_offset = 0, MapBufferInfo mi = {}) {
             const auto span = detail::extract_pod_span(val);
             if(span.bytes == 0) return true;
-            auto mapped = map({ .offset = dst_offset, .size = span.bytes, .ew = ew });
+            mi.offset = dst_offset;
+            mi.size = span.bytes;
+            auto mapped = map(mi);
             if(!mapped) return false;
             mapped.memcpy(0, span.ptr, span.bytes);
             mapped.cancel_auto_upload();
-            return mapped.flush(ew);
+            return mapped.flush(mi.ew);
+        }
+
+        template<typename T>
+        bool upload(const T& val, VkDeviceSize dst_offset, alib6::ErrorWrapper ew) {
+            return upload(val, dst_offset, MapBufferInfo{ .ew = ew });
         }
 
         template<typename T>
         bool upload(VkDeviceSize dst_offset, const T& val, alib6::ErrorWrapper ew = {}) {
-            return upload(val, dst_offset, ew);
+            return upload(val, dst_offset, MapBufferInfo{ .ew = ew });
         }
 
         [[nodiscard]] const std::shared_ptr<Device>& get_device() const noexcept {

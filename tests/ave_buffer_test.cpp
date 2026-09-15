@@ -177,6 +177,147 @@ static void exercise_regions(const std::shared_ptr<ave::VMAAllocator>& allocator
     check(bool(byte) && byte.get_size() == 1, "partial final atom remains allocatable");
 }
 
+static void exercise_staging_upload(const std::shared_ptr<ave::Device>& device,
+                                    const std::shared_ptr<ave::VMAAllocator>& allocator) {
+    alib6::Error error;
+    auto upload_ctx = ave::UploadContext::create({
+        .device = device,
+        .queue_family = 0,
+        .ew = error
+    });
+    check(bool(upload_ctx), "create UploadContext");
+
+    // 1. DeviceOnly GPU buffer
+    ave::VMABuffer gpu({
+        .allocator = allocator,
+        .size = 256,
+        .usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        .host_access = ave::BufferHostAccess::DeviceOnly,
+        .ew = error
+    });
+    check(bool(gpu), "create DeviceOnly buffer");
+
+    // 2. Staging buffer (SequentialWrite)
+    ave::VMABuffer staging({
+        .allocator = allocator,
+        .size = 256,
+        .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        .host_access = ave::BufferHostAccess::SequentialWrite,
+        .ew = error
+    });
+    check(bool(staging), "create staging buffer");
+
+    // Pre-validation tests:
+    // Missing upload_context with staging must fail
+    alib6::Error missing_ctx_err;
+    auto bad_map = gpu.map({.staging = &staging, .upload_context = nullptr, .ew = missing_ctx_err});
+    check(!bad_map, "staging map without upload_context rejected");
+    check(missing_ctx_err.has_error(), "missing upload_context reported");
+    check(gpu.get_stagedby() == nullptr, "stagedby not locked on pre-validation failure");
+
+    // Staging buffer too small must fail
+    ave::VMABuffer tiny_staging({
+        .allocator = allocator,
+        .size = 16,
+        .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        .host_access = ave::BufferHostAccess::SequentialWrite,
+        .ew = error
+    });
+    alib6::Error small_err;
+    auto small_map = gpu.map({.offset = 0, .size = 32, .staging = &tiny_staging, .upload_context = upload_ctx.get(), .ew = small_err});
+    check(!small_map, "staging capacity too small rejected");
+    check(small_err.has_error(), "small staging capacity reported");
+    check(gpu.get_stagedby() == nullptr, "stagedby not locked on capacity failure");
+
+    // 3. Staging map, write, submit and wait
+    std::vector<uint8_t> test_data = { 10, 20, 30, 40, 50, 60, 70, 80 };
+    {
+        auto mapped = gpu.map({
+            .offset = 16,
+            .size = test_data.size(),
+            .staging = &staging,
+            .upload_context = upload_ctx.get(),
+            .ew = error
+        });
+        check(bool(mapped), "staging map succeeded");
+        check(gpu.get_stagedby() != nullptr, "stagedby locked during session");
+
+        // Concurrent map on the same buffer must be rejected!
+        alib6::Error conflict_err;
+        auto conflict_map = gpu.map({
+            .offset = 0,
+            .size = 8,
+            .staging = &staging,
+            .upload_context = upload_ctx.get(),
+            .ew = conflict_err
+        });
+        check(!conflict_map, "concurrent staging map rejected by stagedby");
+        check(conflict_err.has_error(), "conflict error reported in ew");
+
+        // Write and submit
+        check(mapped.write(test_data), "write to staging mapping");
+        auto ticket = mapped.submit(error);
+        check(bool(ticket), "submit returned ticket");
+        check(ticket.wait(10'000'000'000ULL, error), "ticket wait");
+        check(ticket.is_ready(), "ticket is ready after wait");
+    }
+    // After session and ticket destructed, stagedby must be released
+    check(gpu.get_stagedby() == nullptr, "stagedby released after ticket and session finished");
+
+    // 4. Readback verification from DeviceOnly buffer using upload_ctx submit_copy
+    ave::VMABuffer readback({
+        .allocator = allocator,
+        .size = 256,
+        .usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        .host_access = ave::BufferHostAccess::RandomAccess,
+        .ew = error
+    });
+    auto rb_ticket = upload_ctx->submit_copy(
+        gpu.get_system_handle(), 16,
+        readback.get_system_handle(), 16,
+        test_data.size(),
+        nullptr,
+        error
+    );
+    check(bool(rb_ticket), "readback submit copy");
+    check(rb_ticket.wait(10'000'000'000ULL, error), "readback wait");
+    {
+        auto rb_map = readback.map({.offset = 16, .size = test_data.size(), .ew = error});
+        check(bool(rb_map), "map readback buffer");
+        check(rb_map.invalidate(0, VK_WHOLE_SIZE, error), "invalidate readback");
+        for(size_t i = 0; i < test_data.size(); ++i) {
+            check(rb_map[i] == test_data[i], "readback byte matches uploaded staging data");
+        }
+    }
+
+    // 5. Slice upload with staging
+    auto slice = gpu.alloc_bytes(test_data.size(), {.ew = error});
+    check(bool(slice), "alloc_bytes on DeviceOnly buffer");
+    std::vector<uint8_t> slice_data = { 99, 88, 77, 66 };
+    check(slice.upload(slice_data, 0, {
+        .staging = &staging,
+        .upload_context = upload_ctx.get(),
+        .ew = error
+    }), "slice.upload with staging");
+
+    // Readback slice data
+    auto rb_slice_ticket = upload_ctx->submit_copy(
+        gpu.get_system_handle(), slice.get_offset(),
+        readback.get_system_handle(), 0,
+        slice_data.size(),
+        nullptr,
+        error
+    );
+    check(rb_slice_ticket.wait(10'000'000'000ULL, error), "readback slice wait");
+    {
+        auto rb_map = readback.map({.offset = 0, .size = slice_data.size(), .ew = error});
+        check(rb_map.invalidate(0, VK_WHOLE_SIZE, error), "invalidate readback slice");
+        for(size_t i = 0; i < slice_data.size(); ++i) {
+            check(rb_map[i] == slice_data[i], "slice readback matches");
+        }
+    }
+}
+
 template<class Policy>
 void compile_draw_calls(ave::GraphicsContext& context, const ave::BasicBuffer<Policy>& buffer,
                         const ave::BasicBufferSlice<Policy>& slice) {
@@ -231,5 +372,8 @@ int main() {
     allocator.reset();
     mapped[0] = 42;
     check(mapped.flush(error), "mapping keeps allocator alive");
+
+    exercise_staging_upload(device, ave::VMAAllocator::create_shared({.device = device, .ew = error}));
+
     std::puts("PASS: native/VMA buffers, slices, mappings, bounds and lifetimes");
 }

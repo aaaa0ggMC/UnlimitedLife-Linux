@@ -32,7 +32,7 @@ void App::setup() {
         ci.api_version = ave::ave_vk_1_4;
     };
     with.configure_debug_messenger.emplace();
-    with.try_dynamic_rendering = false;
+    with.try_dynamic_rendering = true;
     with.configure_debug_messenger->on_message = [this](
         VkDebugUtilsMessageSeverityFlagBitsEXT severity,
         VkDebugUtilsMessageTypeFlagsEXT,
@@ -50,10 +50,7 @@ void App::setup() {
         .with_result(report)
         .build();
 
-    lg << "Dynamic Rendering: "
-       << report[ave::RenderBuildStageId::create_device].content["dynamic_rendering"].to<std::string_view>()
-       << std::endl;
-
+    // lg << alib6::to_adata(report) << std::endl;
     setup_vertex_data();
 
     auto vertex_input = ave::vertex_layout<Vertex>().build();
@@ -78,11 +75,12 @@ void App::setup() {
 
 void App::setup_vertex_data() {
     allocator = ave::VMAAllocator::create_shared({ .device = renderer->device });
+    // 顶点缓冲区配置为纯 GPU 端 DeviceOnly 显存（高性能，CPU 不可直接写入）
     buffer.emplace(ave::CreateVMABufferInfo{
         .allocator = allocator,
         .size = 1024 * 1024,
-        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        .host_access = ave::BufferHostAccess::SequentialWrite,
+        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        .host_access = ave::BufferHostAccess::DeviceOnly,
     });
     
     const std::vector<Vertex> vertices = {
@@ -134,10 +132,25 @@ void App::setup_vertex_data() {
         { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
         { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
     };
-    vertices_data = buffer->alloc(vertices); 
+
+    // 创建临时的 CPU 可见中介缓冲 (Staging Buffer)
+    staging_buffer = std::make_unique<ave::VMABuffer>(ave::CreateVMABufferInfo{
+        .allocator = allocator,
+        .size = sizeof(Vertex) * vertices.size(),
+        .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        .host_access = ave::BufferHostAccess::SequentialWrite,
+    });
+
+    // 一行代码无感通过 staging 上传到 DeviceOnly 顶点缓冲区切片
+    vertices_data = buffer->alloc(vertices, {
+        .map_info = {
+            .staging = staging_buffer.get(),
+            .upload_context = renderer->get_upload_context()
+        }
+    }); 
     vertex_count = static_cast<uint32_t>(vertices.size());
 
-    lg << "Uploaded " << vertices.size() << " vertices to GPU via vertex_buffer->upload()." << std::endl;
+    lg << "Uploaded " << vertices.size() << " vertices to DeviceOnly GPU buffer via staging buffer." << std::endl;
 }
 
 } // namespace avetest
