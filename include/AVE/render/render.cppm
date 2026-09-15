@@ -11,6 +11,7 @@
 module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
+#include <alib6/debug.h>
 
 export module ave.render:render;
 import ave.context;
@@ -94,40 +95,92 @@ export namespace ave{
         );
         void begin(std::span<const VkClearValue> clear_values);
         void bind_pipeline(const Pipeline& pipeline);
+        template<class MemoryPolicy>
         void bind_vertex_buffer(
-            const Buffer& buffer,
+            const BasicBuffer<MemoryPolicy>& buffer,
             VkDeviceSize offset = 0,
             alib6::u32 binding = 0
-        ) noexcept;
+        ) noexcept {
+            panic_debug(!recording, "Cannot bind vertex buffer outside of an active recording scope.");
+            panic_debug(
+                (buffer.get_usage() & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0,
+                "Cannot bind a Buffer as vertex buffer without VK_BUFFER_USAGE_VERTEX_BUFFER_BIT."
+            );
+            if(!recording) return;
+            VkBuffer handle = buffer.get_system_handle();
+            if(handle != VK_NULL_HANDLE) {
+                vkCmdBindVertexBuffers(command_buffer, binding, 1, &handle, &offset);
+            }
+        }
+        template<class MemoryPolicy>
         void bind_vertex_buffer(
-            const BufferSlice& slice,
+            const BasicBufferSlice<MemoryPolicy>& slice,
             alib6::u32 binding = 0
-        ) noexcept;
+        ) noexcept {
+            panic_debug(!recording, "Cannot bind vertex buffer outside of an active recording scope.");
+            panic_debug(
+                !slice.get_buffer() || (slice.get_buffer()->get_usage() & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0,
+                "Cannot bind a BufferSlice as vertex buffer without VK_BUFFER_USAGE_VERTEX_BUFFER_BIT."
+            );
+            if(!recording) return;
+            VkBuffer handle = slice.get_system_handle();
+            VkDeviceSize offset = slice.get_offset();
+            if(handle != VK_NULL_HANDLE) {
+                vkCmdBindVertexBuffers(command_buffer, binding, 1, &handle, &offset);
+            }
+        }
         void bind_vertex_buffers(
             alib6::u32 first_binding,
             std::span<const VkBuffer> buffers,
             std::span<const VkDeviceSize> offsets
         ) noexcept;
 
+        template<class MemoryPolicy>
         void bind_index_buffer(
-            const Buffer& buffer,
+            const BasicBuffer<MemoryPolicy>& buffer,
             VkDeviceSize offset = 0,
             VkIndexType index_type = VK_INDEX_TYPE_UINT32
-        ) noexcept;
+        ) noexcept {
+            panic_debug(!recording, "Cannot bind index buffer outside of an active recording scope.");
+            panic_debug(
+                (buffer.get_usage() & VK_BUFFER_USAGE_INDEX_BUFFER_BIT) == 0,
+                "Cannot bind a Buffer as index buffer without VK_BUFFER_USAGE_INDEX_BUFFER_BIT."
+            );
+            if(!recording) return;
+            VkBuffer handle = buffer.get_system_handle();
+            if(handle != VK_NULL_HANDLE) {
+                vkCmdBindIndexBuffer(command_buffer, handle, offset, index_type);
+            }
+        }
+        template<class MemoryPolicy>
         void bind_index_buffer(
-            const BufferSlice& slice,
+            const BasicBufferSlice<MemoryPolicy>& slice,
             VkIndexType index_type = VK_INDEX_TYPE_UINT32
-        ) noexcept;
+        ) noexcept {
+            panic_debug(!recording, "Cannot bind index buffer outside of an active recording scope.");
+            panic_debug(
+                !slice.get_buffer() || (slice.get_buffer()->get_usage() & VK_BUFFER_USAGE_INDEX_BUFFER_BIT) == 0,
+                "Cannot bind a BufferSlice as index buffer without VK_BUFFER_USAGE_INDEX_BUFFER_BIT."
+            );
+            if(!recording) return;
+            VkBuffer handle = slice.get_system_handle();
+            VkDeviceSize offset = slice.get_offset();
+            if(handle != VK_NULL_HANDLE) {
+                vkCmdBindIndexBuffer(command_buffer, handle, offset, index_type);
+            }
+        }
 
+        template<class MemoryPolicy>
         inline void bind_indice_buffer(
-            const Buffer& buffer,
+            const BasicBuffer<MemoryPolicy>& buffer,
             VkDeviceSize offset = 0,
             VkIndexType index_type = VK_INDEX_TYPE_UINT32
         ) noexcept {
             bind_index_buffer(buffer, offset, index_type);
         }
+        template<class MemoryPolicy>
         inline void bind_indice_buffer(
-            const BufferSlice& slice,
+            const BasicBufferSlice<MemoryPolicy>& slice,
             VkIndexType index_type = VK_INDEX_TYPE_UINT32
         ) noexcept {
             bind_index_buffer(slice, index_type);
@@ -146,18 +199,42 @@ export namespace ave{
             alib6::i32 vertex_offset = 0,
             alib6::u32 first_instance = 0
         ) noexcept;
+        template<class MemoryPolicy>
         void draw_indirect(
-            const Buffer& buffer,
+            const BasicBuffer<MemoryPolicy>& buffer,
             VkDeviceSize offset = 0,
             alib6::u32 draw_count = 1,
             alib6::u32 stride = sizeof(VkDrawIndirectCommand)
-        ) noexcept;
+        ) noexcept {
+            panic_debug(!recording, "Cannot draw indirect outside of an active recording scope.");
+            panic_debug(
+                (buffer.get_usage() & VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT) == 0,
+                "Cannot use a Buffer for indirect draw without VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT."
+            );
+            if(!recording) return;
+            VkBuffer handle = buffer.get_system_handle();
+            if(handle != VK_NULL_HANDLE) {
+                vkCmdDrawIndirect(command_buffer, handle, offset, draw_count, stride);
+            }
+        }
+        template<class MemoryPolicy>
         void draw_indexed_indirect(
-            const Buffer& buffer,
+            const BasicBuffer<MemoryPolicy>& buffer,
             VkDeviceSize offset = 0,
             alib6::u32 draw_count = 1,
             alib6::u32 stride = sizeof(VkDrawIndexedIndirectCommand)
-        ) noexcept;
+        ) noexcept {
+            panic_debug(!recording, "Cannot draw indexed indirect outside of an active recording scope.");
+            panic_debug(
+                (buffer.get_usage() & VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT) == 0,
+                "Cannot use a Buffer for indexed indirect draw without VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT."
+            );
+            if(!recording) return;
+            VkBuffer handle = buffer.get_system_handle();
+            if(handle != VK_NULL_HANDLE) {
+                vkCmdDrawIndexedIndirect(command_buffer, handle, offset, draw_count, stride);
+            }
+        }
         void end();
 
         /// @brief 获取最后一次执行操作的综合 VkResult 结果码 (Acquire / Submit / Present)

@@ -22,8 +22,15 @@ import :device;
 
 export namespace ave {
 
-    class Buffer;
-    class BufferData;
+    template<class MemoryPolicy> class BasicBuffer;
+    template<class MemoryPolicy> class BasicBufferData;
+    template<class MemoryPolicy> class BasicBufferSlice;
+
+    struct AVE_API AllocateBufferInfo {
+        /// 区域起点对齐（2 的幂）；内部还会满足 nonCoherentAtomSize。
+        VkDeviceSize alignment { 1 };
+        mutable alib6::ErrorWrapper ew {};
+    };
 
     struct AVE_API CreateBufferInfo {
         std::shared_ptr<Device> device;
@@ -80,6 +87,105 @@ export namespace ave {
         mutable alib6::ErrorWrapper ew {};
     };
 
+    /// CPU 访问模式；DeviceOnly 不允许 map/upload。
+    enum class BufferHostAccess { DeviceOnly, SequentialWrite, RandomAccess };
+    enum class BufferMemoryPreference { Automatic, PreferDevice, PreferHost };
+
+    struct AVE_API CreateVMAAllocatorInfo {
+        std::shared_ptr<Device> device;
+        /// 必须是 Instance 与物理设备共同支持的版本，默认保守使用 Vulkan 1.0。
+        alib6::u32 api_version { VK_API_VERSION_1_0 };
+        /// 仅在逻辑设备已启用 bufferDeviceAddress 特性时设置。
+        bool buffer_device_address { false };
+        mutable alib6::ErrorWrapper ew {};
+    };
+
+    struct VmaMemoryPolicy;
+
+    /// 不暴露 VMA 原生类型；由所有所属 Buffer 共同持有。
+    class AVE_API VMAAllocator {
+        struct Impl;
+        std::shared_ptr<Impl> impl;
+        explicit VMAAllocator(std::shared_ptr<Impl>);
+        friend struct VmaMemoryPolicy;
+    public:
+        ~VMAAllocator();
+        VMAAllocator(const VMAAllocator&) = delete;
+        VMAAllocator& operator=(const VMAAllocator&) = delete;
+        [[nodiscard]] static std::shared_ptr<VMAAllocator> create_shared(CreateVMAAllocatorInfo);
+        [[nodiscard]] const std::shared_ptr<Device>& get_device() const noexcept;
+    };
+
+    struct AVE_API CreateVMABufferInfo {
+        std::shared_ptr<VMAAllocator> allocator;
+        VkDeviceSize size { 0 };
+        alib6::u32 atom_multiply { 0 };
+        VkBufferUsageFlags usage {
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+        };
+        BufferHostAccess host_access { BufferHostAccess::SequentialWrite };
+        BufferMemoryPreference memory_preference { BufferMemoryPreference::Automatic };
+        VkMemoryPropertyFlags required_memory_properties { 0 };
+        VkMemoryPropertyFlags preferred_memory_properties { 0 };
+        bool persistent_mapping { false };
+        bool dedicated_allocation { false };
+        const void* next { nullptr };
+        VkBufferCreateFlags flags { 0 };
+        VkSharingMode sharing_mode { VK_SHARING_MODE_EXCLUSIVE };
+        std::vector<alib6::u32> queue_family_indices;
+        mutable alib6::ErrorWrapper ew {};
+
+        CreateVMABufferInfo& enable_usage(VkBufferUsageFlags u) noexcept {
+            usage |= u;
+            return *this;
+        }
+        CreateVMABufferInfo& add_memory_property(VkMemoryPropertyFlags p) noexcept {
+            required_memory_properties |= p;
+            return *this;
+        }
+    };
+
+    namespace detail {
+        struct BufferRegion {
+            std::shared_ptr<void> lifetime;
+            VkDeviceSize offset { 0 };
+        };
+        struct BufferProperties {
+            std::shared_ptr<Device> device;
+            VkBuffer buffer { VK_NULL_HANDLE };
+            VkDeviceMemory memory { VK_NULL_HANDLE };
+            VkDeviceSize memory_offset { 0 };
+            VkDeviceSize size { 0 };
+            VkDeviceSize allocation_size { 0 };
+            VkBufferUsageFlags usage { 0 };
+            VkMemoryPropertyFlags memory_properties { 0 };
+        };
+    }
+
+    struct AVE_API NativeMemoryPolicy {
+        struct State;
+        using CreateInfo = CreateBufferInfo;
+        [[nodiscard]] static std::shared_ptr<State> create(CreateInfo);
+        [[nodiscard]] static const detail::BufferProperties& properties(const State&) noexcept;
+        static VkResult map(State&, void**);
+        static void unmap(State&) noexcept;
+        static VkResult flush(State&, VkDeviceSize offset, VkDeviceSize size);
+        static VkResult invalidate(State&, VkDeviceSize offset, VkDeviceSize size);
+    };
+
+    struct AVE_API VmaMemoryPolicy {
+        struct State;
+        using CreateInfo = CreateVMABufferInfo;
+        [[nodiscard]] static std::shared_ptr<State> create(CreateInfo);
+        [[nodiscard]] static const detail::BufferProperties& properties(const State&) noexcept;
+        static VkResult map(State&, void**);
+        static void unmap(State&) noexcept;
+        static VkResult flush(State&, VkDeviceSize offset, VkDeviceSize size);
+        static VkResult invalidate(State&, VkDeviceSize offset, VkDeviceSize size);
+        static detail::BufferRegion allocate_region(const std::shared_ptr<State>&,
+            VkDeviceSize bytes, AllocateBufferInfo);
+    };
+
     namespace detail {
         struct PodSpan {
             const void* ptr { nullptr };
@@ -121,17 +227,18 @@ export namespace ave {
         }
     }
 
-    class AVE_API BufferData {
+    template<class MemoryPolicy>
+    class BasicBufferData {
     public:
         /// 代理字节引用，拦截写操作并打上脏块标记
-        class AVE_API ByteProxy {
+        class ByteProxy {
         private:
             uint8_t* ptr { nullptr };
-            BufferData* parent { nullptr };
+            BasicBufferData* parent { nullptr };
             alib6::usize offset { 0 };
 
         public:
-            ByteProxy(uint8_t* p, BufferData* par, alib6::usize off) noexcept
+            ByteProxy(uint8_t* p, BasicBufferData* par, alib6::usize off) noexcept
                 : ptr(p), parent(par), offset(off) {}
 
             ByteProxy& operator=(uint8_t val) noexcept;
@@ -144,7 +251,7 @@ export namespace ave {
         class Iterator {
         private:
             uint8_t* ptr { nullptr };
-            BufferData* parent { nullptr };
+            BasicBufferData* parent { nullptr };
             alib6::usize offset { 0 };
 
         public:
@@ -155,7 +262,7 @@ export namespace ave {
             using reference = ByteProxy;
 
             Iterator() = default;
-            Iterator(uint8_t* p, BufferData* par, alib6::usize off) noexcept
+            Iterator(uint8_t* p, BasicBufferData* par, alib6::usize off) noexcept
                 : ptr(p), parent(par), offset(off) {}
 
             reference operator*() const noexcept {
@@ -196,10 +303,11 @@ export namespace ave {
         };
 
     private:
-        friend class Buffer;
+        friend class BasicBuffer<MemoryPolicy>;
+        friend class BasicBufferSlice<MemoryPolicy>;
 
-        std::shared_ptr<Device> device { nullptr };
-        VkDeviceMemory memory { VK_NULL_HANDLE };
+        std::shared_ptr<typename MemoryPolicy::State> state;
+        std::shared_ptr<void> region_lifetime;
         void* mapped_ptr { nullptr };
 
         VkDeviceSize map_offset { 0 };
@@ -214,9 +322,10 @@ export namespace ave {
 
         alib6::storage::MonoBitSet dirty_mask;
 
-        BufferData(
-            std::shared_ptr<Device> dev,
-            VkDeviceMemory mem,
+        void release() noexcept;
+
+        BasicBufferData(
+            std::shared_ptr<typename MemoryPolicy::State> resource,
             void* ptr,
             VkDeviceSize offset,
             VkDeviceSize size,
@@ -227,16 +336,16 @@ export namespace ave {
         );
 
     public:
-        BufferData() = default;
-        ~BufferData() noexcept;
+        BasicBufferData() = default;
+        ~BasicBufferData() noexcept;
 
         // 移动语义
-        BufferData(BufferData&& other) noexcept;
-        BufferData& operator=(BufferData&& other) noexcept;
+        BasicBufferData(BasicBufferData&& other) noexcept;
+        BasicBufferData& operator=(BasicBufferData&& other) noexcept;
 
         // 禁用拷贝
-        BufferData(const BufferData&) = delete;
-        BufferData& operator=(const BufferData&) = delete;
+        BasicBufferData(const BasicBufferData&) = delete;
+        BasicBufferData& operator=(const BasicBufferData&) = delete;
 
         // 内存写入接口
         void memcpy(alib6::usize dst_offset, const void* src, alib6::usize bytes);
@@ -247,10 +356,10 @@ export namespace ave {
         bool write(const T& val, alib6::usize dst_offset = 0, alib6::ErrorWrapper ew = {}) {
             const auto span = detail::extract_pod_span(val);
             if(span.bytes == 0 || !span.ptr) return true;
-            if(dst_offset + span.bytes > map_size) {
+            if(dst_offset > map_size || span.bytes > map_size - dst_offset) {
                 ew.report(
                     ave_vk_map_buffer,
-                    "BufferData::write out of bounds: dst_offset ({}) + bytes ({}) > map_size ({}).",
+                    "BasicBufferData::write out of bounds: dst_offset ({}) + bytes ({}) > map_size ({}).",
                     dst_offset, span.bytes, map_size
                 );
                 return false;
@@ -285,7 +394,12 @@ export namespace ave {
         void mark_range_dirty(alib6::usize byte_offset, alib6::usize byte_count) noexcept;
 
         /// 按照修改过的 dirty chunks 动态上传（合并连续区间并执行 vkFlushMappedMemoryRanges）
-        void upload();
+        /// 显式 flush 返回错误；析构仍提供 best-effort 自动刷新。
+        [[nodiscard]] bool flush(alib6::ErrorWrapper ew = {});
+        [[nodiscard]] bool invalidate(VkDeviceSize offset = 0,
+                                      VkDeviceSize size = VK_WHOLE_SIZE,
+                                      alib6::ErrorWrapper ew = {});
+        void upload() { (void)flush(); }
 
         /// 强制上传（忽略脏位图，直接按指定区间或全量上传）
         void upload_raw(VkDeviceSize raw_offset = 0, VkDeviceSize raw_size = VK_WHOLE_SIZE);
@@ -307,100 +421,130 @@ export namespace ave {
         }
     };
 
-    class AVE_API Buffer {
-    private:
-        std::shared_ptr<Device> device;
-        VkBuffer buffer { VK_NULL_HANDLE };
-        VkDeviceMemory memory { VK_NULL_HANDLE };
-        VkDeviceSize size { 0 };
-        VkDeviceSize allocation_size { 0 };
-        VkBufferUsageFlags usage { 0 };
-        VkMemoryPropertyFlags memory_properties { 0 };
+    template<class MemoryPolicy>
+    class BasicBuffer {
+        std::shared_ptr<typename MemoryPolicy::State> state;
 
+        const detail::BufferProperties& properties() const noexcept {
+            static const detail::BufferProperties empty {};
+            return state ? MemoryPolicy::properties(*state) : empty;
+        }
     public:
-        Buffer() = default;
-        explicit Buffer(CreateBufferInfo ci) { (void)create(std::move(ci)); }
-        ~Buffer() { destroy(); }
+        using CreateInfo = typename MemoryPolicy::CreateInfo;
+        using Data = BasicBufferData<MemoryPolicy>;
 
-        // 移动语义（参考 Instance 范式）
-        Buffer(Buffer&& other) noexcept;
-        Buffer& operator=(Buffer&& other) noexcept;
+        /// 只分配字节区域，不初始化内容；也适用于 DeviceOnly Buffer。
+        [[nodiscard]] BasicBufferSlice<MemoryPolicy> alloc_bytes(VkDeviceSize bytes, AllocateBufferInfo ai = {})
+            requires std::same_as<MemoryPolicy, VmaMemoryPolicy>;
 
-        // 禁用拷贝
-        Buffer(const Buffer&) = delete;
-        Buffer& operator=(const Buffer&) = delete;
+        /// 在现有容量内自动分配并写入 POD 或 POD 连续区间；失败返回空切片。
+        template<class T>
+        [[nodiscard]] BasicBufferSlice<MemoryPolicy> alloc(const T& data, AllocateBufferInfo ai = {})
+            requires std::same_as<MemoryPolicy, VmaMemoryPolicy>;
 
-        /// 创建或重置缓冲区
-        [[nodiscard]] bool create(CreateBufferInfo ci);
+        BasicBuffer() = default;
+        explicit BasicBuffer(CreateInfo ci) { (void)create(std::move(ci)); }
+        ~BasicBuffer() = default;
+        BasicBuffer(BasicBuffer&&) noexcept = default;
+        BasicBuffer& operator=(BasicBuffer&&) noexcept = default;
+        BasicBuffer(const BasicBuffer&) = delete;
+        BasicBuffer& operator=(const BasicBuffer&) = delete;
 
-        /// 静态工厂模式创建（参考 Device / Image 范式）
-        [[nodiscard]] static std::shared_ptr<Buffer> create_shared(CreateBufferInfo ci);
+        [[nodiscard]] bool create(CreateInfo ci) {
+            if(state) {
+                ci.ew.report(ave_already_created, "Buffer has already been created.");
+                return false;
+            }
+            state = MemoryPolicy::create(std::move(ci));
+            return bool(state);
+        }
 
-        /// 释放并清理持有的 Vulkan 资源
-        void destroy() noexcept;
+        [[nodiscard]] static std::shared_ptr<BasicBuffer> create_shared(CreateInfo ci) {
+            auto result = std::make_shared<BasicBuffer>();
+            return result->create(std::move(ci)) ? result : nullptr;
+        }
 
-        /// 映射 Buffer 内存，返回具备修改追踪和 RAII 自动上传/解除映射能力的 BufferData
-        [[nodiscard]] BufferData map(MapBufferInfo mi = {});
+        /// 释放本对象的所有权；已有映射会延长分配寿命。
+        /// 调用方须保证 GPU 已不再使用该资源（不隐式 vkDeviceWaitIdle）。
+        void destroy() noexcept { state.reset(); }
 
-        /// 映射、写入并立即上传/刷新单个 POD 对象或 POD 连续区间（如 std::vector, std::span, std::array）至 GPU 显存
+        [[nodiscard]] Data map(MapBufferInfo mi = {}) {
+            if(!state || !is_host_visible()) {
+                mi.ew.report(ave_vk_map_buffer, "Buffer is uninitialized or not host visible.");
+                return {};
+            }
+            const auto total = get_size();
+            if(mi.offset >= total) {
+                mi.ew.report(ave_vk_map_buffer, "Buffer mapping offset is out of bounds.");
+                return {};
+            }
+            const auto bytes = mi.size == VK_WHOLE_SIZE ? total - mi.offset : mi.size;
+            if(bytes == 0 || bytes > total - mi.offset) {
+                mi.ew.report(ave_vk_map_buffer, "Buffer mapping size is out of bounds.");
+                return {};
+            }
+            void* base = nullptr;
+            const auto code = MemoryPolicy::map(*state, &base);
+            if(code != VK_SUCCESS) {
+                mi.ew.report(ave_vk_map_buffer, "Failed to map Buffer ({}).", int(code));
+                return {};
+            }
+            const auto chunk = get_device()->get_non_coherent_atom_size()
+                             * std::max(1u, mi.chunk_multiply);
+            try {
+                return Data(state, static_cast<uint8_t*>(base) + mi.offset,
+                            mi.offset, bytes, get_allocation_size() - mi.offset,
+                            get_allocation_size(), chunk, is_host_coherent());
+            } catch(...) {
+                MemoryPolicy::unmap(*state);
+                throw;
+            }
+        }
+
+        /// 仅映射写入；DeviceOnly 内存需要显式 staging copy。
         template<typename T>
         bool upload(const T& val, VkDeviceSize dst_offset = 0, alib6::ErrorWrapper ew = {}) {
             const auto span = detail::extract_pod_span(val);
             if(span.bytes == 0) return true;
-            if(!*this) {
-                ew.report(ave_vk_map_buffer, "Cannot upload to an uninitialized buffer.");
-                return false;
-            }
-            auto mapped = this->map({ .offset = dst_offset, .size = span.bytes, .ew = ew });
+            auto mapped = map({ .offset = dst_offset, .size = span.bytes, .ew = ew });
             if(!mapped) return false;
             mapped.memcpy(0, span.ptr, span.bytes);
-            return true; // mapped 析构时自动 upload() 并 unmap()
+            mapped.cancel_auto_upload();
+            return mapped.flush(ew);
         }
 
         template<typename T>
         bool upload(VkDeviceSize dst_offset, const T& val, alib6::ErrorWrapper ew = {}) {
-            return this->upload(val, dst_offset, ew);
+            return upload(val, dst_offset, ew);
         }
 
         [[nodiscard]] const std::shared_ptr<Device>& get_device() const noexcept {
-            return device;
+            return properties().device;
         }
-
-        [[nodiscard]] VkBuffer get_system_handle() const noexcept {
-            return buffer;
-        }
-
-        [[nodiscard]] VkDeviceMemory get_memory() const noexcept {
-            return memory;
-        }
-
-        [[nodiscard]] VkDeviceSize get_size() const noexcept {
-            return size;
-        }
-
-        [[nodiscard]] VkDeviceSize get_allocation_size() const noexcept {
-            return allocation_size;
-        }
-
-        [[nodiscard]] VkBufferUsageFlags get_usage() const noexcept {
-            return usage;
-        }
-
+        [[nodiscard]] VkBuffer get_system_handle() const noexcept { return properties().buffer; }
+        /// 借用句柄；不得直接 free/map/unmap，VMA 后端可能与其他 Buffer 共享内存。
+        [[nodiscard]] VkDeviceMemory get_memory() const noexcept { return properties().memory; }
+        [[nodiscard]] VkDeviceSize get_memory_offset() const noexcept { return properties().memory_offset; }
+        [[nodiscard]] VkDeviceSize get_size() const noexcept { return properties().size; }
+        [[nodiscard]] VkDeviceSize get_allocation_size() const noexcept { return properties().allocation_size; }
+        [[nodiscard]] VkBufferUsageFlags get_usage() const noexcept { return properties().usage; }
         [[nodiscard]] VkMemoryPropertyFlags get_memory_properties() const noexcept {
-            return memory_properties;
+            return properties().memory_properties;
         }
-
         [[nodiscard]] bool is_host_visible() const noexcept {
-            return (memory_properties & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0;
+            return (get_memory_properties() & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0;
         }
-
         [[nodiscard]] bool is_host_coherent() const noexcept {
-            return (memory_properties & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0;
+            return (get_memory_properties() & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) != 0;
         }
-
-        [[nodiscard]] explicit operator bool() const noexcept {
-            return buffer != VK_NULL_HANDLE;
-        }
+        [[nodiscard]] explicit operator bool() const noexcept { return bool(state); }
     };
+
+    #include "buffer_data.inl"
+
+    using Buffer = BasicBuffer<NativeMemoryPolicy>;
+    using VMABuffer = BasicBuffer<VmaMemoryPolicy>;
+    using BufferData = BasicBufferData<NativeMemoryPolicy>;
+    using VMABufferData = BasicBufferData<VmaMemoryPolicy>;
 
 }

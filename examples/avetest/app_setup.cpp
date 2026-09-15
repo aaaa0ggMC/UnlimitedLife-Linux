@@ -77,6 +77,14 @@ void App::setup() {
 }
 
 void App::setup_vertex_data() {
+    allocator = ave::VMAAllocator::create_shared({ .device = renderer->device });
+    buffer.emplace(ave::CreateVMABufferInfo{
+        .allocator = allocator,
+        .size = 1024 * 1024,
+        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        .host_access = ave::BufferHostAccess::SequentialWrite,
+    });
+    
     const std::vector<Vertex> vertices = {
         // 前表面 (+Z, normal: 0, 0, 1)
         { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
@@ -126,19 +134,9 @@ void App::setup_vertex_data() {
         { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
         { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
     };
-
+    vertices_data = buffer->alloc(vertices); 
     vertex_count = static_cast<uint32_t>(vertices.size());
 
-    // 1. 创建 HOST_VISIBLE 顶点缓冲
-    vertex_buffer.emplace(ave::CreateBufferInfo{
-        .device = renderer->device,
-        .size = sizeof(Vertex) * vertices.size(),
-        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        .memory_properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-    });
-
-    // 2. 使用 upload 便捷模板接口直接上传顶点数据（错误由 ErrorWrapper 自动拦截处理）
-    vertex_buffer->upload(vertices);
     lg << "Uploaded " << vertices.size() << " vertices to GPU via vertex_buffer->upload()." << std::endl;
 }
 

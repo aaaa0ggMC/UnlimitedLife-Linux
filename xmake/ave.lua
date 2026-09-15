@@ -16,8 +16,17 @@ target("AVE")
 
     -- AVE 使用的外部依赖
     add_packages("alib6", {public = true})
+    -- Implementation-only dependency: consumers never include vk_mem_alloc.h.
+    add_packages("vulkan-memory-allocator")
     add_packages("vulkansdk", "glfw", "glm", {public = true})
 
     -- 与 alib6 当前共享库构建方式保持一致
     add_rules("utils.symbols.export_all")
+target_end()
+
+target("ave_buffer_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("../tests/ave_buffer_test.cpp")
+    add_deps("AVE")
 target_end()

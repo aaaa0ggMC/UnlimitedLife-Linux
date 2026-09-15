@@ -11,6 +11,7 @@ else
 end
 
 add_requires("vulkansdk")
+add_requires("vulkan-memory-allocator >=3.0.0")
 
 if has_config("examples") then
     add_requires("imgui", {configs = {glfw = true, opengl3 = true}})

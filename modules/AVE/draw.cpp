@@ -439,40 +439,6 @@ void GraphicsContext::bind_pipeline(const Pipeline& pipeline) {
     pipeline.bind(command_buffer);
 }
 
-void GraphicsContext::bind_vertex_buffer(
-    const Buffer& buffer,
-    VkDeviceSize offset,
-    alib6::u32 binding
-) noexcept {
-    panic_debug(!recording, "Cannot bind vertex buffer outside of an active recording scope.");
-    panic_debug(
-        (buffer.get_usage() & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0,
-        "Cannot bind a Buffer as vertex buffer without VK_BUFFER_USAGE_VERTEX_BUFFER_BIT."
-    );
-    if(!recording) return;
-    VkBuffer handle = buffer.get_system_handle();
-    if(handle != VK_NULL_HANDLE) {
-        vkCmdBindVertexBuffers(command_buffer, binding, 1, &handle, &offset);
-    }
-}
-
-void GraphicsContext::bind_vertex_buffer(
-    const BufferSlice& slice,
-    alib6::u32 binding
-) noexcept {
-    panic_debug(!recording, "Cannot bind vertex buffer outside of an active recording scope.");
-    panic_debug(
-        !slice.get_buffer() || (slice.get_buffer()->get_usage() & VK_BUFFER_USAGE_VERTEX_BUFFER_BIT) == 0,
-        "Cannot bind a BufferSlice as vertex buffer without VK_BUFFER_USAGE_VERTEX_BUFFER_BIT."
-    );
-    if(!recording) return;
-    VkBuffer handle = slice.get_system_handle();
-    VkDeviceSize offset = slice.get_offset();
-    if(handle != VK_NULL_HANDLE) {
-        vkCmdBindVertexBuffers(command_buffer, binding, 1, &handle, &offset);
-    }
-}
-
 void GraphicsContext::bind_vertex_buffers(
     alib6::u32 first_binding,
     std::span<const VkBuffer> buffers,
@@ -487,40 +453,6 @@ void GraphicsContext::bind_vertex_buffers(
         buffers.data(),
         offsets.data()
     );
-}
-
-void GraphicsContext::bind_index_buffer(
-    const Buffer& buffer,
-    VkDeviceSize offset,
-    VkIndexType index_type
-) noexcept {
-    panic_debug(!recording, "Cannot bind index buffer outside of an active recording scope.");
-    panic_debug(
-        (buffer.get_usage() & VK_BUFFER_USAGE_INDEX_BUFFER_BIT) == 0,
-        "Cannot bind a Buffer as index buffer without VK_BUFFER_USAGE_INDEX_BUFFER_BIT."
-    );
-    if(!recording) return;
-    VkBuffer handle = buffer.get_system_handle();
-    if(handle != VK_NULL_HANDLE) {
-        vkCmdBindIndexBuffer(command_buffer, handle, offset, index_type);
-    }
-}
-
-void GraphicsContext::bind_index_buffer(
-    const BufferSlice& slice,
-    VkIndexType index_type
-) noexcept {
-    panic_debug(!recording, "Cannot bind index buffer outside of an active recording scope.");
-    panic_debug(
-        !slice.get_buffer() || (slice.get_buffer()->get_usage() & VK_BUFFER_USAGE_INDEX_BUFFER_BIT) == 0,
-        "Cannot bind a BufferSlice as index buffer without VK_BUFFER_USAGE_INDEX_BUFFER_BIT."
-    );
-    if(!recording) return;
-    VkBuffer handle = slice.get_system_handle();
-    VkDeviceSize offset = slice.get_offset();
-    if(handle != VK_NULL_HANDLE) {
-        vkCmdBindIndexBuffer(command_buffer, handle, offset, index_type);
-    }
 }
 
 void GraphicsContext::draw(
@@ -555,42 +487,6 @@ void GraphicsContext::draw_indexed(
         vertex_offset,
         first_instance
     );
-}
-
-void GraphicsContext::draw_indirect(
-    const Buffer& buffer,
-    VkDeviceSize offset,
-    alib6::u32 draw_count,
-    alib6::u32 stride
-) noexcept {
-    panic_debug(!recording, "Cannot draw indirect outside of an active recording scope.");
-    panic_debug(
-        (buffer.get_usage() & VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT) == 0,
-        "Cannot use a Buffer for indirect draw without VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT."
-    );
-    if(!recording) return;
-    VkBuffer handle = buffer.get_system_handle();
-    if(handle != VK_NULL_HANDLE) {
-        vkCmdDrawIndirect(command_buffer, handle, offset, draw_count, stride);
-    }
-}
-
-void GraphicsContext::draw_indexed_indirect(
-    const Buffer& buffer,
-    VkDeviceSize offset,
-    alib6::u32 draw_count,
-    alib6::u32 stride
-) noexcept {
-    panic_debug(!recording, "Cannot draw indexed indirect outside of an active recording scope.");
-    panic_debug(
-        (buffer.get_usage() & VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT) == 0,
-        "Cannot use a Buffer for indexed indirect draw without VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT."
-    );
-    if(!recording) return;
-    VkBuffer handle = buffer.get_system_handle();
-    if(handle != VK_NULL_HANDLE) {
-        vkCmdDrawIndexedIndirect(command_buffer, handle, offset, draw_count, stride);
-    }
 }
 
 void GraphicsContext::end() {

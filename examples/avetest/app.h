@@ -22,7 +22,6 @@ static_assert(ave::is_std430_compatible_v<PushConstant>);
 // 小朋友们不要学我偶
 struct RenderCache {
     ave::Pipeline & pipeline;
-    ave::Buffer & buffer;
     uint32_t vertex_count { 36 };
 };
 
@@ -33,7 +32,9 @@ struct App {
 
     ave::Context context;
     std::unique_ptr<ave::Window> window;
-    std::optional<ave::Buffer> vertex_buffer;
+    std::shared_ptr<ave::VMAAllocator> allocator;
+    std::optional<ave::VMABuffer> buffer;
+    ave::VMABufferSlice vertices_data;
     std::shared_ptr<ave::Pipeline> pipeline;
     std::optional<ave::Renderer> renderer;
     uint32_t vertex_count { 0 };

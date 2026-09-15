@@ -5,7 +5,6 @@ namespace avetest {
 void App::run() {
     RenderCache rc {
         .pipeline = *pipeline,
-        .buffer = *vertex_buffer,
         .vertex_count = vertex_count
     };
 
