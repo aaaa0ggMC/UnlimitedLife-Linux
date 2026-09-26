@@ -169,6 +169,10 @@ bool Renderer::invalidate_graphics_cache() noexcept {
     return true;
 }
 
+VkResult Renderer::wait_idle() const noexcept {
+    return device ? device->wait_idle() : VK_SUCCESS;
+}
+
 GraphicsContext Renderer::acquire_context(alib6::ErrorWrapper ew) {
     auto failure = [&ew](VkResult code) {
         GraphicsContext context(std::move(ew));

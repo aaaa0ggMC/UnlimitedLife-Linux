@@ -9,6 +9,24 @@ App::App()
     logger.append_mod<alib6::lot::Console>("console");
 }
 
+App::~App() {
+    if(descriptor_pool != VK_NULL_HANDLE && renderer && renderer->device) {
+        // 主循环退出时最后一帧可能仍在 GPU 上执行，其命令缓冲仍引用本 pool 分配的
+        // descriptor set。必须先等待设备空闲，再销毁 pool，否则会触发校验错误
+        // VUID-vkDestroyDescriptorPool-descriptorPool-00303。
+        if(renderer->wait_idle() != VK_SUCCESS) {
+            lg << "Failed to wait for the device to become idle during shutdown."
+               << std::endl;
+        }
+        vkDestroyDescriptorPool(
+            renderer->device->get_system_handle(),
+            descriptor_pool,
+            renderer->device->get_instance()->get_vk_allocator()
+        );
+        descriptor_pool = VK_NULL_HANDLE;
+    }
+}
+
 void App::setup() {
     window = std::make_unique<ave::Window>(ave::CreateWindowInfo{
         .ctx = context,
@@ -69,8 +87,13 @@ void App::setup() {
         .depth_test = true,
         .depth_write = true,
         .depth_compare_op = VK_COMPARE_OP_LESS,
+        .descriptor_bindings = {
+            ave::DescriptorBinding::ubo(0, VK_SHADER_STAGE_VERTEX_BIT)
+        },
         .constant_attributes = push_layout.attributes
     });
+
+    setup_ubo();
 }
 
 void App::setup_vertex_data() {
@@ -151,6 +174,58 @@ void App::setup_vertex_data() {
     vertex_count = static_cast<uint32_t>(vertices.size());
 
     lg << "Uploaded " << vertices.size() << " vertices to DeviceOnly GPU buffer via staging buffer." << std::endl;
+}
+
+void App::setup_ubo() {
+    ubo_buffer.emplace(ave::CreateVMABufferInfo{
+        .allocator = allocator,
+        .size = sizeof(CameraUbo),
+        .usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        .host_access = ave::BufferHostAccess::RandomAccess,
+        .persistent_mapping = true,
+    });
+
+    VkDescriptorPoolSize pool_size {
+        .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .descriptorCount = 1,
+    };
+    VkDescriptorPoolCreateInfo pool_ci {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .maxSets = 1,
+        .poolSizeCount = 1,
+        .pPoolSizes = &pool_size,
+    };
+    const auto handle = renderer->device->get_system_handle();
+    const auto allocator_vk = renderer->device->get_instance()->get_vk_allocator();
+
+    vkCreateDescriptorPool(handle, &pool_ci, allocator_vk, &descriptor_pool);
+
+    VkDescriptorSetLayout layout = pipeline->get_descriptor_set_layout(0);
+    VkDescriptorSetAllocateInfo alloc_info {
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .descriptorPool = descriptor_pool,
+        .descriptorSetCount = 1,
+        .pSetLayouts = &layout,
+    };
+    vkAllocateDescriptorSets(handle, &alloc_info, &descriptor_set);
+
+    VkDescriptorBufferInfo buffer_info {
+        .buffer = ubo_buffer->get_system_handle(),
+        .offset = 0,
+        .range = sizeof(CameraUbo),
+    };
+    VkWriteDescriptorSet write {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .dstSet = descriptor_set,
+        .dstBinding = 0,
+        .dstArrayElement = 0,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .pBufferInfo = &buffer_info,
+    };
+    vkUpdateDescriptorSets(handle, 1, &write, 0, nullptr);
+
+    lg << "Initialized Camera UBO buffer and allocated DescriptorSet from Pipeline layout." << std::endl;
 }
 
 } // namespace avetest

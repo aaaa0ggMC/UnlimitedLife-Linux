@@ -527,6 +527,14 @@ export namespace ave{
         );
         [[nodiscard]] bool invalidate_graphics_cache() noexcept;
 
+        /// @brief 等待 GPU 完成所有已提交的工作 (vkDeviceWaitIdle)。
+        ///
+        /// 在销毁任何仍可能被"已提交但未完成"的命令缓冲引用的资源
+        /// （例如手写的 VkDescriptorPool / VkDescriptorSet）之前，必须先调用本方法，
+        /// 否则会触发 VUID-vkDestroyDescriptorPool-descriptorPool-00303 一类的校验错误。
+        /// @return vkDeviceWaitIdle 的结果码；Renderer 无有效 Device 时返回 VK_SUCCESS。
+        [[nodiscard]] VkResult wait_idle() const noexcept;
+
         // Render backend creation
         std::shared_ptr<LegacyRender> create_legacy_render(
             ConfigureLegacyRender configure = default_configure_legacy_render,

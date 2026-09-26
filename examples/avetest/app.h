@@ -14,8 +14,13 @@ struct Vertex {
     glm::vec3 color;
 };
 
+struct alignas(16) CameraUbo {
+    glm::mat4 vp;
+};
+static_assert(ave::is_std430_compatible_v<CameraUbo>);
+
 struct alignas(16) PushConstant {
-    glm::mat4 mvp;
+    glm::mat4 model;
 };
 static_assert(ave::is_std430_compatible_v<PushConstant>);
 
@@ -35,16 +40,20 @@ struct App {
     std::shared_ptr<ave::VMAAllocator> allocator;
     std::unique_ptr<ave::VMABuffer> staging_buffer;
     std::optional<ave::VMABuffer> buffer;
+    std::optional<ave::VMABuffer> ubo_buffer;
+    VkDescriptorPool descriptor_pool { VK_NULL_HANDLE };
+    VkDescriptorSet descriptor_set { VK_NULL_HANDLE };
     ave::VMABufferSlice vertices_data;
     std::shared_ptr<ave::Pipeline> pipeline;
     std::optional<ave::Renderer> renderer;
     uint32_t vertex_count { 0 };
 
     App();
-    ~App() = default;
+    ~App();
 
     void setup();
     void setup_vertex_data();
+    void setup_ubo();
     void run();
     void render_frame(RenderCache rc, const PushConstant& pc);
 };

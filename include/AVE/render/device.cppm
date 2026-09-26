@@ -211,6 +211,12 @@ export namespace ave {
             return result;
         }
 
+        /// @brief 等待该 Device 上所有已提交的命令执行完毕 (vkDeviceWaitIdle)。
+        /// @return VK_SUCCESS；若 Device 尚未创建或已销毁则直接返回 VK_SUCCESS。
+        [[nodiscard]] VkResult wait_idle() const noexcept {
+            return device != VK_NULL_HANDLE ? vkDeviceWaitIdle(device) : VK_SUCCESS;
+        }
+
         void destroy() noexcept {
             if(device != VK_NULL_HANDLE) {
                 vkDeviceWaitIdle(device);

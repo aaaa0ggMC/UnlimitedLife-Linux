@@ -41,8 +41,13 @@ void App::run() {
         glm::mat4 proj = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
         proj[1][1] *= -1.0f; // 适配 Vulkan 裁剪空间 Y 轴朝下
 
+        CameraUbo camera_ubo {
+            .vp = proj * view
+        };
+        ubo_buffer->upload(camera_ubo);
+
         PushConstant pc {
-            .mvp = proj * view * model
+            .model = model
         };
 
         render_frame(rc, pc);
