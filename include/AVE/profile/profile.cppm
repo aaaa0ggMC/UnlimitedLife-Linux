@@ -354,5 +354,15 @@ export namespace ave{
                 default_configure_command_buffers
             };
 
+        // 指定现有 DescriptorPool 后，下面的描述符池创建配置会被忽略。
+        std::shared_ptr<DescriptorPool> descriptor_pool { nullptr };
+            // 默认创建一个"每帧一个 uniform buffer"的池（见 default_configure_descriptor_pool）。
+            std::function<void(
+                WithDescriptorPoolInput&,
+                CreateDescriptorPoolInfo&
+            )> configure_descriptor_pool {
+                default_configure_descriptor_pool
+            };
+
     };
 };

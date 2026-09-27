@@ -31,6 +31,7 @@ import :legacy_render;
 import :dynamic_render;
 import :pipeline;
 import :command;
+import :descriptor;
 import :upload_context;
 import :buffer;
 import :buffer_slice;
@@ -509,6 +510,7 @@ export namespace ave{
         std::shared_ptr<CommandPool> command_pool;
         std::shared_ptr<CommandBuffers> command_buffers;
         std::shared_ptr<UploadContext> upload_context;
+        std::shared_ptr<DescriptorPool> descriptor_pool;
         std::vector<VkClearValue> default_clear_values;
 
         [[nodiscard]] UploadContext* get_upload_context() noexcept {

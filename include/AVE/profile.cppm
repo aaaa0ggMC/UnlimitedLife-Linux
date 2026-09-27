@@ -124,6 +124,7 @@ export namespace ave{
         bool __vk_dynamic_render(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
         bool __vk_command_pool(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
         bool __vk_command_buffers(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
+        bool __vk_descriptor_pool(Renderer & r, alib6::ErrorWrapper ew, RenderBuildReport * result);
     };
     
     inline bool recreate_swapchain_from_window(

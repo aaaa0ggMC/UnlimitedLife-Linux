@@ -32,7 +32,8 @@ export namespace ave{
         create_render_pass,
         create_framebuffers,
         create_command_pool,
-        allocate_command_buffers
+        allocate_command_buffers,
+        create_descriptor_pool
     };
 
     enum class RenderBuildStageStatus {
@@ -123,7 +124,8 @@ export namespace ave{
             RenderBuildStageId::create_render_pass,
             RenderBuildStageId::create_framebuffers,
             RenderBuildStageId::create_command_pool,
-            RenderBuildStageId::allocate_command_buffers
+            RenderBuildStageId::allocate_command_buffers,
+            RenderBuildStageId::create_descriptor_pool
         };
 
         RenderBuildStageStatus status { RenderBuildStageStatus::not_run };

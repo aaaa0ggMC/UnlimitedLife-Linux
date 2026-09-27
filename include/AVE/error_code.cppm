@@ -40,6 +40,7 @@ export namespace ave{
         ave_vk_create_buffer = 100'020,
         ave_vk_map_buffer = 100'021,
         ave_invalid_vertex_layout = 100'022,
-        ave_invalid_constant_layout = 100'023
+        ave_invalid_constant_layout = 100'023,
+        ave_vk_create_descriptor_pool = 100'024
     };
 };

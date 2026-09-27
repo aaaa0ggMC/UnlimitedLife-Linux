@@ -252,6 +252,11 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
         });
     }
 
+    /// 最后一个阶段：创建或接收 DescriptorPool（由 Renderer 持有，RAII 管理）。
+    if(!__vk_descriptor_pool(renderer, ew, result)){
+        return renderer;
+    }
+
     return renderer;
 }
 
@@ -354,6 +359,52 @@ bool RenderProfile::__vk_command_buffers(
         }
     }
     return static_cast<bool>(r.command_buffers);
+}
+
+bool RenderProfile::__vk_descriptor_pool(
+    Renderer& r,
+    alib6::ErrorWrapper ew,
+    RenderBuildReport* result
+){
+    if(with_data.descriptor_pool) {
+        const bool valid =
+            static_cast<bool>(*with_data.descriptor_pool) &&
+            with_data.descriptor_pool->get_device() == r.device;
+        if(result) {
+            auto& stage = (*result)[create_descriptor_pool];
+            stage["source"] = "provided";
+            if(valid) stage.succeed();
+            else stage.fail(
+                "Provided DescriptorPool is invalid or belongs to a different Device");
+        }
+        if(!valid) {
+            ew.report(ave_vk_create_descriptor_pool,
+                "The provided DescriptorPool is invalid or belongs to a different Device.");
+            return false;
+        }
+        r.descriptor_pool = with_data.descriptor_pool;
+        return true;
+    }
+
+    WithDescriptorPoolInput input(r.device, r.sync_objects->size());
+    CreateDescriptorPoolInfo ci;
+    ci.ew = ew;
+    if(with_data.configure_descriptor_pool) {
+        with_data.configure_descriptor_pool(input, ci);
+    }else{
+        default_configure_descriptor_pool(input, ci);
+    }
+    const auto requested_max_sets = ci.max_sets;
+    r.descriptor_pool = DescriptorPool::create(std::move(ci));
+
+    if(result) {
+        auto& stage = (*result)[create_descriptor_pool];
+        stage["source"] = "created";
+        stage["max_sets"] = requested_max_sets;
+        if(r.descriptor_pool) stage.succeed();
+        else stage.fail("Failed to create Vulkan DescriptorPool");
+    }
+    return static_cast<bool>(r.descriptor_pool);
 }
 
 bool RenderProfile::__vk_sync_objects(
@@ -1382,6 +1433,8 @@ bool RenderProfile::recreate_swapchain_from_window(
     // count. Recreate them directly so a capability/image-count change cannot
     // leave Renderer with a stale cache or mismatched synchronizations.
     if(!pw.command_pool) pw.command_pool = r.command_pool;
+    // DescriptorPool 不依赖 swapchain，重建时沿用现有池。
+    if(!pw.descriptor_pool) pw.descriptor_pool = r.descriptor_pool;
     pw.swapchain       = nullptr;
     pw.sync_objects    = nullptr;
     pw.command_buffers = nullptr;

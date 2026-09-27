@@ -41,7 +41,6 @@ struct App {
     std::unique_ptr<ave::VMABuffer> staging_buffer;
     std::optional<ave::VMABuffer> buffer;
     std::optional<ave::VMABuffer> ubo_buffer;
-    VkDescriptorPool descriptor_pool { VK_NULL_HANDLE };
     VkDescriptorSet descriptor_set { VK_NULL_HANDLE };
     ave::VMABufferSlice vertices_data;
     std::shared_ptr<ave::Pipeline> pipeline;
@@ -49,7 +48,9 @@ struct App {
     uint32_t vertex_count { 0 };
 
     App();
-    ~App();
+    // 图形资源（含 DescriptorPool/CommandPool 等）均由 Renderer 及其 RAII 组件自行析构，
+    // 这里不需要任何图形相关清理。
+    ~App() = default;
 
     void setup();
     void setup_vertex_data();
