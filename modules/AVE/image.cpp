@@ -206,6 +206,7 @@ bool Image::initialize(CreateImageInfo ci) {
             allocator.reset();
             return false;
         }
+        owns_image = true;
     }else{
         VkMemoryRequirements requirements {};
         vkGetImageMemoryRequirements(handle, image, &requirements);
@@ -468,8 +469,9 @@ void Image::destroy() noexcept {
         const auto vk_allocator = device->get_instance()->get_vk_allocator();
         // VMA 后端：ImageBinding 析构负责释放 VMA 显存。
         vma_binding.reset();
-        // swapchain 持有的 image 不归本对象销毁。
-        if(!swapchain && image != VK_NULL_HANDLE) {
+        // 只有本对象创建的 VkImage 才由本对象销毁
+        // （swapchain 持有的 image 与 ImageView 的父 image 均不归此处销毁）。
+        if(owns_image && image != VK_NULL_HANDLE) {
             vkDestroyImage(handle, image, vk_allocator);
         }
         if(memory != VK_NULL_HANDLE) {

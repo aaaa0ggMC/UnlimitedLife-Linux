@@ -2,6 +2,7 @@ module;
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
 
+
 module ave.render;
 
 import std;
@@ -23,6 +24,15 @@ struct VmaMemoryPolicy::ImageBinding {
     VmaAllocation allocation { VK_NULL_HANDLE };
     VkImage image { VK_NULL_HANDLE };
     std::shared_ptr<VMAAllocator> owner;
+
+    /// 直接构造（经 make_shared 转发），避免产生会提前释放显存的临时量。
+    ImageBinding(
+        VmaAllocation target_allocation,
+        VkImage target_image,
+        std::shared_ptr<VMAAllocator> target_owner
+    ) : allocation(target_allocation)
+      , image(target_image)
+      , owner(std::move(target_owner)) {}
 
     ~ImageBinding() {
         // VkImage 由调用方（Image）创建与销毁，这里只释放 VMA 显存。
@@ -84,7 +94,7 @@ std::shared_ptr<VmaMemoryPolicy::ImageBinding> VmaMemoryPolicy::create_image(
         return {};
     }
     return std::make_shared<ImageBinding>(
-        ImageBinding{ vma_allocation, image, allocator });
+        vma_allocation, image, allocator);
 }
 
 VkImage VmaMemoryPolicy::get_image_handle(
