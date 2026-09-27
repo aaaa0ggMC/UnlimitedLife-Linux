@@ -44,6 +44,17 @@ void App::setup() {
         return false;
     };
 
+    with.configure_descriptor_pool = [](
+        ave::WithDescriptorPoolInput& input,
+        ave::CreateDescriptorPoolInfo& ci
+    ) {
+        // 先沿用默认配置（每帧一个 uniform buffer），再追加纹理用的 sampler 描述符
+        ave::default_configure_descriptor_pool(input, ci);
+        ci.pool_sizes.push_back(
+            ave::DescriptorPoolSize::combined_image_sampler(1)
+        );
+    };
+
     ave::RenderBuildReport report;
     renderer = ave::RenderProfile::from_window(context, *window)
         .with(with)
@@ -70,7 +81,10 @@ void App::setup() {
         .depth_write = true,
         .depth_compare_op = VK_COMPARE_OP_LESS,
         .descriptor_bindings = {
-            ave::DescriptorBinding::ubo(0, VK_SHADER_STAGE_VERTEX_BIT)
+            ave::DescriptorBinding::ubo(0, VK_SHADER_STAGE_VERTEX_BIT),
+            ave::DescriptorBinding::combined_image_sampler(
+                1, VK_SHADER_STAGE_FRAGMENT_BIT
+            )
         },
         .constant_attributes = push_layout.attributes
     });
@@ -127,6 +141,18 @@ void App::setup_texture() {
     );
 
     if(!texture) return;
+    // 采样器：线性过滤 + Repeat 寻址；非 mipmap 纹理 max_lod = 0
+    sampler = ave::Sampler::create({ .device = renderer->device });
+    if(!sampler) return;
+
+    // 纹理（sampler + view）写入 descriptor set 的 binding 1
+    renderer->descriptor_pool->write_image(
+        descriptor_set,
+        1,
+        sampler->get_system_handle(),
+        texture->get_image_view()
+    );
+
     lg << "Loaded texture " << texture->get_extent().width << "x"
        << texture->get_extent().height << " (format "
        << static_cast<int>(texture->get_format()) << ", auto default view)." << std::endl;

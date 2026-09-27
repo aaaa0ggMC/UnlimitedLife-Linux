@@ -191,4 +191,31 @@ void DescriptorPool::write_buffer(
     vkUpdateDescriptorSets(device->get_system_handle(), 1, &write, 0, nullptr);
 }
 
+void DescriptorPool::write_image(
+    VkDescriptorSet dst_set,
+    alib6::u32 dst_binding,
+    VkSampler sampler,
+    VkImageView view,
+    VkImageLayout image_layout,
+    alib6::u32 dst_array_element
+) {
+    if(!device) return;
+
+    VkDescriptorImageInfo image_info {
+        .sampler = sampler,
+        .imageView = view,
+        .imageLayout = image_layout
+    };
+    VkWriteDescriptorSet write {};
+    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write.dstSet = dst_set;
+    write.dstBinding = dst_binding;
+    write.dstArrayElement = dst_array_element;
+    write.descriptorCount = 1;
+    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    write.pImageInfo = &image_info;
+
+    vkUpdateDescriptorSets(device->get_system_handle(), 1, &write, 0, nullptr);
+}
+
 } // namespace ave

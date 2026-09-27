@@ -127,6 +127,17 @@ export namespace ave {
             VkDeviceSize range = VK_WHOLE_SIZE,
             alib6::u32 dst_array_element = 0
         );
+
+        /// @brief 向已有 descriptor set 写入一个图像（sampler + view）描述符。
+        void write_image(
+            VkDescriptorSet dst_set,
+            alib6::u32 dst_binding,
+            VkSampler sampler,
+            VkImageView view,
+            VkImageLayout image_layout =
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            alib6::u32 dst_array_element = 0
+        );
     };
 
 } // namespace ave

@@ -346,6 +346,23 @@ export namespace ave{
                 .binding_flags = flags
             };
         }
+
+        static constexpr DescriptorBinding combined_image_sampler(
+            alib6::u32 binding,
+            VkShaderStageFlags stages = VK_SHADER_STAGE_FRAGMENT_BIT,
+            alib6::u32 count = 1,
+            const VkSampler* immutable_samplers = nullptr,
+            VkDescriptorBindingFlags flags = 0
+        ) noexcept {
+            return DescriptorBinding{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .descriptor_count = count,
+                .stage_flags = stages,
+                .immutable_samplers = immutable_samplers,
+                .binding_flags = flags
+            };
+        }
     };
 
     /// @brief 描述符集布局信息，支持多 binding、自定义 flags 与用户扩展 pNext 挂载

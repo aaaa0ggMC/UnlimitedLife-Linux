@@ -42,6 +42,7 @@ struct App {
     ave::VMABufferSlice vertices_data;
     ave::VMABufferSlice indices_data;
     std::shared_ptr<ave::Image> texture;
+    std::shared_ptr<ave::Sampler> sampler;
     std::shared_ptr<ave::Pipeline> pipeline;
     std::optional<ave::Renderer> renderer;
     uint32_t index_count { 0 };
