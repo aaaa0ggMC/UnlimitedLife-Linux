@@ -59,10 +59,33 @@ export namespace ave {
         mutable alib6::ErrorWrapper ew {};
     };
 
+    /// @brief buffer → image 一次性复制配置（含前后 layout 转换的 barrier）
+    struct AVE_API UploadToImageInfo {
+        VkBuffer src { VK_NULL_HANDLE };
+        VkDeviceSize src_offset { 0 };
+        VkImage dst { VK_NULL_HANDLE };
+        VkImageSubresourceLayers subresource {
+            VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1
+        };
+        VkExtent3D extent {};
+        VkImageLayout initial_layout { VK_IMAGE_LAYOUT_UNDEFINED };
+        VkImageLayout final_layout { VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+        VkPipelineStageFlags final_stage { VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT };
+        std::shared_ptr<const void> session_lifetime { nullptr };
+        mutable alib6::ErrorWrapper ew {};
+    };
+
     class AVE_API UploadContext final {
     private:
         struct Impl;
         std::shared_ptr<Impl> impl;
+
+        /// 一次性命令录制/提交通道（submit_copy 与 submit_copy_to_image 共用）。
+        [[nodiscard]] UploadTicket submit_recording(
+            const std::function<void(VkCommandBuffer)>& record,
+            std::shared_ptr<const void> session_lifetime,
+            alib6::ErrorWrapper ew
+        );
 
     public:
         UploadContext() = default;
@@ -82,6 +105,11 @@ export namespace ave {
             VkDeviceSize size,
             std::shared_ptr<const void> session_lifetime = nullptr,
             alib6::ErrorWrapper ew = {}
+        );
+
+        /// 录制并提交单次 buffer → image 复制命令（自动插入 layout 转换 barrier）
+        [[nodiscard]] UploadTicket submit_copy_to_image(
+            UploadToImageInfo ci
         );
 
         [[nodiscard]] explicit operator bool() const noexcept;

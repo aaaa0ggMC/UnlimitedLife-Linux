@@ -9,7 +9,8 @@ void App::render_frame(RenderCache rc, const PushConstant& pc) {
     graphics.bind_descriptor_set(0, descriptor_set);
     graphics.push_constant(pc);
     graphics.bind_vertex_buffer(vertices_data);
-    graphics.draw(rc.vertex_count);
+    graphics.bind_index_buffer<std::uint16_t>(indices_data);
+    graphics.draw_indexed(rc.index_count);
     graphics.end();
 }
 

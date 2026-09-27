@@ -160,6 +160,7 @@ export namespace ave {
         VMAAllocator& operator=(const VMAAllocator&) = delete;
         [[nodiscard]] static std::shared_ptr<VMAAllocator> create_shared(CreateVMAAllocatorInfo);
         [[nodiscard]] const std::shared_ptr<Device>& get_device() const noexcept;
+        [[nodiscard]] explicit operator bool() const noexcept;
     };
 
     struct AVE_API CreateVMABufferInfo {
@@ -224,8 +225,24 @@ export namespace ave {
 
     struct AVE_API VmaMemoryPolicy {
         struct State;
+        /// VMA 后端的 Image 绑定（VkImage + VmaAllocation，不暴露 VMA 类型）。
+        struct ImageBinding;
         using CreateInfo = CreateVMABufferInfo;
         [[nodiscard]] static std::shared_ptr<State> create(CreateInfo);
+        /// 为已创建的 VkImage 分配并绑定 VMA 显存；失败返回 nullptr。
+        /// required_memory_properties 为 0 时默认使用 DEVICE_LOCAL。
+        [[nodiscard]] static std::shared_ptr<ImageBinding> create_image(
+            const std::shared_ptr<VMAAllocator>& allocator,
+            VkImage image,
+            VkMemoryPropertyFlags required_memory_properties,
+            VkMemoryPropertyFlags preferred_memory_properties,
+            bool dedicated_allocation,
+            alib6::ErrorWrapper ew = {}
+        );
+        /// 取 VMA Image 绑定包裹的 VkImage 句柄。
+        [[nodiscard]] static VkImage get_image_handle(
+            const ImageBinding& binding
+        ) noexcept;
         [[nodiscard]] static const detail::BufferProperties& properties(const State&) noexcept;
         static VkResult map(State&, void**);
         static void unmap(State&) noexcept;

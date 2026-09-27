@@ -76,86 +76,60 @@ void App::setup() {
     });
 
     setup_ubo();
+    setup_texture();
 }
 
 void App::setup_vertex_data() {
     allocator = ave::VMAAllocator::create_shared({ .device = renderer->device });
-    // 顶点缓冲区配置为纯 GPU 端 DeviceOnly 显存（高性能，CPU 不可直接写入）
+    // 顶点与索引共用同一个 DeviceOnly 缓冲区（各自通过 slice 访问）
     buffer.emplace(ave::CreateVMABufferInfo{
         .allocator = allocator,
         .size = 1024 * 1024,
-        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+        .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT
+               | VK_BUFFER_USAGE_INDEX_BUFFER_BIT
+               | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
         .host_access = ave::BufferHostAccess::DeviceOnly,
     });
-    
-    const std::vector<Vertex> vertices = {
-        // 前表面 (+Z, normal: 0, 0, 1)
-        { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
-        { {  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
-        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
-        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
-        { { -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f } },
-        { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
-
-        // 后表面 (-Z, normal: 0, 0, -1)
-        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
-        { { -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
-        { {  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f, 0.0f } },
-        { {  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f, 0.0f } },
-        { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
-        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
-
-        // 左表面 (-X, normal: -1, 0, 0)
-        { { -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f } },
-        { { -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
-        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
-        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
-        { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
-        { { -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f } },
-
-        // 右表面 (+X, normal: 1, 0, 0)
-        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
-        { {  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
-        { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
-        { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
-        { {  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f, 0.0f } },
-        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
-
-        // 上表面 (+Y, normal: 0, 1, 0)
-        { { -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
-        { { -0.5f,  0.5f,  0.5f }, { 0.0f, 1.0f, 1.0f } },
-        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
-        { {  0.5f,  0.5f,  0.5f }, { 1.0f, 1.0f, 1.0f } },
-        { {  0.5f,  0.5f, -0.5f }, { 1.0f, 1.0f, 0.0f } },
-        { { -0.5f,  0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
-
-        // 下表面 (-Y, normal: 0, -1, 0)
-        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
-        { {  0.5f, -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
-        { {  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
-        { {  0.5f, -0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
-        { { -0.5f, -0.5f,  0.5f }, { 0.0f, 0.0f, 1.0f } },
-        { { -0.5f, -0.5f, -0.5f }, { 0.0f, 0.0f, 0.0f } },
-    };
 
     // 创建临时的 CPU 可见中介缓冲 (Staging Buffer)
     staging_buffer = std::make_unique<ave::VMABuffer>(ave::CreateVMABufferInfo{
         .allocator = allocator,
-        .size = sizeof(Vertex) * vertices.size(),
+        .size = sizeof(Vertex) * cube_vertices.size()
+              + sizeof(std::uint16_t) * cube_indices.size(),
         .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         .host_access = ave::BufferHostAccess::SequentialWrite,
     });
 
-    // 一行代码无感通过 staging 上传到 DeviceOnly 顶点缓冲区切片
-    vertices_data = buffer->alloc(vertices, {
+    // 一行代码无感通过 staging 上传到 DeviceOnly 缓冲区切片
+    const ave::AllocateBufferInfo slice_info {
         .map_info = {
             .staging = staging_buffer.get(),
             .upload_context = renderer->get_upload_context()
         }
-    }); 
-    vertex_count = static_cast<uint32_t>(vertices.size());
+    };
+    vertices_data = buffer->alloc(cube_vertices, slice_info);
+    indices_data = buffer->alloc(cube_indices, slice_info);
+    index_count = static_cast<uint32_t>(cube_indices.size());
 
-    lg << "Uploaded " << vertices.size() << " vertices to DeviceOnly GPU buffer via staging buffer." << std::endl;
+    lg << "Uploaded " << cube_vertices.size() << " vertices and "
+       << cube_indices.size() << " indices to DeviceOnly GPU buffer via staging buffer." << std::endl;
+}
+
+void App::setup_texture() {
+    // 一条调用完成：stb 解码 → VMA 建图 → 内部临时 staging 上传（含 layout 转换）。
+    // - format/extent/usage 零值 → 按文件自动推断；
+    // - .map_info.staging 留空 → 使用 ci.allocator 创建内部 staging；
+    // - 未来有 Sampler 后即可直接通过 descriptor 采样本纹理。
+    texture = ave::Image::create_from_file(
+        { .allocator = allocator },
+        alib6::io::load_entry("avetest/textures/template.png"),
+        { .map_info = { .upload_context = renderer->get_upload_context() } }
+    );
+
+    if(!texture) return;
+    lg << "Loaded texture " << texture->get_extent().width << "x"
+       << texture->get_extent().height << " (format "
+       << static_cast<int>(texture->get_format()) << ", auto default view)." << std::endl;
 }
 
 void App::setup_ubo() {

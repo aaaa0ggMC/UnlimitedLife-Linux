@@ -22,6 +22,7 @@ target("AVE")
 
     -- 与 alib6 当前共享库构建方式保持一致
     add_rules("utils.symbols.export_all")
+    add_packages("stb", {public = true})
 target_end()
 
 target("ave_buffer_test")

@@ -5,7 +5,7 @@ namespace avetest {
 void App::run() {
     RenderCache rc {
         .pipeline = *pipeline,
-        .vertex_count = vertex_count
+        .index_count = index_count
     };
 
     ave::misc::FPSDetective detective;

@@ -1,12 +1,8 @@
 #include "app.h"
 
 auto main() -> int {
-    try {
-        avetest::App app;
-        app.setup();
-        app.run();
-    } catch (...) {
-        return 1;
-    }
+    avetest::App app;
+    app.setup();
+    app.run();
     return 0;
 }

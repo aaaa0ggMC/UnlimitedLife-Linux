@@ -19,8 +19,84 @@ struct VMAAllocator::Impl {
     ~Impl() { if(handle) vmaDestroyAllocator(handle); }
 };
 
+struct VmaMemoryPolicy::ImageBinding {
+    VmaAllocation allocation { VK_NULL_HANDLE };
+    VkImage image { VK_NULL_HANDLE };
+    std::shared_ptr<VMAAllocator> owner;
+
+    ~ImageBinding() {
+        // VkImage 由调用方（Image）创建与销毁，这里只释放 VMA 显存。
+        if(owner && allocation) {
+            vmaFreeMemory(owner->impl->handle, allocation);
+        }
+    }
+};
+
+std::shared_ptr<VmaMemoryPolicy::ImageBinding> VmaMemoryPolicy::create_image(
+    const std::shared_ptr<VMAAllocator>& allocator,
+    VkImage image,
+    VkMemoryPropertyFlags required_memory_properties,
+    VkMemoryPropertyFlags preferred_memory_properties,
+    bool dedicated_allocation,
+    alib6::ErrorWrapper ew
+) {
+    if(!allocator || image == VK_NULL_HANDLE) {
+        ew.report(ave_vk_create_image,
+            "VMA image binding requires a valid VMAAllocator and VkImage.");
+        return {};
+    }
+    const auto device = allocator->get_device();
+    if(!device || device->get_system_handle() == VK_NULL_HANDLE) {
+        ew.report(ave_vk_create_image,
+            "VMA image binding requires a valid Device.");
+        return {};
+    }
+
+    VkMemoryRequirements requirements {};
+    vkGetImageMemoryRequirements(device->get_system_handle(), image, &requirements);
+
+    // vmaAllocateMemory 拿不到被创建资源的细节，不能使用 AUTO*，
+    // 这里显式声明所需内存属性（默认 DEVICE_LOCAL）。
+    VmaAllocationCreateInfo allocation {};
+    allocation.usage = VMA_MEMORY_USAGE_UNKNOWN;
+    allocation.requiredFlags = required_memory_properties != 0
+        ? required_memory_properties
+        : VkMemoryPropertyFlags { VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT };
+    allocation.preferredFlags = preferred_memory_properties;
+    if(dedicated_allocation) {
+        allocation.flags |= VMA_ALLOCATION_CREATE_DEDICATED_MEMORY_BIT;
+    }
+
+    VmaAllocation vma_allocation = VK_NULL_HANDLE;
+    auto code = vmaAllocateMemory(
+        allocator->impl->handle, &requirements, &allocation,
+        &vma_allocation, nullptr);
+    if(code != VK_SUCCESS) {
+        ew.report(ave_vk_create_image,
+            "Failed to allocate Vulkan Image memory via VMA ({}).", int(code));
+        return {};
+    }
+    code = vmaBindImageMemory(allocator->impl->handle, vma_allocation, image);
+    if(code != VK_SUCCESS) {
+        vmaFreeMemory(allocator->impl->handle, vma_allocation);
+        ew.report(ave_vk_create_image,
+            "Failed to bind Vulkan Image memory via VMA ({}).", int(code));
+        return {};
+    }
+    return std::make_shared<ImageBinding>(
+        ImageBinding{ vma_allocation, image, allocator });
+}
+
+VkImage VmaMemoryPolicy::get_image_handle(
+    const ImageBinding& binding
+) noexcept {
+    return binding.image;
+}
+
 VMAAllocator::VMAAllocator(std::shared_ptr<Impl> value) : impl(std::move(value)) {}
 VMAAllocator::~VMAAllocator() = default;
+
+VMAAllocator::operator bool() const noexcept { return impl != nullptr; }
 
 const std::shared_ptr<Device>& VMAAllocator::get_device() const noexcept {
     return impl->device;

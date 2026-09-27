@@ -638,12 +638,7 @@ bool RenderProfile::__vk_images(
         auto image = Image::create_swapchain_image({
             .swapchain = r.swapchain,
             .image = (*swapchain_handles)[i],
-            .image_view_next = ci.swapchain_image_view_next,
-            .image_view_flags = ci.swapchain_image_view_flags,
-            .image_view_type = ci.swapchain_image_view_type,
-            .image_view_components = ci.swapchain_image_view_components,
-            .image_view_subresource_range =
-                ci.swapchain_image_view_subresource_range,
+            .view = ci.swapchain_image_view,
             .ew = ci.ew
         });
         if(!image) {
