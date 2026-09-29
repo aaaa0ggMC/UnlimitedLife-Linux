@@ -372,6 +372,13 @@ export namespace ave {
             return val;
         }
 
+        /// 光标模式切换时由 Window 调用：重置鼠标基准，
+        /// 使下一次 MouseMoveEvent 重新取基准，避免 GLFW 模式切换导致的
+        /// 坐标跳变被 get_mouse_delta 当成一次巨大增量。
+        void notify_cursor_mode_changed() noexcept {
+            m_first_mouse_move = true;
+        }
+
         /// 清除所有当前按下的状态（例如窗口失焦时）
         void reset_state() noexcept {
             for (auto& k : m_keys) {

@@ -13,6 +13,7 @@ import :glfw;
 import :keycode;
 import :event;
 import :input;
+import :cursor;
 
 export namespace ave {
 
@@ -68,6 +69,9 @@ export namespace ave {
         std::optional<std::pair<int, int>> position;
         double resize_debounce_time = 0.5; ///< 窗口拉伸防抖时间 (秒)，默认 0.5s
 
+        /// 初始光标模式；默认正常显示。Disabled 适合创建即进入的 FPS 相机场景。
+        CursorMode cursor_mode { CursorMode::Normal };
+
         mutable alib6::ErrorWrapper ew = {};
     };
 
@@ -94,6 +98,7 @@ export namespace ave {
         double m_after_resize_timeout_ms { 500.0 };
 
         Input* m_bound_input { nullptr };
+        CursorMode m_cursor_mode { CursorMode::Normal };
 
         void setup_callbacks() {
             if (!window) return;
@@ -131,6 +136,11 @@ export namespace ave {
                 if (!self) return;
                 WindowFocusEvent ev(focused == GLFW_TRUE);
                 self->dispatch_event(ev);
+                // 失焦时自动释放鼠标：否则 alt-tab 后光标仍被锁定，
+                // 其它程序将收不到指针事件（重新聚焦后需再次 set_cursor_mode）。
+                if (!focused && self->m_cursor_mode != CursorMode::Normal) {
+                    self->set_cursor_mode(CursorMode::Normal);
+                }
             });
 
             glfwSetWindowIconifyCallback(window, [](GLFWwindow* w, int iconified) {
@@ -360,6 +370,9 @@ export namespace ave {
             glfwSetWindowUserPointer(window, this);
             setup_callbacks();
 
+            // 应用初始光标模式（Normal 为默认值，无副作用）
+            set_cursor_mode(ci.cursor_mode);
+
             return true;
         }
 
@@ -457,6 +470,32 @@ export namespace ave {
 
         inline Input* get_bound_input() const noexcept {
             return m_bound_input;
+        }
+
+        /// @brief 获取当前光标模式
+        [[nodiscard]] inline CursorMode get_cursor_mode() const noexcept {
+            return m_cursor_mode;
+        }
+
+        /// @brief 设置光标模式（Normal / Hidden / Disabled）
+        ///
+        /// Disabled 下光标隐藏并锁定，GLFW 以虚拟无限坐标持续派发 MouseMoveEvent，
+        /// 配合 Input::get_mouse_delta 即可获得不越界的原始增量（FPS 相机）。
+        /// 模式切换会同时通知绑定的 Input 重置鼠标基准，避免一次性坐标跳变被
+        /// 误判为巨大 delta。重复设置同一模式为无操作。
+        inline void set_cursor_mode(CursorMode mode) noexcept {
+            if (m_cursor_mode == mode) return;
+            m_cursor_mode = mode;
+            if (window) {
+                glfwSetInputMode(window, GLFW_CURSOR,
+                    mode == CursorMode::Normal   ? GLFW_CURSOR_NORMAL   :
+                    mode == CursorMode::Hidden   ? GLFW_CURSOR_HIDDEN   :
+                                                   GLFW_CURSOR_DISABLED
+                );
+            }
+            if (m_bound_input) {
+                m_bound_input->notify_cursor_mode_changed();
+            }
         }
 
         void dispatch_event(Event& e) {
