@@ -7,4 +7,5 @@ export import :glfw;
 export import :keycode;
 export import :event;
 export import :input;
+export import :cursor;
 export import :window;

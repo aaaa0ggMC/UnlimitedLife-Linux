@@ -69,7 +69,9 @@ export namespace ave {
         std::optional<std::pair<int, int>> position;
         double resize_debounce_time = 0.5; ///< 窗口拉伸防抖时间 (秒)，默认 0.5s
 
-        /// 初始光标模式；默认正常显示。Disabled 适合创建即进入的 FPS 相机场景。
+        /// @brief 初始光标模式；默认 ave::CursorMode::Normal。
+        /// 创建即进入 FPS 相机的场景可传 ave::CursorMode::Disabled。
+        /// @start-date 2026/09/29
         CursorMode cursor_mode { CursorMode::Normal };
 
         mutable alib6::ErrorWrapper ew = {};
@@ -473,16 +475,30 @@ export namespace ave {
         }
 
         /// @brief 获取当前光标模式
+        /// @return 当前 ave::CursorMode
+        /// @start-date 2026/09/29
         [[nodiscard]] inline CursorMode get_cursor_mode() const noexcept {
             return m_cursor_mode;
         }
 
-        /// @brief 设置光标模式（Normal / Hidden / Disabled）
-        ///
-        /// Disabled 下光标隐藏并锁定，GLFW 以虚拟无限坐标持续派发 MouseMoveEvent，
-        /// 配合 Input::get_mouse_delta 即可获得不越界的原始增量（FPS 相机）。
-        /// 模式切换会同时通知绑定的 Input 重置鼠标基准，避免一次性坐标跳变被
-        /// 误判为巨大 delta。重复设置同一模式为无操作。
+        /**
+         * @brief 设置光标模式（Normal / Hidden / Disabled）
+         * @start-date 2026/09/29
+         *
+         * ave::CursorMode::Disabled 下光标隐藏并锁定，GLFW 以虚拟无限坐标
+         * 持续派发 MouseMoveEvent，配合 ave::Input::get_mouse_delta 即可获得
+         * 不越界的原始增量（FPS 相机首选）。
+         *
+         * @note 模式切换会同时通知绑定的 ave::Input 重置鼠标基准
+         *       （Input::notify_cursor_mode_changed），GLFW 模式切换带来的
+         *       一次性坐标跳变不会被误判为巨大 delta，调用方无需自行过滤。
+         * @note 重复设置同一模式为无操作；窗口未创建时仅记录状态，
+         *       创建后由 CreateWindowInfo::cursor_mode 统一应用。
+         * @note 窗口失焦时若非 Normal 会自动恢复 Normal，
+         *       重新聚焦后需再次调用本函数锁定。
+         *
+         * @param mode 目标光标模式
+         */
         inline void set_cursor_mode(CursorMode mode) noexcept {
             if (m_cursor_mode == mode) return;
             m_cursor_mode = mode;

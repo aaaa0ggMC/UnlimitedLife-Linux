@@ -372,9 +372,15 @@ export namespace ave {
             return val;
         }
 
-        /// 光标模式切换时由 Window 调用：重置鼠标基准，
-        /// 使下一次 MouseMoveEvent 重新取基准，避免 GLFW 模式切换导致的
-        /// 坐标跳变被 get_mouse_delta 当成一次巨大增量。
+        /**
+         * @brief 光标模式切换时由 ave::Window 调用：重置鼠标基准
+         * @start-date 2026/09/29
+         *
+         * 使下一次 MouseMoveEvent 重新取基准（丢弃一个 delta），
+         * GLFW 模式切换（如 ave::CursorMode::Disabled <-> Normal）导致的
+         * 光标坐标跳变不会被 get_mouse_delta 当成一次巨大增量。
+         * 一般无需手动调用；仅在你自行调用 glfwSetInputMode 时才需要。
+         */
         void notify_cursor_mode_changed() noexcept {
             m_first_mouse_move = true;
         }
