@@ -20,3 +20,4 @@ export module ave.shape;
 
 export import :shape;
 export import :prefab;
+export import :loader;

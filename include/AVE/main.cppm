@@ -9,3 +9,4 @@ export import ave.render;
 export import ave.profile;
 export import ave.misc;
 export import ave.reflect;
+export import ave.shape;
