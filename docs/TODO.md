@@ -11,5 +11,5 @@
 2025/10/31  1. 2025/08/31 实现鼠标控制相机旋转 
 2025/11/2   4. 2025/11/2 把bingyan-Mininginx中的日志DSL搬到alib里面，优化一下后可以作为一个轻量级的配置引擎，核心代码140行，进行富功能化后估计500行左右
 2026/09/29  5. 2026/09/29 fog示例：全局Linear Fog（雾色/start/end可由配置与按键实时调节，fog-vert/fog-frag在fragment内按视空间距离mix雾色，清屏色同步为雾色）
-2026/09/29  6. 2026/09/29 从AGE移植ModelData概念为ave.shape（Shape纯数据+Prefab程序化生成box/cube/plane，不与renderer联动，绑定归用户）；完整Mesh/Model规划在ave.model
+2026/09/29  6. 2026/09/29 从AGE移植ModelData概念为ave.shape（Shape纯数据+Prefab程序化生成box/cube/plane/sphere/torus，不与renderer联动，绑定归用户）；完整Mesh/Model规划在ave.model
 2026/09/29  7. 2026/09/29 ave.shape 增加 ShapeLoader（OBJ/STL ASCII+Binary 加载，自动识别，相对AGE修复了STL法线错位/支持n-gon/binary越界保护）；tests/ave_shape_loader_test 覆盖全部路径
