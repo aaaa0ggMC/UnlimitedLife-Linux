@@ -13,7 +13,7 @@ namespace fog {
 
 using namespace alib6::ecs;
 
-/// @brief 脏标记（AGE DirtyMarker 的最小复刻，组件放入示例而非引擎）
+/// @brief 脏标记
 struct DirtyMarker {
     bool dirty { true };
 

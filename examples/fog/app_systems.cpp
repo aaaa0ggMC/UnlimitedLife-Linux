@@ -48,10 +48,8 @@ auto App::update_fog(float dt) -> void {
     fog_params.start = std::clamp(fog_params.start, 0.0f, fog_params.end - 0.5f);
 }
 
-//// 渲染系统：view 查询 (Transform, Renderable) 并逐物体绘制 ////
 auto App::render_scene() -> void {
     auto& fog_params = fog.params();
-
     const auto [fb_w, fb_h] = window->get_framebuffer_size();
     const float aspect = (fb_h > 0)
         ? static_cast<float>(fb_w) / static_cast<float>(fb_h)
@@ -73,13 +71,6 @@ auto App::render_scene() -> void {
 
     auto graphics = renderer->acquire_context();
     if(!graphics) {
-        // 无效上下文（典型：交换链 OUT_OF_DATE、设备暂时不可用）：直接跳过本帧。
-        // 不在这是循环里重建交换链——重建统一走 AfterWindowFramebufferResizeEvent
-        // 的防抖路径（见 setup_create_window）。原因：
-        // 1. 最小化时 recreate 每次只有一次 glfwGetFramebufferSize + 提前返回，纯浪费；
-        // 2. 持续 OUT_OF_DATE 时 recreate 内含 vkDeviceWaitIdle + 全量重建
-        //    (swapchain/sync/command/framebuffer/depth)，每帧调一次会让 GPU 反复停顿。
-        // invalid 路径不会置位 context_acquired，跳过一帧后下一帧可正常重新 acquire。
         return;
     }
 
