@@ -42,9 +42,6 @@ auto main() -> int {
 App::App(const AppConfig & cfg)
 :cfg(cfg)
 ,lg(logger, "Fog")
-,vklg(logger, "Vulkan")
-,fog_color(cfg.fog.r, cfg.fog.g, cfg.fog.b)
-,fog_start(cfg.fog.start)
-,fog_end(cfg.fog.end) {
+,vklg(logger, "Vulkan") {
     logger.append_mod<alib6::lot::Console>("console");
 }

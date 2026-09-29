@@ -60,11 +60,12 @@ auto App::run() -> int {
         proj[1][1] *= -1.0f; // 适配 Vulkan 裁剪空间 Y 轴朝下
 
         // 3. 上传相机 + 全局雾参数 UBO
+        const glm::vec3 fog_color(cfg.fog.r, cfg.fog.g, cfg.fog.b);
         const CameraFogUbo ubo {
             .view = view,
             .proj = proj,
             .fog_color = glm::vec4(fog_color, 1.0f),
-            .fog_params = glm::vec4(fog_start, fog_end, 0.0f, 0.0f),
+            .fog_params = glm::vec4(cfg.fog.start, cfg.fog.end, 0.0f, 0.0f),
         };
         ubo_buffer->upload(ubo);
 
@@ -72,9 +73,9 @@ auto App::run() -> int {
         auto graphics = renderer->acquire_context();
         if(graphics) {
             VkClearColorValue clear {};
-            clear.float32[0] = fog_color.r;
-            clear.float32[1] = fog_color.g;
-            clear.float32[2] = fog_color.b;
+            clear.float32[0] = cfg.fog.r;
+            clear.float32[1] = cfg.fog.g;
+            clear.float32[2] = cfg.fog.b;
             clear.float32[3] = 1.0f;
 
             graphics.begin(clear);
@@ -126,17 +127,17 @@ auto App::update_camera(float dt) -> void {
         cam_pos += glm::normalize(move) * speed * dt;
     }
 
-    // ---- 全局线性雾参数实时调节 ----
+    // ---- 全局线性雾参数实时调节（直接写回 cfg.fog：配置即运行期状态） ----
     const double sy = input.get_mouse_scroll().second;
     if(sy != 0.0) {
-        fog_end = std::clamp(fog_end + static_cast<float>(sy), fog_start + 0.5f, 200.0f);
+        cfg.fog.end = std::clamp(cfg.fog.end + static_cast<float>(sy), cfg.fog.start + 0.5f, 200.0f);
     }
-    if(input.is_key_down(ave::KeyCode::R)) fog_end += dt * 5.0f;
-    if(input.is_key_down(ave::KeyCode::T)) fog_end -= dt * 5.0f;
-    if(input.is_key_down(ave::KeyCode::G)) fog_start += dt * 5.0f;
-    if(input.is_key_down(ave::KeyCode::F)) fog_start -= dt * 5.0f;
-    fog_end = std::max(fog_start + 0.5f, fog_end);
-    fog_start = std::clamp(fog_start, 0.0f, fog_end - 0.5f);
+    if(input.is_key_down(ave::KeyCode::R)) cfg.fog.end += dt * 5.0f;
+    if(input.is_key_down(ave::KeyCode::T)) cfg.fog.end -= dt * 5.0f;
+    if(input.is_key_down(ave::KeyCode::G)) cfg.fog.start += dt * 5.0f;
+    if(input.is_key_down(ave::KeyCode::F)) cfg.fog.start -= dt * 5.0f;
+    cfg.fog.end = std::max(cfg.fog.start + 0.5f, cfg.fog.end);
+    cfg.fog.start = std::clamp(cfg.fog.start, 0.0f, cfg.fog.end - 0.5f);
 }
 
 auto App::draw_object(ave::GraphicsContext& graphics, const Object& obj) -> void {

@@ -99,15 +99,10 @@ struct App {
     /// 场景：一排沿 -Z 渐远的立方体 + 地面
     std::vector<Object> objects;
 
-    /// 运行期相机状态（由 update_camera 推进）
+    /// 运行期相机状态（由 update_camera 推进；雾参数直接读写 cfg.fog，按键实时调节）
     glm::vec3 cam_pos { 0.0f, 1.6f, 10.0f };
     float cam_yaw { -90.0f };   ///< 度，-90 即朝向 -Z
     float cam_pitch { -12.0f }; ///< 度，负数俯视
-
-    /// 运行期雾参数（可由按键/滚轮调节）
-    glm::vec3 fog_color;
-    float fog_start;
-    float fog_end;
 
     App(const AppConfig & cfg);
     void setup();
