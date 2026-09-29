@@ -97,7 +97,8 @@ export namespace ave {
 
         [[nodiscard]] std::shared_ptr<DynamicPipeline> create_graphics_pipeline(
             GraphicsShaderBytecode shaders,
-            ConfigureDynamicPipeline configure = {}
+            ConfigureDynamicPipeline configure = {},
+            alib6::ErrorWrapper ew = {}
         );
 
         [[nodiscard]] std::shared_ptr<DynamicPipeline> create_graphics_pipeline(
@@ -105,12 +106,14 @@ export namespace ave {
             ShaderBytecode fragment,
             ShaderBytecode geometry = {},
             TessellationShaderBytecode tessellation = {},
-            ConfigureDynamicPipeline configure = {}
+            ConfigureDynamicPipeline configure = {},
+            alib6::ErrorWrapper ew = {}
         );
 
         [[nodiscard]] std::shared_ptr<DynamicPipeline> create_graphics_pipeline(
             GraphicsShaderPaths shaders,
-            ConfigureDynamicPipeline configure = {}
+            ConfigureDynamicPipeline configure = {},
+            alib6::ErrorWrapper ew = {}
         );
 
         [[nodiscard]] std::shared_ptr<DynamicPipeline> create_graphics_pipeline(
@@ -118,7 +121,8 @@ export namespace ave {
             std::string_view fragment,
             std::string_view geometry = {},
             TessellationShaderPaths tessellation = {},
-            ConfigureDynamicPipeline configure = {}
+            ConfigureDynamicPipeline configure = {},
+            alib6::ErrorWrapper ew = {}
         );
 
         [[nodiscard]] explicit operator bool() const noexcept;

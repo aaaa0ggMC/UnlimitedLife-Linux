@@ -552,14 +552,16 @@ export namespace ave {
             std::size_t count,
             VkDeviceSize element_size,
             VkDeviceSize alignment = 1,
-            VkDeviceSize start_offset = 0
+            VkDeviceSize start_offset = 0,
+            alib6::ErrorWrapper ew = {}
         ) const;
 
         template<typename T>
         [[nodiscard]] BasicBufferSlices<MemoryPolicy> slice_n(
             std::size_t count,
             VkDeviceSize alignment = 1,
-            VkDeviceSize start_offset = 0
+            VkDeviceSize start_offset = 0,
+            alib6::ErrorWrapper ew = {}
         ) const;
 
         /// 在现有容量内自动分配一段包含 count 个槽位的连续区域，切分为 count 个切片（步长按 ai.alignment 对齐），所有切片共享同一次分配的生命周期。

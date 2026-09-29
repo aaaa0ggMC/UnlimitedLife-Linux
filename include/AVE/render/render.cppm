@@ -552,25 +552,29 @@ export namespace ave{
         // Dynamic graphics pipeline creation (forwards to dynamic_render, panics if not in dynamic mode)
         [[nodiscard]] std::shared_ptr<DynamicPipeline> create_dynamic_graphics_pipeline(
             GraphicsShaderBytecode shaders,
-            ConfigureDynamicPipeline configure = nullptr
+            ConfigureDynamicPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<DynamicPipeline> create_dynamic_graphics_pipeline(
             ShaderBytecode vertex,
             ShaderBytecode fragment,
             ShaderBytecode geometry = {},
             TessellationShaderBytecode tessellation = {},
-            ConfigureDynamicPipeline configure = nullptr
+            ConfigureDynamicPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<DynamicPipeline> create_dynamic_graphics_pipeline(
             GraphicsShaderPaths shaders,
-            ConfigureDynamicPipeline configure = nullptr
+            ConfigureDynamicPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<DynamicPipeline> create_dynamic_graphics_pipeline(
             std::string_view vertex,
             std::string_view fragment,
             std::string_view geometry = {},
             TessellationShaderPaths tessellation = {},
-            ConfigureDynamicPipeline configure = nullptr
+            ConfigureDynamicPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
 
         template<typename... Args>
@@ -581,25 +585,29 @@ export namespace ave{
         // Legacy graphics pipeline creation (forwards to legacy_render, panics if not in legacy mode)
         [[nodiscard]] std::shared_ptr<LegacyPipeline> create_legacy_graphics_pipeline(
             GraphicsShaderBytecode shaders,
-            ConfigureLegacyPipeline configure = nullptr
+            ConfigureLegacyPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<LegacyPipeline> create_legacy_graphics_pipeline(
             ShaderBytecode vertex,
             ShaderBytecode fragment,
             ShaderBytecode geometry = {},
             TessellationShaderBytecode tessellation = {},
-            ConfigureLegacyPipeline configure = nullptr
+            ConfigureLegacyPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<LegacyPipeline> create_legacy_graphics_pipeline(
             GraphicsShaderPaths shaders,
-            ConfigureLegacyPipeline configure = nullptr
+            ConfigureLegacyPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<LegacyPipeline> create_legacy_graphics_pipeline(
             std::string_view vertex,
             std::string_view fragment,
             std::string_view geometry = {},
             TessellationShaderPaths tessellation = {},
-            ConfigureLegacyPipeline configure = nullptr
+            ConfigureLegacyPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
 
         template<typename... Args>
@@ -610,28 +618,33 @@ export namespace ave{
         // Graceful-degradation graphics pipeline creation (returns Pipeline base, dynamically branches)
         [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
             GraphicsShaderBytecode shaders,
-            ConfigureGraphicsPipeline configure = nullptr
+            ConfigureGraphicsPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
             ShaderBytecode vertex,
             ShaderBytecode fragment,
             ShaderBytecode geometry = {},
             TessellationShaderBytecode tessellation = {},
-            ConfigureGraphicsPipeline configure = nullptr
+            ConfigureGraphicsPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
             GraphicsShaderPaths shaders,
-            ConfigureGraphicsPipeline configure = nullptr
+            ConfigureGraphicsPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
             std::string_view vertex,
             std::string_view fragment,
             std::string_view geometry = {},
             TessellationShaderPaths tessellation = {},
-            ConfigureGraphicsPipeline configure = nullptr
+            ConfigureGraphicsPipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
         );
         [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
-            GraphicsPipelineConfig config
+            GraphicsPipelineConfig config,
+            alib6::ErrorWrapper ew = {}
         );
 
     private:

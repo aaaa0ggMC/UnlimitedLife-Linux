@@ -3,11 +3,6 @@
 namespace avetest {
 
 void App::run() {
-    RenderCache rc {
-        .pipeline = *pipeline,
-        .index_count = index_count
-    };
-
     ave::misc::FPSDetective detective;
     detective.start();
 
@@ -19,9 +14,8 @@ void App::run() {
         angle += 0.001f;
 
         const auto extent = window->get_framebuffer_size();
-        float aspect = (extent.second > 0)
-            ? (static_cast<float>(extent.first) / static_cast<float>(extent.second))
-            : (800.0f / 600.0f);
+        const float aspect = static_cast<float>(extent.first)
+                           / static_cast<float>(extent.second);
 
         // 模型矩阵：绕着斜对角轴 3D 复合旋转
         glm::mat4 model = glm::rotate(
@@ -50,7 +44,7 @@ void App::run() {
             .model = model
         };
 
-        render_frame(rc, pc);
+        render_frame(pc);
         detective.next_frame();
     }
 

@@ -91,9 +91,15 @@ export namespace ave {
         /// 对当前切片做进一步的子切片（sub_offset 相对于当前切片的起始位置）
         [[nodiscard]] BasicBufferSlice sub_slice(
             VkDeviceSize sub_offset,
-            VkDeviceSize sub_size = VK_WHOLE_SIZE
+            VkDeviceSize sub_size = VK_WHOLE_SIZE,
+            alib6::ErrorWrapper ew = {}
         ) const {
-            if(!*this || sub_offset >= size) return {};
+            if(!*this || sub_offset >= size) {
+                ew.report(ave_vk_map_buffer,
+                    "sub_slice out of range: offset {} is invalid for a BufferSlice of size {}.",
+                    sub_offset, size);
+                return {};
+            }
             const auto available = size - sub_offset;
             auto result = BasicBufferSlice(buffer, offset + sub_offset,
                 sub_size == VK_WHOLE_SIZE ? available : std::min(sub_size, available));
@@ -106,14 +112,16 @@ export namespace ave {
             std::size_t count,
             VkDeviceSize target_element_size,
             VkDeviceSize alignment = 1,
-            VkDeviceSize sub_offset = 0
+            VkDeviceSize sub_offset = 0,
+            alib6::ErrorWrapper ew = {}
         ) const;
 
         template<typename T>
         [[nodiscard]] BasicBufferSlices<MemoryPolicy> slice_n(
             std::size_t count,
             VkDeviceSize alignment = 1,
-            VkDeviceSize sub_offset = 0
+            VkDeviceSize sub_offset = 0,
+            alib6::ErrorWrapper ew = {}
         ) const;
 
         /// 映射该切片对应的显存区间
@@ -421,12 +429,22 @@ export namespace ave {
         std::size_t count,
         VkDeviceSize target_element_size,
         VkDeviceSize alignment,
-        VkDeviceSize sub_offset
+        VkDeviceSize sub_offset,
+        alib6::ErrorWrapper ew
     ) const {
-        if(!*this || count == 0 || target_element_size == 0) return {};
+        if(!*this || count == 0 || target_element_size == 0) {
+            ew.report(ave_vk_map_buffer,
+                "slice_n requires a valid BufferSlice, nonzero count and element size.");
+            return {};
+        }
         const auto target_stride = detail::align_up(target_element_size, alignment);
         const auto total_needed = (count - 1) * target_stride + target_element_size;
-        if(sub_offset + total_needed > size) return {};
+        if(sub_offset + total_needed > size) {
+            ew.report(ave_vk_map_buffer,
+                "slice_n range [{} , {}) exceeds BufferSlice size ({}).",
+                sub_offset, sub_offset + total_needed, size);
+            return {};
+        }
 
         std::vector<BasicBufferSlice<MemoryPolicy>> result_slices;
         result_slices.reserve(count);
@@ -443,9 +461,10 @@ export namespace ave {
     BasicBufferSlices<MemoryPolicy> BasicBufferSlice<MemoryPolicy>::slice_n(
         std::size_t count,
         VkDeviceSize alignment,
-        VkDeviceSize sub_offset
+        VkDeviceSize sub_offset,
+        alib6::ErrorWrapper ew
     ) const {
-        return slice_n(count, static_cast<VkDeviceSize>(sizeof(T)), alignment, sub_offset);
+        return slice_n(count, static_cast<VkDeviceSize>(sizeof(T)), alignment, sub_offset, ew);
     }
 
     template<class MemoryPolicy>
@@ -453,12 +472,22 @@ export namespace ave {
         std::size_t count,
         VkDeviceSize element_size,
         VkDeviceSize alignment,
-        VkDeviceSize start_offset
+        VkDeviceSize start_offset,
+        alib6::ErrorWrapper ew
     ) const {
-        if(!*this || count == 0 || element_size == 0) return {};
+        if(!*this || count == 0 || element_size == 0) {
+            ew.report(ave_vk_map_buffer,
+                "slice_n requires an initialized Buffer, nonzero count and element size.");
+            return {};
+        }
         const auto target_stride = detail::align_up(element_size, alignment);
         const auto total_needed = (count - 1) * target_stride + element_size;
-        if(start_offset + total_needed > get_size()) return {};
+        if(start_offset + total_needed > get_size()) {
+            ew.report(ave_vk_map_buffer,
+                "slice_n range [{} , {}) exceeds Buffer size ({}).",
+                start_offset, start_offset + total_needed, get_size());
+            return {};
+        }
 
         auto owner = std::make_shared<BasicBuffer>();
         owner->state = state;
@@ -476,9 +505,10 @@ export namespace ave {
     BasicBufferSlices<MemoryPolicy> BasicBuffer<MemoryPolicy>::slice_n(
         std::size_t count,
         VkDeviceSize alignment,
-        VkDeviceSize start_offset
+        VkDeviceSize start_offset,
+        alib6::ErrorWrapper ew
     ) const {
-        return slice_n(count, static_cast<VkDeviceSize>(sizeof(T)), alignment, start_offset);
+        return slice_n(count, static_cast<VkDeviceSize>(sizeof(T)), alignment, start_offset, ew);
     }
 
     template<class MemoryPolicy>

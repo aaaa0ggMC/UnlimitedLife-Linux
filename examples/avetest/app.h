@@ -21,12 +21,6 @@ struct alignas(16) PushConstant {
 };
 static_assert(ave::is_std430_compatible_v<PushConstant>);
 
-// 小朋友们不要学我偶
-struct RenderCache {
-    ave::Pipeline & pipeline;
-    uint32_t index_count { 36 };
-};
-
 struct App {
     alib6::Logger logger;
     alib6::LogFactory lg;
@@ -57,7 +51,7 @@ struct App {
     void setup_texture();
     void setup_ubo();
     void run();
-    void render_frame(RenderCache rc, const PushConstant& pc);
+    void render_frame(const PushConstant& pc);
 };
 
 

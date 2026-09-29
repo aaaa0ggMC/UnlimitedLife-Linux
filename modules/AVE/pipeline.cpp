@@ -596,9 +596,11 @@ std::shared_ptr<LegacyPipeline> LegacyPipeline::create(
 
 std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     GraphicsShaderBytecode shaders,
-    ConfigureLegacyPipeline configure
+    ConfigureLegacyPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     CreatePipelineInfo<pipeline_type::Legacy> ci;
+    ci.ew = ew;
     ci.render = shared_from_this();
     ci.device = get_device();
     ci.subpass = 0;
@@ -636,6 +638,8 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
        (shaders.tessellation.complete() &&
         (modules.tessellation_control == VK_NULL_HANDLE ||
          modules.tessellation_evaluation == VK_NULL_HANDLE))) {
+        ci.ew.report(ave_vk_create_shader_module,
+            "Failed to create one or more required pipeline shader modules.");
         return {};
     }
 
@@ -654,25 +658,27 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     ShaderBytecode fragment,
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
-    ConfigureLegacyPipeline configure
+    ConfigureLegacyPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderBytecode {
         .vertex = vertex,
         .fragment = fragment,
         .geometry = geometry,
         .tessellation = tessellation
-    }, std::move(configure));
+    }, std::move(configure), ew);
 }
 
 std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     GraphicsShaderPaths shaders,
-    ConfigureLegacyPipeline configure
+    ConfigureLegacyPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     const bool incomplete_tessellation =
         shaders.tessellation.control.empty() !=
         shaders.tessellation.evaluation.empty();
     if(shaders.vertex.empty() || shaders.fragment.empty() || incomplete_tessellation) {
-        alib6::ErrorWrapper{}.report(ave_vk_create_shader_module,
+        ew.report(ave_vk_create_shader_module,
             "Graphics shader paths require vertex/fragment and a complete tessellation pair.");
         return {};
     }
@@ -692,7 +698,7 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
        !read(shaders.geometry, geometry) ||
        !read(shaders.tessellation.control, tessellation_control) ||
        !read(shaders.tessellation.evaluation, tessellation_evaluation)) {
-        alib6::ErrorWrapper{}.report(ave_vk_create_shader_module,
+        ew.report(ave_vk_create_shader_module,
             "Failed to read one or more SPIR-V shader files.");
         return {};
     }
@@ -707,7 +713,7 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
             .patch_control_points = shaders.tessellation.patch_control_points
         },
         .entry_point = std::move(shaders.entry_point)
-    }, std::move(configure));
+    }, std::move(configure), ew);
 }
 
 std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
@@ -715,23 +721,26 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     std::string_view fragment,
     std::string_view geometry,
     TessellationShaderPaths tessellation,
-    ConfigureLegacyPipeline configure
+    ConfigureLegacyPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderPaths {
         .vertex = vertex,
         .fragment = fragment,
         .geometry = geometry,
         .tessellation = tessellation
-    }, std::move(configure));
+    }, std::move(configure), ew);
 }
 
 // ---------------- DynamicRender::create_graphics_pipeline ----------------
 
 std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     GraphicsShaderBytecode shaders,
-    ConfigureDynamicPipeline configure
+    ConfigureDynamicPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     CreatePipelineInfo<pipeline_type::Dynamic> ci;
+    ci.ew = ew;
     ci.device = get_device();
     ci.color_attachment_formats = color_attachment_formats;
     ci.depth_attachment_format = depth_attachment_format;
@@ -770,6 +779,8 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
        (shaders.tessellation.complete() &&
         (modules.tessellation_control == VK_NULL_HANDLE ||
          modules.tessellation_evaluation == VK_NULL_HANDLE))) {
+        ci.ew.report(ave_vk_create_shader_module,
+            "Failed to create one or more required pipeline shader modules.");
         return {};
     }
 
@@ -788,25 +799,27 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     ShaderBytecode fragment,
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
-    ConfigureDynamicPipeline configure
+    ConfigureDynamicPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderBytecode {
         .vertex = vertex,
         .fragment = fragment,
         .geometry = geometry,
         .tessellation = tessellation
-    }, std::move(configure));
+    }, std::move(configure), ew);
 }
 
 std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     GraphicsShaderPaths shaders,
-    ConfigureDynamicPipeline configure
+    ConfigureDynamicPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     const bool incomplete_tessellation =
         shaders.tessellation.control.empty() !=
         shaders.tessellation.evaluation.empty();
     if(shaders.vertex.empty() || shaders.fragment.empty() || incomplete_tessellation) {
-        alib6::ErrorWrapper{}.report(ave_vk_create_shader_module,
+        ew.report(ave_vk_create_shader_module,
             "Graphics shader paths require vertex/fragment and a complete tessellation pair.");
         return {};
     }
@@ -826,7 +839,7 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
        !read(shaders.geometry, geometry) ||
        !read(shaders.tessellation.control, tessellation_control) ||
        !read(shaders.tessellation.evaluation, tessellation_evaluation)) {
-        alib6::ErrorWrapper{}.report(ave_vk_create_shader_module,
+        ew.report(ave_vk_create_shader_module,
             "Failed to read one or more SPIR-V shader files.");
         return {};
     }
@@ -841,7 +854,7 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
             .patch_control_points = shaders.tessellation.patch_control_points
         },
         .entry_point = std::move(shaders.entry_point)
-    }, std::move(configure));
+    }, std::move(configure), ew);
 }
 
 std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
@@ -849,14 +862,15 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     std::string_view fragment,
     std::string_view geometry,
     TessellationShaderPaths tessellation,
-    ConfigureDynamicPipeline configure
+    ConfigureDynamicPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderPaths {
         .vertex = vertex,
         .fragment = fragment,
         .geometry = geometry,
         .tessellation = tessellation
-    }, std::move(configure));
+    }, std::move(configure), ew);
 }
 
 // ---------------- Renderer render backend creation ----------------
@@ -916,11 +930,15 @@ std::shared_ptr<DynamicRender> Renderer::create_dynamic_render(
 
 std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
     GraphicsShaderBytecode shaders,
-    ConfigureDynamicPipeline configure
+    ConfigureDynamicPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
-    panic_debug(!dynamic_render,
-        "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
-    return dynamic_render->create_graphics_pipeline(std::move(shaders), std::move(configure));
+    if(!dynamic_render) {
+        ew.report(ave_vk_create_graphics_pipeline,
+            "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+        return {};
+    }
+    return dynamic_render->create_graphics_pipeline(std::move(shaders), std::move(configure), ew);
 }
 
 std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
@@ -928,21 +946,29 @@ std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
     ShaderBytecode fragment,
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
-    ConfigureDynamicPipeline configure
+    ConfigureDynamicPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
-    panic_debug(!dynamic_render,
-        "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+    if(!dynamic_render) {
+        ew.report(ave_vk_create_graphics_pipeline,
+            "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+        return {};
+    }
     return dynamic_render->create_graphics_pipeline(
-        vertex, fragment, geometry, tessellation, std::move(configure));
+        vertex, fragment, geometry, tessellation, std::move(configure), ew);
 }
 
 std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
     GraphicsShaderPaths shaders,
-    ConfigureDynamicPipeline configure
+    ConfigureDynamicPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
-    panic_debug(!dynamic_render,
-        "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
-    return dynamic_render->create_graphics_pipeline(shaders, std::move(configure));
+    if(!dynamic_render) {
+        ew.report(ave_vk_create_graphics_pipeline,
+            "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+        return {};
+    }
+    return dynamic_render->create_graphics_pipeline(shaders, std::move(configure), ew);
 }
 
 std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
@@ -950,23 +976,31 @@ std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
     std::string_view fragment,
     std::string_view geometry,
     TessellationShaderPaths tessellation,
-    ConfigureDynamicPipeline configure
+    ConfigureDynamicPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
-    panic_debug(!dynamic_render,
-        "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+    if(!dynamic_render) {
+        ew.report(ave_vk_create_graphics_pipeline,
+            "Renderer is not in dynamic rendering mode, cannot create dynamic graphics pipeline.");
+        return {};
+    }
     return dynamic_render->create_graphics_pipeline(
-        vertex, fragment, geometry, tessellation, std::move(configure));
+        vertex, fragment, geometry, tessellation, std::move(configure), ew);
 }
 
 // ---------------- Renderer::create_legacy_graphics_pipeline ----------------
 
 std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
     GraphicsShaderBytecode shaders,
-    ConfigureLegacyPipeline configure
+    ConfigureLegacyPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
-    panic_debug(!legacy_render,
-        "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
-    return legacy_render->create_graphics_pipeline(std::move(shaders), std::move(configure));
+    if(!legacy_render) {
+        ew.report(ave_vk_create_graphics_pipeline,
+            "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+        return {};
+    }
+    return legacy_render->create_graphics_pipeline(std::move(shaders), std::move(configure), ew);
 }
 
 std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
@@ -974,21 +1008,29 @@ std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
     ShaderBytecode fragment,
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
-    ConfigureLegacyPipeline configure
+    ConfigureLegacyPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
-    panic_debug(!legacy_render,
-        "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+    if(!legacy_render) {
+        ew.report(ave_vk_create_graphics_pipeline,
+            "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+        return {};
+    }
     return legacy_render->create_graphics_pipeline(
-        vertex, fragment, geometry, tessellation, std::move(configure));
+        vertex, fragment, geometry, tessellation, std::move(configure), ew);
 }
 
 std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
     GraphicsShaderPaths shaders,
-    ConfigureLegacyPipeline configure
+    ConfigureLegacyPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
-    panic_debug(!legacy_render,
-        "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
-    return legacy_render->create_graphics_pipeline(shaders, std::move(configure));
+    if(!legacy_render) {
+        ew.report(ave_vk_create_graphics_pipeline,
+            "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+        return {};
+    }
+    return legacy_render->create_graphics_pipeline(shaders, std::move(configure), ew);
 }
 
 std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
@@ -996,26 +1038,32 @@ std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
     std::string_view fragment,
     std::string_view geometry,
     TessellationShaderPaths tessellation,
-    ConfigureLegacyPipeline configure
+    ConfigureLegacyPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
-    panic_debug(!legacy_render,
-        "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+    if(!legacy_render) {
+        ew.report(ave_vk_create_graphics_pipeline,
+            "Renderer is not in legacy rendering mode, cannot create legacy graphics pipeline.");
+        return {};
+    }
     return legacy_render->create_graphics_pipeline(
-        vertex, fragment, geometry, tessellation, std::move(configure));
+        vertex, fragment, geometry, tessellation, std::move(configure), ew);
 }
 
 // ---------------- Renderer::create_graphics_pipeline (graceful degradation) ----------------
 
 std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     GraphicsShaderBytecode shaders,
-    ConfigureGraphicsPipeline configure
+    ConfigureGraphicsPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     if(dynamic_render) {
         return dynamic_render->create_graphics_pipeline(
             std::move(shaders),
             configure ? ConfigureDynamicPipeline([configure](CreatePipelineInfo<pipeline_type::Dynamic>& ci) {
                 configure(ci);
-            }) : ConfigureDynamicPipeline{}
+            }) : ConfigureDynamicPipeline{},
+            ew
         );
     }
     if(legacy_render) {
@@ -1023,10 +1071,12 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
             std::move(shaders),
             configure ? ConfigureLegacyPipeline([configure](CreatePipelineInfo<pipeline_type::Legacy>& ci) {
                 configure(ci);
-            }) : ConfigureLegacyPipeline{}
+            }) : ConfigureLegacyPipeline{},
+            ew
         );
     }
-    panic_debug(false, "Renderer has neither dynamic_render nor legacy_render initialized.");
+    ew.report(ave_vk_create_graphics_pipeline,
+        "Renderer has neither dynamic_render nor legacy_render initialized.");
     return {};
 }
 
@@ -1035,26 +1085,29 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     ShaderBytecode fragment,
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
-    ConfigureGraphicsPipeline configure
+    ConfigureGraphicsPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderBytecode {
         .vertex = vertex,
         .fragment = fragment,
         .geometry = geometry,
         .tessellation = tessellation
-    }, std::move(configure));
+    }, std::move(configure), ew);
 }
 
 std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     GraphicsShaderPaths shaders,
-    ConfigureGraphicsPipeline configure
+    ConfigureGraphicsPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     if(dynamic_render) {
         return dynamic_render->create_graphics_pipeline(
             shaders,
             configure ? ConfigureDynamicPipeline([configure](CreatePipelineInfo<pipeline_type::Dynamic>& ci) {
                 configure(ci);
-            }) : ConfigureDynamicPipeline{}
+            }) : ConfigureDynamicPipeline{},
+            ew
         );
     }
     if(legacy_render) {
@@ -1062,10 +1115,12 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
             shaders,
             configure ? ConfigureLegacyPipeline([configure](CreatePipelineInfo<pipeline_type::Legacy>& ci) {
                 configure(ci);
-            }) : ConfigureLegacyPipeline{}
+            }) : ConfigureLegacyPipeline{},
+            ew
         );
     }
-    panic_debug(false, "Renderer has neither dynamic_render nor legacy_render initialized.");
+    ew.report(ave_vk_create_graphics_pipeline,
+        "Renderer has neither dynamic_render nor legacy_render initialized.");
     return {};
 }
 
@@ -1074,18 +1129,20 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     std::string_view fragment,
     std::string_view geometry,
     TessellationShaderPaths tessellation,
-    ConfigureGraphicsPipeline configure
+    ConfigureGraphicsPipeline configure,
+    alib6::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderPaths {
         .vertex = vertex,
         .fragment = fragment,
         .geometry = geometry,
         .tessellation = tessellation
-    }, std::move(configure));
+    }, std::move(configure), ew);
 }
 
 std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
-    GraphicsPipelineConfig config
+    GraphicsPipelineConfig config,
+    alib6::ErrorWrapper ew
 ) {
     GraphicsShaderPaths paths {
         .vertex = config.vert,
@@ -1148,7 +1205,7 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
         if(cfg.configure) {
             cfg.configure(ci);
         }
-    });
+    }, ew);
 }
 
 }

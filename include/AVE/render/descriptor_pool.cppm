@@ -125,7 +125,8 @@ export namespace ave {
             VkBuffer buffer,
             VkDeviceSize offset = 0,
             VkDeviceSize range = VK_WHOLE_SIZE,
-            alib6::u32 dst_array_element = 0
+            alib6::u32 dst_array_element = 0,
+            alib6::ErrorWrapper ew = {}
         );
 
         /// @brief 向已有 descriptor set 写入一个图像（sampler + view）描述符。
@@ -136,7 +137,8 @@ export namespace ave {
             VkImageView view,
             VkImageLayout image_layout =
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            alib6::u32 dst_array_element = 0
+            alib6::u32 dst_array_element = 0,
+            alib6::ErrorWrapper ew = {}
         );
     };
 

@@ -143,7 +143,11 @@ std::vector<VkDescriptorSet> DescriptorPool::allocate_descriptor_sets(
             "Cannot allocate descriptor sets from an invalid DescriptorPool.");
         return {};
     }
-    if(layouts.empty()) return {};
+    if(layouts.empty()) {
+        ew.report(ave_vk_create_descriptor_pool,
+            "Cannot allocate zero descriptor sets.");
+        return {};
+    }
 
     auto result = std::vector<VkDescriptorSet>(layouts.size(), VK_NULL_HANDLE);
 
@@ -170,9 +174,19 @@ void DescriptorPool::write_buffer(
     VkBuffer buffer,
     VkDeviceSize offset,
     VkDeviceSize range,
-    alib6::u32 dst_array_element
+    alib6::u32 dst_array_element,
+    alib6::ErrorWrapper ew
 ) {
-    if(!device) return;
+    if(pool == VK_NULL_HANDLE || !device) {
+        ew.report(ave_vk_create_descriptor_pool,
+            "Cannot write buffer descriptor from an invalid DescriptorPool.");
+        return;
+    }
+    if(dst_set == VK_NULL_HANDLE) {
+        ew.report(ave_vk_create_descriptor_pool,
+            "Cannot write buffer descriptor to a null DescriptorSet.");
+        return;
+    }
 
     VkDescriptorBufferInfo buffer_info {
         .buffer = buffer,
@@ -197,9 +211,19 @@ void DescriptorPool::write_image(
     VkSampler sampler,
     VkImageView view,
     VkImageLayout image_layout,
-    alib6::u32 dst_array_element
+    alib6::u32 dst_array_element,
+    alib6::ErrorWrapper ew
 ) {
-    if(!device) return;
+    if(pool == VK_NULL_HANDLE || !device) {
+        ew.report(ave_vk_create_descriptor_pool,
+            "Cannot write image descriptor from an invalid DescriptorPool.");
+        return;
+    }
+    if(dst_set == VK_NULL_HANDLE) {
+        ew.report(ave_vk_create_descriptor_pool,
+            "Cannot write image descriptor to a null DescriptorSet.");
+        return;
+    }
 
     VkDescriptorImageInfo image_info {
         .sampler = sampler,

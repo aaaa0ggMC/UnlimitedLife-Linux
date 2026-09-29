@@ -17,12 +17,12 @@ void App::setup() {
         .height = 600,
     });
 
+    // renderer 要到本函数末尾才构建，但窗口事件只在 run() 的 poll/process 中派发，
+    // 彼时 renderer 必然已就绪；0 尺寸（如最小化）由库内部直接返回 false，无需在此判断。
     window->on<ave::AfterWindowFramebufferResizeEvent>(
-    [this](ave::AfterWindowFramebufferResizeEvent& ev) {
-        if(ev.width > 0 && ev.height > 0 && renderer.has_value()) {
-            if(ave::recreate_swapchain_from_window(*renderer, *window)) {
-                lg << "Recreated swapchain." << std::endl;
-            }
+    [this](ave::AfterWindowFramebufferResizeEvent&) {
+        if(ave::recreate_swapchain_from_window(*renderer, *window)) {
+            lg << "Recreated swapchain." << std::endl;
         }
     });
 
@@ -61,7 +61,6 @@ void App::setup() {
         .with_result(report)
         .build();
 
-    // lg << alib6::to_adata(report) << std::endl;
     setup_vertex_data();
 
     auto vertex_input = ave::vertex_layout<Vertex>().build();
@@ -130,22 +129,14 @@ void App::setup_vertex_data() {
 }
 
 void App::setup_texture() {
-    // 一条调用完成：stb 解码 → VMA 建图 → 内部临时 staging 上传（含 layout 转换）。
-    // - format/extent/usage 零值 → 按文件自动推断；
-    // - .map_info.staging 留空 → 使用 ci.allocator 创建内部 staging；
-    // - 未来有 Sampler 后即可直接通过 descriptor 采样本纹理。
     texture = ave::Image::create_from_file(
         { .allocator = allocator },
         alib6::io::load_entry("avetest/textures/template.png"),
         { .map_info = { .upload_context = renderer->get_upload_context() } }
     );
 
-    if(!texture) return;
-    // 采样器：线性过滤 + Repeat 寻址；非 mipmap 纹理 max_lod = 0
     sampler = ave::Sampler::create({ .device = renderer->device });
-    if(!sampler) return;
-
-    // 纹理（sampler + view）写入 descriptor set 的 binding 1
+    
     renderer->descriptor_pool->write_image(
         descriptor_set,
         1,
