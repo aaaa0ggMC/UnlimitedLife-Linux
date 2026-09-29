@@ -73,8 +73,6 @@ auto App::setup_renderer() -> void {
 auto App::setup_geometry() -> void {
     allocator = ave::VMAAllocator::create_shared({ .device = renderer->device });
 
-    // 场景几何：全部由 ave::Prefab 程序化生成（替代手写顶点数组）
-    // 立方体棱长 1m（uv 1:1），地面 60m×60m、UV 重复 15 次平铺砖墙
     ave::Shape cube_shape = ave::Prefab::cube(1.0f);
     ave::Shape ground_shape = ave::Prefab::plane(60.0f, 60.0f, 15.0f);
 
@@ -97,7 +95,7 @@ auto App::setup_geometry() -> void {
         .host_access = ave::BufferHostAccess::SequentialWrite,
     });
 
-    // 一行代码无感通过 staging 上传到 DeviceOnly 缓冲区切片
+    // 通过 staging 上传到 GPU 上
     const ave::AllocateBufferInfo slice_info {
         .map_info = {
             .staging = staging_buffer.get(),
@@ -122,7 +120,6 @@ auto App::setup_pipeline() -> void {
     lg << "Vertex Input Layout Table:\n" << vertex_input.to_table() << std::endl;
     lg << "Push Constant Layout Table:\n" << push_layout.to_table() << std::endl;
 
-    // 使用聚合 GraphicsPipelineConfig 配置管线（错误由 ErrorWrapper 自动处理）
     // 不透明场景：雾在 fragment shader 内 mix，关闭颜色混合。
     pipeline = renderer->create_graphics_pipeline({
         .vert = "fog/shaders/fog-vert.spv",
@@ -155,7 +152,7 @@ auto App::setup_ubo() -> void {
         .persistent_mapping = true,
     });
 
-    // DescriptorPool 由 Profile 在构建 Renderer 时创建并持有（RAII，销毁时自行等待设备空闲）。
+    // DescriptorPool 由 Profile 在构建 Renderer 时创建并持有
     descriptor_cubes = renderer->descriptor_pool->allocate_descriptor_set(
         pipeline->get_descriptor_set_layout(0)
     );
@@ -180,36 +177,33 @@ auto App::setup_ubo() -> void {
 auto App::setup_textures() -> void {
     sampler = ave::Sampler::create({ .device = renderer->device });
 
-    const auto load_texture = [this](std::string_view path) -> std::shared_ptr<ave::Image> {
-        auto entry = alib6::io::load_entry(path);
-        if(entry.invalid()) {
-            lg << "Failed to load texture " << quote(path) << std::endl;
-            return nullptr;
-        }
-        return ave::Image::create_from_file(
-            { .allocator = allocator },
-            entry,
-            { .map_info = { .upload_context = renderer->get_upload_context() } }
-        );
-    };
+    // 注意：load_entry(path) 默认 force_existence=true，文件不存在时会经默认的
+    // 空 ErrorWrapper 上报——AVE 开启了 ALIB6_ERROR_USE_PANIC，即直接 panic。
+    // 纹理是必需资源：缺文件就该响亮失败；若真的想软检查（如可选配置），
+    // 必须显式 load_entry(path, false) 后判 entry.invalid()（见 main.cpp）。
+    // 半路的降级分支没有意义：缺纹理继续渲染只会把未绑定描述符喂给管线。
+    cube_texture = ave::Image::create_from_file(
+        { .allocator = allocator },
+        alib6::io::load_entry("test_data/imgs/ice.png"),
+        { .map_info = { .upload_context = renderer->get_upload_context() } }
+    );
+    ground_texture = ave::Image::create_from_file(
+        { .allocator = allocator },
+        alib6::io::load_entry("test_data/imgs/wall.jpg"),
+        { .map_info = { .upload_context = renderer->get_upload_context() } }
+    );
 
-    cube_texture = load_texture("test_data/imgs/ice.png");
-    ground_texture = load_texture("test_data/imgs/wall.jpg");
+    renderer->descriptor_pool->write_image(
+        descriptor_cubes, 1, sampler->get_system_handle(), cube_texture->get_image_view()
+    );
+    renderer->descriptor_pool->write_image(
+        descriptor_ground, 1, sampler->get_system_handle(), ground_texture->get_image_view()
+    );
 
-    if(cube_texture) {
-        renderer->descriptor_pool->write_image(
-            descriptor_cubes, 1, sampler->get_system_handle(), cube_texture->get_image_view()
-        );
-        lg << "Loaded ice.png (cubes) " << cube_texture->get_extent().width << "x"
-           << cube_texture->get_extent().height << std::endl;
-    }
-    if(ground_texture) {
-        renderer->descriptor_pool->write_image(
-            descriptor_ground, 1, sampler->get_system_handle(), ground_texture->get_image_view()
-        );
-        lg << "Loaded wall.jpg (ground) " << ground_texture->get_extent().width << "x"
-           << ground_texture->get_extent().height << std::endl;
-    }
+    lg << "Loaded ice.png (cubes) " << cube_texture->get_extent().width << "x"
+       << cube_texture->get_extent().height << std::endl;
+    lg << "Loaded wall.jpg (ground) " << ground_texture->get_extent().width << "x"
+       << ground_texture->get_extent().height << std::endl;
 }
 
 auto App::setup_scene() -> void {
