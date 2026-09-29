@@ -56,3 +56,13 @@ __pycache__/
 *.exe
 *.out
 *.app
+
+# examples/fog-android (Android/Gradle 工程)
+examples/fog-android/local.properties
+examples/fog-android/.gradle/
+examples/fog-android/build/
+examples/fog-android/app/build/
+examples/fog-android/app/src/main/cpp/out/
+examples/fog-android/app/src/main/cpp/build/
+examples/fog-android/.idea/
+*.iml
