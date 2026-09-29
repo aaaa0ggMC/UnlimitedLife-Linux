@@ -1,59 +1,5 @@
 #include "app.h"
 
-//// 场景几何数据 ////
-namespace {
-
-    /// 24 顶点立方体（每面独立 UV）
-    inline constexpr auto geom_cube_vertices = []() {
-        std::array<Vertex, 24> vertices {};
-
-        auto put_face = [&](
-            std::size_t base,
-            glm::vec3 a, glm::vec3 b, glm::vec3 c, glm::vec3 d
-        ) {
-            vertices[base + 0] = { a, glm::vec2(0.0f, 0.0f) };
-            vertices[base + 1] = { b, glm::vec2(1.0f, 0.0f) };
-            vertices[base + 2] = { c, glm::vec2(1.0f, 1.0f) };
-            vertices[base + 3] = { d, glm::vec2(0.0f, 1.0f) };
-        };
-
-        put_face(0,  {-0.5f,-0.5f, 0.5f}, { 0.5f,-0.5f, 0.5f}, { 0.5f, 0.5f, 0.5f}, {-0.5f, 0.5f, 0.5f}); // 前 (+Z)
-        put_face(4,  {-0.5f,-0.5f,-0.5f}, {-0.5f, 0.5f,-0.5f}, { 0.5f, 0.5f,-0.5f}, { 0.5f,-0.5f,-0.5f}); // 后 (-Z)
-        put_face(8,  {-0.5f, 0.5f, 0.5f}, {-0.5f, 0.5f,-0.5f}, {-0.5f,-0.5f,-0.5f}, {-0.5f,-0.5f, 0.5f}); // 左 (-X)
-        put_face(12, { 0.5f, 0.5f, 0.5f}, { 0.5f,-0.5f, 0.5f}, { 0.5f,-0.5f,-0.5f}, { 0.5f, 0.5f,-0.5f}); // 右 (+X)
-        put_face(16, {-0.5f, 0.5f,-0.5f}, {-0.5f, 0.5f, 0.5f}, { 0.5f, 0.5f, 0.5f}, { 0.5f, 0.5f,-0.5f}); // 上 (+Y)
-        put_face(20, {-0.5f,-0.5f,-0.5f}, { 0.5f,-0.5f,-0.5f}, { 0.5f,-0.5f, 0.5f}, {-0.5f,-0.5f, 0.5f}); // 下 (-Y)
-
-        return vertices;
-    }();
-
-    inline constexpr std::array<std::uint16_t, 36> geom_cube_indices {{
-         0,  1,  2,  2,  3,  0, // 前 (+Z)
-         4,  5,  6,  6,  7,  4, // 后 (-Z)
-         8,  9, 10, 10, 11,  8, // 左 (-X)
-        12, 13, 14, 14, 15, 12, // 右 (+X)
-        16, 17, 18, 18, 19, 16, // 上 (+Y)
-        20, 21, 22, 22, 23, 20  // 下 (-Y)
-    }};
-
-    /// 60m × 60m 地面 quad（y = 0 平面，UV 放大 15 倍配合 REPEAT 采样器平铺砖墙）
-    inline constexpr auto geom_ground_vertices = []() {
-        std::array<Vertex, 4> vertices {};
-        constexpr float s = 30.0f;
-        constexpr float uv = 15.0f;
-        vertices[0] = { {-s, 0.0f, -s}, {0.0f, 0.0f} };
-        vertices[1] = { { s, 0.0f, -s}, {uv,  0.0f} };
-        vertices[2] = { { s, 0.0f,  s}, {uv,  uv } };
-        vertices[3] = { {-s, 0.0f,  s}, {0.0f, uv } };
-        return vertices;
-    }();
-
-    inline constexpr std::array<std::uint16_t, 6> geom_ground_indices {{
-        0, 1, 2, 2, 3, 0
-    }};
-
-}
-
 auto App::setup() -> void {
     setup_create_window();
     setup_renderer();
@@ -127,6 +73,11 @@ auto App::setup_renderer() -> void {
 auto App::setup_geometry() -> void {
     allocator = ave::VMAAllocator::create_shared({ .device = renderer->device });
 
+    // 场景几何：全部由 ave::Prefab 程序化生成（替代手写顶点数组）
+    // 立方体棱长 1m（uv 1:1），地面 60m×60m、UV 重复 15 次平铺砖墙
+    ave::Shape cube_shape = ave::Prefab::cube(1.0f);
+    ave::Shape ground_shape = ave::Prefab::plane(60.0f, 60.0f, 15.0f);
+
     // 立方体与地面几何共用同一个 DeviceOnly 缓冲区（各自通过 slice 访问）
     geometry_buffer.emplace(ave::CreateVMABufferInfo{
         .allocator = allocator,
@@ -140,8 +91,8 @@ auto App::setup_geometry() -> void {
     // 创建临时的 CPU 可见中介缓冲 (Staging Buffer)
     staging_buffer = std::make_unique<ave::VMABuffer>(ave::CreateVMABufferInfo{
         .allocator = allocator,
-        .size = sizeof(Vertex) * (geom_cube_vertices.size() + geom_ground_vertices.size())
-              + sizeof(std::uint16_t) * (geom_cube_indices.size() + geom_ground_indices.size()),
+        .size = sizeof(ave::Shape::Vertex) * (cube_shape.vertex_count() + ground_shape.vertex_count())
+              + sizeof(std::uint32_t) * (cube_shape.index_count() + ground_shape.index_count()),
         .usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         .host_access = ave::BufferHostAccess::SequentialWrite,
     });
@@ -153,19 +104,19 @@ auto App::setup_geometry() -> void {
             .upload_context = renderer->get_upload_context()
         }
     };
-    cube_vertices = geometry_buffer->alloc(geom_cube_vertices, slice_info);
-    cube_indices = geometry_buffer->alloc(geom_cube_indices, slice_info);
-    ground_vertices = geometry_buffer->alloc(geom_ground_vertices, slice_info);
-    ground_indices = geometry_buffer->alloc(geom_ground_indices, slice_info);
+    cube_vertices = geometry_buffer->alloc(cube_shape.vertices, slice_info);
+    cube_indices = geometry_buffer->alloc(cube_shape.indices, slice_info);
+    ground_vertices = geometry_buffer->alloc(ground_shape.vertices, slice_info);
+    ground_indices = geometry_buffer->alloc(ground_shape.indices, slice_info);
 
-    lg << "Uploaded " << ::geom_cube_vertices.size() << " cube vertices + "
-       << ::geom_cube_indices.size() << " indices, "
-       << ::geom_ground_vertices.size() << " ground vertices + "
-       << ::geom_ground_indices.size() << " indices." << std::endl;
+    lg << "Uploaded " << cube_shape.vertex_count() << " cube vertices + "
+       << cube_shape.index_count() << " indices, "
+       << ground_shape.vertex_count() << " ground vertices + "
+       << ground_shape.index_count() << " indices." << std::endl;
 }
 
 auto App::setup_pipeline() -> void {
-    auto vertex_input = ave::vertex_layout<Vertex>().build();
+    auto vertex_input = ave::vertex_layout<ave::Shape::Vertex>().build();
     auto push_layout = ave::constant_layout<PushConstant>().build();
 
     lg << "Vertex Input Layout Table:\n" << vertex_input.to_table() << std::endl;

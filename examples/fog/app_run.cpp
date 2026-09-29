@@ -146,11 +146,11 @@ auto App::draw_object(ave::GraphicsContext& graphics, const Object& obj) -> void
 
     if(obj.ground) {
         graphics.bind_vertex_buffer(ground_vertices);
-        graphics.bind_index_buffer<std::uint16_t>(ground_indices);
+        graphics.bind_index_buffer<std::uint32_t>(ground_indices);
         graphics.draw_indexed(6);
     } else {
         graphics.bind_vertex_buffer(cube_vertices);
-        graphics.bind_index_buffer<std::uint16_t>(cube_indices);
+        graphics.bind_index_buffer<std::uint32_t>(cube_indices);
         graphics.draw_indexed(36);
     }
 }

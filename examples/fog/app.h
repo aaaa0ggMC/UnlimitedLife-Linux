@@ -32,12 +32,6 @@ struct AppConfig {
     Fog fog;
 };
 
-/// 顶点：位置 + UV
-struct Vertex {
-    glm::vec3 pos;
-    glm::vec2 uv;
-};
-
 /// 相机 + 全局线性雾参数的 UBO（std430）
 struct alignas(16) CameraFogUbo {
     glm::mat4 view;
