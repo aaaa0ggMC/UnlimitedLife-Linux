@@ -73,10 +73,13 @@ auto App::render_scene() -> void {
 
     auto graphics = renderer->acquire_context();
     if(!graphics) {
-        // 窗口最小化等场景：库内直接返回无效上下文，此处按需重建交换链
-        if(graphics.is_out_of_date()) {
-            ave::recreate_swapchain_from_window(context, *renderer, *window);
-        }
+        // 无效上下文（典型：交换链 OUT_OF_DATE、设备暂时不可用）：直接跳过本帧。
+        // 不在这是循环里重建交换链——重建统一走 AfterWindowFramebufferResizeEvent
+        // 的防抖路径（见 setup_create_window）。原因：
+        // 1. 最小化时 recreate 每次只有一次 glfwGetFramebufferSize + 提前返回，纯浪费；
+        // 2. 持续 OUT_OF_DATE 时 recreate 内含 vkDeviceWaitIdle + 全量重建
+        //    (swapchain/sync/command/framebuffer/depth)，每帧调一次会让 GPU 反复停顿。
+        // invalid 路径不会置位 context_acquired，跳过一帧后下一帧可正常重新 acquire。
         return;
     }
 
