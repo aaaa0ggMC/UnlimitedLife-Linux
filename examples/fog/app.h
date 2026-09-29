@@ -47,11 +47,7 @@ struct alignas(16) PushConstant {
 };
 static_assert(ave::is_std430_compatible_v<PushConstant>);
 
-/// 一个待绘制的物体
-struct Object {
-    glm::mat4 model { 1.0f };
-    bool ground { false }; ///< true 使用地面描述符集（ice.png）
-};
+#include "app_comp.h"
 
 struct App {
     AppConfig cfg;
@@ -90,13 +86,18 @@ struct App {
     VkDescriptorSet descriptor_ground { VK_NULL_HANDLE };
     std::optional<ave::Renderer> renderer;
 
-    /// 场景：一排沿 -Z 渐远的立方体 + 地面
-    std::vector<Object> objects;
-
-    /// 运行期相机状态（由 update_camera 推进；雾参数直接读写 cfg.fog，按键实时调节）
-    glm::vec3 cam_pos { 0.0f, 1.6f, 10.0f };
-    float cam_yaw { -90.0f };   ///< 度，-90 即朝向 -Z
-    float cam_pitch { -12.0f }; ///< 度，负数俯视
+    //// ECS ////
+    /// 实体管理器（在 renderer 之后声明 → 先于 renderer 析构）
+    alib6::ecs::EntityManager em;
+    /// 相机实体包装（长期持有，组件 ref 已缓存）
+    fog::CameraEntity camera { em };
+    /// 全局雾实体包装（长期持有；配置值仅作种子）
+    fog::FogEntity fog {
+        em,
+        glm::vec3(cfg.fog.r, cfg.fog.g, cfg.fog.b),
+        cfg.fog.start,
+        cfg.fog.end
+    };
 
     App(const AppConfig & cfg);
     void setup();
@@ -109,9 +110,10 @@ private:
     void setup_pipeline();
     void setup_ubo();
     void setup_textures();
-    void setup_scene();
+    void setup_world();
     void update_camera(float dt);
-    void draw_object(ave::GraphicsContext& graphics, const Object& obj);
+    void update_fog(float dt);
+    void render_scene();
 };
 
 

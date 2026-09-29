@@ -7,7 +7,7 @@ auto App::setup() -> void {
     setup_pipeline();
     setup_ubo();
     setup_textures();
-    setup_scene();
+    setup_world();
 }
 
 auto App::setup_create_window() -> void {
@@ -176,12 +176,6 @@ auto App::setup_ubo() -> void {
 
 auto App::setup_textures() -> void {
     sampler = ave::Sampler::create({ .device = renderer->device });
-
-    // 注意：load_entry(path) 默认 force_existence=true，文件不存在时会经默认的
-    // 空 ErrorWrapper 上报——AVE 开启了 ALIB6_ERROR_USE_PANIC，即直接 panic。
-    // 纹理是必需资源：缺文件就该响亮失败；若真的想软检查（如可选配置），
-    // 必须显式 load_entry(path, false) 后判 entry.invalid()（见 main.cpp）。
-    // 半路的降级分支没有意义：缺纹理继续渲染只会把未绑定描述符喂给管线。
     cube_texture = ave::Image::create_from_file(
         { .allocator = allocator },
         alib6::io::load_entry("test_data/imgs/ice.png"),
@@ -206,34 +200,45 @@ auto App::setup_textures() -> void {
        << ground_texture->get_extent().height << std::endl;
 }
 
-auto App::setup_scene() -> void {
-    objects.clear();
-
-    // 一排沿 -Z 渐远的立方体，直观展示线性雾的距离衰减
+auto App::setup_world() -> void {
+    //// 相机与雾实体由 CameraEntity / FogEntity 包装器在成员初始化时创建 ////
+    //// 物体：一排沿 -Z 渐远的立方体 + 地面 ////
     for(int i = 0; i < 12; ++i) {
-        Object obj;
-        obj.model = glm::translate(
-            glm::mat4(1.0f),
+        fog::ObjectEntity(
+            em,
+            "cube",
+            fog::Renderable{
+                .vertices = cube_vertices,
+                .indices = cube_indices,
+                .descriptor_set = descriptor_cubes,
+                .index_count = 36,
+                .ground = false,
+            },
             glm::vec3(
                 (i % 3 - 1) * 1.6f,
                 0.1f + 0.35f * std::sin(static_cast<float>(i) * 0.9f),
                 -2.6f * static_cast<float>(i)
-            )
+            ),
+            glm::vec3(0.25f, 1.0f, 0.15f),
+            12.0f * static_cast<float>(i)
         );
-        obj.model = glm::rotate(
-            obj.model,
-            glm::radians(12.0f * static_cast<float>(i)),
-            glm::vec3(0.25f, 1.0f, 0.15f)
-        );
-        obj.ground = false;
-        objects.push_back(obj);
     }
+    // 地面（砖墙，置于 y = -1）
+    fog::ObjectEntity(
+        em,
+        "ground",
+        fog::Renderable{
+            .vertices = ground_vertices,
+            .indices = ground_indices,
+            .descriptor_set = descriptor_ground,
+            .index_count = 6,
+            .ground = true,
+        },
+        glm::vec3(0.0f, -1.0f, 0.0f),
+        glm::vec3(0.0f),
+        0.0f
+    );
 
-    // 地面（ice.png，置于 y = -1）
-    Object ground;
-    ground.model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f));
-    ground.ground = true;
-    objects.push_back(ground);
-
-    lg << "Scene ready: " << objects.size() << " objects." << std::endl;
+    lg << "Scene ready: " << em.entity_count() << " entities, "
+       << em.view<fog::Transform, fog::Renderable>().count() << " renderables." << std::endl;
 }
