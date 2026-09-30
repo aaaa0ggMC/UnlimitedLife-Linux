@@ -3,7 +3,7 @@ local function example_exists(name)
     return os.isdir(path.join(os.scriptdir(), "..", "examples", name))
 end
 
-for _, name in ipairs({"agetest", "age_simptest"}) do
+for _, name in ipairs({"agetest", "age_simptest", "fog_gl"}) do
     if example_exists(name) then
         target(name)
             set_kind("binary")
@@ -20,7 +20,7 @@ for _, name in ipairs({"agetest", "age_simptest"}) do
 end
 
 --- AGE Vulkan
-for _, name in ipairs({"fog" , "avetest", "ave_event_test", "ave_reflect_test"}) do
+for _, name in ipairs({"fog" , "avetest", "avetest_tri", "ave_event_test", "ave_reflect_test"}) do
     if example_exists(name) then
         target(name)
             set_kind("binary")

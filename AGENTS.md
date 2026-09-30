@@ -1,8 +1,8 @@
 # AGENTS.md
 
-## 子项目：`examples/fog` 与 `examples/fog-android`
+## 子项目：`examples/fog`、`examples/fog-android` 与 `examples/fog_gl`
 
-这两个目录**暂不公开**（导师要求），因此：
+这些目录（`fog_gl` 为 AGE/OpenGL 版雾场景基准复刻）**暂不公开**（导师要求），因此：
 
 - 已写入根仓库 `.gitignore`，**不再被根仓库跟踪**。
 - 各自是**独立的 git 仓库**（在各自目录内 `git init`）。等项目完成后由用户手动合并回主仓库。

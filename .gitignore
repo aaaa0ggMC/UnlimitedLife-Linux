@@ -60,3 +60,4 @@ __pycache__/
 # 暂不公开的子项目（各自独立 git 仓库，见 AGENTS.md）
 /examples/fog/
 /examples/fog-android/
+/examples/fog_gl/
