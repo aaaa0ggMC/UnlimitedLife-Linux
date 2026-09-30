@@ -57,12 +57,6 @@ __pycache__/
 *.out
 *.app
 
-# examples/fog-android (Android/Gradle 工程)
-examples/fog-android/local.properties
-examples/fog-android/.gradle/
-examples/fog-android/build/
-examples/fog-android/app/build/
-examples/fog-android/app/src/main/cpp/out/
-examples/fog-android/app/src/main/cpp/build/
-examples/fog-android/.idea/
-*.iml
+# 暂不公开的子项目（各自独立 git 仓库，见 AGENTS.md）
+/examples/fog/
+/examples/fog-android/
