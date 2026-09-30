@@ -30,6 +30,10 @@ void App::setup() {
         ci.api_version = ave::ave_vk_1_4;
     };
     with.configure_debug_messenger.emplace();
+    // 基准用：FOG_VALIDATION=0 / AVE_VALIDATION=0 关闭 Khronos 校验层（Debug 默认开启），用于量化校验层开销
+    if(const char* v = std::getenv("AVE_VALIDATION"); v && std::string_view(v) == "0") {
+        with.validation_layer = false;
+    }
     // 基准用：AVE_RENDER_MODE=legacy 强制 RenderPass（LegacyRender），默认优先 dynamic rendering
     {
         const char* mode = std::getenv("AVE_RENDER_MODE");
