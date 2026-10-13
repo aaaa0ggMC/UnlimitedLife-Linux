@@ -3,6 +3,15 @@ local function example_exists(name)
     return os.isdir(path.join(os.scriptdir(), "..", "examples", name))
 end
 
+if example_exists("fog") then
+    target("fog_camera_test")
+        set_kind("binary")
+        set_default(false)
+        add_files("../examples/fog/tests/camera_test.cc")
+        add_deps("AVE")
+    target_end()
+end
+
 for _, name in ipairs({"agetest", "age_simptest", "fog_gl"}) do
     if example_exists(name) then
         target(name)
