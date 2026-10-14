@@ -124,6 +124,12 @@ export namespace ave{
         void begin(
             VkClearColorValue clear_color
         );
+
+        /// @brief 便捷清屏：直接给浮点 RGBA（alpha 默认 1），免去手搓 VkClearColorValue
+        void begin(float r, float g, float b, float a = 1.0f) noexcept {
+            begin(VkClearColorValue{ .float32 = { r, g, b, a } });
+        }
+
         void begin(std::span<const VkClearValue> clear_values);
         void bind_pipeline(const Pipeline& pipeline);
         template<class MemoryPolicy>

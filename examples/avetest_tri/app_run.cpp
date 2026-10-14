@@ -11,9 +11,7 @@ namespace {
 
 void App::render_frame() {
     auto graphics = renderer->acquire_context();
-    VkClearColorValue clear {};
-    clear.float32[3] = 1.0f; // 黑色，与 LearnVulkan2 一致
-    graphics.begin(clear);
+    graphics.begin(0.0f, 0.0f, 0.0f); // 黑色，与 LearnVulkan2 一致
     graphics.bind_pipeline(*pipeline);
     graphics.draw(3);
     graphics.end();

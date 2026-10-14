@@ -242,4 +242,64 @@ void DescriptorPool::write_image(
     vkUpdateDescriptorSets(device->get_system_handle(), 1, &write, 0, nullptr);
 }
 
+void DescriptorPool::write_set(
+    VkDescriptorSet dst_set,
+    std::initializer_list<DescriptorWrite> writes,
+    alib6::ErrorWrapper ew
+) {
+    if(pool == VK_NULL_HANDLE || !device) {
+        ew.report(ave_vk_create_descriptor_pool,
+            "Cannot write descriptors from an invalid DescriptorPool.");
+        return;
+    }
+    if(dst_set == VK_NULL_HANDLE) {
+        ew.report(ave_vk_create_descriptor_pool,
+            "Cannot write descriptors to a null DescriptorSet.");
+        return;
+    }
+    if(writes.size() == 0) return;
+
+    // reserve 保证下面取到的指针在整个 vkUpdateDescriptorSets 调用期间有效
+    std::vector<VkDescriptorBufferInfo> buffer_infos;
+    std::vector<VkDescriptorImageInfo> image_infos;
+    std::vector<VkWriteDescriptorSet> vk_writes;
+    buffer_infos.reserve(writes.size());
+    image_infos.reserve(writes.size());
+    vk_writes.reserve(writes.size());
+
+    for(const auto& w : writes) {
+        VkWriteDescriptorSet write {};
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.dstSet = dst_set;
+        write.dstBinding = w.binding;
+        write.dstArrayElement = w.array_element;
+        write.descriptorCount = 1;
+        write.descriptorType = w.descriptor_type;
+
+        switch(w.descriptor_type) {
+            case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER:
+            case VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC:
+            case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER:
+            case VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC:
+                buffer_infos.push_back(VkDescriptorBufferInfo{
+                    .buffer = w.buffer, .offset = w.offset, .range = w.range
+                });
+                write.pBufferInfo = &buffer_infos.back();
+                break;
+            default:
+                image_infos.push_back(VkDescriptorImageInfo{
+                    .sampler = w.sampler, .imageView = w.view, .imageLayout = w.image_layout
+                });
+                write.pImageInfo = &image_infos.back();
+                break;
+        }
+        vk_writes.push_back(write);
+    }
+
+    vkUpdateDescriptorSets(
+        device->get_system_handle(),
+        static_cast<uint32_t>(vk_writes.size()), vk_writes.data(), 0, nullptr
+    );
+}
+
 } // namespace ave

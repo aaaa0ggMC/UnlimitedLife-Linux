@@ -173,9 +173,10 @@ static void exercise_compute_pipeline(const std::shared_ptr<ave::Instance>& inst
         .pool_sizes = { ave::DescriptorPoolSize::storage_buffer(1) },
         .max_sets = 1
     });
-    const auto descriptor_set = descriptor_pool->allocate_descriptor_set(pipeline->get_descriptor_set_layout());
-    descriptor_pool->write_buffer(descriptor_set, 0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
-        buffer.get_system_handle());
+    const auto descriptor_set = descriptor_pool->allocate_and_write(
+        pipeline->get_descriptor_set_layout(),
+        { ave::DescriptorWrite::ssbo(0, buffer) }
+    );
     auto pool = ave::CommandPool::create({ .device = device, .queue_family = queue_family });
     auto commands = ave::CommandBuffers::create({ .pool = pool, .count = 1 });
     const auto command_buffer = commands->get_buffers().front();

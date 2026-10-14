@@ -149,11 +149,9 @@ void App::setup_texture() {
 
     sampler = ave::Sampler::create({ .device = renderer->device });
     
-    renderer->descriptor_pool->write_image(
+    renderer->descriptor_pool->write_set(
         descriptor_set,
-        1,
-        sampler->get_system_handle(),
-        texture->get_image_view()
+        { ave::DescriptorWrite::image(1, *sampler, *texture) }
     );
 
     lg << "Loaded texture " << texture->get_extent().width << "x"
@@ -171,16 +169,9 @@ void App::setup_ubo() {
     });
 
     // DescriptorPool 由 Profile 在构建 Renderer 时创建并持有（RAII，销毁时自行等待设备空闲）。
-    descriptor_set = renderer->descriptor_pool->allocate_descriptor_set(
-        pipeline->get_descriptor_set_layout(0)
-    );
-    renderer->descriptor_pool->write_buffer(
-        descriptor_set,
-        0,
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-        ubo_buffer->get_system_handle(),
-        0,
-        sizeof(CameraUbo)
+    descriptor_set = renderer->descriptor_pool->allocate_and_write(
+        pipeline->get_descriptor_set_layout(0),
+        { ave::DescriptorWrite::ubo(0, *ubo_buffer) }
     );
 
     lg << "Initialized Camera UBO buffer and allocated DescriptorSet from Pipeline layout." << std::endl;

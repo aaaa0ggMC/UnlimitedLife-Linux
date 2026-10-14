@@ -18,6 +18,10 @@ import std;
 import alib6;
 import ave.ecode;
 import :device;
+import :buffer;
+import :buffer_slice;
+import :sampler;
+import :image;
 
 export namespace ave {
 
@@ -84,6 +88,133 @@ export namespace ave {
         CreateDescriptorPoolInfo& ci
     );
 
+    /**
+     * @brief 单条描述符写入载荷（buffer 或 image）
+     *
+     * 工厂方法既接受原生句柄，也接受 ave 对象（BasicBuffer / BasicBufferSlice / Sampler + Image），
+     * 后者自动取句柄与范围，调用点不必再写 get_system_handle()。
+     * 配合 DescriptorPool::write_set / allocate_and_write 使用，多条写入合并为一次 vkUpdateDescriptorSets。
+     */
+    struct AVE_API DescriptorWrite {
+        alib6::u32 binding { 0 };
+        VkDescriptorType descriptor_type { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER };
+        alib6::u32 array_element { 0 };
+
+        /// buffer 载荷
+        VkBuffer buffer { VK_NULL_HANDLE };
+        VkDeviceSize offset { 0 };
+        VkDeviceSize range { VK_WHOLE_SIZE };
+
+        /// image 载荷
+        VkSampler sampler { VK_NULL_HANDLE };
+        VkImageView view { VK_NULL_HANDLE };
+        VkImageLayout image_layout { VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL };
+
+        static constexpr DescriptorWrite ubo(
+            alib6::u32 binding,
+            VkBuffer buffer,
+            VkDeviceSize offset = 0,
+            VkDeviceSize range = VK_WHOLE_SIZE
+        ) noexcept {
+            return DescriptorWrite{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+                .buffer = buffer,
+                .offset = offset,
+                .range = range
+            };
+        }
+
+        static constexpr DescriptorWrite dynamic_ubo(
+            alib6::u32 binding,
+            VkBuffer buffer,
+            VkDeviceSize offset = 0,
+            VkDeviceSize range = VK_WHOLE_SIZE
+        ) noexcept {
+            return DescriptorWrite{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+                .buffer = buffer,
+                .offset = offset,
+                .range = range
+            };
+        }
+
+        static constexpr DescriptorWrite ssbo(
+            alib6::u32 binding,
+            VkBuffer buffer,
+            VkDeviceSize offset = 0,
+            VkDeviceSize range = VK_WHOLE_SIZE
+        ) noexcept {
+            return DescriptorWrite{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                .buffer = buffer,
+                .offset = offset,
+                .range = range
+            };
+        }
+
+        static constexpr DescriptorWrite image(
+            alib6::u32 binding,
+            VkSampler sampler,
+            VkImageView view,
+            VkImageLayout image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        ) noexcept {
+            return DescriptorWrite{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+                .sampler = sampler,
+                .view = view,
+                .image_layout = image_layout
+            };
+        }
+
+        static constexpr DescriptorWrite storage_image(
+            alib6::u32 binding,
+            VkImageView view,
+            VkImageLayout image_layout = VK_IMAGE_LAYOUT_GENERAL
+        ) noexcept {
+            return DescriptorWrite{
+                .binding = binding,
+                .descriptor_type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                .view = view,
+                .image_layout = image_layout
+            };
+        }
+
+        /// @brief 裸缓冲：整个缓冲区（含切片偏移）
+        template<class MemoryPolicy>
+        static DescriptorWrite ubo(alib6::u32 binding, const BasicBuffer<MemoryPolicy>& b) {
+            return ubo(binding, b.get_system_handle(), 0, b.get_size());
+        }
+
+        template<class MemoryPolicy>
+        static DescriptorWrite ubo(alib6::u32 binding, const BasicBufferSlice<MemoryPolicy>& s) {
+            return ubo(binding, s.get_system_handle(), s.get_offset(), s.get_size());
+        }
+
+        template<class MemoryPolicy>
+        static DescriptorWrite ssbo(alib6::u32 binding, const BasicBuffer<MemoryPolicy>& b) {
+            return ssbo(binding, b.get_system_handle(), 0, b.get_size());
+        }
+
+        template<class MemoryPolicy>
+        static DescriptorWrite ssbo(alib6::u32 binding, const BasicBufferSlice<MemoryPolicy>& s) {
+            return ssbo(binding, s.get_system_handle(), s.get_offset(), s.get_size());
+        }
+
+        /// @brief 采样器 + 图像：自动取 VkSampler 与 image view
+        static DescriptorWrite image(
+            alib6::u32 binding,
+            const Sampler& sampler,
+            const Image& texture,
+            VkImageLayout image_layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        ) {
+            return image(binding, sampler.get_system_handle(), texture.get_image_view(), image_layout);
+        }
+    };
+
     class AVE_API DescriptorPool final {
     private:
         std::shared_ptr<Device> device;
@@ -140,6 +271,31 @@ export namespace ave {
             alib6::u32 dst_array_element = 0,
             alib6::ErrorWrapper ew = {}
         );
+
+        /**
+         * @brief 一次写入一个 descriptor set 的多个绑定
+         * @note 内部合并为单次 vkUpdateDescriptorSets；无需手写 get_system_handle()
+         */
+        void write_set(
+            VkDescriptorSet dst_set,
+            std::initializer_list<DescriptorWrite> writes,
+            alib6::ErrorWrapper ew = {}
+        );
+
+        /**
+         * @brief 分配一个 descriptor set 并写入其绑定
+         * @return 成功返回可用的 set；分配失败返回 VK_NULL_HANDLE
+         */
+        [[nodiscard]] VkDescriptorSet allocate_and_write(
+            VkDescriptorSetLayout layout,
+            std::initializer_list<DescriptorWrite> writes,
+            alib6::ErrorWrapper ew = {}
+        ) {
+            const VkDescriptorSet set = allocate_descriptor_set(layout, ew);
+            if(set == VK_NULL_HANDLE) return VK_NULL_HANDLE;
+            write_set(set, writes, ew);
+            return set;
+        }
     };
 
 } // namespace ave
