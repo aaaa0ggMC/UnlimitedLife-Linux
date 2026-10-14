@@ -11,6 +11,8 @@ import ave;
 
 namespace avetest {
 
+void test_compute_pipeline();
+
 struct alignas(16) CameraUbo {
     glm::mat4 vp;
 };

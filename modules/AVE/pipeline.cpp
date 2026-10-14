@@ -195,17 +195,21 @@ namespace {
         };
     }
 
-    bool create_graphics_pipeline_common(
-        CreatePipelineCommonInfo& ci,
+    bool create_pipeline_common(
+        CreatePipelineResourceInfo& ci,
         VkPipelineRenderingCreateInfo* rendering_info,
         VkRenderPass render_pass,
         alib6::u32 subpass,
-        Pipeline& target
+        Pipeline& target,
+        const CreatePipelineCommonInfo* graphics = nullptr
     ) {
+        const bool compute = graphics == nullptr;
+        const auto pipeline_error = compute
+            ? ave_vk_create_compute_pipeline : ave_vk_create_graphics_pipeline;
         if(!ci.device || ci.device->get_system_handle() == VK_NULL_HANDLE ||
            ci.shader_stages.empty()) {
-            ci.ew.report(ave_vk_create_graphics_pipeline,
-                "Cannot create a Graphics Pipeline without a valid Device and shader stages.");
+            ci.ew.report(pipeline_error,
+                "Cannot create a Pipeline without a valid Device and shader stages.");
             return false;
         }
 
@@ -223,11 +227,40 @@ namespace {
                         &PipelineShaderStageInfo::stage) == 1;
             }
         );
-        if(!has_vertex || !has_fragment ||
-           has_tess_control != has_tess_evaluation || !unique_stages) {
+        if(compute && (ci.shader_stages.size() != 1 || !unique_stages ||
+                      ci.shader_stages.front().stage != VK_SHADER_STAGE_COMPUTE_BIT)) {
+            ci.ew.report(ave_vk_create_compute_pipeline,
+                "Compute Pipeline requires exactly one valid compute shader stage.");
+            return false;
+        }
+        if(compute && ci.base_pipeline_index != -1) {
+            ci.ew.report(ave_vk_create_compute_pipeline,
+                "Single Compute Pipeline creation requires base_pipeline_index == -1; use base_pipeline instead.");
+            return false;
+        }
+        if(!compute && (!has_vertex || !has_fragment ||
+           has_tess_control != has_tess_evaluation || !unique_stages)) {
             ci.ew.report(ave_vk_create_graphics_pipeline,
                 "Graphics Pipeline requires unique vertex/fragment stages and a complete tessellation pair.");
             return false;
+        }
+
+        if(compute) {
+            for(auto& attr : ci.constant_attributes) {
+                if(attr.stage_flags == 0) attr.stage_flags = VK_SHADER_STAGE_COMPUTE_BIT;
+                if(attr.stage_flags != VK_SHADER_STAGE_COMPUTE_BIT || attr.size == 0 ||
+                   attr.offset % 4 != 0 ||
+                   attr.size > std::numeric_limits<alib6::u32>::max() - attr.offset - 3) {
+                    ci.ew.report(ave_vk_create_pipeline_layout,
+                        "Invalid compute constant attribute stage, alignment or size.");
+                    return false;
+                }
+            }
+            if(ci.push_constant_ranges.size() > 1) {
+                ci.ew.report(ave_vk_create_pipeline_layout,
+                    "Compute stage may occur in only one push constant range.");
+                return false;
+            }
         }
 
         // 若未显式配置 push_constant_ranges，但提供了 constant_attributes，自动聚合并生成 ranges
@@ -261,7 +294,8 @@ namespace {
                     total_sz = (total_sz + 3) & ~3u;
                 }
                 ci.push_constant_ranges.push_back(VkPushConstantRange{
-                    .stageFlags = common_stage ? common_stage : VK_SHADER_STAGE_ALL_GRAPHICS,
+                    .stageFlags = common_stage ? common_stage :
+                        (compute ? VK_SHADER_STAGE_COMPUTE_BIT : VK_SHADER_STAGE_ALL_GRAPHICS),
                     .offset = min_off,
                     .size = total_sz
                 });
@@ -293,6 +327,13 @@ namespace {
         alib6::u32 total_pc_size = 0;
         VkShaderStageFlags combined_pc_stages = 0;
         for(const auto& r : ci.push_constant_ranges) {
+            if(compute && (r.stageFlags != VK_SHADER_STAGE_COMPUTE_BIT ||
+               r.size == 0 || r.offset % 4 != 0 || r.size % 4 != 0 ||
+               r.offset > std::numeric_limits<alib6::u32>::max() - r.size)) {
+                ci.ew.report(ave_vk_create_pipeline_layout,
+                    "Compute push constant ranges require aligned, non-empty compute-only ranges.");
+                return false;
+            }
             total_pc_size = std::max(total_pc_size, r.offset + r.size);
             combined_pc_stages |= r.stageFlags;
         }
@@ -366,11 +407,11 @@ namespace {
             VkDescriptorSetLayout set_layout = VK_NULL_HANDLE;
             VkResult res = vkCreateDescriptorSetLayout(handle, &layout_ci, allocator, &set_layout);
             if(res != VK_SUCCESS) {
-                ci.ew.report(ave_vk_create_pipeline_layout,
-                    "Failed to create Vulkan DescriptorSetLayout ({}).", static_cast<int>(res));
                 for(auto l : owned_descriptor_set_layouts) {
                     vkDestroyDescriptorSetLayout(handle, l, allocator);
                 }
+                ci.ew.report(ave_vk_create_pipeline_layout,
+                    "Failed to create Vulkan DescriptorSetLayout ({}).", static_cast<int>(res));
                 return false;
             }
             owned_descriptor_set_layouts.push_back(set_layout);
@@ -390,95 +431,108 @@ namespace {
         VkPipelineLayout layout = VK_NULL_HANDLE;
         VkResult code = vkCreatePipelineLayout(handle, &layout_info, allocator, &layout);
         if(code != VK_SUCCESS) {
-            ci.ew.report(ave_vk_create_pipeline_layout,
-                "Failed to create Vulkan PipelineLayout ({}).", static_cast<int>(code));
             for(auto l : owned_descriptor_set_layouts) {
                 vkDestroyDescriptorSetLayout(handle, l, allocator);
             }
+            ci.ew.report(ave_vk_create_pipeline_layout,
+                "Failed to create Vulkan PipelineLayout ({}).", static_cast<int>(code));
             return false;
         }
 
-        VkPipelineVertexInputStateCreateInfo vertex_input {};
-        vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertex_input.vertexBindingDescriptionCount = static_cast<alib6::u32>(
-            ci.vertex_bindings.size());
-        vertex_input.pVertexBindingDescriptions = ci.vertex_bindings.data();
-        vertex_input.vertexAttributeDescriptionCount = static_cast<alib6::u32>(
-            ci.vertex_attributes.size());
-        vertex_input.pVertexAttributeDescriptions = ci.vertex_attributes.data();
-
-        auto input_assembly = ci.input_assembly;
-        input_assembly.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        auto tessellation = ci.tessellation;
-        tessellation.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
-        auto viewport = ci.viewport;
-        viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        auto rasterization = ci.rasterization;
-        rasterization.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-        auto multisample = ci.multisample;
-        multisample.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-        auto depth_stencil = ci.depth_stencil;
-        depth_stencil.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-        auto color_blend = ci.color_blend;
-        color_blend.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        color_blend.attachmentCount = static_cast<alib6::u32>(
-            ci.color_blend_attachments.size());
-        color_blend.pAttachments = ci.color_blend_attachments.data();
-        VkPipelineDynamicStateCreateInfo dynamic_state {};
-        dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-        dynamic_state.dynamicStateCount = static_cast<alib6::u32>(
-            ci.dynamic_states.size());
-        dynamic_state.pDynamicStates = ci.dynamic_states.data();
-
-        VkGraphicsPipelineCreateInfo pipeline_info {};
-        pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipeline_info.flags = ci.flags;
-        pipeline_info.stageCount = static_cast<alib6::u32>(stages.size());
-        pipeline_info.pStages = stages.data();
-        pipeline_info.pVertexInputState = &vertex_input;
-        pipeline_info.pInputAssemblyState = &input_assembly;
-        pipeline_info.pTessellationState = has_tess_control ? &tessellation : nullptr;
-        pipeline_info.pViewportState = &viewport;
-        pipeline_info.pRasterizationState = &rasterization;
-        pipeline_info.pMultisampleState = &multisample;
-        const bool require_depth_stencil = ci.use_depth_stencil_state ||
-            (rendering_info && (rendering_info->depthAttachmentFormat != VK_FORMAT_UNDEFINED ||
-                                rendering_info->stencilAttachmentFormat != VK_FORMAT_UNDEFINED));
-        pipeline_info.pDepthStencilState = require_depth_stencil
-            ? &depth_stencil : nullptr;
-        pipeline_info.pColorBlendState = &color_blend;
-        pipeline_info.pDynamicState = ci.dynamic_states.empty()
-            ? nullptr : &dynamic_state;
-        pipeline_info.layout = layout;
-        pipeline_info.basePipelineHandle = ci.base_pipeline;
-        pipeline_info.basePipelineIndex = ci.base_pipeline_index;
-
-        if(rendering_info) {
-            pipeline_info.pNext = rendering_info;
-            pipeline_info.renderPass = VK_NULL_HANDLE;
-            pipeline_info.subpass = 0;
-        } else {
-            pipeline_info.pNext = nullptr;
-            pipeline_info.renderPass = render_pass;
-            pipeline_info.subpass = subpass;
-        }
-
         VkPipeline pipeline = VK_NULL_HANDLE;
-        code = vkCreateGraphicsPipelines(
-            handle, ci.cache, 1, &pipeline_info, allocator, &pipeline);
+        if(compute) {
+            VkComputePipelineCreateInfo pipeline_info {};
+            pipeline_info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+            pipeline_info.flags = ci.flags;
+            pipeline_info.stage = stages.front();
+            pipeline_info.layout = layout;
+            pipeline_info.basePipelineHandle = ci.base_pipeline;
+            pipeline_info.basePipelineIndex = ci.base_pipeline_index;
+            code = vkCreateComputePipelines(
+                handle, ci.cache, 1, &pipeline_info, allocator, &pipeline);
+        } else {
+            VkPipelineVertexInputStateCreateInfo vertex_input {};
+            vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+            vertex_input.vertexBindingDescriptionCount = static_cast<alib6::u32>(
+                graphics->vertex_bindings.size());
+            vertex_input.pVertexBindingDescriptions = graphics->vertex_bindings.data();
+            vertex_input.vertexAttributeDescriptionCount = static_cast<alib6::u32>(
+                graphics->vertex_attributes.size());
+            vertex_input.pVertexAttributeDescriptions = graphics->vertex_attributes.data();
+
+            auto input_assembly = graphics->input_assembly;
+            input_assembly.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+            auto tessellation = graphics->tessellation;
+            tessellation.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_TESSELLATION_STATE_CREATE_INFO;
+            auto viewport = graphics->viewport;
+            viewport.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+            auto rasterization = graphics->rasterization;
+            rasterization.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+            auto multisample = graphics->multisample;
+            multisample.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+            auto depth_stencil = graphics->depth_stencil;
+            depth_stencil.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+            auto color_blend = graphics->color_blend;
+            color_blend.sType =
+                VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+            color_blend.attachmentCount = static_cast<alib6::u32>(
+                graphics->color_blend_attachments.size());
+            color_blend.pAttachments = graphics->color_blend_attachments.data();
+            VkPipelineDynamicStateCreateInfo dynamic_state {};
+            dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+            dynamic_state.dynamicStateCount = static_cast<alib6::u32>(
+                graphics->dynamic_states.size());
+            dynamic_state.pDynamicStates = graphics->dynamic_states.data();
+
+            VkGraphicsPipelineCreateInfo pipeline_info {};
+            pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+            pipeline_info.flags = ci.flags;
+            pipeline_info.stageCount = static_cast<alib6::u32>(stages.size());
+            pipeline_info.pStages = stages.data();
+            pipeline_info.pVertexInputState = &vertex_input;
+            pipeline_info.pInputAssemblyState = &input_assembly;
+            pipeline_info.pTessellationState = has_tess_control ? &tessellation : nullptr;
+            pipeline_info.pViewportState = &viewport;
+            pipeline_info.pRasterizationState = &rasterization;
+            pipeline_info.pMultisampleState = &multisample;
+            const bool require_depth_stencil = graphics->use_depth_stencil_state ||
+                (rendering_info && (rendering_info->depthAttachmentFormat != VK_FORMAT_UNDEFINED ||
+                                    rendering_info->stencilAttachmentFormat != VK_FORMAT_UNDEFINED));
+            pipeline_info.pDepthStencilState = require_depth_stencil
+                ? &depth_stencil : nullptr;
+            pipeline_info.pColorBlendState = &color_blend;
+            pipeline_info.pDynamicState = graphics->dynamic_states.empty()
+                ? nullptr : &dynamic_state;
+            pipeline_info.layout = layout;
+            pipeline_info.basePipelineHandle = ci.base_pipeline;
+            pipeline_info.basePipelineIndex = ci.base_pipeline_index;
+
+            if(rendering_info) {
+                pipeline_info.pNext = rendering_info;
+                pipeline_info.renderPass = VK_NULL_HANDLE;
+                pipeline_info.subpass = 0;
+            } else {
+                pipeline_info.pNext = nullptr;
+                pipeline_info.renderPass = render_pass;
+                pipeline_info.subpass = subpass;
+            }
+
+            code = vkCreateGraphicsPipelines(
+                handle, ci.cache, 1, &pipeline_info, allocator, &pipeline);
+        }
         if(code != VK_SUCCESS) {
-            ci.ew.report(ave_vk_create_graphics_pipeline,
-                "Failed to create Vulkan Graphics Pipeline ({}).", static_cast<int>(code));
+            if(pipeline != VK_NULL_HANDLE) vkDestroyPipeline(handle, pipeline, allocator);
             vkDestroyPipelineLayout(handle, layout, allocator);
             for(auto l : owned_descriptor_set_layouts) {
                 vkDestroyDescriptorSetLayout(handle, l, allocator);
             }
+            ci.ew.report(pipeline_error,
+                "Failed to create Vulkan Pipeline ({}).", static_cast<int>(code));
             return false;
         }
 
@@ -527,6 +581,87 @@ void Pipeline::destroy() noexcept {
     device.reset();
 }
 
+// ---------------- ComputePipeline implementation ----------------
+
+ComputePipeline::ComputePipeline() {
+    type = PipelineType::Compute;
+    bind_point = VK_PIPELINE_BIND_POINT_COMPUTE;
+}
+
+bool ComputePipeline::initialize(CreateComputePipelineInfo ci) {
+    return create_pipeline_common(ci, nullptr, VK_NULL_HANDLE, 0, *this);
+}
+
+std::shared_ptr<ComputePipeline> ComputePipeline::create(CreateComputePipelineInfo ci) {
+    auto result = std::shared_ptr<ComputePipeline>(new ComputePipeline());
+    if(!result->initialize(std::move(ci))) return {};
+    return result;
+}
+
+std::shared_ptr<ComputePipeline> ComputePipeline::create(
+    std::shared_ptr<Device> device,
+    ShaderBytecode shader,
+    ConfigureComputePipeline configure,
+    alib6::ErrorWrapper ew
+) {
+    if(!device || device->get_system_handle() == VK_NULL_HANDLE || shader.empty()) {
+        ew.report(ave_vk_create_compute_pipeline,
+            "Compute Pipeline requires a valid Device and non-empty SPIR-V bytecode.");
+        return {};
+    }
+
+    ShaderModuleScope module_scope(device);
+    const auto shader_module = module_scope.create(shader, ew);
+    if(shader_module == VK_NULL_HANDLE) return {};
+
+    CreateComputePipelineInfo ci;
+    ci.device = device;
+    ci.ew = ew;
+    ci.shader_stages.push_back({
+        .stage = VK_SHADER_STAGE_COMPUTE_BIT,
+        .module = shader_module
+    });
+    if(configure) configure(ci);
+    if(ci.device != device) {
+        ew.report(ave_vk_create_compute_pipeline,
+            "Cannot change Device while using a temporary compute shader module.");
+        return {};
+    }
+    return create(std::move(ci));
+}
+
+std::shared_ptr<ComputePipeline> ComputePipeline::create(
+    std::shared_ptr<Device> device,
+    std::string_view shader_path,
+    ConfigureComputePipeline configure,
+    alib6::ErrorWrapper ew
+) {
+    std::string shader;
+    alib6::Error read_error;
+    if(shader_path.empty() || alib6::io::read_all(shader_path, shader, read_error) ==
+       std::numeric_limits<alib6::usize>::max()) {
+        ew.report(ave_vk_create_shader_module, "Failed to read compute SPIR-V shader file.");
+        return {};
+    }
+    return create(std::move(device), as_bytecode(shader), std::move(configure), ew);
+}
+
+std::shared_ptr<ComputePipeline> Renderer::create_compute_pipeline(
+    ShaderBytecode shader,
+    ConfigureComputePipeline configure,
+    alib6::ErrorWrapper ew
+) {
+    return ComputePipeline::create(device, shader, std::move(configure), ew);
+}
+
+std::shared_ptr<ComputePipeline> Renderer::create_compute_pipeline(
+    std::string_view shader_path,
+    ConfigureComputePipeline configure,
+    alib6::ErrorWrapper ew
+) {
+    return ComputePipeline::create(device, shader_path, std::move(configure), ew);
+}
+
 // ---------------- DynamicPipeline implementation ----------------
 
 DynamicPipeline::DynamicPipeline() {
@@ -551,8 +686,8 @@ bool DynamicPipeline::initialize(CreatePipelineInfo<pipeline_type::Dynamic> ci) 
     rendering_info.depthAttachmentFormat = ci.depth_attachment_format;
     rendering_info.stencilAttachmentFormat = ci.stencil_attachment_format;
 
-    return create_graphics_pipeline_common(
-        ci, &rendering_info, VK_NULL_HANDLE, 0, *this
+    return create_pipeline_common(
+        ci, &rendering_info, VK_NULL_HANDLE, 0, *this, &ci
     );
 }
 
@@ -579,8 +714,8 @@ bool LegacyPipeline::initialize(CreatePipelineInfo<pipeline_type::Legacy> ci) {
     }
     ci.device = ci.render->get_device();
 
-    return create_graphics_pipeline_common(
-        ci, nullptr, ci.render->get_render_pass(), ci.subpass, *this
+    return create_pipeline_common(
+        ci, nullptr, ci.render->get_render_pass(), ci.subpass, *this, &ci
     );
 }
 
@@ -1209,4 +1344,3 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
 }
 
 }
-

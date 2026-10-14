@@ -45,6 +45,7 @@ export namespace ave{
         ave_vk_create_image_view = 100'025,
         ave_vk_image_upload = 100'026,
         ave_vk_create_sampler = 100'027,
-        ave_shape_load_failed = 100'028
+        ave_shape_load_failed = 100'028,
+        ave_vk_create_compute_pipeline = 100'029
     };
 };

@@ -615,6 +615,18 @@ export namespace ave{
             return create_legacy_graphics_pipeline(std::forward<Args>(args)...);
         }
 
+        // Compute pipeline creation is independent of the graphics render backend.
+        [[nodiscard]] std::shared_ptr<ComputePipeline> create_compute_pipeline(
+            ShaderBytecode shader,
+            ConfigureComputePipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
+        );
+        [[nodiscard]] std::shared_ptr<ComputePipeline> create_compute_pipeline(
+            std::string_view shader_path,
+            ConfigureComputePipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
+        );
+
         // Graceful-degradation graphics pipeline creation (returns Pipeline base, dynamically branches)
         [[nodiscard]] std::shared_ptr<Pipeline> create_graphics_pipeline(
             GraphicsShaderBytecode shaders,

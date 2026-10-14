@@ -1,6 +1,6 @@
 /**
  * @file pipeline.cppm
- * @brief Base and specialized graphics pipeline classes
+ * @brief Base and specialized graphics/compute pipeline classes
  * @version 5.0
  * @date 2026-09-12
  */
@@ -26,7 +26,8 @@ export namespace ave {
         const VkSpecializationInfo* specialization_info { nullptr };
     };
 
-    struct AVE_API CreatePipelineCommonInfo {
+    /// 图形与计算管线共用的着色器、布局及创建资源。
+    struct AVE_API CreatePipelineResourceInfo {
         std::shared_ptr<Device> device;
         std::vector<PipelineShaderStageInfo> shader_stages;
 
@@ -42,6 +43,12 @@ export namespace ave {
         VkPipeline base_pipeline { VK_NULL_HANDLE };
         alib6::i32 base_pipeline_index { -1 };
 
+        mutable alib6::ErrorWrapper ew {};
+    };
+
+    struct AVE_API CreatePipelineCommonInfo
+        : CreatePipelineResourceInfo
+    {
         std::vector<VkVertexInputBindingDescription> vertex_bindings;
         std::vector<VkVertexInputAttributeDescription> vertex_attributes;
         VkPipelineInputAssemblyStateCreateInfo input_assembly {};
@@ -54,9 +61,13 @@ export namespace ave {
         std::vector<VkPipelineColorBlendAttachmentState> color_blend_attachments;
         VkPipelineColorBlendStateCreateInfo color_blend {};
         std::vector<VkDynamicState> dynamic_states;
-
-        mutable alib6::ErrorWrapper ew {};
     };
+
+    /// shader_stages 必须且只能包含一个 compute stage；外部 shader module 不转移所有权。
+    template<>
+    struct AVE_API CreatePipelineInfo<pipeline_type::Compute>
+        : CreatePipelineResourceInfo
+    {};
 
     template<>
     struct AVE_API CreatePipelineInfo<pipeline_type::Legacy>
@@ -152,6 +163,41 @@ export namespace ave {
 
         inline void bind(VkCommandBuffer command_buffer) const noexcept {
             vkCmdBindPipeline(command_buffer, bind_point, pipeline);
+        }
+    };
+
+    class AVE_API ComputePipeline final : public Pipeline {
+    private:
+        ComputePipeline();
+        [[nodiscard]] bool initialize(CreateComputePipelineInfo ci);
+
+    public:
+        ~ComputePipeline() override = default;
+
+        [[nodiscard]] static std::shared_ptr<ComputePipeline> create(CreateComputePipelineInfo ci);
+        /// 字节码/文件重载临时创建 shader module，管线创建后自动释放。
+        [[nodiscard]] static std::shared_ptr<ComputePipeline> create(
+            std::shared_ptr<Device> device,
+            ShaderBytecode shader,
+            ConfigureComputePipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
+        );
+        [[nodiscard]] static std::shared_ptr<ComputePipeline> create(
+            std::shared_ptr<Device> device,
+            std::string_view shader_path,
+            ConfigureComputePipeline configure = nullptr,
+            alib6::ErrorWrapper ew = {}
+        );
+
+        /// 在 render pass 之外绑定并 dispatch；descriptor/push constants、同步和队列由调用方管理。
+        inline void dispatch(
+            VkCommandBuffer command_buffer,
+            alib6::u32 group_count_x,
+            alib6::u32 group_count_y = 1,
+            alib6::u32 group_count_z = 1
+        ) const noexcept {
+            bind(command_buffer);
+            vkCmdDispatch(command_buffer, group_count_x, group_count_y, group_count_z);
         }
     };
 

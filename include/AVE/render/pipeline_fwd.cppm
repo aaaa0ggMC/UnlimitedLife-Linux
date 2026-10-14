@@ -25,12 +25,15 @@ export namespace ave {
     namespace pipeline_type {
         struct Dynamic {};
         struct Legacy {};
+        struct Compute {};
     }
 
     class Pipeline;
     class DynamicPipeline;
     class LegacyPipeline;
+    class ComputePipeline;
 
+    struct CreatePipelineResourceInfo;
     struct CreatePipelineCommonInfo;
 
     template<class Type>
@@ -38,6 +41,9 @@ export namespace ave {
 
     using CreateDynamicPipelineInfo = CreatePipelineInfo<pipeline_type::Dynamic>;
     using CreateLegacyPipelineInfo = CreatePipelineInfo<pipeline_type::Legacy>;
+    using CreateComputePipelineInfo = CreatePipelineInfo<pipeline_type::Compute>;
+
+    using ConfigureComputePipeline = std::function<void(CreateComputePipelineInfo&)>;
 
     using ShaderBytecode = std::span<const alib6::u8>;
 

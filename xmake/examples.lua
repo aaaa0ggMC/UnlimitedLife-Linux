@@ -40,6 +40,17 @@ for _, name in ipairs({"fog" , "avetest", "avetest_tri", "ave_event_test", "ave_
                     os.vrunv("bash", {path.join(target:scriptdir(), "..", "examples", "fog", "build_shaders.sh")})
                 end)
             end
+            if name == "avetest" then
+                before_build(function (target)
+                    local root = path.join(target:scriptdir(), "..")
+                    local output = path.join(root, "assets", "avetest", "shaders", "compute-test.spv")
+                    os.mkdir(path.directory(output))
+                    os.vrunv("glslangValidator", {
+                        "-V", "--target-env", "vulkan1.0", "-o", output,
+                        path.join(root, "examples", "avetest", "compute.comp")
+                    })
+                end)
+            end
             set_rundir("../assets")
         target_end()
     else
