@@ -14,5 +14,6 @@ add_requires("vulkansdk")
 add_requires("vulkan-memory-allocator >=3.0.0")
 
 if has_config("examples") then
-    add_requires("imgui", {configs = {glfw = true, opengl3 = true}})
+    -- agetest 用 opengl3 后端，fog（AVE/Vulkan）用 vulkan 后端
+    add_requires("imgui", {configs = {glfw = true, opengl3 = true, vulkan = true}})
 end

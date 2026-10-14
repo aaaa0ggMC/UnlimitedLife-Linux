@@ -36,6 +36,7 @@ for _, name in ipairs({"fog" , "avetest", "avetest_tri", "ave_event_test", "ave_
             add_files("../examples/" .. name .. "/**.cpp")
             add_deps("AVE")
             if name == "fog" then
+                add_packages("imgui")
                 before_build(function (target)
                     os.vrunv("bash", {path.join(target:scriptdir(), "..", "examples", "fog", "build_shaders.sh")})
                 end)
