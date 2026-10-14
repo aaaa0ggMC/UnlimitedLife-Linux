@@ -250,7 +250,7 @@ void test_compute_pipeline() {
         messenger = ave::DebugMessenger::create(instance, {
             .severity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
                         VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-            .on_message = [&](auto severity, auto, const auto& data) {
+            .on_message_advanced = [&](auto severity, auto, const auto& data) {
                 if(severity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) ++validation_errors;
                 std::cerr << (data.pMessage ? data.pMessage : "<no message>") << std::endl;
                 return false;

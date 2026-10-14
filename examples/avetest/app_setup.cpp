@@ -37,16 +37,11 @@ void App::setup() {
         const char* mode = std::getenv("AVE_RENDER_MODE");
         with.try_dynamic_rendering = !(mode && std::string_view(mode) == "legacy");
     }
-    with.configure_debug_messenger->on_message = [this](
-        VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-        VkDebugUtilsMessageTypeFlagsEXT,
-        const VkDebugUtilsMessengerCallbackDataEXT& data
-    ) {
-        vklg(ave::to_log_level(severity))
-            << (data.pMessage ? data.pMessage : "<no message>")
-            << std::endl;
-        return false;
-    };
+    with.configure_debug_messenger->on_message(
+        [this](alib6::LogLevel level, std::string_view, std::string_view message) {
+            vklg(level) << message << std::endl;
+        }
+    );
 
     with.configure_descriptor_pool = [](
         ave::WithDescriptorPoolInput& input,

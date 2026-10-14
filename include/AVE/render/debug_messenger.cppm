@@ -23,7 +23,6 @@ export namespace ave {
         VkDebugUtilsMessageTypeFlagsEXT type,
         const VkDebugUtilsMessengerCallbackDataEXT& data
     )>;
-
     [[nodiscard]] constexpr alib6::LogLevel to_log_level(
         VkDebugUtilsMessageSeverityFlagBitsEXT severity
     ) noexcept {
@@ -64,7 +63,48 @@ export namespace ave {
             VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
             VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-        DebugMessageCallback on_message;
+
+        /// 内核回调：拿到原始 severity/type 与 VkDebugUtilsMessengerCallbackDataEXT
+        DebugMessageCallback on_message_advanced;
+
+        /**
+         * @brief 简易回调的包装：severity 翻成 alib6::LogLevel、type 翻成名字、消息已取出
+         *
+         * 返回 void 表示不中止触发消息的调用；返回 bool 则按返回值交给 Vulkan。
+         * 需要 pMessageIdName、对象名、队列标签这些原始字段时，直接写 on_message_advanced。
+         *
+         * @code
+         * with.configure_debug_messenger.emplace().on_message(
+         *     [](alib6::LogLevel level, std::string_view, std::string_view message) {
+         *         vklg(level) << message << std::endl;
+         *     }
+         * );
+         * @endcode
+         */
+        template<class F>
+        requires std::invocable<std::remove_cvref_t<F>&, alib6::LogLevel, std::string_view, std::string_view>
+        CreateDebugMessengerInfo& on_message(F&& fn) {
+            using Handler = std::remove_cvref_t<F>;
+            using Result = std::invoke_result_t<Handler&, alib6::LogLevel, std::string_view, std::string_view>;
+            on_message_advanced = [handler = Handler(std::forward<F>(fn))](
+                VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+                VkDebugUtilsMessageTypeFlagsEXT type,
+                const VkDebugUtilsMessengerCallbackDataEXT& data
+            ) -> bool {
+                const std::string_view message =
+                    data.pMessage ? std::string_view(data.pMessage) : std::string_view {};
+                if constexpr (std::is_void_v<Result>) {
+                    handler(to_log_level(severity), to_message_type_name(type), message);
+                    return false;
+                } else {
+                    return static_cast<bool>(
+                        handler(to_log_level(severity), to_message_type_name(type), message)
+                    );
+                }
+            };
+            return *this;
+        }
+
         mutable alib6::ErrorWrapper ew = {};
     };
 
@@ -73,7 +113,7 @@ export namespace ave {
         // 保证 messenger 一定先于其依赖的 instance 销毁。
         std::shared_ptr<Instance> instance;
         VkDebugUtilsMessengerEXT messenger { VK_NULL_HANDLE };
-        DebugMessageCallback on_message;
+        DebugMessageCallback on_message_advanced;
 
         DebugMessenger() = default;
 
@@ -96,8 +136,8 @@ export namespace ave {
             if(!self || !data) return VK_FALSE;
 
             try {
-                if(self->on_message) {
-                    return self->on_message(severity, type, *data)
+                if(self->on_message_advanced) {
+                    return self->on_message_advanced(severity, type, *data)
                         ? VK_TRUE
                         : VK_FALSE;
                 }
@@ -130,7 +170,7 @@ export namespace ave {
             }
 
             instance = std::move(target_instance);
-            on_message = ci.on_message;
+            on_message_advanced = ci.on_message_advanced;
 
             const auto create_fn = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
                 vkGetInstanceProcAddr(
@@ -145,7 +185,7 @@ export namespace ave {
                     VK_EXT_DEBUG_UTILS_EXTENSION_NAME
                 );
                 instance.reset();
-                on_message = {};
+                on_message_advanced = {};
                 return false;
             }
 
@@ -169,7 +209,7 @@ export namespace ave {
                     static_cast<int>(code)
                 );
                 instance.reset();
-                on_message = {};
+                on_message_advanced = {};
                 return false;
             }
 
@@ -211,7 +251,7 @@ export namespace ave {
             }
 
             messenger = VK_NULL_HANDLE;
-            on_message = {};
+            on_message_advanced = {};
             instance.reset();
         }
 

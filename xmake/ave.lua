@@ -39,6 +39,13 @@ target("ave_shape_loader_test")
     add_deps("AVE")
 target_end()
 
+target("ave_debug_messenger_test")
+    set_kind("binary")
+    set_default(false)
+    add_files("../tests/ave_debug_messenger_test.cpp")
+    add_deps("AVE")
+target_end()
+
 target("ave_prefab_test")
     set_kind("binary")
     set_default(false)

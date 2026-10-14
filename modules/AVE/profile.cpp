@@ -135,7 +135,7 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
                 stage.fail("Failed to create debug messenger");
             }
             stage["source"] = "created";
-            stage["has_callback"] = (ci.on_message != nullptr);
+            stage["has_callback"] = (ci.on_message_advanced != nullptr);
         }
         if(!renderer.debug_messenger) renderer.instance.reset();
     }else if(result){
