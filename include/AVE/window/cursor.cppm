@@ -15,7 +15,10 @@
  *   - 运行期经 ave::Window::set_cursor_mode / ave::Window::get_cursor_mode 切换；
  *   - 窗口失焦时自动恢复 Normal，避免 alt-tab 后光标被锁死在其它程序外；
  *   - 模式切换时通知绑定的 ave::Input 重置鼠标基准，天然消除跳变，
- *     使用方无需任何 sentinel 技巧。
+ *     使用方无需任何 sentinel 技巧；
+ *   - Hidden / Disabled 除设置 GLFW 输入模式外，还会挂一张 1x1 全透明光标兜底
+ *     （GLFW 在 Wayland 上只把光标面设为 NULL，部分合成器仍会把光标画回来），
+ *     并可经 Window::reapply_cursor_mode 在锁定期间持续重设。
  *
  * @code
  * // 典型用法：按 M 锁定/释放鼠标（FPS 相机）

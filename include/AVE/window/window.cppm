@@ -101,6 +101,36 @@ export namespace ave {
 
         Input* m_bound_input { nullptr };
         CursorMode m_cursor_mode { CursorMode::Normal };
+        /// 懒创建的 1x1 全透明光标（隐藏兜底，见 ensure_empty_cursor）
+        GLFWcursor* m_empty_cursor { nullptr };
+
+        /// @brief 懒创建 1x1 全透明光标
+        ///
+        /// 为什么需要：GLFW 在 HIDDEN / DISABLED 下只把 Wayland 的光标面设为 NULL，
+        /// 而部分合成器（实测 KDE/KWin 在指针锁定被激活后）会把光标重新画回来，
+        /// 此时「光标图像」这条路（NORMAL / CAPTURED 分支）才是可控的。
+        /// 挂一张全透明图即可让那条路也达到隐藏效果（AGE 的 Cursor::emptyCursor 同款做法）。
+        /// @return 透明光标；创建失败或窗口不存在时为 nullptr（退回 GLFW 自身的隐藏行为）
+        [[nodiscard]] inline GLFWcursor* ensure_empty_cursor() noexcept {
+            if (m_empty_cursor || !window) return m_empty_cursor;
+            unsigned char transparent[4] { 0, 0, 0, 0 };
+            GLFWimage image { .width = 1, .height = 1, .pixels = transparent };
+            m_empty_cursor = glfwCreateCursor(&image, 0, 0);
+            return m_empty_cursor;
+        }
+
+        /// @brief 把 m_cursor_mode 写入 GLFW：先是输入模式，再用透明光标兜底
+        inline void apply_cursor_mode() noexcept {
+            if (!window) return;
+            glfwSetInputMode(window, GLFW_CURSOR,
+                m_cursor_mode == CursorMode::Normal ? GLFW_CURSOR_NORMAL :
+                m_cursor_mode == CursorMode::Hidden ? GLFW_CURSOR_HIDDEN :
+                                                      GLFW_CURSOR_DISABLED
+            );
+            glfwSetCursor(window, m_cursor_mode == CursorMode::Normal
+                                     ? nullptr
+                                     : ensure_empty_cursor());
+        }
 
         void setup_callbacks() {
             if (!window) return;
@@ -379,6 +409,10 @@ export namespace ave {
         }
 
         inline void destroy() noexcept {
+            if(m_empty_cursor){
+                glfwDestroyCursor(m_empty_cursor);
+                m_empty_cursor = nullptr;
+            }
             if(window){
                 glfwSetWindowUserPointer(window, nullptr);
                 glfwDestroyWindow(window);
@@ -502,16 +536,23 @@ export namespace ave {
         inline void set_cursor_mode(CursorMode mode) noexcept {
             if (m_cursor_mode == mode) return;
             m_cursor_mode = mode;
-            if (window) {
-                glfwSetInputMode(window, GLFW_CURSOR,
-                    mode == CursorMode::Normal   ? GLFW_CURSOR_NORMAL   :
-                    mode == CursorMode::Hidden   ? GLFW_CURSOR_HIDDEN   :
-                                                   GLFW_CURSOR_DISABLED
-                );
-            }
+            apply_cursor_mode();
             if (m_bound_input) {
                 m_bound_input->notify_cursor_mode_changed();
             }
+        }
+
+        /**
+         * @brief 重新把当前光标模式写入 GLFW（隐藏/锁定的持续保障）
+         * @start-date 2026/10/14
+         *
+         * GLFW 只在切换模式时写一次光标状态；Wayland 上合成器在指针锁定被激活后
+         * 有可能重新显示光标，锁定期间按 tick（120Hz 量级）调用本函数即可保持隐藏。
+         * 内部只有幂等的 glfwSetInputMode + glfwSetCursor 两次调用，
+         * Normal 模式下等价于重设默认光标，无副作用。
+         */
+        inline void reapply_cursor_mode() noexcept {
+            apply_cursor_mode();
         }
 
         void dispatch_event(Event& e) {
