@@ -100,6 +100,33 @@ export namespace ave {
         );
 
         /**
+         * @brief 从已加载的 FileEntry 读取并解析（自动识别 Obj/Stl）
+         * @param entry 文件条目（通常来自 alib6::io::load_entry）
+         * @param options 加载选项
+         * @param ew 错误上报通道
+         * @return 成功返回 ave::Shape；条目无效或数据为空返回 std::nullopt
+         */
+        [[nodiscard]] static std::optional<Shape> from_entry(
+            const alib6::io::FileEntry& entry,
+            ShapeLoadOptions options = {},
+            alib6::ErrorWrapper ew = {}
+        );
+
+        /**
+         * @brief 从已加载的 FileEntry 读取并解析（显式指定格式）
+         * @param entry 文件条目（通常来自 alib6::io::load_entry）
+         * @param format 强制使用的格式（跳过自动识别）
+         * @param options 加载选项
+         * @param ew 错误上报通道
+         */
+        [[nodiscard]] static std::optional<Shape> from_entry(
+            const alib6::io::FileEntry& entry,
+            ShapeFormat format,
+            ShapeLoadOptions options = {},
+            alib6::ErrorWrapper ew = {}
+        );
+
+        /**
          * @brief 从内存解析（自动识别 Obj/Stl）
          * @param data 文件内容（无需以 '\0' 结尾）
          * @param options 加载选项
@@ -135,6 +162,34 @@ export namespace ave {
             ShapeLoadOptions options
         );
     };
+
+    /// @brief 从已加载的 FileEntry 读取并解析（小函数，显式 inline 便于调用方内联）
+    inline std::optional<Shape> ShapeLoader::from_entry(
+        const alib6::io::FileEntry& entry,
+        ShapeFormat format,
+        ShapeLoadOptions options,
+        alib6::ErrorWrapper ew
+    ) {
+        if(entry.invalid()) {
+            ew.report(ave_shape_load_failed,
+                "ShapeLoader: entry is invalid (format={}).", to_string(format));
+            return std::nullopt;
+        }
+        return from_memory(entry.read(), format, options, ew);
+    }
+
+    inline std::optional<Shape> ShapeLoader::from_entry(
+        const alib6::io::FileEntry& entry,
+        ShapeLoadOptions options,
+        alib6::ErrorWrapper ew
+    ) {
+        if(entry.invalid()) {
+            ew.report(ave_shape_load_failed,
+                "ShapeLoader: entry is invalid (auto detection).");
+            return std::nullopt;
+        }
+        return from_memory(entry.read(), options, ew);
+    }
 
 }
 

@@ -148,12 +148,12 @@ namespace {
         std::vector<glm::vec3> normals;
         std::vector<glm::vec2> uvs;
         std::unordered_map<FaceRef, std::uint32_t, FaceRefHash> cache;
+        std::vector<FaceRef> faces;
+        std::int32_t max_v = -1;
+        std::int32_t max_vt = -1;
+        std::int32_t max_vn = -1;
 
-        const auto emit_vertex = [&](FaceRef ref) -> std::uint32_t {
-            ref.v = fix_index(ref.v, positions.size());
-            ref.vt = fix_index(ref.vt, uvs.size());
-            ref.vn = fix_index(ref.vn, normals.size());
-
+        const auto emit_vertex = [&](const FaceRef& ref) -> std::uint32_t {
             if(const auto it = cache.find(ref); it != cache.end()) {
                 return it->second;
             }
@@ -200,15 +200,32 @@ namespace {
                     rest = rest.substr(space + 1);
                 }
                 if(refs.size() < 3) return;
+                for(auto& ref : refs) {
+                    ref.v  = fix_index(ref.v, positions.size());
+                    ref.vt = fix_index(ref.vt, uvs.size());
+                    ref.vn = fix_index(ref.vn, normals.size());
+                    if(ref.v  > max_v)  max_v  = ref.v;
+                    if(ref.vt > max_vt) max_vt = ref.vt;
+                    if(ref.vn > max_vn) max_vn = ref.vn;
+                }
                 for(std::size_t i = 2; i < refs.size(); ++i) {
-                    shape.indices.push_back(emit_vertex(refs[0]));
-                    shape.indices.push_back(emit_vertex(refs[i - 1]));
-                    shape.indices.push_back(emit_vertex(refs[i]));
+                    faces.push_back(refs[0]);
+                    faces.push_back(refs[i - 1]);
+                    faces.push_back(refs[i]);
                 }
             }
             // 其余指令（mtllib / usemtl / s / o / g ...）对纯几何无意义，忽略
         });
 
+        // OBJ 允许面引用后面才出现的顶点：统一在读完整个文件后校验记录到的最大下标
+        if(max_v >= 0 && static_cast<std::size_t>(max_v) >= positions.size()) return Shape{};
+        if(max_vt >= 0 && static_cast<std::size_t>(max_vt) >= uvs.size()) return Shape{};
+        if(max_vn >= 0 && static_cast<std::size_t>(max_vn) >= normals.size()) return Shape{};
+
+        shape.indices.reserve(faces.size());
+        for(const auto& ref : faces) {
+            shape.indices.push_back(emit_vertex(ref));
+        }
         return shape;
     }
 

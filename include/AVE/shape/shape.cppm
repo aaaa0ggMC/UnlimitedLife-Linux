@@ -28,6 +28,7 @@ export namespace ave {
      * 顶点为 interleaved 布局，字段顺序即 ave::vertex_layout 反射出的
      * attribute location 顺序（position 0 / normal 1 / uv 2）；
      * 索引统一使用 uint32_t（VK_INDEX_TYPE_UINT32 为核心支持）。
+     * ShapeLoader 解析出的 Shape 保证：indices 为完整三元组，且每个索引 < vertex_count()。
      *
      * @note 绑定与上传由用户自理，典型用法：
      * @code
