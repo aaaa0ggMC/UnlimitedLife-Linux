@@ -143,8 +143,8 @@ int main() {
         assert(input.is_key_just_pressed(ave::KeyCode::W));
         assert(!input.is_key_just_released(ave::KeyCode::W));
 
-        // Frame 1: 换帧 new_frame (PressedThisTick -> Held)
-        input.new_frame();
+        // Frame 1: 换帧 end_frame (PressedThisTick -> Held)
+        input.end_frame();
 
         assert(input.is_key_down(ave::KeyCode::W));
         assert(!input.is_key_just_pressed(ave::KeyCode::W)); // 已经不再是刚刚按下
@@ -159,7 +159,7 @@ int main() {
         assert(input.is_key_just_released(ave::KeyCode::W));
 
         // Frame 3: 换帧 (ReleasedThisTick -> Released)
-        input.new_frame();
+        input.end_frame();
         assert(input.is_key_up(ave::KeyCode::W));
         assert(!input.is_key_just_released(ave::KeyCode::W));
 
@@ -175,7 +175,7 @@ int main() {
         // 模拟鼠标移动
         ave::MouseMoveEvent m1(100.0, 200.0);
         input.on_event(m1);
-        input.new_frame();
+        input.end_frame();
 
         ave::MouseMoveEvent m2(125.0, 240.0);
         input.on_event(m2);
@@ -193,7 +193,7 @@ int main() {
         assert(sx == 0.0 && sy == 3.5);
 
         // 换帧后滚轮清零
-        input.new_frame();
+        input.end_frame();
         auto [sx2, sy2] = input.get_mouse_scroll();
         assert(sx2 == 0.0 && sy2 == 0.0);
 
@@ -203,7 +203,7 @@ int main() {
         assert(input.is_mouse_button_down(ave::MouseButton::Left));
         assert(input.is_mouse_button_just_pressed(ave::MouseButton::Left));
 
-        input.new_frame();
+        input.end_frame();
         assert(input.is_mouse_button_down(ave::MouseButton::Left));
         assert(!input.is_mouse_button_just_pressed(ave::MouseButton::Left));
 

@@ -16,8 +16,6 @@ export namespace ave {
 
         double m_mouse_x { 0.0 };
         double m_mouse_y { 0.0 };
-        double m_prev_mouse_x { 0.0 };
-        double m_prev_mouse_y { 0.0 };
         double m_mouse_delta_x { 0.0 };
         double m_mouse_delta_y { 0.0 };
         double m_scroll_delta_x { 0.0 };
@@ -58,8 +56,9 @@ export namespace ave {
             }
         }
 
-        /// 每帧开始时调用，推进按键生命周期并重置帧间增量
-        void new_frame() noexcept {
+        /// 一帧/一拍结束时调用：推进按键生命周期（边沿 → Held）、清零本帧累计的鼠标位移与滚轮。
+        /// 所有输入查询（is_key_just_pressed / get_mouse_delta / get_mouse_scroll）都应在本调用之前完成。
+        void end_frame() noexcept {
             // 推进按键状态
             for (auto& k : m_keys) {
                 if (k.status == KeyState::PressedThisTick) {
@@ -78,11 +77,9 @@ export namespace ave {
                 }
             }
 
-            // 更新鼠标增量
-            m_mouse_delta_x = m_mouse_x - m_prev_mouse_x;
-            m_mouse_delta_y = m_mouse_y - m_prev_mouse_y;
-            m_prev_mouse_x = m_mouse_x;
-            m_prev_mouse_y = m_mouse_y;
+            // 更新鼠标增量：位移在事件里累计，这里只负责清零本帧的量
+            m_mouse_delta_x = 0.0;
+            m_mouse_delta_y = 0.0;
 
             // 重置滚轮增量
             m_scroll_delta_x = 0.0;
@@ -91,7 +88,7 @@ export namespace ave {
 
         /// 兼容 AGE 的 update 命名
         inline void update() noexcept {
-            new_frame();
+            end_frame();
         }
 
         /// 接收事件驱动系统的事件，实时同步状态机（零查询开销，绝不漏键）
@@ -142,9 +139,11 @@ export namespace ave {
 
             dispatcher.dispatch<MouseMoveEvent>([this](MouseMoveEvent& ev) {
                 if (m_first_mouse_move) {
-                    m_prev_mouse_x = ev.x;
-                    m_prev_mouse_y = ev.y;
+                    // 首次移动或光标模式切换后的坐标跳变：不计入增量
                     m_first_mouse_move = false;
+                } else {
+                    m_mouse_delta_x += ev.x - m_mouse_x;
+                    m_mouse_delta_y += ev.y - m_mouse_y;
                 }
                 m_mouse_x = ev.x;
                 m_mouse_y = ev.y;
@@ -284,10 +283,12 @@ export namespace ave {
             return { m_mouse_x, m_mouse_y };
         }
 
+        /// 本帧（自上次 end_frame 以来）累计的鼠标位移，单位为像素
         inline std::pair<double, double> get_mouse_delta() const noexcept {
             return { m_mouse_delta_x, m_mouse_delta_y };
         }
 
+        /// 本帧（自上次 end_frame 以来）累计的滚轮增量
         inline std::pair<double, double> get_mouse_scroll() const noexcept {
             return { m_scroll_delta_x, m_scroll_delta_y };
         }
