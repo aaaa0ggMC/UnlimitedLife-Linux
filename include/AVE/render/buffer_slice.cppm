@@ -88,6 +88,14 @@ export namespace ave {
             return size;
         }
 
+        /// @brief 是否与另一切片指向同一缓冲区的同一区间（调用方无需比对裸句柄）
+        [[nodiscard]] bool same_region(const BasicBufferSlice& other) const noexcept {
+            return get_system_handle() != VK_NULL_HANDLE
+                && get_system_handle() == other.get_system_handle()
+                && get_offset() == other.get_offset()
+                && get_size() == other.get_size();
+        }
+
         /// 对当前切片做进一步的子切片（sub_offset 相对于当前切片的起始位置）
         [[nodiscard]] BasicBufferSlice sub_slice(
             VkDeviceSize sub_offset,
@@ -142,13 +150,24 @@ export namespace ave {
             return result;
         }
 
-        /// 底层连续字节写入
+        /// 底层连续字节写入（staging 容量装不下时按容量分多轮映射 + 提交）
         bool upload_bytes(const void* ptr, VkDeviceSize bytes, VkDeviceSize dst_offset = 0, MapBufferInfo mi = {}) const {
             if(bytes == 0) return true;
             if(!*this) {
                 mi.ew.report(ave_vk_map_buffer, "Cannot upload to an uninitialized BasicBufferSlice.");
                 return false;
             }
+
+            if(mi.staging.capacity > 0 && mi.staging.capacity < bytes) {
+                const auto* src = static_cast<const std::uint8_t*>(ptr);
+                const VkDeviceSize chunk = mi.staging.capacity;
+                for(VkDeviceSize done = 0; done < bytes; done += chunk) {
+                    const VkDeviceSize part = std::min(chunk, bytes - done);
+                    if(!upload_bytes(src + done, part, dst_offset + done, mi)) return false;
+                }
+                return true;
+            }
+
             mi.offset = dst_offset;
             mi.size = bytes;
             auto mapped = this->map(mi);

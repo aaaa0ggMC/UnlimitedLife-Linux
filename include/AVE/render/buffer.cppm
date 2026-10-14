@@ -705,9 +705,20 @@ export namespace ave {
             }
         }
 
-        /// 底层连续字节写入
+        /// 底层连续字节写入（staging 容量装不下时按容量分多轮映射 + 提交）
         bool upload_bytes(const void* ptr, VkDeviceSize bytes, VkDeviceSize dst_offset = 0, MapBufferInfo mi = {}) {
             if(bytes == 0) return true;
+
+            if(mi.staging.capacity > 0 && mi.staging.capacity < bytes) {
+                const auto* src = static_cast<const std::uint8_t*>(ptr);
+                const VkDeviceSize chunk = mi.staging.capacity;
+                for(VkDeviceSize done = 0; done < bytes; done += chunk) {
+                    const VkDeviceSize part = std::min(chunk, bytes - done);
+                    if(!upload_bytes(src + done, part, dst_offset + done, mi)) return false;
+                }
+                return true;
+            }
+
             mi.offset = dst_offset;
             mi.size = bytes;
             auto mapped = map(mi);

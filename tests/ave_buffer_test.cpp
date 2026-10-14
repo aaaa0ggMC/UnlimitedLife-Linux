@@ -148,7 +148,7 @@ static void exercise(typename Policy::CreateInfo ci) {
         check(*reinterpret_cast<const uint32_t*>(map0.raw_data()) == 42, "slice 0 unchanged");
         check(*reinterpret_cast<const uint32_t*>(map1.raw_data()) == 999, "slice 1 updated");
     }
-    auto oob_slices = buffer->template slice_n<uint32_t>(10, 64, 0);
+    auto oob_slices = buffer->template slice_n<uint32_t>(10, 64, 0, error);
     check(!oob_slices && oob_slices.empty(), "buffer slice_n oob rejection");
 
     // Test slice_n on Slice
@@ -434,6 +434,64 @@ static void exercise_staging_upload(const std::shared_ptr<ave::Device>& device,
             check(rb_map[i] == slice_data[i], "slice readback matches");
         }
     }
+
+    // 6. 数据量超过 staging 容量：必须自动分多轮上传（fog 的几何上传走这条路径）
+    std::vector<uint8_t> large_data(600);
+    for(size_t i = 0; i < large_data.size(); ++i) large_data[i] = static_cast<uint8_t>(i * 7 + 1);
+    check(large_data.size() > tiny_staging.get_size(), "payload must exceed the small staging capacity");
+
+    const auto verify_bytes = [&](ave::VMABuffer& src, VkDeviceSize src_offset,
+                                  const std::vector<uint8_t>& expected, const char* tag) {
+        ave::VMABuffer rb({
+            .allocator = allocator,
+            .size = static_cast<VkDeviceSize>(expected.size()),
+            .usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+            .host_access = ave::BufferHostAccess::RandomAccess,
+            .ew = error
+        });
+        check(bool(rb), "create oversized readback buffer");
+        auto ticket = upload_ctx->submit_copy(src.get_system_handle(), src_offset,
+                                              rb.get_system_handle(), 0,
+                                              static_cast<VkDeviceSize>(expected.size()), nullptr, error);
+        check(bool(ticket) && ticket.wait(10'000'000'000ULL, error), tag);
+        auto mapped_rb = rb.map({.size = static_cast<VkDeviceSize>(expected.size()), .ew = error});
+        check(bool(mapped_rb) && mapped_rb.invalidate(0, VK_WHOLE_SIZE, error), "map oversized readback");
+        for(size_t i = 0; i < expected.size(); ++i) {
+            check(mapped_rb[i] == expected[i], tag);
+        }
+    };
+
+    ave::VMABuffer large_gpu({
+        .allocator = allocator,
+        .size = static_cast<VkDeviceSize>(large_data.size()),
+        .usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        .host_access = ave::BufferHostAccess::DeviceOnly,
+        .ew = error
+    });
+    check(bool(large_gpu), "create oversized DeviceOnly buffer");
+    check(large_gpu.upload(large_data, 0, {
+        .staging = &tiny_staging,
+        .upload_context = upload_ctx.get(),
+        .ew = error
+    }), "oversized payload upload splits across staging rounds");
+    verify_bytes(large_gpu, 0, large_data, "multi-round buffer upload bytes match");
+
+    ave::VMABuffer large_slice_buffer({
+        .allocator = allocator,
+        .size = static_cast<VkDeviceSize>(large_data.size() + 128),
+        .usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        .host_access = ave::BufferHostAccess::DeviceOnly,
+        .ew = error
+    });
+    check(bool(large_slice_buffer), "create oversized slice backing buffer");
+    auto large_slice = large_slice_buffer.alloc_bytes(large_data.size(), {.ew = error});
+    check(bool(large_slice), "alloc_bytes for oversized slice");
+    check(large_slice.upload(large_data, 0, {
+        .staging = &tiny_staging,
+        .upload_context = upload_ctx.get(),
+        .ew = error
+    }), "oversized slice upload splits across staging rounds");
+    verify_bytes(large_slice_buffer, large_slice.get_offset(), large_data, "multi-round slice upload bytes match");
 }
 
 template<class Policy>
