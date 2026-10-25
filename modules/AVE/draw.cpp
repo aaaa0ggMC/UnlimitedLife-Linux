@@ -286,7 +286,8 @@ void GraphicsContext::begin() {
     begin(default_clear_values);
 }
 
-void GraphicsContext::begin(VkClearColorValue clear_color) {
+void GraphicsContext::begin(VkClearColorValue clear_color,
+                            const std::function<void(VkCommandBuffer)>& before_render) {
     std::array<VkClearValue, 2> stack_clears {};
     alib6::u32 count = 1;
     stack_clears[0].color = clear_color;
@@ -294,10 +295,11 @@ void GraphicsContext::begin(VkClearColorValue clear_color) {
         stack_clears[1] = default_clear_values[1];
         count = 2;
     }
-    begin(std::span<const VkClearValue>(stack_clears.data(), count));
+    begin(std::span<const VkClearValue>(stack_clears.data(), count), before_render);
 }
 
-void GraphicsContext::begin(std::span<const VkClearValue> clear_values) {
+void GraphicsContext::begin(std::span<const VkClearValue> clear_values,
+                            const std::function<void(VkCommandBuffer)>& before_render) {
     if(!renderer) return;
     if(recording || finished) {
         result_code = VK_ERROR_INITIALIZATION_FAILED;
@@ -316,6 +318,8 @@ void GraphicsContext::begin(std::span<const VkClearValue> clear_values) {
             static_cast<int>(result_code));
         return;
     }
+
+    if(before_render) before_render(command_buffer);
 
     if(dynamic_rendering) {
         VkImageMemoryBarrier color_barrier {};

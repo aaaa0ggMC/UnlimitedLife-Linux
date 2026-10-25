@@ -122,7 +122,8 @@ export namespace ave{
 
         void begin();
         void begin(
-            VkClearColorValue clear_color
+            VkClearColorValue clear_color,
+            const std::function<void(VkCommandBuffer)>& before_render = {}
         );
 
         /// @brief 便捷清屏：直接给浮点 RGBA（alpha 默认 1），免去手搓 VkClearColorValue
@@ -130,7 +131,10 @@ export namespace ave{
             begin(VkClearColorValue{ .float32 = { r, g, b, a } });
         }
 
-        void begin(std::span<const VkClearValue> clear_values);
+        /// Record compute/transfer work after command-buffer begin, outside either rendering backend.
+        /// The callback must not end the command buffer or open a rendering scope.
+        void begin(std::span<const VkClearValue> clear_values,
+                   const std::function<void(VkCommandBuffer)>& before_render = {});
         void bind_pipeline(const Pipeline& pipeline);
         template<class MemoryPolicy>
         void bind_vertex_buffer(
