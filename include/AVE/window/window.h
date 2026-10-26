@@ -576,7 +576,7 @@ namespace ave {
                 m_need_after_resize_event = true;
             }
 
-            // 强类型分桶监听器（由 alib6.storage 驱动）
+            // 强类型分桶监听器（由 alib5.storage 驱动）
             const auto idx = static_cast<size_t>(e.get_type());
             if (idx < m_event_storages.size() && (m_active_event_mask & (1ULL << idx)) != 0) {
                 m_event_storages[idx].for_each([&](std::function<void(Event&)>& cb) {

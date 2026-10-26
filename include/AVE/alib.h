@@ -18,18 +18,17 @@
 
 namespace ave {
 
-    // alib5 的 MonoBitSet 方法名与 AVE 既有用法不同（get 而非 test，且无
-    // fill/none/find_next_*）。在此提供与 AVE 既有 dirty-mask 算法等价的薄辅助，
-    // 保持 buffer/reflect 中位图逻辑的语义不变。
+    // AVE 原先用到的位图接口名与 alib5 MonoBitSet 不完全一致（get 而非 test，
+    // 也没有 find_next_*）。这里用 alib5 原生 fill/none 与 for_each_* 提供薄辅助，
+    // 保持 buffer/reflect 中 dirty-mask 的语义不变。
     using BitSet = alib5::storage::MonoBitSet;
 
     inline void bitset_clear(BitSet& bs) noexcept {
-        for(auto& w : bs.mask) w = 0;
+        bs.fill(false);
     }
 
     [[nodiscard]] inline bool bitset_none(const BitSet& bs) noexcept {
-        for(auto w : bs.mask) if(w) return false;
-        return true;
+        return bs.none();
     }
 
     /// 首个置位且 >= from 的位置（遍历全部置位，调用方自行校验上界），等价原 find_next_1(from)。

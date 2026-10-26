@@ -8,8 +8,8 @@
 #include <AVE/reflect/layout.h>
 
 /**
- * @file vertex.cppm
- * @brief Vulkan vertex input reflection, format deduction, and layout builder with alib6 MonoBitSet slot allocation
+ * @file vertex.h
+ * @brief Vulkan vertex input reflection, format deduction, and layout builder with alib5 MonoBitSet slot allocation
  * @version 6.0
  * @date 2026-09-13
  */

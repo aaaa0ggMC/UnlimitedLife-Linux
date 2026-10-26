@@ -383,7 +383,7 @@ std::optional<Shape> ShapeLoader::from_file(
     std::string data;
     const auto size = alib5::io::read_all(path, data);
     if(size == std::numeric_limits<std::size_t>::max()) {
-        // read_all 内部已经过 ew 上报过一次，这里只补充上下文
+        // alib5 的 read_all 只返回失败哨兵（诊断走 invoke_error），上下文由此处补报。
         ew.report(ave_shape_load_failed,
             "ShapeLoader: failed to read '{}' (format={}).", path, to_string(format));
         return std::nullopt;
