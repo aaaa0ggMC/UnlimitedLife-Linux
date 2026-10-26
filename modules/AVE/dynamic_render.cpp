@@ -1,15 +1,12 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
-#include <alib6/debug.h>
+#include <alib5/adebug.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/dynamic_render.h>
+#include <AVE/render/pipeline.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :dynamic_render;
-import :pipeline;
 
 namespace ave {
 

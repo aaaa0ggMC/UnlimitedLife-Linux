@@ -1,19 +1,16 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
-#include <alib6/debug.h>
+#include <alib5/adebug.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/render.h>
+#include <AVE/render/buffer.h>
+#include <AVE/render/buffer_slice.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :render;
-import :buffer;
-import :buffer_slice;
 
 namespace ave {
-GraphicsContext::GraphicsContext(alib6::ErrorWrapper target_ew)
+GraphicsContext::GraphicsContext(ave::ErrorWrapper target_ew)
 :ew(std::move(target_ew)){}
 
 GraphicsContext::~GraphicsContext() {
@@ -61,7 +58,7 @@ GraphicsContext::GraphicsContext(GraphicsContext&& other) noexcept
     other.finished = true;
 }
 
-bool Renderer::prepare_graphics_cache(alib6::ErrorWrapper& ew) {
+bool Renderer::prepare_graphics_cache(ave::ErrorWrapper& ew) {
     const bool dynamic_rendering = device && device->supports_dynamic_rendering();
     const bool valid_legacy = !dynamic_rendering && legacy_render &&
         legacy_render->get_framebuffers().size() == swapchain->get_image_count();
@@ -173,7 +170,7 @@ VkResult Renderer::wait_idle() const noexcept {
     return device ? device->wait_idle() : VK_SUCCESS;
 }
 
-GraphicsContext Renderer::acquire_context(alib6::ErrorWrapper ew) {
+GraphicsContext Renderer::acquire_context(ave::ErrorWrapper ew) {
     auto failure = [&ew](VkResult code) {
         GraphicsContext context(std::move(ew));
         context.result_code = code;
@@ -215,7 +212,7 @@ GraphicsContext Renderer::acquire_context(alib6::ErrorWrapper ew) {
         return failure(code);
     }
 
-    alib6::u32 image_index = 0;
+    ave::u32 image_index = 0;
     const VkResult acquire_code = vkAcquireNextImageKHR(
         cache.device,
         cache.swapchain,
@@ -289,7 +286,7 @@ void GraphicsContext::begin() {
 void GraphicsContext::begin(VkClearColorValue clear_color,
                             const std::function<void(VkCommandBuffer)>& before_render) {
     std::array<VkClearValue, 2> stack_clears {};
-    alib6::u32 count = 1;
+    ave::u32 count = 1;
     stack_clears[0].color = clear_color;
     if(default_clear_values.size() > 1) {
         stack_clears[1] = default_clear_values[1];
@@ -338,7 +335,7 @@ void GraphicsContext::begin(std::span<const VkClearValue> clear_values,
         VkPipelineStageFlags src_stages = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
         VkPipelineStageFlags dst_stages =
             VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        alib6::u32 barrier_count = 1;
+        ave::u32 barrier_count = 1;
         std::array<VkImageMemoryBarrier, 2> barriers { color_barrier };
 
         if(depth_image != VK_NULL_HANDLE) {
@@ -418,7 +415,7 @@ void GraphicsContext::begin(std::span<const VkClearValue> clear_values,
         render_pass_info.framebuffer = framebuffer;
         render_pass_info.renderArea.offset = { 0, 0 };
         render_pass_info.renderArea.extent = extent;
-        render_pass_info.clearValueCount = static_cast<alib6::u32>(
+        render_pass_info.clearValueCount = static_cast<ave::u32>(
             clear_values.size()
         );
         render_pass_info.pClearValues = clear_values.data();
@@ -450,9 +447,9 @@ void GraphicsContext::bind_pipeline(const Pipeline& pipeline) {
 
 void GraphicsContext::bind_descriptor_set(
     const Pipeline& pipeline,
-    alib6::u32 set_index,
+    ave::u32 set_index,
     VkDescriptorSet set,
-    std::span<const alib6::u32> dynamic_offsets
+    std::span<const ave::u32> dynamic_offsets
 ) noexcept {
     panic_debug(!recording, "Cannot bind descriptor set outside of an active recording scope.");
     panic_debug(set_index >= bound_descriptor_sets.size(), "Descriptor set index out of range.");
@@ -472,9 +469,9 @@ void GraphicsContext::bind_descriptor_set(
 }
 
 void GraphicsContext::bind_descriptor_set(
-    alib6::u32 set_index,
+    ave::u32 set_index,
     VkDescriptorSet set,
-    std::span<const alib6::u32> dynamic_offsets
+    std::span<const ave::u32> dynamic_offsets
 ) noexcept {
     panic_debug(!recording, "Cannot bind descriptor set outside of an active recording scope.");
     panic_debug(!bound_pipeline, "Cannot bind descriptor set without an active bound pipeline.");
@@ -484,9 +481,9 @@ void GraphicsContext::bind_descriptor_set(
 
 void GraphicsContext::bind_descriptor_sets(
     const Pipeline& pipeline,
-    alib6::u32 first_set,
+    ave::u32 first_set,
     std::span<const VkDescriptorSet> sets,
-    std::span<const alib6::u32> dynamic_offsets
+    std::span<const ave::u32> dynamic_offsets
 ) noexcept {
     panic_debug(!recording, "Cannot bind descriptor sets outside of an active recording scope.");
     panic_debug(first_set + sets.size() > bound_descriptor_sets.size(), "Descriptor set range out of bounds.");
@@ -511,9 +508,9 @@ void GraphicsContext::bind_descriptor_sets(
 }
 
 void GraphicsContext::bind_descriptor_sets(
-    alib6::u32 first_set,
+    ave::u32 first_set,
     std::span<const VkDescriptorSet> sets,
-    std::span<const alib6::u32> dynamic_offsets
+    std::span<const ave::u32> dynamic_offsets
 ) noexcept {
     panic_debug(!recording, "Cannot bind descriptor sets outside of an active recording scope.");
     panic_debug(!bound_pipeline, "Cannot bind descriptor sets without an active bound pipeline.");
@@ -523,8 +520,8 @@ void GraphicsContext::bind_descriptor_sets(
 
 void GraphicsContext::set_dynamic_buffer_offsets(
     const Pipeline& pipeline,
-    alib6::u32 set_index,
-    std::span<const alib6::u32> dynamic_offsets
+    ave::u32 set_index,
+    std::span<const ave::u32> dynamic_offsets
 ) noexcept {
     panic_debug(!recording, "Cannot set dynamic buffer offsets outside of an active recording scope.");
     panic_debug(set_index >= bound_descriptor_sets.size(), "Descriptor set index out of range.");
@@ -547,8 +544,8 @@ void GraphicsContext::set_dynamic_buffer_offsets(
 }
 
 void GraphicsContext::set_dynamic_buffer_offsets(
-    alib6::u32 set_index,
-    std::span<const alib6::u32> dynamic_offsets
+    ave::u32 set_index,
+    std::span<const ave::u32> dynamic_offsets
 ) noexcept {
     panic_debug(!recording, "Cannot set dynamic buffer offsets outside of an active recording scope.");
     panic_debug(!bound_pipeline, "Cannot set dynamic buffer offsets without an active bound pipeline.");
@@ -557,7 +554,7 @@ void GraphicsContext::set_dynamic_buffer_offsets(
 }
 
 void GraphicsContext::bind_vertex_buffers(
-    alib6::u32 first_binding,
+    ave::u32 first_binding,
     std::span<const VkBuffer> buffers,
     std::span<const VkDeviceSize> offsets
 ) noexcept {
@@ -573,10 +570,10 @@ void GraphicsContext::bind_vertex_buffers(
 }
 
 void GraphicsContext::draw(
-    alib6::u32 vertex_count,
-    alib6::u32 instance_count,
-    alib6::u32 first_vertex,
-    alib6::u32 first_instance
+    ave::u32 vertex_count,
+    ave::u32 instance_count,
+    ave::u32 first_vertex,
+    ave::u32 first_instance
 ) noexcept {
     if(!recording) return;
     vkCmdDraw(
@@ -589,11 +586,11 @@ void GraphicsContext::draw(
 }
 
 void GraphicsContext::draw_indexed(
-    alib6::u32 index_count,
-    alib6::u32 instance_count,
-    alib6::u32 first_index,
-    alib6::i32 vertex_offset,
-    alib6::u32 first_instance
+    ave::u32 index_count,
+    ave::u32 instance_count,
+    ave::u32 first_index,
+    ave::i32 vertex_offset,
+    ave::u32 first_instance
 ) noexcept {
     if(!recording) return;
     vkCmdDrawIndexed(
@@ -709,8 +706,8 @@ void GraphicsContext::end() {
 
 void GraphicsContext::push_constant_raw(
     VkShaderStageFlags stage_flags,
-    alib6::u32 offset,
-    alib6::u32 size,
+    ave::u32 offset,
+    ave::u32 size,
     const void* data
 ) noexcept {
     panic_debug(!recording, "Cannot push constant outside of an active recording scope.");
@@ -750,7 +747,7 @@ void GraphicsContext::push_constant_raw(
     );
 }
 
-alib6::u32 GraphicsContext::get_image_index() const noexcept { return image_index; }
+ave::u32 GraphicsContext::get_image_index() const noexcept { return image_index; }
 VkExtent2D GraphicsContext::get_extent() const noexcept { return extent; }
 VkCommandBuffer GraphicsContext::get_command_buffer() const noexcept {
     return command_buffer;

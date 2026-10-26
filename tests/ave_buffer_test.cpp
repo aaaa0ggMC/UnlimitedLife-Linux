@@ -7,9 +7,9 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <AVE/AVE.h>
+#include <AVE/alib.h>
 
-import ave;
-import alib6;
 
 static void check(bool value, const char* message) {
     if(!value) { std::fprintf(stderr, "FAIL: %s\n", message); std::exit(1); }
@@ -50,7 +50,7 @@ static void exercise_dirty_tracking(const std::shared_ptr<ave::Device>& device) 
     const auto atom = device->get_non_coherent_atom_size();
     ave::BasicBuffer<TrackingPolicy> buffer({.device = device, .size = 8 * atom});
     auto state = TrackingPolicy::current.lock();
-    alib6::Error error;
+    ave::Error error;
     {
         auto mapped = buffer.map({.chunk_multiply = 1, .offset = 3, .size = 5 * atom});
         check(bool(mapped), "tracking mapping");
@@ -93,7 +93,7 @@ template<class Policy>
 static void exercise(typename Policy::CreateInfo ci) {
     using Buffer = ave::BasicBuffer<Policy>;
     using Slice = ave::BasicBufferSlice<Policy>;
-    alib6::Error error;
+    ave::Error error;
     ci.ew = error;
     ci.size = 257;
     auto buffer = Buffer::create_shared(ci);
@@ -216,7 +216,7 @@ static void exercise(typename Policy::CreateInfo ci) {
 
 // Instantiating these calls verifies both backends integrate with drawing APIs.
 static void exercise_regions(const std::shared_ptr<ave::VMAAllocator>& allocator) {
-    alib6::Error error;
+    ave::Error error;
     const auto atom = allocator->get_device()->get_non_coherent_atom_size();
     ave::VMABuffer arena({.allocator = allocator, .size = 4 * atom,
         .host_access = ave::BufferHostAccess::RandomAccess, .ew = error});
@@ -297,7 +297,7 @@ static void exercise_regions(const std::shared_ptr<ave::VMAAllocator>& allocator
 
 static void exercise_staging_upload(const std::shared_ptr<ave::Device>& device,
                                     const std::shared_ptr<ave::VMAAllocator>& allocator) {
-    alib6::Error error;
+    ave::Error error;
     auto upload_ctx = ave::UploadContext::create({
         .device = device,
         .queue_family = 0,
@@ -327,7 +327,7 @@ static void exercise_staging_upload(const std::shared_ptr<ave::Device>& device,
 
     // Pre-validation tests:
     // Missing upload_context with staging must fail
-    alib6::Error missing_ctx_err;
+    ave::Error missing_ctx_err;
     auto bad_map = gpu.map({.staging = &staging, .upload_context = nullptr, .ew = missing_ctx_err});
     check(!bad_map, "staging map without upload_context rejected");
     check(missing_ctx_err.has_error(), "missing upload_context reported");
@@ -341,7 +341,7 @@ static void exercise_staging_upload(const std::shared_ptr<ave::Device>& device,
         .host_access = ave::BufferHostAccess::SequentialWrite,
         .ew = error
     });
-    alib6::Error small_err;
+    ave::Error small_err;
     auto small_map = gpu.map({.offset = 0, .size = 32, .staging = &tiny_staging, .upload_context = upload_ctx.get(), .ew = small_err});
     check(!small_map, "staging capacity too small rejected");
     check(small_err.has_error(), "small staging capacity reported");
@@ -361,7 +361,7 @@ static void exercise_staging_upload(const std::shared_ptr<ave::Device>& device,
         check(gpu.get_stagedby() != nullptr, "stagedby locked during session");
 
         // Concurrent map on the same buffer must be rejected!
-        alib6::Error conflict_err;
+        ave::Error conflict_err;
         auto conflict_map = gpu.map({
             .offset = 0,
             .size = 8,
@@ -599,7 +599,7 @@ static void exercise_descriptor_binding_and_sets(const std::shared_ptr<ave::Devi
 
 int main() {
     ave::Context context;
-    alib6::Error error;
+    ave::Error error;
     auto instance = std::make_shared<ave::Instance>();
     check(instance->create({.ctx = context, .ew = error}), "instance");
     uint32_t count = 0;

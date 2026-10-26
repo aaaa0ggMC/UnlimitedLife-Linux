@@ -6,7 +6,7 @@ App::App()
     : logger(),
       lg(logger, "avetest"),
       vklg(logger, "Vulkan") {
-    logger.append_mod<alib6::lot::Console>("console");
+    logger.append_mod<alib5::lot::Console>("console");
 }
 
 void App::setup() {
@@ -38,7 +38,7 @@ void App::setup() {
         with.try_dynamic_rendering = !(mode && std::string_view(mode) == "legacy");
     }
     with.configure_debug_messenger->on_message(
-        [this](alib6::LogLevel level, std::string_view, std::string_view message) {
+        [this](alib5::LogLevel level, std::string_view, std::string_view message) {
             vklg(level) << message << std::endl;
         }
     );
@@ -138,7 +138,7 @@ void App::setup_vertex_data() {
 void App::setup_texture() {
     texture = ave::Image::create_from_file(
         { .allocator = allocator },
-        alib6::io::load_entry("avetest/textures/template.png"),
+        alib5::io::load_entry("avetest/textures/template.png"),
         { .map_info = { .upload_context = renderer->get_upload_context() } }
     );
 

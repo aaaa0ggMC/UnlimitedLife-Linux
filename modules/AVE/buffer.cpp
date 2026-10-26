@@ -1,14 +1,13 @@
-module;
 #include <vulkan/vulkan.h>
-#include <alib6/debug.h>
+#include <alib5/adebug.h>
+#include <memory>
+#include <algorithm>
+#include <ranges>
+#include <limits>
 
-module ave.render;
-
-import std;
-import alib6;
-import ave.ecode;
-import :buffer;
-
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/buffer.h>
 #include "buffer_detail.inl"
 
 namespace ave {
@@ -54,7 +53,7 @@ struct NativeMemoryPolicy::State {
 std::shared_ptr<NativeMemoryPolicy::State> NativeMemoryPolicy::create(CreateInfo ci) {
     auto state = std::make_shared<State>();
     VkBufferCreateInfo vk {};
-    std::vector<alib6::u32> families;
+    std::vector<ave::u32> families;
     if(!detail::prepare_buffer(ci, ci.device, state->info, vk, families, true)) return {};
     const auto device = ci.device->get_system_handle();
     const auto callbacks = ci.device->get_instance()->get_vk_allocator();

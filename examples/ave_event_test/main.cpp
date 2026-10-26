@@ -5,9 +5,9 @@
 #include <thread>
 #include <chrono>
 #include <cmath>
+#include <AVE/AVE.h>
+#include <AVE/alib.h>
 
-import ave;
-import alib6;
 
 int main() {
     std::cout << "Starting AVE Event & Input Systems Test..." << std::endl;
@@ -280,9 +280,9 @@ int main() {
         // 验证 Renderer 默认 context 为空
         assert(empty_renderer.context == nullptr);
 
-        // 使用 alib6::Error 捕获错误报告，验证无效 Renderer 调用时安全报告错误并返回 false
-        alib6::Error err;
-        alib6::ErrorWrapper ew(err);
+        // 使用 ave::Error 捕获错误报告，验证无效 Renderer 调用时安全报告错误并返回 false
+        ave::Error err;
+        ave::ErrorWrapper ew(err);
         bool res1 = ave::recreate_swapchain_from_window(empty_renderer, window, {}, ew);
         assert(!res1);
         assert(err.has_error());
@@ -377,4 +377,3 @@ int main() {
     std::cout << "==============================================" << std::endl;
     return 0;
 }
-

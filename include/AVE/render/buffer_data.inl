@@ -7,9 +7,9 @@ BasicBufferData<P>::BasicBufferData(
 ) : state(std::move(resource)), mapped_ptr(ptr), map_offset(offset),
     map_size(size), mapped_capacity(capacity), allocation_size(alloc_size),
     chunk_size(c_size), chunk_count(size / c_size + (size % c_size != 0)),
-    is_coherent(coherent), dirty_mask(chunk_count) {
+    is_coherent(coherent) {
     dirty_mask.ensure(chunk_count);
-    dirty_mask.fill(false);
+    ave::bitset_clear(dirty_mask);
 }
 
 template<class P>
@@ -23,9 +23,9 @@ BasicBufferData<P>::BasicBufferData(
     mapped_ptr(ptr), map_offset(offset), map_size(size),
     mapped_capacity(capacity), allocation_size(alloc_size),
     chunk_size(c_size), chunk_count(size / c_size + (size % c_size != 0)),
-    is_coherent(false), dirty_mask(chunk_count) {
+    is_coherent(false) {
     dirty_mask.ensure(chunk_count);
-    dirty_mask.fill(false);
+    ave::bitset_clear(dirty_mask);
 }
 
 template<class P>
@@ -34,7 +34,7 @@ void BasicBufferData<P>::release() noexcept {
         if(auto_upload) {
             // Destructors cannot report flush failures; use explicit flush() when needed.
             try {
-                alib6::Error ignored;
+                ave::Error ignored;
                 (void)flush(ignored);
             } catch(...) {}
         }
@@ -101,7 +101,7 @@ BasicBufferData<P>::ByteProxy::operator=(const ByteProxy& other) noexcept {
 }
 
 template<class P>
-void BasicBufferData<P>::mark_range_dirty(alib6::usize offset, alib6::usize count) noexcept {
+void BasicBufferData<P>::mark_range_dirty(ave::usize offset, ave::usize count) noexcept {
     if(!mapped_ptr || is_coherent || count == 0 || offset >= map_size) return;
     const auto end = offset + std::min<VkDeviceSize>(count, map_size - offset);
     const auto last = end / chunk_size + (end % chunk_size != 0);
@@ -109,7 +109,7 @@ void BasicBufferData<P>::mark_range_dirty(alib6::usize offset, alib6::usize coun
 }
 
 template<class P>
-void BasicBufferData<P>::memcpy(alib6::usize offset, const void* src, alib6::usize bytes) {
+void BasicBufferData<P>::memcpy(ave::usize offset, const void* src, ave::usize bytes) {
     const bool invalid = offset > map_size || bytes > map_size - offset;
     panic_debug(invalid, "BufferData::memcpy out of bounds.");
     if(invalid || !mapped_ptr || !src || bytes == 0) return;
@@ -118,19 +118,19 @@ void BasicBufferData<P>::memcpy(alib6::usize offset, const void* src, alib6::usi
 }
 
 template<class P>
-typename BasicBufferData<P>::ByteProxy BasicBufferData<P>::operator[](alib6::usize offset) {
+typename BasicBufferData<P>::ByteProxy BasicBufferData<P>::operator[](ave::usize offset) {
     panic_debug(!mapped_ptr || offset >= map_size, "BufferData::operator[] out of range.");
     return ByteProxy(static_cast<uint8_t*>(mapped_ptr) + offset, this, offset);
 }
 
 template<class P>
-uint8_t BasicBufferData<P>::operator[](alib6::usize offset) const noexcept {
+uint8_t BasicBufferData<P>::operator[](ave::usize offset) const noexcept {
     panic_debug(!mapped_ptr || offset >= map_size, "BufferData::operator[] out of range.");
     return static_cast<const uint8_t*>(mapped_ptr)[offset];
 }
 
 template<class P>
-UploadTicket BasicBufferData<P>::submit(alib6::ErrorWrapper ew) {
+UploadTicket BasicBufferData<P>::submit(ave::ErrorWrapper ew) {
     if(!staging_session) {
         ew.report(ave_vk_map_buffer, "submit() is only available on staging mappings.");
         return {};
@@ -139,16 +139,16 @@ UploadTicket BasicBufferData<P>::submit(alib6::ErrorWrapper ew) {
         ew.report(ave_vk_map_buffer, "Missing UploadContext for staging submit.");
         return {};
     }
-    if(dirty_mask.none()) {
+    if(ave::bitset_none(dirty_mask)) {
         return last_ticket;
     }
 
-    const auto first = dirty_mask.find_next_1(0);
+    const auto first = ave::bitset_find_next_1(dirty_mask, 0);
     if(!first || *first >= chunk_count) return last_ticket;
 
-    alib6::usize last = *first;
-    for(alib6::usize i = *first; i < chunk_count; ++i) {
-        if(dirty_mask.test(i)) last = i;
+    ave::usize last = *first;
+    for(ave::usize i = *first; i < chunk_count; ++i) {
+        if(dirty_mask.get(i)) last = i;
     }
 
     const VkDeviceSize begin = *first * chunk_size;
@@ -163,13 +163,13 @@ UploadTicket BasicBufferData<P>::submit(alib6::ErrorWrapper ew) {
         ew
     );
     if(last_ticket) {
-        dirty_mask.fill(false);
+        ave::bitset_clear(dirty_mask);
     }
     return last_ticket;
 }
 
 template<class P>
-bool BasicBufferData<P>::flush(alib6::ErrorWrapper ew) {
+bool BasicBufferData<P>::flush(ave::ErrorWrapper ew) {
     if(!mapped_ptr || !state) {
         ew.report(ave_vk_map_buffer, "Cannot flush an empty mapping.");
         return false;
@@ -179,12 +179,12 @@ bool BasicBufferData<P>::flush(alib6::ErrorWrapper ew) {
         if(!ticket) return false;
         return ticket.wait(std::numeric_limits<uint64_t>::max(), ew);
     }
-    if(is_coherent || dirty_mask.none()) return true;
-    alib6::usize cursor = 0;
+    if(is_coherent || ave::bitset_none(dirty_mask)) return true;
+    ave::usize cursor = 0;
     while(cursor < chunk_count) {
-        const auto first = dirty_mask.find_next_1(cursor);
+        const auto first = ave::bitset_find_next_1(dirty_mask, cursor);
         if(!first || *first >= chunk_count) break;
-        const auto last = dirty_mask.find_next_0(*first, chunk_count).value_or(chunk_count);
+        const auto last = ave::bitset_find_next_0(dirty_mask, *first, chunk_count).value_or(chunk_count);
         const VkDeviceSize begin = *first * chunk_size;
         const VkDeviceSize end = last == chunk_count ? map_size : last * chunk_size;
         const auto code = P::flush(*state, map_offset + begin, end - begin);
@@ -194,7 +194,7 @@ bool BasicBufferData<P>::flush(alib6::ErrorWrapper ew) {
         }
         cursor = last;
     }
-    dirty_mask.fill(false);
+    ave::bitset_clear(dirty_mask);
     return true;
 }
 
@@ -203,19 +203,19 @@ void BasicBufferData<P>::upload_raw(VkDeviceSize offset, VkDeviceSize size) {
     if(!mapped_ptr || !state || offset >= map_size) return;
     const auto bytes = size == VK_WHOLE_SIZE ? map_size - offset : size;
     if(bytes == 0 || bytes > map_size - offset) return;
-    mark_range_dirty(static_cast<alib6::usize>(offset), static_cast<alib6::usize>(bytes));
+    mark_range_dirty(static_cast<ave::usize>(offset), static_cast<ave::usize>(bytes));
     if(staging_session) {
         (void)submit();
         return;
     }
     const auto code = P::flush(*state, map_offset + offset, bytes);
     // Preserve dirty tracking on failure; do not clear partially covered chunks.
-    if(code == VK_SUCCESS && offset == 0 && bytes == map_size) dirty_mask.fill(false);
+    if(code == VK_SUCCESS && offset == 0 && bytes == map_size) ave::bitset_clear(dirty_mask);
 }
 
 template<class P>
 bool BasicBufferData<P>::invalidate(VkDeviceSize offset, VkDeviceSize size,
-                                    alib6::ErrorWrapper ew) {
+                                    ave::ErrorWrapper ew) {
     if(staging_session) {
         ew.report(ave_vk_map_buffer, "Staging mappings are write-only and do not support invalidate().");
         return false;

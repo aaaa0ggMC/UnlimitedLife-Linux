@@ -3,9 +3,9 @@
 #include <cstdlib>
 #include <string>
 #include <string_view>
+#include <AVE/AVE.h>
+#include <AVE/alib.h>
 
-import ave;
-import alib6;
 
 static void check(bool value, const char* message) {
     if(!value) { std::fprintf(stderr, "FAIL: %s\n", message); std::exit(1); }
@@ -41,25 +41,25 @@ static void test_simple_wrapper() {
     const struct {
         VkDebugUtilsMessageSeverityFlagBitsEXT severity;
         VkDebugUtilsMessageTypeFlagsEXT type;
-        alib6::LogLevel level;
+        alib5::LogLevel level;
         std::string_view type_name;
     } cases[] = {
         { VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT, VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT,
-          alib6::LogLevel::Error, "Validation" },
+          alib5::LogLevel::Error, "Validation" },
         { VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT, VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
-          alib6::LogLevel::Warn, "Performance" },
+          alib5::LogLevel::Warn, "Performance" },
         { VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT, VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT,
-          alib6::LogLevel::Info, "General" },
+          alib5::LogLevel::Info, "General" },
         { VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT, VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT,
-          alib6::LogLevel::Debug, "General" },
+          alib5::LogLevel::Debug, "General" },
     };
 
     for(const auto& c : cases) {
         ave::CreateDebugMessengerInfo info;
-        alib6::LogLevel seen_level = alib6::LogLevel::Debug;
+        alib5::LogLevel seen_level = alib5::LogLevel::Debug;
         std::string seen_type = "<none>";
         std::string seen_message = "<none>";
-        info.on_message([&](alib6::LogLevel level, std::string_view type, std::string_view message) {
+        info.on_message([&](alib5::LogLevel level, std::string_view type, std::string_view message) {
             seen_level = level;
             seen_type = type;
             seen_message = message;
@@ -78,8 +78,8 @@ static void test_simple_wrapper() {
     // 返回 bool 的简易回调按返回值交给 Vulkan
     {
         ave::CreateDebugMessengerInfo info;
-        info.on_message([](alib6::LogLevel level, std::string_view, std::string_view) {
-            return level == alib6::LogLevel::Error;
+        info.on_message([](alib5::LogLevel level, std::string_view, std::string_view) {
+            return level == alib5::LogLevel::Error;
         });
         VkDebugUtilsMessengerCallbackDataEXT data {};
         data.pMessage = "boom";
@@ -95,7 +95,7 @@ static void test_simple_wrapper() {
     {
         ave::CreateDebugMessengerInfo info;
         std::string seen_message = "<none>";
-        info.on_message([&](alib6::LogLevel, std::string_view, std::string_view message) {
+        info.on_message([&](alib5::LogLevel, std::string_view, std::string_view message) {
             seen_message = message;
         });
         VkDebugUtilsMessengerCallbackDataEXT data {};
@@ -110,14 +110,14 @@ static void test_simple_wrapper() {
         ave::CreateDebugMessengerInfo info;
         int calls = 0;
         info.on_message_advanced = [&](auto, auto, const auto&) { ++calls; return false; };
-        info.on_message([&](alib6::LogLevel, std::string_view, std::string_view) { ++calls; });
+        info.on_message([&](alib5::LogLevel, std::string_view, std::string_view) { ++calls; });
         VkDebugUtilsMessengerCallbackDataEXT data {};
         data.pMessage = "x";
         info.on_message_advanced(VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT,
                                  VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT, data);
         check(calls == 1, "on_message must replace the previous kernel callback");
 
-        auto& same = info.on_message([](alib6::LogLevel, std::string_view, std::string_view) {});
+        auto& same = info.on_message([](alib5::LogLevel, std::string_view, std::string_view) {});
         check(&same == &info, "on_message must return the config for chaining");
     }
 }

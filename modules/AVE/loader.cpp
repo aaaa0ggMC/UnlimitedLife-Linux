@@ -1,18 +1,15 @@
-module;
 #include <AVE/config.h>
 #include <glm/glm.hpp>
 #include <cctype>
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/shape/loader.h>
+#include <AVE/shape/shape.h>
 
-module ave.shape;
 
-import std;
-import alib6;
-import ave.ecode;
-import :loader;
-import :shape;
 
 namespace ave {
 
@@ -353,7 +350,7 @@ std::optional<Shape> ShapeLoader::from_memory(
     std::string_view data,
     ShapeFormat format,
     ShapeLoadOptions options,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ){
     if(data.empty()) {
         ew.report(ave_shape_load_failed,
@@ -366,7 +363,7 @@ std::optional<Shape> ShapeLoader::from_memory(
 std::optional<Shape> ShapeLoader::from_memory(
     std::string_view data,
     ShapeLoadOptions options,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ){
     if(data.empty()) {
         ew.report(ave_shape_load_failed,
@@ -381,10 +378,10 @@ std::optional<Shape> ShapeLoader::from_file(
     std::string_view path,
     ShapeFormat format,
     ShapeLoadOptions options,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ){
     std::string data;
-    const auto size = alib6::io::read_all(path, data, ew);
+    const auto size = alib5::io::read_all(path, data);
     if(size == std::numeric_limits<std::size_t>::max()) {
         // read_all 内部已经过 ew 上报过一次，这里只补充上下文
         ew.report(ave_shape_load_failed,
@@ -397,10 +394,10 @@ std::optional<Shape> ShapeLoader::from_file(
 std::optional<Shape> ShapeLoader::from_file(
     std::string_view path,
     ShapeLoadOptions options,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ){
     std::string data;
-    const auto size = alib6::io::read_all(path, data, ew);
+    const auto size = alib5::io::read_all(path, data);
     if(size == std::numeric_limits<std::size_t>::max()) {
         ew.report(ave_shape_load_failed,
             "ShapeLoader: failed to read '{}' (auto detection).", path);

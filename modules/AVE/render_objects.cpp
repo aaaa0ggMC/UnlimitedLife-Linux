@@ -1,14 +1,11 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/sync_objects.h>
+#include <AVE/render/legacy_render.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :sync_objects;
-import :legacy_render;
 
 namespace ave {
 
@@ -28,13 +25,13 @@ WithSyncObjectsInput::get_swapchain() const noexcept {
     return swapchain;
 }
 
-alib6::u32 WithSyncObjectsInput::get_swapchain_image_count() const noexcept {
+ave::u32 WithSyncObjectsInput::get_swapchain_image_count() const noexcept {
     return swapchain
         ? swapchain->get_image_count()
         : 0;
 }
 
-alib6::u32 default_select_sync_objects_count(WithSyncObjectsInput& input) {
+ave::u32 default_select_sync_objects_count(WithSyncObjectsInput& input) {
     return input.get_swapchain_image_count();
 }
 
@@ -58,7 +55,7 @@ bool SyncObjects::initialize(CreateSyncObjectsInfo ci) {
     fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fence_info.flags = ci.fence_flags;
 
-    for(alib6::u32 i = 0; i < ci.count; ++i) {
+    for(ave::u32 i = 0; i < ci.count; ++i) {
         FrameSyncObjects frame;
         const auto handle = device->get_system_handle();
         const auto allocator = device->get_instance()->get_vk_allocator();
@@ -129,8 +126,8 @@ const std::vector<FrameSyncObjects>& SyncObjects::get_frames() const noexcept {
     return frames;
 }
 
-alib6::u32 SyncObjects::size() const noexcept {
-    return static_cast<alib6::u32>(frames.size());
+ave::u32 SyncObjects::size() const noexcept {
+    return static_cast<ave::u32>(frames.size());
 }
 
 SyncObjects::operator bool() const noexcept {
@@ -331,17 +328,17 @@ bool LegacyRender::initialize(
         VkSubpassDescription value {};
         value.flags = source.flags;
         value.pipelineBindPoint = source.bind_point;
-        value.inputAttachmentCount = static_cast<alib6::u32>(
+        value.inputAttachmentCount = static_cast<ave::u32>(
             source.input_attachments.size());
         value.pInputAttachments = source.input_attachments.data();
-        value.colorAttachmentCount = static_cast<alib6::u32>(
+        value.colorAttachmentCount = static_cast<ave::u32>(
             source.color_attachments.size());
         value.pColorAttachments = source.color_attachments.data();
         value.pResolveAttachments = source.resolve_attachments.empty()
             ? nullptr : source.resolve_attachments.data();
         value.pDepthStencilAttachment = source.depth_stencil_attachment
             ? std::addressof(*source.depth_stencil_attachment) : nullptr;
-        value.preserveAttachmentCount = static_cast<alib6::u32>(
+        value.preserveAttachmentCount = static_cast<ave::u32>(
             source.preserve_attachments.size());
         value.pPreserveAttachments = source.preserve_attachments.data();
         subpass_infos.push_back(value);
@@ -350,11 +347,11 @@ bool LegacyRender::initialize(
     VkRenderPassCreateInfo render_pass_info {};
     render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     render_pass_info.flags = ci.render_pass_flags;
-    render_pass_info.attachmentCount = static_cast<alib6::u32>(ci.attachments.size());
+    render_pass_info.attachmentCount = static_cast<ave::u32>(ci.attachments.size());
     render_pass_info.pAttachments = ci.attachments.data();
-    render_pass_info.subpassCount = static_cast<alib6::u32>(subpass_infos.size());
+    render_pass_info.subpassCount = static_cast<ave::u32>(subpass_infos.size());
     render_pass_info.pSubpasses = subpass_infos.data();
-    render_pass_info.dependencyCount = static_cast<alib6::u32>(ci.dependencies.size());
+    render_pass_info.dependencyCount = static_cast<ave::u32>(ci.dependencies.size());
     render_pass_info.pDependencies = ci.dependencies.data();
 
     swapchain = ci.swapchain;
@@ -375,7 +372,7 @@ bool LegacyRender::initialize(
     subpass_uses_depth_stencil.reserve(ci.subpasses.size());
     for(const auto& subpass : ci.subpasses) {
         subpass_color_attachment_counts.push_back(
-            static_cast<alib6::u32>(subpass.color_attachments.size())
+            static_cast<ave::u32>(subpass.color_attachments.size())
         );
         subpass_uses_depth_stencil.push_back(
             subpass.depth_stencil_attachment.has_value());
@@ -383,7 +380,7 @@ bool LegacyRender::initialize(
     default_clear_values = std::move(ci.default_clear_values);
 
     framebuffers.reserve(ci.framebuffer_attachments.size());
-    for(alib6::u32 i = 0; i < ci.framebuffer_attachments.size(); ++i) {
+    for(ave::u32 i = 0; i < ci.framebuffer_attachments.size(); ++i) {
         const auto& attachments = ci.framebuffer_attachments[i];
         if(attachments.size() != ci.attachments.size()) {
             ci.ew.report(ave_vk_create_framebuffer,
@@ -395,7 +392,7 @@ bool LegacyRender::initialize(
         framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebuffer_info.flags = ci.framebuffer_flags;
         framebuffer_info.renderPass = render_pass;
-        framebuffer_info.attachmentCount = static_cast<alib6::u32>(attachments.size());
+        framebuffer_info.attachmentCount = static_cast<ave::u32>(attachments.size());
         framebuffer_info.pAttachments = attachments.data();
         framebuffer_info.width = ci.framebuffer_extent.width;
         framebuffer_info.height = ci.framebuffer_extent.height;
@@ -472,15 +469,15 @@ const std::vector<VkFramebuffer>& LegacyRender::get_framebuffers() const noexcep
     return framebuffers;
 }
 
-alib6::u32 LegacyRender::get_subpass_color_attachment_count(
-    alib6::u32 subpass
+ave::u32 LegacyRender::get_subpass_color_attachment_count(
+    ave::u32 subpass
 ) const noexcept {
     return subpass < subpass_color_attachment_counts.size()
         ? subpass_color_attachment_counts[subpass]
         : 0;
 }
 
-bool LegacyRender::subpass_has_depth_stencil(alib6::u32 subpass) const noexcept {
+bool LegacyRender::subpass_has_depth_stencil(ave::u32 subpass) const noexcept {
     return subpass < subpass_uses_depth_stencil.size()
         ? subpass_uses_depth_stencil[subpass] : false;
 }

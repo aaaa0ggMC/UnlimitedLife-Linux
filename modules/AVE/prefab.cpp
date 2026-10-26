@@ -1,17 +1,14 @@
-module;
 #include <AVE/config.h>
 #include <glm/glm.hpp>
 #include <array>
 #include <cmath>
 #include <cstdint>
 #include <numbers>
+#include <AVE/alib.h>
+#include <AVE/shape/prefab.h>
+#include <AVE/shape/shape.h>
 
-module ave.shape;
 
-import std;
-import alib6;
-import :prefab;
-import :shape;
 
 namespace ave {
 

@@ -7,7 +7,9 @@
 
 ## 构建与运行
 
-项目使用 xmake，当前构建 AGE 引擎共享库及两个交互式示例，游戏原型尚未接入构建。
+项目使用 xmake，构建 AGE／AVE 共享库、相关示例及测试；游戏原型尚未接入构建。
+AVE 现使用传统头文件＋`.cpp`，公共入口为 `#include <AVE/AVE.h>`，也可只包含所需子系统头。
+仍保留 C++26 静态反射和 GCC 16 工具链，但不再构建 C++ modules、`import std` 或依赖 alib6 模块。
 
 前置条件：
 
@@ -15,7 +17,13 @@
 - 与工具链兼容的 alib5 和 `stdc++exp`。Linux 上先运行 `./scripts/install alib5`；
   迁移旧安装使用 `--adopt-existing`，详见 [安装与升级](docs/install.md)。
   UL 通过 `alib5` 包声明读取安装元数据，默认前缀为 `/usr/local`。
-- OpenGL 开发/运行环境。GLFW、GLEW、GLM、stb、miniaudio、ImGui 由 xmake 声明和获取。
+  - 若已安装的 alib5 头/库落后于 `aaaa0ggmcLib` 源码，可改用源码头编译并链接基础库
+    自己 build 出的匹配 `.so`：`./scripts/configure --alib5_src=<aaaa0ggmcLib源码根>
+    --alib5_libdir=<该库 build 出的 libaaaa0ggmcLib.so 目录>`。**源码头与链接库必须匹配**
+    （只给 `--alib5_src` 而库仍用旧 `/usr/local` 会缺符号，如 `alib5::data::JSON::__internal_dump`）。
+    `--alib5_libdir` 会同时设置链接目录与 RUNPATH 优先序（排在 `/usr/local/lib` 之前，不依赖
+    `LD_LIBRARY_PATH`）；二者均为可配置项，不写死个人路径。
+- AGE 需要 OpenGL 开发/运行环境，AVE 需要 Vulkan。GLFW、GLEW、GLM、stb、miniaudio、ImGui 等由 xmake 声明。
   Windows 配置使用 MSYS2 UCRT64/MinGW；当前实际验证以 Linux 为准。
 
 ```bash

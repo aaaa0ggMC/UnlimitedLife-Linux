@@ -10,6 +10,12 @@ if example_exists("fog") then
         add_files("../examples/fog/tests/camera_test.cc")
         add_deps("AVE")
     target_end()
+    target("fog_ecs_test")
+        set_kind("binary")
+        set_default(false)
+        add_files("../examples/fog/tests/ecs_test.cc")
+        add_deps("AVE")
+    target_end()
 end
 
 for _, name in ipairs({"agetest", "age_simptest", "fog_gl"}) do

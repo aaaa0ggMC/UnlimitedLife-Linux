@@ -4,9 +4,9 @@
 #include <string>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
+#include <AVE/AVE.h>
+#include <AVE/alib.h>
 
-import ave;
-import alib6;
 
 // ========================================================
 // 测试结构体定义
@@ -15,8 +15,8 @@ import alib6;
 // 1. 标量结构体 (std140 规范要求结构体基准对齐到 16 字节)
 struct alignas(16) ScalarBlockStd140 {
     float a;
-    alib6::i32 b;
-    alib6::u32 c;
+    ave::i32 b;
+    ave::u32 c;
     float d;
 }; // 4 x 4 = 16 字节
 
@@ -258,20 +258,20 @@ int main() {
     }
 
     // ========================================================
-    // 9. 日志管道兼容与可视化表格打印 (alib6::aout & to_table)
+    // 9. 日志管道兼容与可视化表格打印 (alib5::aout & to_table)
     // ========================================================
     {
         // 打印一个通过报告
         auto good_rep = ave::verify_std140<VectorsBlock>();
-        alib6::aout << good_rep << alib6::endlog;
-        alib6::aout << "\n" << good_rep.to_table() << alib6::endlog;
+        alib5::aout << good_rep << alib5::endlog;
+        alib5::aout << "\n" << good_rep.to_table() << alib5::endlog;
 
         // 打印一个失配诊断报告
         auto bad_rep = ave::verify_std140<BadVec3Block>();
-        alib6::aout << bad_rep << alib6::endlog;
-        alib6::aout << "\n" << bad_rep.to_table() << alib6::endlog;
+        alib5::aout << bad_rep << alib5::endlog;
+        alib5::aout << "\n" << bad_rep.to_table() << alib5::endlog;
 
-        std::cout << "[PASS] alib6::aout streaming & Unicode table formatting verified." << std::endl;
+        std::cout << "[PASS] alib5::aout streaming & Unicode table formatting verified." << std::endl;
     }
 
     // ========================================================
@@ -331,10 +331,10 @@ int main() {
     }
 
     // ========================================================
-    // 12. 冲突检测与 alib6::ErrorWrapper 报错拦截 (Collision Detection)
+    // 12. 冲突检测与 ave::ErrorWrapper 报错拦截 (Collision Detection)
     // ========================================================
     {
-        alib6::Error err;
+        ave::Error err;
         // 故意让 pos 和 uv 都显式占用 location 2，触发冲突检测！
         auto builder = ave::vertex_layout<VertexData>()
             .with_location<&VertexData::pos>(2)
@@ -410,8 +410,8 @@ int main() {
         assert(ci.pVertexAttributeDescriptions != nullptr);
 
         // 打印精美的 Unicode 状态表格
-        alib6::aout << "\nCombined Multi-Stream Vertex Input State:\n"
-                    << full_state.to_table() << alib6::endlog;
+        alib5::aout << "\nCombined Multi-Stream Vertex Input State:\n"
+                    << full_state.to_table() << alib5::endlog;
 
         std::cout << "[PASS] Multi-stream operator+ and CreateInfo pipeline integration verified." << std::endl;
     }
@@ -459,8 +459,8 @@ int main() {
         assert(range.stageFlags == VK_SHADER_STAGE_ALL_GRAPHICS);
 
         // 打印精美的表格
-        alib6::aout << "\nPush Constant Layout Table (PushBlock):\n"
-                    << layout.to_table() << alib6::endlog;
+        alib5::aout << "\nPush Constant Layout Table (PushBlock):\n"
+                    << layout.to_table() << alib5::endlog;
 
         std::cout << "[PASS] Basic push constant reflection (constant_layout) verified." << std::endl;
     }
@@ -496,8 +496,8 @@ int main() {
         assert(cfg.constant_attributes.size() == 2);
         assert(cfg.constant_attributes[0].name == "view_proj");
 
-        alib6::aout << "\nMulti-Stage Push Constant Table:\n"
-                    << custom.to_table() << alib6::endlog;
+        alib5::aout << "\nMulti-Stage Push Constant Table:\n"
+                    << custom.to_table() << alib5::endlog;
 
         std::cout << "[PASS] Multi-stage push constant layout & pipeline config verified." << std::endl;
     }

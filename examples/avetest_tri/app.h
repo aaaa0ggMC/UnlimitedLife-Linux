@@ -1,9 +1,8 @@
 #pragma once
 #include <vulkan/vulkan.h>
+#include <AVE/alib.h>
+#include <AVE/AVE.h>
 
-import alib6;
-import std;
-import ave;
 
 namespace avetest_tri {
 
@@ -13,9 +12,9 @@ namespace avetest_tri {
  * 着色器为 LearnVulkan2 的同一份 SPIR-V。
  */
 struct App {
-    alib6::Logger logger;
-    alib6::LogFactory lg;
-    alib6::LogFactory vklg;
+    alib5::Logger logger;
+    alib5::LogFactory lg;
+    alib5::LogFactory vklg;
 
     ave::Context context;
     std::unique_ptr<ave::Window> window;

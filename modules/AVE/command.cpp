@@ -1,13 +1,10 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/command.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :command;
 
 namespace ave {
 WithCommandPoolInput::WithCommandPoolInput(
@@ -22,7 +19,7 @@ const std::shared_ptr<Device>& WithCommandPoolInput::get_device() const noexcept
 const std::shared_ptr<Swapchain>& WithCommandPoolInput::get_swapchain() const noexcept {
     return swapchain;
 }
-alib6::u32 WithCommandPoolInput::get_graphics_queue_family() const noexcept {
+ave::u32 WithCommandPoolInput::get_graphics_queue_family() const noexcept {
     return swapchain ? swapchain->get_graphics_queue_family() : 0;
 }
 void default_configure_command_pool(
@@ -77,7 +74,7 @@ void CommandPool::destroy() noexcept {
 }
 const std::shared_ptr<Device>& CommandPool::get_device() const noexcept { return device; }
 VkCommandPool CommandPool::get_system_handle() const noexcept { return pool; }
-alib6::u32 CommandPool::get_queue_family() const noexcept { return queue_family; }
+ave::u32 CommandPool::get_queue_family() const noexcept { return queue_family; }
 CommandPool::operator bool() const noexcept { return pool != VK_NULL_HANDLE; }
 
 WithCommandBuffersInput::WithCommandBuffersInput(
@@ -92,7 +89,7 @@ const std::shared_ptr<CommandPool>& WithCommandBuffersInput::get_pool() const no
 const std::shared_ptr<SyncObjects>& WithCommandBuffersInput::get_sync_objects() const noexcept {
     return sync_objects;
 }
-alib6::u32 WithCommandBuffersInput::get_frame_count() const noexcept {
+ave::u32 WithCommandBuffersInput::get_frame_count() const noexcept {
     return sync_objects ? sync_objects->size() : 0;
 }
 void default_configure_command_buffers(
@@ -141,7 +138,7 @@ void CommandBuffers::destroy() noexcept {
         vkFreeCommandBuffers(
             pool->get_device()->get_system_handle(),
             pool->get_system_handle(),
-            static_cast<alib6::u32>(buffers.size()),
+            static_cast<ave::u32>(buffers.size()),
             buffers.data());
     }
     buffers.clear();
@@ -149,8 +146,8 @@ void CommandBuffers::destroy() noexcept {
 }
 const std::shared_ptr<CommandPool>& CommandBuffers::get_pool() const noexcept { return pool; }
 const std::vector<VkCommandBuffer>& CommandBuffers::get_buffers() const noexcept { return buffers; }
-alib6::u32 CommandBuffers::size() const noexcept {
-    return static_cast<alib6::u32>(buffers.size());
+ave::u32 CommandBuffers::size() const noexcept {
+    return static_cast<ave::u32>(buffers.size());
 }
 CommandBuffers::operator bool() const noexcept { return pool && !buffers.empty(); }
 }

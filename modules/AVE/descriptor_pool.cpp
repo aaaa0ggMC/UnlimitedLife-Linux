@@ -1,19 +1,16 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/descriptor_pool.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :descriptor;
 
 namespace ave {
 
 WithDescriptorPoolInput::WithDescriptorPoolInput(
     std::shared_ptr<Device> target_device,
-    alib6::u32 target_frame_count
+    ave::u32 target_frame_count
 )
 :device(std::move(target_device))
 ,frame_count(target_frame_count){}
@@ -22,7 +19,7 @@ const std::shared_ptr<Device>& WithDescriptorPoolInput::get_device() const noexc
     return device;
 }
 
-alib6::u32 WithDescriptorPoolInput::get_frame_count() const noexcept {
+ave::u32 WithDescriptorPoolInput::get_frame_count() const noexcept {
     return frame_count;
 }
 
@@ -31,7 +28,7 @@ void default_configure_descriptor_pool(
     CreateDescriptorPoolInfo& ci
 ) {
     ci.device = input.get_device();
-    alib6::u32 max_sets = ci.max_sets ? ci.max_sets : input.get_frame_count();
+    ave::u32 max_sets = ci.max_sets ? ci.max_sets : input.get_frame_count();
     if(max_sets == 0) max_sets = 1;
     ci.max_sets = max_sets;
     if(ci.pool_sizes.empty()) {
@@ -104,7 +101,7 @@ DescriptorPool::operator bool() const noexcept { return pool != VK_NULL_HANDLE; 
 
 VkDescriptorSet DescriptorPool::allocate_descriptor_set(
     VkDescriptorSetLayout layout,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(pool == VK_NULL_HANDLE || !device) {
         ew.report(ave_vk_create_descriptor_pool,
@@ -136,7 +133,7 @@ VkDescriptorSet DescriptorPool::allocate_descriptor_set(
 
 std::vector<VkDescriptorSet> DescriptorPool::allocate_descriptor_sets(
     std::span<const VkDescriptorSetLayout> layouts,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(pool == VK_NULL_HANDLE || !device) {
         ew.report(ave_vk_create_descriptor_pool,
@@ -169,13 +166,13 @@ std::vector<VkDescriptorSet> DescriptorPool::allocate_descriptor_sets(
 
 void DescriptorPool::write_buffer(
     VkDescriptorSet dst_set,
-    alib6::u32 dst_binding,
+    ave::u32 dst_binding,
     VkDescriptorType descriptor_type,
     VkBuffer buffer,
     VkDeviceSize offset,
     VkDeviceSize range,
-    alib6::u32 dst_array_element,
-    alib6::ErrorWrapper ew
+    ave::u32 dst_array_element,
+    ave::ErrorWrapper ew
 ) {
     if(pool == VK_NULL_HANDLE || !device) {
         ew.report(ave_vk_create_descriptor_pool,
@@ -207,12 +204,12 @@ void DescriptorPool::write_buffer(
 
 void DescriptorPool::write_image(
     VkDescriptorSet dst_set,
-    alib6::u32 dst_binding,
+    ave::u32 dst_binding,
     VkSampler sampler,
     VkImageView view,
     VkImageLayout image_layout,
-    alib6::u32 dst_array_element,
-    alib6::ErrorWrapper ew
+    ave::u32 dst_array_element,
+    ave::ErrorWrapper ew
 ) {
     if(pool == VK_NULL_HANDLE || !device) {
         ew.report(ave_vk_create_descriptor_pool,
@@ -245,7 +242,7 @@ void DescriptorPool::write_image(
 void DescriptorPool::write_set(
     VkDescriptorSet dst_set,
     std::initializer_list<DescriptorWrite> writes,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(pool == VK_NULL_HANDLE || !device) {
         ew.report(ave_vk_create_descriptor_pool,

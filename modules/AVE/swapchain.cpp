@@ -1,13 +1,10 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/swapchain.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :swapchain;
 
 namespace ave {
 
@@ -28,7 +25,7 @@ bool WithSwapchain::supports(VkPresentModeKHR value) const noexcept {
 std::optional<WithSwapchain> query_swapchain_support(
     const std::shared_ptr<Device>& device,
     const std::shared_ptr<Surface>& surface,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!device || device->get_system_handle() == VK_NULL_HANDLE ||
        device->get_physical_device() == VK_NULL_HANDLE ||
@@ -50,7 +47,7 @@ std::optional<WithSwapchain> query_swapchain_support(
         return std::nullopt;
     }
 
-    alib6::u32 count = 0;
+    ave::u32 count = 0;
     do {
         code = vkGetPhysicalDeviceSurfaceFormatsKHR(
             physical_device, surface_handle, &count, nullptr);
@@ -84,16 +81,16 @@ std::optional<WithSwapchain> query_swapchain_support(
 
     const auto [width, height] = surface->get_window().get_framebuffer_size();
     result.framebuffer_extent = {
-        static_cast<alib6::u32>(std::max(width, 0)),
-        static_cast<alib6::u32>(std::max(height, 0))
+        static_cast<ave::u32>(std::max(width, 0)),
+        static_cast<ave::u32>(std::max(height, 0))
     };
 
-    alib6::u32 family_count = 0;
+    ave::u32 family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &family_count, nullptr);
     std::vector<VkQueueFamilyProperties> families(family_count);
     vkGetPhysicalDeviceQueueFamilyProperties(
         physical_device, &family_count, families.data());
-    for(alib6::u32 i = 0; i < family_count; ++i) {
+    for(ave::u32 i = 0; i < family_count; ++i) {
         if(!device->has_queue(i) || families[i].queueCount == 0) continue;
         VkBool32 can_present = VK_FALSE;
         code = vkGetPhysicalDeviceSurfaceSupportKHR(
@@ -143,7 +140,7 @@ void default_configure_swapchain(WithSwapchain& with, CreateSwapchainInfo& ci) {
     ci.present_mode = with.supports(VK_PRESENT_MODE_MAILBOX_KHR)
         ? VK_PRESENT_MODE_MAILBOX_KHR : VK_PRESENT_MODE_FIFO_KHR;
     if(with.capabilities.currentExtent.width !=
-       std::numeric_limits<alib6::u32>::max()) {
+       std::numeric_limits<ave::u32>::max()) {
         ci.extent = with.capabilities.currentExtent;
     }else{
         ci.extent.width = std::clamp(with.framebuffer_extent.width,
@@ -206,7 +203,7 @@ bool Swapchain::initialize(CreateSwapchainInfo ci, const WithSwapchain& with) {
 
     const auto& cap = with.capabilities;
     const bool fixed_extent = cap.currentExtent.width !=
-        std::numeric_limits<alib6::u32>::max();
+        std::numeric_limits<ave::u32>::max();
     const bool valid_extent = fixed_extent
         ? ci.extent.width == cap.currentExtent.width &&
           ci.extent.height == cap.currentExtent.height
@@ -237,7 +234,7 @@ bool Swapchain::initialize(CreateSwapchainInfo ci, const WithSwapchain& with) {
         std::unique(queue_families.begin(), queue_families.end()),
         queue_families.end());
     if(ci.sharing_mode == VK_SHARING_MODE_CONCURRENT &&
-       !std::ranges::all_of(queue_families, [&](alib6::u32 family) {
+       !std::ranges::all_of(queue_families, [&](ave::u32 family) {
            return ci.device->has_queue(family);
        })) {
         ci.ew.report(ave_vk_create_swapchain,
@@ -257,7 +254,7 @@ bool Swapchain::initialize(CreateSwapchainInfo ci, const WithSwapchain& with) {
     create_info.imageUsage = ci.image_usage;
     create_info.imageSharingMode = ci.sharing_mode;
     create_info.queueFamilyIndexCount = ci.sharing_mode == VK_SHARING_MODE_CONCURRENT
-        ? static_cast<alib6::u32>(queue_families.size()) : 0;
+        ? static_cast<ave::u32>(queue_families.size()) : 0;
     create_info.pQueueFamilyIndices = ci.sharing_mode == VK_SHARING_MODE_CONCURRENT
         ? queue_families.data() : nullptr;
     create_info.preTransform = ci.pre_transform;
@@ -280,7 +277,7 @@ bool Swapchain::initialize(CreateSwapchainInfo ci, const WithSwapchain& with) {
         return false;
     }
 
-    alib6::u32 actual_count = 0;
+    ave::u32 actual_count = 0;
     std::vector<VkImage> queried_images;
     do {
         code = vkGetSwapchainImagesKHR(
@@ -341,13 +338,13 @@ void Swapchain::destroy() noexcept {
 VkSwapchainKHR Swapchain::get_system_handle() const noexcept { return swapchain; }
 const std::shared_ptr<Device>& Swapchain::get_device() const noexcept { return device; }
 const std::shared_ptr<Surface>& Swapchain::get_surface() const noexcept { return surface; }
-alib6::u32 Swapchain::get_image_count() const noexcept { return image_count; }
+ave::u32 Swapchain::get_image_count() const noexcept { return image_count; }
 VkImageUsageFlags Swapchain::get_image_usage() const noexcept {
     return image_usage;
 }
 
 std::optional<std::vector<VkImage>> Swapchain::enumerate_images(
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) const {
     if(!device || device->get_system_handle() == VK_NULL_HANDLE ||
        swapchain == VK_NULL_HANDLE) {
@@ -355,7 +352,7 @@ std::optional<std::vector<VkImage>> Swapchain::enumerate_images(
             "Cannot enumerate Images from an invalid Swapchain.");
         return std::nullopt;
     }
-    alib6::u32 count = 0;
+    ave::u32 count = 0;
     std::vector<VkImage> result;
     VkResult code = VK_SUCCESS;
     do {
@@ -377,10 +374,10 @@ std::optional<std::vector<VkImage>> Swapchain::enumerate_images(
 VkSurfaceFormatKHR Swapchain::get_surface_format() const noexcept { return surface_format; }
 VkPresentModeKHR Swapchain::get_present_mode() const noexcept { return present_mode; }
 VkExtent2D Swapchain::get_extent() const noexcept { return extent; }
-alib6::u32 Swapchain::get_graphics_queue_family() const noexcept {
+ave::u32 Swapchain::get_graphics_queue_family() const noexcept {
     return graphics_queue_family;
 }
-alib6::u32 Swapchain::get_present_queue_family() const noexcept {
+ave::u32 Swapchain::get_present_queue_family() const noexcept {
     return present_queue_family;
 }
 Swapchain::operator bool() const noexcept { return swapchain != VK_NULL_HANDLE; }

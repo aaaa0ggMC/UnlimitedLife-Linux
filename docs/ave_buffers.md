@@ -1,6 +1,6 @@
 # Buffer 与 VMABuffer
 
-`import ave.render;`（或 `import ave;`）即可使用；调用方不需要包含 VMA 头文件。
+`#include <AVE/render/buffer.h>`（或 `#include <AVE/AVE.h>`）即可使用；调用方不需要包含 VMA 头文件。
 
 ```cpp
 using Buffer        = BasicBuffer<NativeMemoryPolicy>;
@@ -62,7 +62,7 @@ ave::VMABuffer arena({
     .size = 1024 * 1024,
     .usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
 });
-alib6::Error error;
+ave::Error error;
 ave::VMABufferSlice vertices = arena.alloc(vertex_data, { .ew = error });
 if (!vertices) return;
 graphics.bind_vertex_buffer(vertices); // 自动使用区域的 VkBuffer 与 offset

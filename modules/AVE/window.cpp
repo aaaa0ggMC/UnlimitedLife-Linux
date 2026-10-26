@@ -1,6 +1,5 @@
-module ave.window;
+#include <AVE/AVE.h>
 
-import ave;
 using namespace ave;
 
 /// 这里需要自动终止 glfw

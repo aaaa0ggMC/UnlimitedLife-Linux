@@ -1,4 +1,5 @@
 #include "app.h"
+#include <numeric>
 
 namespace avetest {
 
@@ -71,10 +72,10 @@ static void exercise_compute_pipeline(const std::shared_ptr<ave::Instance>& inst
         pipeline->get_descriptor_set_layout(1) == VK_NULL_HANDLE, "owned layout and bounds");
 
     std::string shader;
-    check_compute(alib6::io::read_all(shader_path, shader) == shader.size() && !shader.empty(),
+    check_compute(alib5::io::read_all(shader_path, shader) == shader.size() && !shader.empty(),
         "read bytecode");
     const ave::ShaderBytecode bytecode {
-        reinterpret_cast<const alib6::u8*>(shader.data()), shader.size()
+        reinterpret_cast<const ave::u8*>(shader.data()), shader.size()
     };
     auto bytecode_pipeline = renderer.create_compute_pipeline(bytecode, configure);
     check_compute(bool(bytecode_pipeline), "create pipeline from bytecode");
@@ -113,7 +114,7 @@ static void exercise_compute_pipeline(const std::shared_ptr<ave::Instance>& inst
     borrowed_pipeline->destroy();
     check_compute(!*borrowed_pipeline, "idempotent destroy");
 
-    alib6::Error error;
+    ave::Error error;
     ave::CreateComputePipelineInfo invalid;
     invalid.ew = error;
     check_compute(!ave::ComputePipeline::create(invalid) && error.has_error(), "reject missing device");

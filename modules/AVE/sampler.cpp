@@ -1,12 +1,9 @@
-module;
 #include <vulkan/vulkan.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/sampler.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :sampler;
 
 namespace ave {
 

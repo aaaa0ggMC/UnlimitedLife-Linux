@@ -13,17 +13,17 @@ option_end()
 set_symbols("debug")
 add_cxflags("-fno-omit-frame-pointer")
 add_cxxflags("-freflection", {force = true})
--- Retain the existing executable link policy until duplicate symbols are audited.
-add_ldflags("-Wl,--allow-multiple-definition")
 
+-- alib5（头文件式基础库）经 xmake/alib.lua 引入；去 modules 后不再需要 alib6 模块仓库。
+-- RUNPATH（含 --alib5_libdir 优先序）在 xmake/alib.lua 内、选项定义之后设置。
+includes("xmake/alib.lua")
+-- Root-scope options must be applied here: settings in the package-only include
+-- do not propagate to targets declared by sibling include scripts.
 if is_plat("linux") then
+    local libdir = get_config("alib5_libdir")
+    if libdir then add_rpathdirs(path.absolute(libdir)) end
     add_rpathdirs("$ORIGIN", path.join(get_config("alib_prefix") or "/usr/local", "lib"))
 end
-
-add_repositories("local-alib6 /usr/local/share/alib6/repository")
-add_requires("alib6", {system = false})
-
-includes("xmake/alib.lua")
 includes("xmake/ave.lua")
 includes("xmake/packages.lua")
 includes("xmake/age.lua")

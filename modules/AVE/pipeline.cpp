@@ -1,26 +1,23 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
-#include <alib6/debug.h>
+#include <alib5/adebug.h>
 #include <cstring>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/base.h>
+#include <AVE/render/pipeline.h>
+#include <AVE/render/legacy_render.h>
+#include <AVE/render/dynamic_render.h>
+#include <AVE/render/swapchain.h>
+#include <AVE/render/render.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import ave.render.base;
-import :pipeline;
-import :legacy_render;
-import :dynamic_render;
-import :swapchain;
-import :render;
 
 namespace ave {
 
 void default_configure_graphics_pipeline(
     CreatePipelineCommonInfo& ci,
-    alib6::u32 color_attachment_count
+    ave::u32 color_attachment_count
 ) {
     ci.vertex_bindings.clear();
     ci.vertex_attributes.clear();
@@ -130,17 +127,17 @@ namespace {
 
         VkShaderModule create(
             ShaderBytecode bytecode,
-            alib6::ErrorWrapper& ew
+            ave::ErrorWrapper& ew
         ) {
             if(bytecode.empty()) return VK_NULL_HANDLE;
-            if(bytecode.size() % sizeof(alib6::u32) != 0) {
+            if(bytecode.size() % sizeof(ave::u32) != 0) {
                 ew.report(ave_vk_create_shader_module,
                     "SPIR-V bytecode size ({}) is not divisible by four.", bytecode.size());
                 return VK_NULL_HANDLE;
             }
 
-            std::vector<alib6::u32> aligned_code(
-                bytecode.size() / sizeof(alib6::u32)
+            std::vector<ave::u32> aligned_code(
+                bytecode.size() / sizeof(ave::u32)
             );
             std::memcpy(aligned_code.data(), bytecode.data(), bytecode.size());
             VkShaderModuleCreateInfo create_info {};
@@ -190,7 +187,7 @@ namespace {
 
     ShaderBytecode as_bytecode(const std::string& value) {
         return {
-            reinterpret_cast<const alib6::u8*>(value.data()),
+            reinterpret_cast<const ave::u8*>(value.data()),
             value.size()
         };
     }
@@ -199,7 +196,7 @@ namespace {
         CreatePipelineResourceInfo& ci,
         VkPipelineRenderingCreateInfo* rendering_info,
         VkRenderPass render_pass,
-        alib6::u32 subpass,
+        ave::u32 subpass,
         Pipeline& target,
         const CreatePipelineCommonInfo* graphics = nullptr
     ) {
@@ -250,7 +247,7 @@ namespace {
                 if(attr.stage_flags == 0) attr.stage_flags = VK_SHADER_STAGE_COMPUTE_BIT;
                 if(attr.stage_flags != VK_SHADER_STAGE_COMPUTE_BIT || attr.size == 0 ||
                    attr.offset % 4 != 0 ||
-                   attr.size > std::numeric_limits<alib6::u32>::max() - attr.offset - 3) {
+                   attr.size > std::numeric_limits<ave::u32>::max() - attr.offset - 3) {
                     ci.ew.report(ave_vk_create_pipeline_layout,
                         "Invalid compute constant attribute stage, alignment or size.");
                     return false;
@@ -276,8 +273,8 @@ namespace {
             }
 
             if(all_same_stage) {
-                alib6::u32 min_off = 0;
-                alib6::u32 max_end = 0;
+                ave::u32 min_off = 0;
+                ave::u32 max_end = 0;
                 bool first = true;
                 for(const auto& attr : ci.constant_attributes) {
                     if(first) {
@@ -289,7 +286,7 @@ namespace {
                         max_end = std::max(max_end, attr.offset + attr.size);
                     }
                 }
-                alib6::u32 total_sz = max_end - min_off;
+                ave::u32 total_sz = max_end - min_off;
                 if(total_sz % 4 != 0) {
                     total_sz = (total_sz + 3) & ~3u;
                 }
@@ -300,7 +297,7 @@ namespace {
                     .size = total_sz
                 });
             } else {
-                std::unordered_map<VkShaderStageFlags, std::pair<alib6::u32, alib6::u32>> stage_map;
+                std::unordered_map<VkShaderStageFlags, std::pair<ave::u32, ave::u32>> stage_map;
                 for(const auto& attr : ci.constant_attributes) {
                     auto it = stage_map.find(attr.stage_flags);
                     if(it == stage_map.end()) {
@@ -311,7 +308,7 @@ namespace {
                     }
                 }
                 for(const auto& [stg, r] : stage_map) {
-                    alib6::u32 sz = r.second - r.first;
+                    ave::u32 sz = r.second - r.first;
                     if(sz % 4 != 0) {
                         sz = (sz + 3) & ~3u;
                     }
@@ -324,12 +321,12 @@ namespace {
             }
         }
 
-        alib6::u32 total_pc_size = 0;
+        ave::u32 total_pc_size = 0;
         VkShaderStageFlags combined_pc_stages = 0;
         for(const auto& r : ci.push_constant_ranges) {
             if(compute && (r.stageFlags != VK_SHADER_STAGE_COMPUTE_BIT ||
                r.size == 0 || r.offset % 4 != 0 || r.size % 4 != 0 ||
-               r.offset > std::numeric_limits<alib6::u32>::max() - r.size)) {
+               r.offset > std::numeric_limits<ave::u32>::max() - r.size)) {
                 ci.ew.report(ave_vk_create_pipeline_layout,
                     "Compute push constant ranges require aligned, non-empty compute-only ranges.");
                 return false;
@@ -421,10 +418,10 @@ namespace {
         VkPipelineLayoutCreateInfo layout_info {};
         layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         layout_info.flags = ci.layout_flags;
-        layout_info.setLayoutCount = static_cast<alib6::u32>(
+        layout_info.setLayoutCount = static_cast<ave::u32>(
             all_descriptor_set_layouts.size());
         layout_info.pSetLayouts = all_descriptor_set_layouts.data();
-        layout_info.pushConstantRangeCount = static_cast<alib6::u32>(
+        layout_info.pushConstantRangeCount = static_cast<ave::u32>(
             ci.push_constant_ranges.size());
         layout_info.pPushConstantRanges = ci.push_constant_ranges.data();
 
@@ -453,10 +450,10 @@ namespace {
         } else {
             VkPipelineVertexInputStateCreateInfo vertex_input {};
             vertex_input.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-            vertex_input.vertexBindingDescriptionCount = static_cast<alib6::u32>(
+            vertex_input.vertexBindingDescriptionCount = static_cast<ave::u32>(
                 graphics->vertex_bindings.size());
             vertex_input.pVertexBindingDescriptions = graphics->vertex_bindings.data();
-            vertex_input.vertexAttributeDescriptionCount = static_cast<alib6::u32>(
+            vertex_input.vertexAttributeDescriptionCount = static_cast<ave::u32>(
                 graphics->vertex_attributes.size());
             vertex_input.pVertexAttributeDescriptions = graphics->vertex_attributes.data();
 
@@ -480,19 +477,19 @@ namespace {
             auto color_blend = graphics->color_blend;
             color_blend.sType =
                 VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-            color_blend.attachmentCount = static_cast<alib6::u32>(
+            color_blend.attachmentCount = static_cast<ave::u32>(
                 graphics->color_blend_attachments.size());
             color_blend.pAttachments = graphics->color_blend_attachments.data();
             VkPipelineDynamicStateCreateInfo dynamic_state {};
             dynamic_state.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-            dynamic_state.dynamicStateCount = static_cast<alib6::u32>(
+            dynamic_state.dynamicStateCount = static_cast<ave::u32>(
                 graphics->dynamic_states.size());
             dynamic_state.pDynamicStates = graphics->dynamic_states.data();
 
             VkGraphicsPipelineCreateInfo pipeline_info {};
             pipeline_info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
             pipeline_info.flags = ci.flags;
-            pipeline_info.stageCount = static_cast<alib6::u32>(stages.size());
+            pipeline_info.stageCount = static_cast<ave::u32>(stages.size());
             pipeline_info.pStages = stages.data();
             pipeline_info.pVertexInputState = &vertex_input;
             pipeline_info.pInputAssemblyState = &input_assembly;
@@ -602,7 +599,7 @@ std::shared_ptr<ComputePipeline> ComputePipeline::create(
     std::shared_ptr<Device> device,
     ShaderBytecode shader,
     ConfigureComputePipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!device || device->get_system_handle() == VK_NULL_HANDLE || shader.empty()) {
         ew.report(ave_vk_create_compute_pipeline,
@@ -634,12 +631,12 @@ std::shared_ptr<ComputePipeline> ComputePipeline::create(
     std::shared_ptr<Device> device,
     std::string_view shader_path,
     ConfigureComputePipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     std::string shader;
-    alib6::Error read_error;
-    if(shader_path.empty() || alib6::io::read_all(shader_path, shader, read_error) ==
-       std::numeric_limits<alib6::usize>::max()) {
+    ave::Error read_error;
+    if(shader_path.empty() || alib5::io::read_all(shader_path, shader) ==
+       std::numeric_limits<ave::usize>::max()) {
         ew.report(ave_vk_create_shader_module, "Failed to read compute SPIR-V shader file.");
         return {};
     }
@@ -649,7 +646,7 @@ std::shared_ptr<ComputePipeline> ComputePipeline::create(
 std::shared_ptr<ComputePipeline> Renderer::create_compute_pipeline(
     ShaderBytecode shader,
     ConfigureComputePipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     return ComputePipeline::create(device, shader, std::move(configure), ew);
 }
@@ -657,7 +654,7 @@ std::shared_ptr<ComputePipeline> Renderer::create_compute_pipeline(
 std::shared_ptr<ComputePipeline> Renderer::create_compute_pipeline(
     std::string_view shader_path,
     ConfigureComputePipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     return ComputePipeline::create(device, shader_path, std::move(configure), ew);
 }
@@ -679,7 +676,7 @@ bool DynamicPipeline::initialize(CreatePipelineInfo<pipeline_type::Dynamic> ci) 
     VkPipelineRenderingCreateInfo rendering_info {};
     rendering_info.sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
     rendering_info.viewMask = ci.view_mask;
-    rendering_info.colorAttachmentCount = static_cast<alib6::u32>(
+    rendering_info.colorAttachmentCount = static_cast<ave::u32>(
         ci.color_attachment_formats.size());
     rendering_info.pColorAttachmentFormats =
         ci.color_attachment_formats.data();
@@ -732,7 +729,7 @@ std::shared_ptr<LegacyPipeline> LegacyPipeline::create(
 std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     GraphicsShaderBytecode shaders,
     ConfigureLegacyPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     CreatePipelineInfo<pipeline_type::Legacy> ci;
     ci.ew = ew;
@@ -794,7 +791,7 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
     ConfigureLegacyPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderBytecode {
         .vertex = vertex,
@@ -807,7 +804,7 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
 std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     GraphicsShaderPaths shaders,
     ConfigureLegacyPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     const bool incomplete_tessellation =
         shaders.tessellation.control.empty() !=
@@ -825,8 +822,8 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     std::string tessellation_evaluation;
     const auto read = [](std::string_view path, std::string& output) {
         if(path.empty()) return true;
-        return alib6::io::read_all(path, output) !=
-            std::numeric_limits<alib6::usize>::max();
+        return alib5::io::read_all(path, output) !=
+            std::numeric_limits<ave::usize>::max();
     };
     if(!read(shaders.vertex, vertex) ||
        !read(shaders.fragment, fragment) ||
@@ -857,7 +854,7 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
     std::string_view geometry,
     TessellationShaderPaths tessellation,
     ConfigureLegacyPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderPaths {
         .vertex = vertex,
@@ -872,7 +869,7 @@ std::shared_ptr<LegacyPipeline> LegacyRender::create_graphics_pipeline(
 std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     GraphicsShaderBytecode shaders,
     ConfigureDynamicPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     CreatePipelineInfo<pipeline_type::Dynamic> ci;
     ci.ew = ew;
@@ -882,7 +879,7 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     ci.stencil_attachment_format = stencil_attachment_format;
     default_configure_graphics_pipeline(
         ci,
-        static_cast<alib6::u32>(ci.color_attachment_formats.size())
+        static_cast<ave::u32>(ci.color_attachment_formats.size())
     );
     if(ci.depth_attachment_format != VK_FORMAT_UNDEFINED) {
         ci.depth_stencil.depthTestEnable = VK_TRUE;
@@ -935,7 +932,7 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
     ConfigureDynamicPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderBytecode {
         .vertex = vertex,
@@ -948,7 +945,7 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
 std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     GraphicsShaderPaths shaders,
     ConfigureDynamicPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     const bool incomplete_tessellation =
         shaders.tessellation.control.empty() !=
@@ -966,8 +963,8 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     std::string tessellation_evaluation;
     const auto read = [](std::string_view path, std::string& output) {
         if(path.empty()) return true;
-        return alib6::io::read_all(path, output) !=
-            std::numeric_limits<alib6::usize>::max();
+        return alib5::io::read_all(path, output) !=
+            std::numeric_limits<ave::usize>::max();
     };
     if(!read(shaders.vertex, vertex) ||
        !read(shaders.fragment, fragment) ||
@@ -998,7 +995,7 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
     std::string_view geometry,
     TessellationShaderPaths tessellation,
     ConfigureDynamicPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderPaths {
         .vertex = vertex,
@@ -1013,7 +1010,7 @@ std::shared_ptr<DynamicPipeline> DynamicRender::create_graphics_pipeline(
 std::shared_ptr<LegacyRender> Renderer::create_legacy_render(
     ConfigureLegacyRender configure,
     LegacyRenderCreateStatus* status,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!device || !swapchain) {
         ew.report(ave_vk_create_render_pass,
@@ -1038,7 +1035,7 @@ std::shared_ptr<LegacyRender> Renderer::create_legacy_render(
 
 std::shared_ptr<DynamicRender> Renderer::create_dynamic_render(
     ConfigureDynamicRender configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!device || !swapchain) {
         ew.report(ave_vk_create_device,
@@ -1066,7 +1063,7 @@ std::shared_ptr<DynamicRender> Renderer::create_dynamic_render(
 std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
     GraphicsShaderBytecode shaders,
     ConfigureDynamicPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!dynamic_render) {
         ew.report(ave_vk_create_graphics_pipeline,
@@ -1082,7 +1079,7 @@ std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
     ConfigureDynamicPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!dynamic_render) {
         ew.report(ave_vk_create_graphics_pipeline,
@@ -1096,7 +1093,7 @@ std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
 std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
     GraphicsShaderPaths shaders,
     ConfigureDynamicPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!dynamic_render) {
         ew.report(ave_vk_create_graphics_pipeline,
@@ -1112,7 +1109,7 @@ std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
     std::string_view geometry,
     TessellationShaderPaths tessellation,
     ConfigureDynamicPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!dynamic_render) {
         ew.report(ave_vk_create_graphics_pipeline,
@@ -1128,7 +1125,7 @@ std::shared_ptr<DynamicPipeline> Renderer::create_dynamic_graphics_pipeline(
 std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
     GraphicsShaderBytecode shaders,
     ConfigureLegacyPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!legacy_render) {
         ew.report(ave_vk_create_graphics_pipeline,
@@ -1144,7 +1141,7 @@ std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
     ConfigureLegacyPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!legacy_render) {
         ew.report(ave_vk_create_graphics_pipeline,
@@ -1158,7 +1155,7 @@ std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
 std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
     GraphicsShaderPaths shaders,
     ConfigureLegacyPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!legacy_render) {
         ew.report(ave_vk_create_graphics_pipeline,
@@ -1174,7 +1171,7 @@ std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
     std::string_view geometry,
     TessellationShaderPaths tessellation,
     ConfigureLegacyPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!legacy_render) {
         ew.report(ave_vk_create_graphics_pipeline,
@@ -1190,7 +1187,7 @@ std::shared_ptr<LegacyPipeline> Renderer::create_legacy_graphics_pipeline(
 std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     GraphicsShaderBytecode shaders,
     ConfigureGraphicsPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(dynamic_render) {
         return dynamic_render->create_graphics_pipeline(
@@ -1221,7 +1218,7 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     ShaderBytecode geometry,
     TessellationShaderBytecode tessellation,
     ConfigureGraphicsPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderBytecode {
         .vertex = vertex,
@@ -1234,7 +1231,7 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
 std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     GraphicsShaderPaths shaders,
     ConfigureGraphicsPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(dynamic_render) {
         return dynamic_render->create_graphics_pipeline(
@@ -1265,7 +1262,7 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     std::string_view geometry,
     TessellationShaderPaths tessellation,
     ConfigureGraphicsPipeline configure,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     return create_graphics_pipeline(GraphicsShaderPaths {
         .vertex = vertex,
@@ -1277,7 +1274,7 @@ std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
 
 std::shared_ptr<Pipeline> Renderer::create_graphics_pipeline(
     GraphicsPipelineConfig config,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     GraphicsShaderPaths paths {
         .vertex = config.vert,

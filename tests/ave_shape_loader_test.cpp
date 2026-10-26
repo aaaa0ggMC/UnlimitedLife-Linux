@@ -6,16 +6,16 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <AVE/AVE.h>
+#include <AVE/alib.h>
 
-import ave;
-import alib6;
 
 static void check(bool value, const char* message) {
     if(!value) { std::fprintf(stderr, "FAIL: %s\n", message); std::exit(1); }
 }
 
-static alib6::Error g_error;
-static alib6::ErrorWrapper ew(g_error);
+static ave::Error g_error;
+static ave::ErrorWrapper ew(g_error);
 
 ///// OBJ: position + uv + normal 三角形，校验索引/UV/法线 /////
 static void test_obj_triangle() {

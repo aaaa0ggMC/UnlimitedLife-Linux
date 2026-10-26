@@ -1,14 +1,11 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
-#include <alib6/debug.h>
+#include <alib5/adebug.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/upload_context.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :upload_context;
 
 namespace ave {
 
@@ -31,7 +28,7 @@ UploadTicket::State::~State() {
     }
 }
 
-bool UploadTicket::wait(uint64_t timeout_ns, alib6::ErrorWrapper ew) const {
+bool UploadTicket::wait(uint64_t timeout_ns, ave::ErrorWrapper ew) const {
     if(!state || state->fence == VK_NULL_HANDLE || !state->device) {
         ew.report(ave_vk_draw_frame, "Cannot wait on an empty or invalid UploadTicket.");
         return false;
@@ -54,7 +51,7 @@ bool UploadTicket::is_ready() const noexcept {
 struct UploadContext::Impl {
     std::shared_ptr<Device> device;
     VkQueue queue { VK_NULL_HANDLE };
-    alib6::u32 queue_family { 0 };
+    ave::u32 queue_family { 0 };
     VkCommandPool pool { VK_NULL_HANDLE };
     std::shared_ptr<std::mutex> mutex;
 
@@ -121,7 +118,7 @@ VkQueue UploadContext::get_queue() const noexcept {
     return impl ? impl->queue : VK_NULL_HANDLE;
 }
 
-alib6::u32 UploadContext::get_queue_family() const noexcept {
+ave::u32 UploadContext::get_queue_family() const noexcept {
     return impl ? impl->queue_family : 0;
 }
 
@@ -130,7 +127,7 @@ UploadTicket UploadContext::submit_copy(
     VkBuffer dst, VkDeviceSize dst_offset,
     VkDeviceSize size,
     std::shared_ptr<const void> session_lifetime,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!*this || size == 0) {
         ew.report(ave_vk_draw_frame, "Invalid UploadContext or zero size in submit_copy.");
@@ -217,7 +214,7 @@ UploadTicket UploadContext::submit_copy_to_image(UploadToImageInfo ci) {
 UploadTicket UploadContext::submit_recording(
     const std::function<void(VkCommandBuffer)>& record,
     std::shared_ptr<const void> session_lifetime,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!*this) {
         ew.report(ave_vk_draw_frame, "Invalid UploadContext in submit_recording.");

@@ -3,7 +3,7 @@ namespace ave::detail {
 template<class Info>
 bool prepare_buffer(const Info& ci, const std::shared_ptr<Device>& device,
                     BufferProperties& properties, VkBufferCreateInfo& vk,
-                    std::vector<alib6::u32>& families, bool pad_to_atom) {
+                    std::vector<ave::u32>& families, bool pad_to_atom) {
     if(!device || device->get_system_handle() == VK_NULL_HANDLE) {
         ci.ew.report(ave_vk_create_buffer, "A valid Device is required.");
         return false;

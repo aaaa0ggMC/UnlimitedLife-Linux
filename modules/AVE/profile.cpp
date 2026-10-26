@@ -1,10 +1,15 @@
-module;
-#include <alib6/debug.h>
+#include <alib5/adebug.h>
 #include <vulkan/vulkan.h>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/profile.h>
+#include <AVE/profile/report.h>
+#include <AVE/render.h>
+#include <AVE/window.h>
+#include <alib5/adata.h>
+#include <alib5/data/reflect.h>
 
-module ave.profile;
 
-import ave.ecode;
 
 using namespace ave;
 using enum RenderBuildStageId;
@@ -50,7 +55,7 @@ namespace {
     }
 }
 
-Renderer RenderProfile::build(alib6::ErrorWrapper ew){
+Renderer RenderProfile::build(ave::ErrorWrapper ew){
     auto * result = std::exchange(build_report, nullptr);
     if(result) result->reset();
     struct FinishResult {
@@ -262,7 +267,7 @@ Renderer RenderProfile::build(alib6::ErrorWrapper ew){
 
 bool RenderProfile::__vk_command_pool(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     if(with_data.command_pool) {
@@ -311,7 +316,7 @@ bool RenderProfile::__vk_command_pool(
 
 bool RenderProfile::__vk_command_buffers(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     if(with_data.command_buffers) {
@@ -363,7 +368,7 @@ bool RenderProfile::__vk_command_buffers(
 
 bool RenderProfile::__vk_descriptor_pool(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     if(with_data.descriptor_pool) {
@@ -409,7 +414,7 @@ bool RenderProfile::__vk_descriptor_pool(
 
 bool RenderProfile::__vk_sync_objects(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     if(with_data.sync_objects) {
@@ -463,7 +468,7 @@ bool RenderProfile::__vk_sync_objects(
 
 bool RenderProfile::__vk_legacy_render(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     if(with_data.legacy_render) {
@@ -530,7 +535,7 @@ bool RenderProfile::__vk_legacy_render(
 
 bool RenderProfile::__vk_dynamic_render(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     if(result) {
@@ -571,7 +576,7 @@ bool RenderProfile::__vk_dynamic_render(
 
 bool RenderProfile::__vk_images(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     const auto swapchain_handles = r.swapchain->enumerate_images(ew);
@@ -688,7 +693,7 @@ bool RenderProfile::__vk_images(
 
 bool RenderProfile::__vk_swapchain(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     if(with_data.swapchain) {
@@ -751,9 +756,9 @@ bool RenderProfile::__vk_swapchain(
     if(result) {
         auto& stage = (*result)[create_swapchain];
         stage["source"] = "created";
-        stage["format"] = static_cast<alib6::i64>(configured_format.format);
-        stage["color_space"] = static_cast<alib6::i64>(configured_format.colorSpace);
-        stage["present_mode"] = static_cast<alib6::i64>(configured_present_mode);
+        stage["format"] = static_cast<ave::i64>(configured_format.format);
+        stage["color_space"] = static_cast<ave::i64>(configured_format.colorSpace);
+        stage["present_mode"] = static_cast<ave::i64>(configured_present_mode);
         stage["width"] = configured_extent.width;
         stage["height"] = configured_extent.height;
         stage["requested_image_count"] = configured_image_count;
@@ -769,7 +774,7 @@ bool RenderProfile::__vk_swapchain(
 
 bool RenderProfile::__vk_device(
     Renderer& r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport* result
 ){
     if(with_data.device){
@@ -779,7 +784,7 @@ bool RenderProfile::__vk_device(
             stage["source"] = "provided";
             stage["queue_family_count"] =
                 r.device->get_queue_requests().size();
-            stage["extensions"] = alib6::to_adata(
+            stage["extensions"] = alib5::to_adata(
                 r.device->get_enabled_extensions()
             );
             stage["dynamic_rendering"] = r.device->supports_dynamic_rendering()
@@ -855,8 +860,8 @@ bool RenderProfile::__vk_device(
                 create_device,
                 "Selected physical device is missing required device extensions"
             );
-            stage["required_extensions"] = alib6::to_adata(required_extensions);
-            stage["missing_extensions"] = alib6::to_adata(
+            stage["required_extensions"] = alib5::to_adata(required_extensions);
+            stage["missing_extensions"] = alib5::to_adata(
                 required_resolution.missing
             );
         }
@@ -973,8 +978,8 @@ bool RenderProfile::__vk_device(
     if(result){
         auto& stage = (*result)[create_device];
         stage["source"] = "created";
-        stage["extensions"] = alib6::to_adata(enabled_extensions);
-        stage["queue_families"] = alib6::to_adata(queue_families);
+        stage["extensions"] = alib5::to_adata(enabled_extensions);
+        stage["queue_families"] = alib5::to_adata(queue_families);
         if(r.device){
             stage.succeed();
             stage["dynamic_rendering"] = r.device->supports_dynamic_rendering()
@@ -988,7 +993,7 @@ bool RenderProfile::__vk_device(
 
 bool RenderProfile::__vk_select_physical_device(
     Renderer & r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport * result
 ){
     const auto required_extensions = collect_required_device_extensions(
@@ -1027,7 +1032,7 @@ bool RenderProfile::__vk_select_physical_device(
         auto& stage = (*result)[select_physical_device];
         stage["device_count"] = devices.size();
         stage["selector"] = custom_selector ? "configured" : "first";
-        stage["required_device_extensions"] = alib6::to_adata(
+        stage["required_device_extensions"] = alib5::to_adata(
             required_extensions
         );
 
@@ -1047,7 +1052,7 @@ bool RenderProfile::__vk_select_physical_device(
                 required_extensions
             );
             stage.fail("Selected physical device is missing required extensions");
-            stage["missing_device_extensions"] = alib6::to_adata(
+            stage["missing_device_extensions"] = alib5::to_adata(
                 resolution.missing
             );
         }else{
@@ -1081,7 +1086,7 @@ bool RenderProfile::__vk_select_physical_device(
 
 bool RenderProfile::__vk_create_glfw_surface(
     Renderer & r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport * result
 ){
     r.surface = Surface::create(
@@ -1108,7 +1113,7 @@ bool RenderProfile::__vk_create_glfw_surface(
 
 bool RenderProfile::__vk_instance(
     Renderer & r,
-    alib6::ErrorWrapper ew,
+    ave::ErrorWrapper ew,
     RenderBuildReport * result
 ){
     CreateInstanceInfo ci{
@@ -1120,7 +1125,7 @@ bool RenderProfile::__vk_instance(
     ci.extensions = gi.get_required_extensions();
     if(result){
         auto & stage = (*result)[instance_extensions];
-        stage["platform"] = alib6::to_adata(ci.extensions);
+        stage["platform"] = alib5::to_adata(ci.extensions);
         stage["has_window"] = (window != nullptr);
     }
 
@@ -1200,9 +1205,9 @@ bool RenderProfile::__vk_instance(
 
             if(result){
                 auto & cat = (*result)[instance_extensions][category];
-                cat["requested"] = alib6::to_adata(provided_extensions);
-                cat["satisfied"] = alib6::to_adata(available_extensions);
-                cat["missing"] = alib6::to_adata(missing_extensions);
+                cat["requested"] = alib5::to_adata(provided_extensions);
+                cat["satisfied"] = alib5::to_adata(available_extensions);
+                cat["missing"] = alib5::to_adata(missing_extensions);
             }
 
             panicf_debug(
@@ -1241,9 +1246,9 @@ bool RenderProfile::__vk_instance(
 
         if(result){
             auto & stage = (*result)[instance_extensions];
-            stage["enabled"] = alib6::to_adata(ci.extensions);
+            stage["enabled"] = alib5::to_adata(ci.extensions);
             stage["available_system_count"] = extensions.size();
-            stage["system_extensions"] = alib6::to_adata(extensions);
+            stage["system_extensions"] = alib5::to_adata(extensions);
             stage["has_window"] = (window != nullptr);
             if(ext_had_failure){
                 stage.fail("Required extensions missing");
@@ -1307,9 +1312,9 @@ bool RenderProfile::__vk_instance(
 
             if(result){
                 auto & cat = (*result)[instance_layers][category];
-                cat["requested"] = alib6::to_adata(provided_layers);
-                cat["satisfied"] = alib6::to_adata(available_layers);
-                cat["missing"] = alib6::to_adata(missing_layers);
+                cat["requested"] = alib5::to_adata(provided_layers);
+                cat["satisfied"] = alib5::to_adata(available_layers);
+                cat["missing"] = alib5::to_adata(missing_layers);
             }
 
             panicf_debug(
@@ -1344,9 +1349,9 @@ bool RenderProfile::__vk_instance(
 
         if(result){
             auto & stage = (*result)[instance_layers];
-            stage["enabled"] = alib6::to_adata(ci.layers);
+            stage["enabled"] = alib5::to_adata(ci.layers);
             stage["available_system_count"] = layers.size();
-            stage["system_layers"] = alib6::to_adata(layers);
+            stage["system_layers"] = alib5::to_adata(layers);
             if(layer_had_failure){
                 stage.fail("Required layers missing");
             }else if(layer_had_partial){
@@ -1373,8 +1378,8 @@ bool RenderProfile::__vk_instance(
             stage["engine_name"] = ci.engine_name;
             stage["engine_version"] = std::format("{}.{}.{}", ci.engine_version.major, ci.engine_version.minor, ci.engine_version.patch);
             stage["api_version"] = std::format("{}.{}.{}", ci.api_version.major, ci.api_version.minor, ci.api_version.patch);
-            stage["enabled_extensions"] = alib6::to_adata(ci.extensions);
-            stage["enabled_layers"] = alib6::to_adata(ci.layers);
+            stage["enabled_extensions"] = alib5::to_adata(ci.extensions);
+            stage["enabled_layers"] = alib5::to_adata(ci.layers);
             stage["instance_handle"] = std::format("{}", static_cast<const void*>(r.instance.get()));
         }else{
             stage.fail("Failed to create Vulkan instance");
@@ -1391,7 +1396,7 @@ bool RenderProfile::recreate_swapchain_from_window(
     Window & window,
     RenderBuildReport * report,
     ProfileWith user_with,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ){
     if(!r.device || r.device->get_system_handle() == VK_NULL_HANDLE){
         ew.report(ave_vk_create_swapchain, "Cannot recreate swapchain: Renderer has no valid Device.");
@@ -1475,7 +1480,7 @@ bool RenderProfile::recreate_swapchain_from_window(
     Window & window,
     RenderBuildReport * report,
     ProfileWith user_with,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ){
     if(!r.device || r.device->get_system_handle() == VK_NULL_HANDLE){
         ew.report(ave_vk_create_swapchain, "Cannot recreate swapchain: Renderer has no valid Device.");

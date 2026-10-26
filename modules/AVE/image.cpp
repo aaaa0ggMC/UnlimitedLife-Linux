@@ -1,18 +1,15 @@
-module;
 #include <AVE/config.h>
 #include <vulkan/vulkan.h>
 #include <stb/stb_image.h>
 #include <cstring>
 #include <limits>
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/image.h>
+#include <AVE/render/buffer.h>
+#include <AVE/render/upload_context.h>
 
-module ave.render;
 
-import std;
-import alib6;
-import ave.ecode;
-import :image;
-import :buffer;
-import :upload_context;
 
 namespace ave {
 namespace {
@@ -36,7 +33,7 @@ namespace {
     VkImageViewType infer_view_type(
         VkImageType type,
         VkImageCreateFlags flags,
-        alib6::u32 layers
+        ave::u32 layers
     ) noexcept {
         switch(type) {
         case VK_IMAGE_TYPE_1D:
@@ -55,14 +52,14 @@ namespace {
         }
     }
 
-    std::optional<alib6::u32> find_memory_type(
+    std::optional<ave::u32> find_memory_type(
         VkPhysicalDevice physical_device,
-        alib6::u32 allowed_types,
+        ave::u32 allowed_types,
         VkMemoryPropertyFlags required_properties
     ) {
         VkPhysicalDeviceMemoryProperties properties {};
         vkGetPhysicalDeviceMemoryProperties(physical_device, &properties);
-        for(alib6::u32 i = 0; i < properties.memoryTypeCount; ++i) {
+        for(ave::u32 i = 0; i < properties.memoryTypeCount; ++i) {
             const bool allowed = (allowed_types & (1u << i)) != 0;
             const bool supported =
                 (properties.memoryTypes[i].propertyFlags & required_properties) ==
@@ -104,7 +101,7 @@ void Image::resolve_self_view_config(ImageViewConfig& cfg) const noexcept {
 
 bool Image::initialize_default_view(
     const ImageViewConfig& config,
-    alib6::ErrorWrapper& ew
+    ave::ErrorWrapper& ew
 ) {
     ImageViewConfig cfg = config;
     resolve_self_view_config(cfg);
@@ -170,7 +167,7 @@ bool Image::initialize(CreateImageInfo ci) {
     image_info.usage = ci.usage;
     image_info.sharingMode = ci.sharing_mode;
     image_info.queueFamilyIndexCount = ci.sharing_mode == VK_SHARING_MODE_CONCURRENT
-        ? static_cast<alib6::u32>(queue_families.size()) : 0;
+        ? static_cast<ave::u32>(queue_families.size()) : 0;
     image_info.pQueueFamilyIndices = ci.sharing_mode == VK_SHARING_MODE_CONCURRENT
         ? queue_families.data() : nullptr;
     image_info.initialLayout = ci.initial_layout;
@@ -304,17 +301,18 @@ std::shared_ptr<Image> Image::create_swapchain_image(
 
 std::shared_ptr<Image> Image::create_from_file(
     CreateImageInfo ci,
-    const alib6::io::FileEntry& entry,
+    const alib5::io::FileEntry& entry,
     AllocateBufferInfo upload
 ) {
     if(entry.invalid()) {
         ci.ew.report(ave_vk_image_upload,
-            "create_from_file requires a valid alib6::io::FileEntry.");
+            "create_from_file requires a valid alib5::io::FileEntry.");
         return {};
     }
 
-    const auto bytes = entry.read(0, alib6::get_default_resource(), ci.ew);
-    if(bytes.empty()) {
+    std::string bytes;
+    const auto bytes_read = entry.read(bytes, 0);
+    if(bytes_read == std::numeric_limits<std::size_t>::max() || bytes.empty()) {
         ci.ew.report(ave_vk_image_upload,
             "Failed to read image file '{}'.", entry.path);
         return {};
@@ -347,8 +345,8 @@ std::shared_ptr<Image> Image::create_from_file(
     if(ci.format == VK_FORMAT_UNDEFINED) ci.format = VK_FORMAT_R8G8B8A8_UNORM;
     if(ci.extent.width == 0 && ci.extent.height == 0 && ci.extent.depth == 0) {
         ci.extent = {
-            static_cast<alib6::u32>(width),
-            static_cast<alib6::u32>(height),
+            static_cast<ave::u32>(width),
+            static_cast<ave::u32>(height),
             1
         };
     }
@@ -510,8 +508,8 @@ VkFormat Image::get_format() const noexcept { return format; }
 VkExtent3D Image::get_extent() const noexcept { return extent; }
 VkImageUsageFlags Image::get_usage() const noexcept { return usage; }
 VkImageAspectFlags Image::get_aspect_mask() const noexcept { return aspect_mask; }
-alib6::u32 Image::get_mip_levels() const noexcept { return mip_levels; }
-alib6::u32 Image::get_array_layers() const noexcept { return array_layers; }
+ave::u32 Image::get_mip_levels() const noexcept { return mip_levels; }
+ave::u32 Image::get_array_layers() const noexcept { return array_layers; }
 Image::operator bool() const noexcept { return image != VK_NULL_HANDLE; }
 
 VkImageView Image::get_image_view() const noexcept {
@@ -607,7 +605,7 @@ VkExtent2D WithImagesInput::get_extent() const noexcept {
     return swapchain ? swapchain->get_extent() : VkExtent2D {};
 }
 
-alib6::u32 WithImagesInput::get_swapchain_image_count() const noexcept {
+ave::u32 WithImagesInput::get_swapchain_image_count() const noexcept {
     return swapchain
         ? swapchain->get_image_count() : 0;
 }
@@ -644,7 +642,7 @@ void default_configure_images(WithImagesInput& input, CreateImagesInfo& ci) {
     if(depth_format == VK_FORMAT_UNDEFINED) return;
 
     ci.images.reserve(image_count);
-    for(alib6::u32 i = 0; i < image_count; ++i) {
+    for(ave::u32 i = 0; i < image_count; ++i) {
         CreateImageInfo image;
         image.device = device;
         image.format = depth_format;

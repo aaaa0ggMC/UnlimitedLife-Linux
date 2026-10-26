@@ -1,15 +1,13 @@
-module;
 #include <vulkan/vulkan.h>
 #include <vk_mem_alloc.h>
+#include <memory>
+#include <algorithm>
+#include <ranges>
+#include <limits>
 
-
-module ave.render;
-
-import std;
-import alib6;
-import ave.ecode;
-import :buffer;
-
+#include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/buffer.h>
 #include "buffer_detail.inl"
 
 namespace ave {
@@ -48,7 +46,7 @@ std::shared_ptr<VmaMemoryPolicy::ImageBinding> VmaMemoryPolicy::create_image(
     VkMemoryPropertyFlags required_memory_properties,
     VkMemoryPropertyFlags preferred_memory_properties,
     bool dedicated_allocation,
-    alib6::ErrorWrapper ew
+    ave::ErrorWrapper ew
 ) {
     if(!allocator || image == VK_NULL_HANDLE) {
         ew.report(ave_vk_create_image,
@@ -191,7 +189,7 @@ std::shared_ptr<VmaMemoryPolicy::State> VmaMemoryPolicy::create(CreateInfo ci) {
     state->owner = ci.allocator;
     state->host_access = ci.host_access;
     VkBufferCreateInfo vk {};
-    std::vector<alib6::u32> families;
+    std::vector<ave::u32> families;
     if(!detail::prepare_buffer(ci, ci.allocator->get_device(), state->info, vk, families, false))
         return {};
     VmaAllocationCreateInfo allocation {};
