@@ -1,6 +1,7 @@
 #include <AVE/error_code.h>
 #include <cstdio>
 #include <cstdlib>
+#include <type_traits>
 
 namespace {
 void check(bool ok, const char* message) {
@@ -32,7 +33,18 @@ int main() {
     {
         ave::Error errors(&resource);
         ave::ErrorWrapper wrapper(errors);
-        check(bool(wrapper) && !bool(ave::ErrorWrapper{}), "optional error receiver");
+        check(bool(wrapper), "host-backed error receiver is active");
+        // AVE 必须直接复用 alib5 的实现，而不是自带一份壳。
+        static_assert(std::is_same_v<ave::ErrorWrapper, alib5::ErrorWrapper>,
+            "ave::ErrorWrapper must be alib5::ErrorWrapper");
+        static_assert(std::is_same_v<ave::Error, alib5::Error>, "ave::Error must be alib5::Error");
+        static_assert(std::is_same_v<ave::ErrorRecord, alib5::ErrorRecord>,
+            "ave::ErrorRecord must be alib5::ErrorRecord");
+        static_assert(std::is_same_v<ave::CodeWithLocation, alib5::CodeWithLocation>,
+            "ave::CodeWithLocation must be alib5::CodeWithLocation");
+        // alib6 语义：bool 表示“是否会上报”；无宿主时按默认策略（panic）为真。
+        check(bool(ave::ErrorWrapper{}) == alib5::ErrorWrapper::__need_invoke_error(),
+            "empty receiver activity must follow the alib5 policy");
         const auto line = std::source_location::current().line() + 1;
         wrapper.report("literal", 17);
         check(errors.size() == 1 && errors[0].message == "literal" && errors[0].code == 17,

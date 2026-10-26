@@ -53,59 +53,21 @@ namespace ave {
     using alib5::ErrorRecord;
     /// 错误累积容器：直接复用 alib5 实现。
     using alib5::Error;
-
     /**
-     * @brief 轻量错误上报包装（AVE 调用约定的薄转发层）。
+     * @brief 错误上报包装：**直接使用 alib5 的实现**，AVE 不再保留自己的壳。
      *
      * @details
-     * 存储与累积语义完全来自 `alib5::Error`；这里只保留 AVE 既有的两个便捷重载：
-     *  - `report(message, code)`
-     *  - `report(code, fmt, args...)`
-     * 以及 `operator bool()`。无宿主 Error 时的行为与迁移前一致：走 alib5 的
-     * panic 后端（alib5 默认策略）。
+     * 迁移前 AVE 自带一份 `ErrorWrapper`（持有 `ave::Error*`、panic 后端自实现）。
+     * 现在 alib5 已全量回移 alib6 的 `Error/ErrorWrapper`（`alib5/aerror.h`），
+     * 因此这里只做类型别名：
+     *  - 存储/累积/复用语义、`operator bool`（是否“可上报”）全部来自 alib5；
+     *  - 无宿主 `ErrorWrapper` 的默认策略是 panic（`ALIB5_FLAG_ERROR_PANIC`），
+     *    与 AVE 迁移前行为一致；
+     *  - AVE 既有调用形态 `report(message, code)` 与 `report(code, fmt, args...)`
+     *    由 alib5 的对应重载直接支持，调用点无需改动。
      */
-    struct ErrorWrapper {
-        alib5::Error* err { nullptr };
+    using alib5::ErrorWrapper;
 
-        ErrorWrapper() = default;
-        ErrorWrapper(alib5::Error& ctx) : err(&ctx) {}
-        ErrorWrapper(alib5::Error&&) = delete("Rvalue is not allowed!");
-        ErrorWrapper(const alib5::Error&) = delete("Const lvalue is not allowed!");
-
-    private:
-        void invoke(std::string_view str, i64 code) {
-            // 注意：panicf 是宏，不能加 alib5:: 限定；这里直接调函数模板。
-            alib5::Panicf("{}\nCode: {}", std::source_location::current(), str, code);
-        }
-
-        template<class T>
-        void __report(T&& str, CodeWithLocation cc) {
-            if(err) {
-                err->report(std::forward<T>(str), cc);
-            } else {
-                invoke(std::string_view(str), cc.code);
-            }
-        }
-
-    public:
-        void report(std::pmr::string&& str, CodeWithLocation cc = CodeWithLocation()) {
-            __report(std::move(str), cc);
-        }
-
-        template<class T> requires requires(T v) { std::string_view(v); }
-        void report(T value, CodeWithLocation cc = CodeWithLocation()) {
-            __report(std::string_view(value), cc);
-        }
-
-        template<class... Args>
-        void report(CodeWithLocation cc, const std::format_string<Args...>& fmt, Args&&... args) {
-            std::pmr::string str(err ? err->get_allocator() : pmr::get_default_resource());
-            std::format_to(std::back_inserter(str), fmt, std::forward<Args>(args)...);
-            __report(std::move(str), cc);
-        }
-
-        [[nodiscard]] explicit operator bool() const noexcept { return err != nullptr; }
-    };
 
 } // namespace ave
 
