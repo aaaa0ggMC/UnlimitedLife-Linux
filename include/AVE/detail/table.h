@@ -1,206 +1,67 @@
 /**
  * @file table.h
- * @brief AVE 诊断用表格与彩色输出（去 modules 迁移，最小自包含实现）。
+ * @brief AVE 诊断用表格与彩色输出：薄转发到 alib5 表格引擎（alib6.table 回移版）。
  *
- * 原 reflect/* 与 misc/fps_detective 的 `to_table()` 调试可视化依赖 alib6::Table
- * 与 alib6::log::color。alib5 无等价 API；为「保留表格可视化」，在 ave 命名空间内
- * 提供最小的 tbl[r][c] << ... 渲染器与 ANSI 彩色 manipulator（基于 alib5 ACP_* 思路）。
- * 仅用于诊断打印，不参与核心反射/布局校验结果；文字排版为近似还原。
+ * 迁移去 modules 时，alib6 的表格子系统一度没有回移，这里曾自造一套极简 `ave::Table`
+ * （圆角框 + ASCII 横线 + 头字节计数宽度），导致日志表格从 alib6 的圆角 Unicode 边框退化。
+ * 现在 alib6::table 已按 alib6 语义回移为 `alib5::table`（include/alib5/atable.h），
+ * 本文件只做命名转发，不再维护第二套排版实现：
+ *  - `ave::Table` / `ave::TableConfig` / `ave::ColAlign` / `ave::RowAlign`
+ *    直接别名到 `alib5::table::*`；
+ *  - `ave::log::color` / `ave::log::Color` / `ave::log::Style` 转发到 `alib5::lot::*`；
+ *  - `std::formatter<ave::Table>` 不再特化：`ave::Table` 与 `alib5::table::Table` 是同一类型，
+ *    alib5 已提供 `std::formatter<alib5::table::Table>`（重复特化同一类型是非法的）。
+ *
+ * 因此 reflect/* 与 misc/fps_detective.h 的既有调用点（tbl[r][c] << ... << color(...)）
+ * 无需改写逻辑，即恢复迁移前的圆角 Unicode 边框外观。
  */
 #pragma once
 
-#include <AVE/error_code.h>
+#include <alib5/atable.h>
 
 #include <string>
-#include <string_view>
-#include <vector>
-#include <sstream>
-#include <optional>
-#include <cstddef>
 
 namespace ave {
-namespace log {
 
-    enum class Color { None, Red, Green, Cyan, Yellow, Magenta, Gray };
-    enum class Style { None, Bold };
+    // ==================== 表格类型（alib5 表格引擎，alib6.table 回移版） ====================
 
-    namespace detail {
-        inline const char* fg_code(Color c) {
-            switch(c) {
-                case Color::Red:     return "\e[31m";
-                case Color::Green:   return "\e[32m";
-                case Color::Cyan:    return "\e[36m";
-                case Color::Yellow:  return "\e[33m";
-                case Color::Magenta: return "\e[35m";
-                case Color::Gray:    return "\e[90m";
-                case Color::None:    break;
-            }
-            return "";
+    /// @brief 表格排版器（等价 alib6::Table）
+    using Table = alib5::table::Table;
+    /// @brief 表格边框与对齐配置（七个预设：unicode_rounded/unicode_box/double_line/modern_dot/markdown/minimal/ascii_classic）
+    using TableConfig = alib5::table::TableConfig;
+    /// @brief 列水平对齐模式
+    using ColAlign = alib5::table::ColAlign;
+    /// @brief 行垂直对齐模式
+    using RowAlign = alib5::table::RowAlign;
+
+    // ==================== 彩色 manipulator（转发 alib5::lot） ====================
+
+    namespace log {
+
+        /// @brief ANSI 颜色枚举（与 alib6::log::Color 同名同义）
+        using Color = alib5::lot::Color;
+        /// @brief 样式位掩码（与 alib6::log::Style 同名同义）
+        using Style = alib5::lot::Style;
+        /// @brief 兼容原 alib6::log::CanForward 概念（alib5 同名概念）
+        template<class T>
+        concept CanForward = alib5::CanForward<T>;
+
+        /// @brief 彩色 manipulator：流式写入表格单元格时注入颜色标签
+        [[nodiscard]] inline constexpr alib5::log_tag color(
+            Color fg,
+            Color bg = Color::None,
+            Style st = Style::None,
+            uint16_t cate_id = 0
+        ) {
+            return alib5::lot::color(fg, bg, st, cate_id);
         }
-        inline const char* bg_code(Color c) {
-            switch(c) {
-                case Color::Red:     return "\e[41m";
-                case Color::Green:   return "\e[42m";
-                case Color::Cyan:    return "\e[46m";
-                case Color::Yellow:  return "\e[43m";
-                case Color::Magenta: return "\e[45m";
-                case Color::Gray:    return "\e[100m";
-                case Color::None:    break;
-            }
-            return "";
-        }
-        inline const char* style_code(Style s) {
-            return s == Style::Bold ? "\e[1m" : "";
-        }
-        // 计算去除 ANSI 转义后的可见宽度。
-        inline usize visible_width(std::string_view s) {
-            usize w = 0;
-            for(usize i = 0; i < s.size();) {
-                if(s[i] == '\e') {
-                    usize end = s.find('m', i);
-                    i = (end == std::string_view::npos) ? s.size() : end + 1;
-                } else {
-                    // 以 UTF-8 首字节计数（近似列宽，等宽终端下正确）。
-                    if((static_cast<unsigned char>(s[i]) & 0xC0) != 0x80) ++w;
-                    ++i;
-                }
-            }
-            return w;
-        }
-        inline std::string pad_to(std::string_view s, usize width) {
-            usize vis = visible_width(s);
-            std::string out(s);
-            if(width > vis) out.append(width - vis, ' ');
-            return out;
-        }
+
+    } // namespace log
+
+    /// @brief 便捷字符串化（保留迁移前的 ave::to_string 入口）
+    [[nodiscard]] inline std::string to_string(const Table& t) {
+        auto s = t.str();
+        return std::string(s.data(), s.size());
     }
-
-    /// 彩色 manipulator：流式写入时输出 ANSI 起始序列。
-    struct ColorManip {
-        std::string codes;
-    };
-
-    inline ColorManip color(Color fg, Color bg = Color::None, Style st = Style::None) {
-        std::string c;
-        c += detail::fg_code(fg);
-        c += detail::bg_code(bg);
-        c += detail::style_code(st);
-        return ColorManip{ std::move(c) };
-    }
-
-    /// 兼容原 alib6::log::CanForward 概念（供 write_to_log 友元声明约束）。
-    template<class T>
-    concept CanForward = requires(T& t, std::pmr::string& s) { t.write_to_log(s); };
-
-} // namespace log
-
-    enum class ColAlign { Left, Right, Center };
-
-    struct TableConfig {
-        ColAlign col_align { ColAlign::Left };
-        static TableConfig unicode_rounded() { return TableConfig{}; }
-    };
-
-    /// 最小表格：tbl[row][col] << value / << log::color(...)，渲染为圆角框。
-    class Table {
-    public:
-        std::vector<std::vector<std::string>> cells;
-        std::vector<std::vector<bool>> colored;
-        TableConfig config;
-
-        explicit Table(TableConfig cfg = TableConfig::unicode_rounded())
-            : config(cfg) {}
-
-        struct Cell {
-            Table* t;
-            usize r, c;
-            template<class T>
-            Cell& operator<<(const T& v) {
-                std::format_to(std::back_inserter(t->at(r, c)), "{}", v);
-                return *this;
-            }
-            Cell& operator<<(const log::ColorManip& m) {
-                t->at(r, c) += m.codes;
-                t->mark_colored(r, c);
-                return *this;
-            }
-        };
-        struct Row {
-            Table* t;
-            usize r;
-            Cell operator[](usize c) { return Cell{ t, r, c }; }
-        };
-        Row operator[](usize r) { return Row{ this, r }; }
-
-        std::string& at(usize r, usize c) {
-            if(cells.size() <= r) { cells.resize(r + 1); colored.resize(r + 1); }
-            if(cells[r].size() <= c) { cells[r].resize(c + 1); colored[r].resize(c + 1, false); }
-            return cells[r][c];
-        }
-        void mark_colored(usize r, usize c) {
-            if(colored.size() <= r) colored.resize(r + 1);
-            if(colored[r].size() <= c) colored[r].resize(c + 1, false);
-            colored[r][c] = true;
-        }
-
-        [[nodiscard]] std::string str() const {
-            usize rows = cells.size();
-            usize cols = 0;
-            for(const auto& row : cells) cols = std::max<std::size_t>(cols, row.size());
-            if(cols == 0) cols = 1;
-
-            std::vector<usize> width(cols, 0);
-            for(const auto& row : cells) {
-                for(usize c = 0; c < row.size(); ++c)
-                    width[c] = std::max<std::size_t>(width[c], log::detail::visible_width(row[c]));
-            }
-
-            std::string out;
-            auto hline = [&](const char* l, const char* mid, const char* r) {
-                out += l;
-                for(usize c = 0; c < cols; ++c) {
-                    out.append(width[c] + 2, '-');
-                    out += (c + 1 == cols) ? r : mid;
-                }
-                out += '\n';
-            };
-            hline("\u256d", "\u252c", "\u256e"); // ╭ ┬ ╮
-            for(usize r = 0; r < rows; ++r) {
-                out += "\u2502"; // │
-                for(usize c = 0; c < cols; ++c) {
-                    std::string_view content = (c < cells[r].size()) ? std::string_view(cells[r][c]) : std::string_view{};
-                    usize vis = log::detail::visible_width(content);
-                    usize pad = (width[c] > vis) ? width[c] - vis : 0;
-                    std::string left, right;
-                    if(config.col_align == ColAlign::Right) left.assign(pad, ' ');
-                    else if(config.col_align == ColAlign::Center) { left.assign(pad / 2, ' '); right.assign(pad - pad / 2, ' '); }
-                    else right.assign(pad, ' ');
-                    out += ' ';
-                    out += left;
-                    out += content;
-                    if((c < colored[r].size()) && colored[r][c]) out += "\e[0m";
-                    out += right;
-                    out += ' ';
-                    out += "\u2502";
-                }
-                out += '\n';
-                if(r + 1 == rows) hline("\u2570", "\u2534", "\u256f"); // ╰ ┴ ╯
-                else hline("\u251c", "\u253c", "\u2524");              // ├ ┼ ┤
-            }
-            return out;
-        }
-    };
-
-    inline std::string to_string(const Table& t) { return t.str(); }
 
 } // namespace ave
-
-// 让 ave::Table 可被 alib5 日志流（基于 std::formatter）与 std::format 输出。
-template<>
-struct std::formatter<ave::Table> {
-    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-    template<class FormatContext>
-    auto format(const ave::Table& t, FormatContext& ctx) const {
-        return std::format_to(ctx.out(), "{}", t.str());
-    }
-};
