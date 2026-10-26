@@ -44,6 +44,33 @@ package("alib5")
         local libdir = package:config("libdir")
         if src == "" then src = nil end
         if libdir == "" then libdir = nil end
+        -- 已安装的 alib5 可能是旧版本：缺 AVE/fog 依赖的新头时，不要在编译期才报
+        -- 「alib5/compact/load_config.h: 没有那个文件或目录」，而是在配置阶段给出可执行方案。
+        if not src then
+            local required = {
+                "compact/load_config.h",
+                "data/data_flat.h",
+                "data/reflect/fill_matching.h"
+            }
+            local missing = {}
+            for _, header in ipairs(required) do
+                if not os.isfile(path.join(prefix, "include", "alib5", header)) then
+                    table.insert(missing, "alib5/" .. header)
+                end
+            end
+            if #missing > 0 then
+                local mode = is_mode("debug") and "debug" or (is_mode("releasedbg") and "releasedbg" or "release")
+                assert(false,
+                    "已安装的 alib5 缺少本项目需要的头文件: " .. table.concat(missing, ", ") ..
+                    "\n  安装前缀: " .. prefix ..
+                    "\n本项目（AVE/fog）需要与 aaaa0ggmcLib 源码同步的 alib5。二选一：" ..
+                    "\n  1) 刷新安装: ./scripts/install alib5 --adopt-existing" ..
+                    "\n  2) 不改系统安装，直接用源码树构建：" ..
+                    "\n     ./scripts/configure --alib5_src=<aaaa0ggmcLib 源码根>" ..
+                    " --alib5_libdir=<aaaa0ggmcLib>/build/" .. os.host() .. "/" .. os.arch() .. "/" .. mode ..
+                    "\n源码头与链接库必须匹配，否则会缺符号（例如 alib5::data::JSON::__internal_dump）。")
+            end
+        end
         if result then
             -- 源码头（头文件式）：优先用源码 include/alib5 头。
             if src then
