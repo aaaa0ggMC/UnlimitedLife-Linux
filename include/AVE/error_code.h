@@ -1,14 +1,20 @@
 /**
  * @file error_code.h
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
- * @brief AVE 定长类型别名、错误码与自包含错误报告设施（去 modules 迁移）
- * @version 5.0
+ * @brief AVE 定长类型别名与 AVE 专有错误码
+ * @version 5.5
  * @date 2026-10-26
  *
- * 原 ave.ecode 模块 + 原先经 alib6 提供的定长类型与 ErrorWrapper/Error。
- * alib5（头文件式、panic 错误模型）不提供这些符号；为「保留 AVE 公开 API 与
- * 返回值 + report 语义」，在 ave 命名空间内以 std::pmr + alib5::panicf 重建。
- * 这是最小兼容设施：不造假 alib6 命名空间、不搬基础库、不改成到处 panic。
+ * 错误上报设施（Error / ErrorWrapper / ErrorRecord / CodeWithLocation）已全量回移至
+ * 头文件式 alib5（`include/alib5/aerror.h`，行为对齐 alib6 `alib6.core:error`）。
+ * 本文件不再自带重复实现，只做两件事：
+ *  1. 把 alib5 的错误类型以 ave 命名空间别名/薄转发的方式暴露出来，
+ *     保持 AVE 既有公开调用点（`ave::Error` / `ave::ErrorWrapper` /
+ *     `ave::CodeWithLocation` / `ave::ErrorRecord`）源码兼容。
+ *  2. 保留 AVE 专有错误码枚举（原 ave.ecode 模块内容）。
+ *
+ * `ave::ErrorWrapper` 是一个薄转发层：存储与语义全部委托 alib5::Error，
+ * 仅保留 AVE 既有的 `(message, code)` / `(code, fmt, args...)` 调用约定。
  */
 #pragma once
 
@@ -18,18 +24,11 @@
 #include <cstddef>
 #include <string>
 #include <string_view>
-#include <vector>
-#include <memory>
-#include <memory_resource>
 #include <format>
 #include <source_location>
-#include <optional>
-#include <type_traits>
 #include <utility>
-#include <algorithm>
-#include <iterator>
 
-#include <alib5/adebug.h> // panicf / vpanicf 作为无宿主 Error 时的后端
+#include <alib5/aerror.h> // panicf / vpanicf 作为无宿主 Error 时的后端
 
 namespace ave {
 
@@ -48,83 +47,37 @@ namespace ave {
 
     namespace pmr = std::pmr;
 
-    /// 附带源码位置的错误码包装（对齐原 alib6::CodeWithLocation 行为）。
-    struct CodeWithLocation {
-        i64 code;
-        std::source_location location;
+    /// 附带源码位置的错误码包装：直接复用 alib5 实现（删除 AVE 自有重复定义）。
+    using alib5::CodeWithLocation;
+    /// 单条错误记录：直接复用 alib5 实现。
+    using alib5::ErrorRecord;
+    /// 错误累积容器：直接复用 alib5 实现。
+    using alib5::Error;
 
-        CodeWithLocation(i64 c = 0, std::source_location loc = std::source_location::current()) noexcept
-            : code(c), location(loc) {}
-    };
-
-    /// 单条错误记录。
-    struct ErrorRecord {
-        pmr::string message;
-        i64 code;
-        std::source_location location;
-
-        ErrorRecord(pmr::string&& message, i64 code,
-                    std::source_location loc = std::source_location::current())
-            : message(std::move(message)), code(code), location(loc) {}
-    };
-
-    /// 错误累积容器（不收缩，语义对齐原 alib6::Error）。
-    struct Error {
-        pmr::vector<ErrorRecord> messages;
-        usize cursor { 0 };
-
-        Error(pmr::memory_resource* mem = pmr::get_default_resource()) : messages(mem) {}
-
-        [[nodiscard]] pmr::memory_resource* get_allocator() const noexcept {
-            return messages.get_allocator().resource();
-        }
-
-        void clear() noexcept { cursor = 0; }
-
-        void report(pmr::string&& str, CodeWithLocation cc = CodeWithLocation()) {
-            if(messages.size() > cursor) {
-                messages[cursor] = ErrorRecord(std::move(str), cc.code, cc.location);
-            } else {
-                messages.emplace_back(std::move(str), cc.code, cc.location);
-            }
-            ++cursor;
-        }
-
-        void report(std::string_view str, CodeWithLocation cc = CodeWithLocation()) {
-            report(pmr::string(str, get_allocator()), cc);
-        }
-
-        template<class... Args>
-        void report(CodeWithLocation cc, const std::format_string<Args...>& fmt, Args&&... args) {
-            pmr::string str(get_allocator());
-            std::format_to(std::back_inserter(str), fmt, std::forward<Args>(args)...);
-            report(std::move(str), cc);
-        }
-
-        [[nodiscard]] bool has_error() const noexcept { return cursor > 0; }
-        [[nodiscard]] explicit operator bool() const noexcept { return has_error(); }
-        [[nodiscard]] usize size() const noexcept { return cursor; }
-
-        [[nodiscard]] const ErrorRecord& operator[](usize idx) const { return messages[idx]; }
-        [[nodiscard]] ErrorRecord& operator[](usize idx) { return messages[idx]; }
-
-        auto begin() const noexcept { return messages.begin(); }
-        auto end() const noexcept { return messages.begin() + cursor; }
-    };
-
-    /// 轻量错误上报包装：有宿主 Error 则累积，否则 panic（对齐 ALIB6_ERROR_USE_PANIC）。
+    /**
+     * @brief 轻量错误上报包装（AVE 调用约定的薄转发层）。
+     *
+     * @details
+     * 存储与累积语义完全来自 `alib5::Error`；这里只保留 AVE 既有的两个便捷重载：
+     *  - `report(message, code)`
+     *  - `report(code, fmt, args...)`
+     * 以及 `operator bool()`。无宿主 Error 时的行为与迁移前一致：走 alib5 的
+     * panic 后端（alib5 默认策略）。
+     */
     struct ErrorWrapper {
-        Error* err { nullptr };
+        alib5::Error* err { nullptr };
 
         ErrorWrapper() = default;
-        ErrorWrapper(Error& ctx) : err(&ctx) {}
-        ErrorWrapper(Error&&) = delete("Rvalue is not allowed!");
-        ErrorWrapper(const Error&) = delete("Const lvalue is not allowed!");
+        ErrorWrapper(alib5::Error& ctx) : err(&ctx) {}
+        ErrorWrapper(alib5::Error&&) = delete("Rvalue is not allowed!");
+        ErrorWrapper(const alib5::Error&) = delete("Const lvalue is not allowed!");
 
     private:
         void invoke(std::string_view str, i64 code) {
-            panicf("{}\nCode: {}", str, code);
+            // 注意：panicf 是宏，不能加 alib5:: 限定；这里直接调函数模板。
+            alib5::Panicf("{}\nCode: {}", std::source_location::current(), str, code);
         }
+
         template<class T>
         void __report(T&& str, CodeWithLocation cc) {
             if(err) {
@@ -135,7 +88,7 @@ namespace ave {
         }
 
     public:
-        void report(pmr::string&& str, CodeWithLocation cc = CodeWithLocation()) {
+        void report(std::pmr::string&& str, CodeWithLocation cc = CodeWithLocation()) {
             __report(std::move(str), cc);
         }
 
@@ -146,7 +99,7 @@ namespace ave {
 
         template<class... Args>
         void report(CodeWithLocation cc, const std::format_string<Args...>& fmt, Args&&... args) {
-            pmr::string str(err ? err->get_allocator() : pmr::get_default_resource());
+            std::pmr::string str(err ? err->get_allocator() : pmr::get_default_resource());
             std::format_to(std::back_inserter(str), fmt, std::forward<Args>(args)...);
             __report(std::move(str), cc);
         }
