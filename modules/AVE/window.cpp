@@ -1,3 +1,4 @@
+#ifndef __ANDROID__
 #include <AVE/AVE.h>
 
 using namespace ave;
@@ -10,3 +11,4 @@ struct AutoFix{
         }
     }
 } __auto__fix;
+#endif

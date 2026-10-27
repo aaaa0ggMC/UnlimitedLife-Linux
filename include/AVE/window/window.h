@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __ANDROID__
+#include <AVE/env/android_window.h>
+#else
+
 #include <AVE/context.h>
 #include <AVE/alib.h>
 #include <AVE/error_code.h>
@@ -653,3 +657,4 @@ namespace ave {
     };
 
 }
+#endif // __ANDROID__

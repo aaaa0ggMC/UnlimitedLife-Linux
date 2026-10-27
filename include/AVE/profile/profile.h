@@ -34,12 +34,16 @@ namespace ave{
     public:
         inline std::vector<std::string> get_required_extensions(){
             if(window){
+#ifdef __ANDROID__
+                return {"VK_KHR_surface", "VK_KHR_android_surface"};
+#else
                 return
                     GLFWManager::get_required_instance_extensions() |
                     std::views::transform([](const char * p){
                         return std::string(p);
                     }) |
                     std::ranges::to<std::vector>();
+#endif
             }
             return {};
         }

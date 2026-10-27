@@ -135,6 +135,12 @@ std::shared_ptr<VMAAllocator> VMAAllocator::create_shared(CreateVMAAllocatorInfo
     vk.device = ci.device->get_system_handle();
     vk.vulkanApiVersion = ci.api_version;
     vk.pAllocationCallbacks = ci.device->get_instance()->get_vk_allocator();
+#ifdef __ANDROID__
+    VmaVulkanFunctions functions {};
+    functions.vkGetInstanceProcAddr = &vkGetInstanceProcAddr;
+    functions.vkGetDeviceProcAddr = &vkGetDeviceProcAddr;
+    vk.pVulkanFunctions = &functions;
+#endif
     if(ci.buffer_device_address) vk.flags |= VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
     const auto code = vmaCreateAllocator(&vk, &impl->handle);
     if(code != VK_SUCCESS) {
