@@ -3,15 +3,27 @@
 #include <android/native_window.h>
 #include <vulkan/vulkan_android.h>
 #include <atomic>
+#include <algorithm>
+#include <cstdint>
 
 namespace ave::android {
     namespace {
         thread_local ANativeWindow* native_window = nullptr;
         thread_local void (*event_pump)() = nullptr;
         std::atomic_bool closing {false};
+        std::atomic<uint64_t> window_size {0};
     }
     void set_native_window(ANativeWindow* window) noexcept { native_window = window; }
     ANativeWindow* get_native_window() noexcept { return native_window; }
+    void set_window_size(int width, int height) noexcept {
+        const auto w = static_cast<uint32_t>(std::max(width, 0));
+        const auto h = static_cast<uint32_t>(std::max(height, 0));
+        window_size.store((uint64_t(w) << 32) | h);
+    }
+    std::pair<int, int> get_window_size() noexcept {
+        const auto size = window_size.load();
+        return {int(size >> 32), int(size & 0xffffffffu)};
+    }
     void set_event_pump(void (*pump)()) noexcept { event_pump = pump; }
     void pump_events() { if (event_pump) event_pump(); }
     void request_close() noexcept { closing.store(true); }
@@ -47,6 +59,8 @@ namespace ave {
     }
     std::pair<int, int> Window::get_framebuffer_size() const {
         if (!window) return {0, 0};
+        const auto size = android::get_window_size();
+        if(size.first > 0 && size.second > 0) return size;
         return {ANativeWindow_getWidth(window), ANativeWindow_getHeight(window)};
     }
     void Window::set_size(int width, int height) {

@@ -3,10 +3,21 @@
 #include <AVE/alib.h>
 #include <AVE/error_code.h>
 #include <AVE/render/swapchain.h>
+#include "swapchain_policy.inl"
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
 
 
 
 namespace ave {
+namespace {
+#ifdef __ANDROID__
+    constexpr bool android_surface = true;
+#else
+    constexpr bool android_surface = false;
+#endif
+}
 
 bool WithSwapchain::supports(VkSurfaceFormatKHR value) const noexcept {
     if(formats.size() == 1 && formats.front().format == VK_FORMAT_UNDEFINED) {
@@ -80,15 +91,8 @@ std::optional<WithSwapchain> query_swapchain_support(
     }
     result.present_modes.resize(count);
 
-    // currentExtent 已定义时以 surface 为准；否则使用平台层提供的窗口尺寸。
-    if(result.capabilities.currentExtent.width !=
-       std::numeric_limits<ave::u32>::max()) {
-        result.framebuffer_extent = result.capabilities.currentExtent;
-    } else if(requested_extent) {
-        result.framebuffer_extent = *requested_extent;
-    } else {
-        result.framebuffer_extent = result.capabilities.minImageExtent;
-    }
+    result.framebuffer_extent = detail::window_extent(
+        result.capabilities, requested_extent, android_surface);
 
     ave::u32 family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &family_count, nullptr);
@@ -144,17 +148,8 @@ void default_configure_swapchain(WithSwapchain& with, CreateSwapchainInfo& ci) {
 
     ci.present_mode = with.supports(VK_PRESENT_MODE_MAILBOX_KHR)
         ? VK_PRESENT_MODE_MAILBOX_KHR : VK_PRESENT_MODE_FIFO_KHR;
-    if(with.capabilities.currentExtent.width !=
-       std::numeric_limits<ave::u32>::max()) {
-        ci.extent = with.capabilities.currentExtent;
-    }else{
-        ci.extent.width = std::clamp(with.framebuffer_extent.width,
-            with.capabilities.minImageExtent.width,
-            with.capabilities.maxImageExtent.width);
-        ci.extent.height = std::clamp(with.framebuffer_extent.height,
-            with.capabilities.minImageExtent.height,
-            with.capabilities.maxImageExtent.height);
-    }
+    ci.extent = detail::swapchain_extent(
+        with.capabilities, with.framebuffer_extent, android_surface);
 
     ci.image_count = with.capabilities.minImageCount + 1;
     if(with.capabilities.maxImageCount > 0) {
@@ -171,7 +166,15 @@ void default_configure_swapchain(WithSwapchain& with, CreateSwapchainInfo& ci) {
     }else{
         ci.sharing_mode = VK_SHARING_MODE_EXCLUSIVE;
     }
-    ci.pre_transform = with.capabilities.currentTransform;
+    ci.pre_transform = detail::swapchain_transform(with.capabilities, android_surface);
+#ifdef __ANDROID__
+    __android_log_print(ANDROID_LOG_INFO, "AVEWindow",
+        "SurfaceView=%ux%u currentExtent=%ux%u swapchain=%ux%u currentTransform=0x%x preTransform=0x%x",
+        with.framebuffer_extent.width, with.framebuffer_extent.height,
+        with.capabilities.currentExtent.width, with.capabilities.currentExtent.height,
+        ci.extent.width, ci.extent.height,
+        unsigned(with.capabilities.currentTransform), unsigned(ci.pre_transform));
+#endif
     constexpr std::array alpha_modes {
         VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
         VK_COMPOSITE_ALPHA_PRE_MULTIPLIED_BIT_KHR,
@@ -207,15 +210,7 @@ bool Swapchain::initialize(CreateSwapchainInfo ci, const WithSwapchain& with) {
     }
 
     const auto& cap = with.capabilities;
-    const bool fixed_extent = cap.currentExtent.width !=
-        std::numeric_limits<ave::u32>::max();
-    const bool valid_extent = fixed_extent
-        ? ci.extent.width == cap.currentExtent.width &&
-          ci.extent.height == cap.currentExtent.height
-        : ci.extent.width >= cap.minImageExtent.width &&
-          ci.extent.width <= cap.maxImageExtent.width &&
-          ci.extent.height >= cap.minImageExtent.height &&
-          ci.extent.height <= cap.maxImageExtent.height;
+    const bool valid_extent = detail::valid_swapchain_extent(cap, ci.extent, android_surface);
     const bool valid_count = ci.image_count >= cap.minImageCount &&
         (cap.maxImageCount == 0 || ci.image_count <= cap.maxImageCount);
     const bool valid_usage = ci.image_usage != 0 &&

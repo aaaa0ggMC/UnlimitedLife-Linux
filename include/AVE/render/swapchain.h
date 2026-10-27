@@ -55,7 +55,7 @@ namespace ave {
         mutable ave::ErrorWrapper ew {};
     };
 
-    /// @param requested_extent currentExtent 未定义时使用的期望尺寸（由窗口/平台层提供）。
+    /// @param requested_extent 平台窗口尺寸；Android优先使用，桌面仅在currentExtent未定义时使用。
     [[nodiscard]] AVE_API std::optional<WithSwapchain>
     query_swapchain_support(
         const std::shared_ptr<Device>& device,
