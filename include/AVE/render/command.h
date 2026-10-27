@@ -118,5 +118,60 @@ namespace ave {
         [[nodiscard]] const std::vector<VkCommandBuffer>& get_buffers() const noexcept;
         [[nodiscard]] ave::u32 size() const noexcept;
         [[nodiscard]] explicit operator bool() const noexcept;
+
+        /// @brief 重置第 @p index 个命令缓冲；失败时写入 @p ew。
+        bool reset(ave::u32 index,
+                   VkCommandBufferResetFlags flags = 0,
+                   ave::ErrorWrapper ew = {}) const;
+        /// @brief 开始录制第 @p index 个命令缓冲；默认一次性提交。
+        bool begin(ave::u32 index,
+                   VkCommandBufferUsageFlags flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+                   ave::ErrorWrapper ew = {}) const;
+        /// @brief 结束第 @p index 个命令缓冲的录制。
+        bool end(ave::u32 index, ave::ErrorWrapper ew = {}) const;
+        /// @brief 提交第 @p index 个命令缓冲到 @p queue 并等待执行完成（同步读回/回归用）。
+        bool submit_and_wait(ave::u32 index,
+                             VkQueue queue,
+                             ave::ErrorWrapper ew = {}) const;
     };
+
+    /// @brief 一次 vkCmdPipelineBarrier 的全局内存屏障（执行 / 访问依赖）。
+    struct AVE_API MemoryBarrier {
+        VkPipelineStageFlags src_stage { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
+        VkAccessFlags src_access { 0 };
+        VkPipelineStageFlags dst_stage { VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT };
+        VkAccessFlags dst_access { 0 };
+    };
+
+    /// @brief 图像布局迁移；子资源默认单 mip、单层，队列族固定为 IGNORED。
+    struct AVE_API ImageBarrier {
+        VkImage image { VK_NULL_HANDLE };
+        VkImageLayout old_layout { VK_IMAGE_LAYOUT_UNDEFINED };
+        VkImageLayout new_layout { VK_IMAGE_LAYOUT_GENERAL };
+        VkImageAspectFlags aspect { VK_IMAGE_ASPECT_COLOR_BIT };
+        VkPipelineStageFlags src_stage { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
+        VkPipelineStageFlags dst_stage { VK_PIPELINE_STAGE_ALL_COMMANDS_BIT };
+        VkAccessFlags src_access { 0 };
+        VkAccessFlags dst_access { 0 };
+        ave::u32 base_mip { 0 };
+        ave::u32 mip_count { 1 };
+        ave::u32 base_layer { 0 };
+        ave::u32 layer_count { 1 };
+    };
+
+    /// @brief 记录一次全局内存屏障。
+    AVE_API void memory_barrier(
+        VkCommandBuffer command_buffer,
+        const MemoryBarrier& barrier
+    ) noexcept;
+    /// @brief 记录一次图像布局迁移。
+    AVE_API void image_barrier(
+        VkCommandBuffer command_buffer,
+        const ImageBarrier& barrier
+    ) noexcept;
+    /// @brief 记录一批图像布局迁移；stage 取各条目的并集，只产生一次 vkCmdPipelineBarrier。
+    AVE_API void image_barriers(
+        VkCommandBuffer command_buffer,
+        std::span<const ImageBarrier> barriers
+    ) noexcept;
 }

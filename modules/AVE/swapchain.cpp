@@ -25,7 +25,8 @@ bool WithSwapchain::supports(VkPresentModeKHR value) const noexcept {
 std::optional<WithSwapchain> query_swapchain_support(
     const std::shared_ptr<Device>& device,
     const std::shared_ptr<Surface>& surface,
-    ave::ErrorWrapper ew
+    ave::ErrorWrapper ew,
+    std::optional<VkExtent2D> requested_extent
 ) {
     if(!device || device->get_system_handle() == VK_NULL_HANDLE ||
        device->get_physical_device() == VK_NULL_HANDLE ||
@@ -79,11 +80,15 @@ std::optional<WithSwapchain> query_swapchain_support(
     }
     result.present_modes.resize(count);
 
-    const auto [width, height] = surface->get_window().get_framebuffer_size();
-    result.framebuffer_extent = {
-        static_cast<ave::u32>(std::max(width, 0)),
-        static_cast<ave::u32>(std::max(height, 0))
-    };
+    // currentExtent 已定义时以 surface 为准；否则使用平台层提供的窗口尺寸。
+    if(result.capabilities.currentExtent.width !=
+       std::numeric_limits<ave::u32>::max()) {
+        result.framebuffer_extent = result.capabilities.currentExtent;
+    } else if(requested_extent) {
+        result.framebuffer_extent = *requested_extent;
+    } else {
+        result.framebuffer_extent = result.capabilities.minImageExtent;
+    }
 
     ave::u32 family_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &family_count, nullptr);

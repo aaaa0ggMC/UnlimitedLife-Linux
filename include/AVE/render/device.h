@@ -249,6 +249,33 @@ namespace ave {
             return physical_device_info.properties.limits.nonCoherentAtomSize;
         }
 
+        /// @brief 检查队列族是否由 Device 创建且具备给定能力。
+        [[nodiscard]] bool queue_family_supports(
+            ave::u32 family_index,
+            VkQueueFlags flags
+        ) const noexcept {
+            const auto& families = physical_device_info.queue_family_properties;
+            return family_index < families.size() &&
+                   families[family_index].queueCount > 0 &&
+                   (families[family_index].queueFlags & flags) == flags &&
+                   has_queue(family_index);
+        }
+
+        /// @brief 检查格式在指定 tiling 下是否具备全部特性（等价于手写 vkGetPhysicalDeviceFormatProperties 查询）。
+        [[nodiscard]] bool supports_format(
+            VkFormat format,
+            VkFormatFeatureFlags required,
+            VkImageTiling tiling = VK_IMAGE_TILING_OPTIMAL
+        ) const noexcept {
+            if(physical_device == VK_NULL_HANDLE) return false;
+            VkFormatProperties properties {};
+            vkGetPhysicalDeviceFormatProperties(physical_device, format, &properties);
+            const auto supported = tiling == VK_IMAGE_TILING_LINEAR
+                ? properties.linearTilingFeatures
+                : properties.optimalTilingFeatures;
+            return (supported & required) == required;
+        }
+
         [[nodiscard]] VkDevice get_system_handle() const noexcept {
             return device;
         }

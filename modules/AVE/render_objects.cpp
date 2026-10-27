@@ -378,6 +378,7 @@ bool LegacyRender::initialize(
             subpass.depth_stencil_attachment.has_value());
     }
     default_clear_values = std::move(ci.default_clear_values);
+    framebuffer_extent = ci.framebuffer_extent;
 
     framebuffers.reserve(ci.framebuffer_attachments.size());
     for(ave::u32 i = 0; i < ci.framebuffer_attachments.size(); ++i) {
@@ -444,6 +445,7 @@ void LegacyRender::destroy() noexcept {
     subpass_color_attachment_counts.clear();
     subpass_uses_depth_stencil.clear();
     default_clear_values.clear();
+    framebuffer_extent = {};
     render_pass = VK_NULL_HANDLE;
     image_dependencies.clear();
     swapchain.reset();
@@ -485,6 +487,45 @@ bool LegacyRender::subpass_has_depth_stencil(ave::u32 subpass) const noexcept {
 const std::vector<VkClearValue>&
 LegacyRender::get_default_clear_values() const noexcept {
     return default_clear_values;
+}
+
+VkExtent2D LegacyRender::get_framebuffer_extent() const noexcept {
+    return framebuffer_extent;
+}
+
+void LegacyRender::begin(
+    VkCommandBuffer command_buffer,
+    ave::u32 framebuffer_index,
+    std::span<const VkClearValue> clear_values,
+    VkSubpassContents contents
+) const noexcept {
+    if(command_buffer == VK_NULL_HANDLE || render_pass == VK_NULL_HANDLE ||
+       framebuffer_index >= framebuffers.size()) return;
+    const auto clears = clear_values.empty()
+        ? std::span<const VkClearValue>(default_clear_values)
+        : clear_values;
+    VkRenderPassBeginInfo info {};
+    info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    info.renderPass = render_pass;
+    info.framebuffer = framebuffers[framebuffer_index];
+    info.renderArea.extent = framebuffer_extent;
+    info.clearValueCount = static_cast<ave::u32>(clears.size());
+    info.pClearValues = clears.empty() ? nullptr : clears.data();
+    vkCmdBeginRenderPass(command_buffer, &info, contents);
+    const VkViewport viewport {
+        0.0f, 0.0f,
+        static_cast<float>(framebuffer_extent.width),
+        static_cast<float>(framebuffer_extent.height),
+        0.0f, 1.0f
+    };
+    const VkRect2D scissor { { 0, 0 }, framebuffer_extent };
+    vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+    vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+}
+
+void LegacyRender::end(VkCommandBuffer command_buffer) const noexcept {
+    if(command_buffer == VK_NULL_HANDLE || render_pass == VK_NULL_HANDLE) return;
+    vkCmdEndRenderPass(command_buffer);
 }
 
 LegacyRender::operator bool() const noexcept {

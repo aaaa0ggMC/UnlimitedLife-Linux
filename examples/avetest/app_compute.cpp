@@ -52,7 +52,8 @@ static void exercise_compute_pipeline(const std::shared_ptr<ave::Instance>& inst
     const VkSpecializationInfo specialization { 1, &entry, sizeof(multiplier), &multiplier };
     const auto configure = [&](ave::CreateComputePipelineInfo& ci) {
         ci.shader_stages.front().specialization_info = &specialization;
-        ci.descriptor_bindings = { ave::DescriptorBinding::ssbo(0, VK_SHADER_STAGE_COMPUTE_BIT) };
+        ci.descriptor_bindings = ave::parse_descriptor_bindings(
+            R"([["ssbo",0]])", ave::ShaderStage::compute);
         ci.constant_attributes = {{
             .name = "params",
             .size = sizeof(ComputeParams),

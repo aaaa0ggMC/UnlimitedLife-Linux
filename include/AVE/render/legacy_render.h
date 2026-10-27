@@ -91,6 +91,7 @@ namespace ave {
         std::vector<std::shared_ptr<Image>> image_dependencies;
         VkRenderPass render_pass { VK_NULL_HANDLE };
         std::vector<VkFramebuffer> framebuffers;
+        VkExtent2D framebuffer_extent {};
         std::vector<ave::u32> subpass_color_attachment_counts;
         std::vector<bool> subpass_uses_depth_stencil;
         std::vector<VkClearValue> default_clear_values;
@@ -128,6 +129,18 @@ namespace ave {
         ) const noexcept;
         [[nodiscard]] const std::vector<VkClearValue>&
         get_default_clear_values() const noexcept;
+        [[nodiscard]] VkExtent2D get_framebuffer_extent() const noexcept;
+
+        /// @brief 在指定 framebuffer 上开始 render pass，并按 framebuffer 尺寸设置 viewport/scissor。
+        /// @param clear_values 为空时使用创建时的 default_clear_values。
+        void begin(
+            VkCommandBuffer command_buffer,
+            ave::u32 framebuffer_index,
+            std::span<const VkClearValue> clear_values = {},
+            VkSubpassContents contents = VK_SUBPASS_CONTENTS_INLINE
+        ) const noexcept;
+        /// @brief 结束由 begin() 开启的 render pass。
+        void end(VkCommandBuffer command_buffer) const noexcept;
 
         [[nodiscard]] std::shared_ptr<LegacyPipeline> create_graphics_pipeline(
             GraphicsShaderBytecode shaders,

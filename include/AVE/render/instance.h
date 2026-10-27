@@ -2,6 +2,7 @@
 
 #include <AVE/alib.h>
 #include <AVE/context.h>
+#include <AVE/render/physical_device.h>
 #include <AVE/error_code.h>
 #include <AVE/render/base.h>
 
@@ -83,6 +84,31 @@ namespace ave::detail{
 }
 
 namespace ave{
+
+    /// @brief 枚举实例层名称；供平台/调试层判断 validation 等是否可用。
+    [[nodiscard]] inline std::vector<std::string> enumerate_instance_layers() {
+        ave::u32 count = 0;
+        if(vkEnumerateInstanceLayerProperties(&count, nullptr) != VK_SUCCESS || count == 0) {
+            return {};
+        }
+        std::vector<VkLayerProperties> layers(count);
+        if(vkEnumerateInstanceLayerProperties(&count, layers.data()) != VK_SUCCESS) {
+            return {};
+        }
+        layers.resize(count);
+        std::vector<std::string> result;
+        result.reserve(layers.size());
+        for(const auto& layer : layers) result.emplace_back(layer.layerName);
+        return result;
+    }
+
+    /// @brief 查询实例层是否可用。
+    [[nodiscard]] inline bool instance_layer_available(std::string_view name) {
+        const auto layers = enumerate_instance_layers();
+        return std::ranges::any_of(layers, [name](const std::string& layer) {
+            return layer == name;
+        });
+    }
 
     struct AVE_API CreateInstanceInfo{
         Context & ctx;
@@ -201,6 +227,25 @@ namespace ave{
         VkInstance get_system_handle() const noexcept { return instance; }
         auto get_vk_allocator() const noexcept {
             return ctx ? ctx->get_vk_allocator() : nullptr;
+        }
+        /// @brief 枚举全部物理设备；结果含 VkPhysicalDevice 句柄，可直接用于 Device::create。
+        [[nodiscard]] std::vector<PhysicalDeviceInfo> enumerate_physical_devices() const {
+            if(instance == VK_NULL_HANDLE) return {};
+            ave::u32 count = 0;
+            if(vkEnumeratePhysicalDevices(instance, &count, nullptr) != VK_SUCCESS || count == 0) {
+                return {};
+            }
+            std::vector<VkPhysicalDevice> handles(count, VK_NULL_HANDLE);
+            if(vkEnumeratePhysicalDevices(instance, &count, handles.data()) != VK_SUCCESS) {
+                return {};
+            }
+            handles.resize(count);
+            std::vector<PhysicalDeviceInfo> result;
+            result.reserve(handles.size());
+            for(const auto handle : handles) {
+                result.push_back(PhysicalDeviceInfo::query(handle));
+            }
+            return result;
         }
         [[nodiscard]] Context* get_context() const noexcept {
             return ctx;

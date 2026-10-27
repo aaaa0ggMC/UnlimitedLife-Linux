@@ -2,6 +2,8 @@
 
 #include <AVE/context.h>
 #include <AVE/alib.h>
+#include <AVE/error_code.h>
+#include <AVE/render/instance.h>
 #include <AVE/window/glfw.h>
 #include <AVE/window/keycode.h>
 #include <AVE/window/event.h>
@@ -592,6 +594,28 @@ namespace ave {
         inline bool should_close() noexcept { return !window || glfwWindowShouldClose(window); }
         inline GLFWwindow * get_system_handle() noexcept { return window; }
         inline static void poll_events() noexcept { glfwPollEvents(); }
+
+        /// @brief 用当前 GLFW 窗口创建 VkSurfaceKHR；所有权交给调用方（通常由 ave::Surface 接管）。
+        [[nodiscard]] VkSurfaceKHR create_vulkan_surface(
+            const std::shared_ptr<Instance>& instance,
+            ave::ErrorWrapper ew = {}
+        ) const {
+            if(!instance || instance->get_system_handle() == VK_NULL_HANDLE || window == nullptr) {
+                ew.report(ave_vk_create_surface,
+                    "Cannot create a Vulkan surface without a valid instance and window.");
+                return VK_NULL_HANDLE;
+            }
+            VkSurfaceKHR surface = VK_NULL_HANDLE;
+            const VkResult code = glfwCreateWindowSurface(
+                instance->get_system_handle(), window,
+                instance->get_vk_allocator(), &surface);
+            if(code != VK_SUCCESS) {
+                ew.report(ave_vk_create_surface,
+                    "Failed to create Vulkan window surface ({}).", static_cast<int>(code));
+                return VK_NULL_HANDLE;
+            }
+            return surface;
+        }
 
         inline void set_size(int width, int height) {
             glfwSetWindowSize(window, width, height);

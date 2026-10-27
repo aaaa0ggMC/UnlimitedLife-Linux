@@ -727,7 +727,15 @@ bool RenderProfile::__vk_swapchain(
         return true;
     }
 
-    auto with = query_swapchain_support(r.device, r.surface, ew);
+    std::optional<VkExtent2D> requested_extent;
+    if(window) {
+        const auto [width, height] = window->get_framebuffer_size();
+        requested_extent = VkExtent2D {
+            static_cast<ave::u32>(std::max(width, 0)),
+            static_cast<ave::u32>(std::max(height, 0))
+        };
+    }
+    auto with = query_swapchain_support(r.device, r.surface, ew, requested_extent);
     if(!with) {
         if(result) result->fail(
             create_swapchain,
@@ -1089,11 +1097,17 @@ bool RenderProfile::__vk_create_glfw_surface(
     ave::ErrorWrapper ew,
     RenderBuildReport * result
 ){
-    r.surface = Surface::create(
-        r.instance,
-        *window,
-        CreateSurfaceInfo { .ew = ew }
-    );
+    // surface 的创建属于窗口/平台层；render 只接管句柄并负责销毁。
+    const VkSurfaceKHR handle = window->create_vulkan_surface(r.instance, ew);
+    if(handle != VK_NULL_HANDLE) {
+        r.surface = Surface::create(
+            CreateSurfaceInfo {
+                .instance = r.instance,
+                .surface = handle,
+                .ew = ew
+            }
+        );
+    }
 
     if(result){
         auto & stage = (*result)[create_surface];

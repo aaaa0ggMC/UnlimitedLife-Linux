@@ -127,8 +127,9 @@ namespace ave{
         );
 
         /// @brief 便捷清屏：直接给浮点 RGBA（alpha 默认 1），免去手搓 VkClearColorValue
-        void begin(float r, float g, float b, float a = 1.0f) noexcept {
-            begin(VkClearColorValue{ .float32 = { r, g, b, a } });
+        void begin(float r, float g, float b, float a = 1.0f,
+                   const std::function<void(VkCommandBuffer)>& before_render = {}) noexcept {
+            begin(VkClearColorValue{ .float32 = { r, g, b, a } }, before_render);
         }
 
         /// Record compute/transfer work after command-buffer begin, outside either rendering backend.

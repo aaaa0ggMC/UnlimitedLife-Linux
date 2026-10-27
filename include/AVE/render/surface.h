@@ -2,87 +2,66 @@
 
 #include <AVE/alib.h>
 #include <AVE/error_code.h>
-#include <AVE/window.h>
 #include <AVE/render/instance.h>
 
 /**
  * @file surface.cppm
  * @author aaaa0ggmc (lovelinux@yslwd.eu.org)
  * @brief Vulkan surface wrapper
- * @version 5.0
- * @date 2026-09-11
+ * @version 5.5
+ * @date 2026-10-27
  *
  * @copyright Copyright (c) 2026
+ *
+ * @note 本模块不依赖窗口/GLFW：VkSurfaceKHR 由平台层（GLFW 窗口、Android ANativeWindow 等）
+ * 创建后交给 Surface 接管，render 模块因此可以独立构建到其他平台。
  */
 #include <AVE/config.h>
-
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 
 
 namespace ave {
 
     struct AVE_API CreateSurfaceInfo {
-        mutable ave::ErrorWrapper ew = {};
+        std::shared_ptr<Instance> instance;
+        /// 已由平台层创建的 surface；Surface 接管其所有权。
+        VkSurfaceKHR surface { VK_NULL_HANDLE };
+        mutable ave::ErrorWrapper ew {};
     };
 
     /**
-     * @brief 包装由 GLFW 窗口创建的 VkSurfaceKHR。
+     * @brief 平台无关的 VkSurfaceKHR 所有者。
      *
-     * Surface 会通过 shared_ptr 保证 Vulkan Instance 存活，但持有的 Window&
-     * 不具有所有权。用户必须保证 Window 的生命周期长于由它创建的所有 Surface
-     * 及其 Swapchain，并且在这些对象销毁前不得调用 Window::destroy()。
+     * Surface 通过 shared_ptr 保证 Vulkan Instance 存活；调用方负责在销毁
+     * Surface 之前保证原生窗口存活（本模块不再持有窗口引用）。
      */
     class AVE_API Surface final {
     private:
-        Window& window;
         std::shared_ptr<Instance> instance;
         VkSurfaceKHR surface { VK_NULL_HANDLE };
 
-        explicit Surface(Window& target_window) noexcept
-        :window(target_window){}
+        explicit Surface() noexcept = default;
 
-        bool initialize(
-            std::shared_ptr<Instance> target_instance,
-            const CreateSurfaceInfo& ci
-        ) {
-            if(!target_instance ||
-               target_instance->get_system_handle() == VK_NULL_HANDLE) {
+        bool initialize(CreateSurfaceInfo ci) {
+            if(!ci.instance ||
+               ci.instance->get_system_handle() == VK_NULL_HANDLE) {
                 ci.ew.report(
                     ave_vk_create_surface,
-                    "Cannot create a Vulkan surface without a valid instance."
+                    "Cannot adopt a Vulkan surface without a valid instance."
                 );
                 return false;
             }
 
-            if(!window || window.get_system_handle() == nullptr) {
+            if(ci.surface == VK_NULL_HANDLE) {
                 ci.ew.report(
                     ave_vk_create_surface,
-                    "Cannot create a Vulkan surface without a valid window."
+                    "Cannot adopt a null Vulkan surface handle."
                 );
                 return false;
             }
 
-            instance = std::move(target_instance);
-            const VkResult code = glfwCreateWindowSurface(
-                instance->get_system_handle(),
-                window.get_system_handle(),
-                instance->get_vk_allocator(),
-                &surface
-            );
-
-            if(code != VK_SUCCESS) {
-                ci.ew.report(
-                    ave_vk_create_surface,
-                    "Failed to create Vulkan window surface ({}).",
-                    static_cast<int>(code)
-                );
-                instance.reset();
-                surface = VK_NULL_HANDLE;
-                return false;
-            }
-
+            instance = std::move(ci.instance);
+            surface = ci.surface;
             return true;
         }
 
@@ -94,13 +73,12 @@ namespace ave {
         Surface(Surface&&) = delete;
         Surface& operator=(Surface&&) = delete;
 
+        /// @brief 接管平台层创建的 surface（GLFW: Window::create_vulkan_surface）。
         [[nodiscard]] static std::shared_ptr<Surface> create(
-            std::shared_ptr<Instance> instance,
-            Window& window,
-            const CreateSurfaceInfo& ci = {}
+            CreateSurfaceInfo ci
         ) {
-            auto result = std::shared_ptr<Surface>(new Surface(window));
-            if(!result->initialize(std::move(instance), ci)) return {};
+            auto result = std::shared_ptr<Surface>(new Surface());
+            if(!result->initialize(std::move(ci))) return {};
             return result;
         }
 
@@ -119,10 +97,6 @@ namespace ave {
 
         [[nodiscard]] VkSurfaceKHR get_system_handle() const noexcept {
             return surface;
-        }
-
-        [[nodiscard]] Window& get_window() const noexcept {
-            return window;
         }
 
         [[nodiscard]] const std::shared_ptr<Instance>& get_instance() const noexcept {

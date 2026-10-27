@@ -150,4 +150,130 @@ ave::u32 CommandBuffers::size() const noexcept {
     return static_cast<ave::u32>(buffers.size());
 }
 CommandBuffers::operator bool() const noexcept { return pool && !buffers.empty(); }
+
+bool CommandBuffers::reset(ave::u32 index, VkCommandBufferResetFlags flags, ave::ErrorWrapper ew) const {
+    if(index >= buffers.size() || buffers[index] == VK_NULL_HANDLE) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "CommandBuffers::reset index {} is out of range.", index);
+        return false;
+    }
+    const VkResult code = vkResetCommandBuffer(buffers[index], flags);
+    if(code != VK_SUCCESS) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "Failed to reset CommandBuffer {} ({}).", index, static_cast<int>(code));
+        return false;
+    }
+    return true;
+}
+
+bool CommandBuffers::begin(ave::u32 index, VkCommandBufferUsageFlags flags, ave::ErrorWrapper ew) const {
+    if(index >= buffers.size() || buffers[index] == VK_NULL_HANDLE) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "CommandBuffers::begin index {} is out of range.", index);
+        return false;
+    }
+    VkCommandBufferBeginInfo info {};
+    info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    info.flags = flags;
+    const VkResult code = vkBeginCommandBuffer(buffers[index], &info);
+    if(code != VK_SUCCESS) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "Failed to begin CommandBuffer {} ({}).", index, static_cast<int>(code));
+        return false;
+    }
+    return true;
+}
+
+bool CommandBuffers::end(ave::u32 index, ave::ErrorWrapper ew) const {
+    if(index >= buffers.size() || buffers[index] == VK_NULL_HANDLE) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "CommandBuffers::end index {} is out of range.", index);
+        return false;
+    }
+    const VkResult code = vkEndCommandBuffer(buffers[index]);
+    if(code != VK_SUCCESS) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "Failed to end CommandBuffer {} ({}).", index, static_cast<int>(code));
+        return false;
+    }
+    return true;
+}
+
+bool CommandBuffers::submit_and_wait(ave::u32 index, VkQueue queue, ave::ErrorWrapper ew) const {
+    if(index >= buffers.size() || buffers[index] == VK_NULL_HANDLE) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "CommandBuffers::submit_and_wait index {} is out of range.", index);
+        return false;
+    }
+    if(queue == VK_NULL_HANDLE) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "Cannot submit CommandBuffer {} to a null queue.", index);
+        return false;
+    }
+    VkSubmitInfo info {};
+    info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    info.commandBufferCount = 1;
+    info.pCommandBuffers = &buffers[index];
+    VkResult code = vkQueueSubmit(queue, 1, &info, VK_NULL_HANDLE);
+    if(code != VK_SUCCESS) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "Failed to submit CommandBuffer {} ({}).", index, static_cast<int>(code));
+        return false;
+    }
+    code = vkQueueWaitIdle(queue);
+    if(code != VK_SUCCESS) {
+        ew.report(ave_vk_allocate_command_buffers,
+            "Failed waiting for CommandBuffer {} ({}).", index, static_cast<int>(code));
+        return false;
+    }
+    return true;
+}
+
+void memory_barrier(VkCommandBuffer command_buffer, const MemoryBarrier& barrier) noexcept {
+    if(command_buffer == VK_NULL_HANDLE) return;
+    VkMemoryBarrier value {};
+    value.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+    value.srcAccessMask = barrier.src_access;
+    value.dstAccessMask = barrier.dst_access;
+    vkCmdPipelineBarrier(command_buffer, barrier.src_stage, barrier.dst_stage,
+        0, 1, &value, 0, nullptr, 0, nullptr);
+}
+
+void image_barriers(VkCommandBuffer command_buffer, std::span<const ImageBarrier> barriers) noexcept {
+    if(command_buffer == VK_NULL_HANDLE || barriers.empty()) return;
+    std::vector<VkImageMemoryBarrier> values;
+    values.reserve(barriers.size());
+    VkPipelineStageFlags src_stage = 0;
+    VkPipelineStageFlags dst_stage = 0;
+    for(const auto& barrier : barriers) {
+        if(barrier.image == VK_NULL_HANDLE) continue;
+        VkImageMemoryBarrier value {};
+        value.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        value.srcAccessMask = barrier.src_access;
+        value.dstAccessMask = barrier.dst_access;
+        value.oldLayout = barrier.old_layout;
+        value.newLayout = barrier.new_layout;
+        value.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        value.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        value.image = barrier.image;
+        value.subresourceRange = {
+            barrier.aspect,
+            barrier.base_mip,
+            barrier.mip_count,
+            barrier.base_layer,
+            barrier.layer_count
+        };
+        values.push_back(value);
+        src_stage |= barrier.src_stage;
+        dst_stage |= barrier.dst_stage;
+    }
+    if(values.empty()) return;
+    vkCmdPipelineBarrier(command_buffer, src_stage, dst_stage,
+        0, 0, nullptr, 0, nullptr,
+        static_cast<ave::u32>(values.size()), values.data());
+}
+
+void image_barrier(VkCommandBuffer command_buffer, const ImageBarrier& barrier) noexcept {
+    image_barriers(command_buffer, std::span<const ImageBarrier>(&barrier, 1));
+}
 }

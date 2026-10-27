@@ -86,12 +86,8 @@ void App::setup() {
         .depth_test = true,
         .depth_write = true,
         .depth_compare_op = VK_COMPARE_OP_LESS,
-        .descriptor_bindings = {
-            ave::DescriptorBinding::ubo(0, VK_SHADER_STAGE_VERTEX_BIT),
-            ave::DescriptorBinding::combined_image_sampler(
-                1, VK_SHADER_STAGE_FRAGMENT_BIT
-            )
-        },
+        .descriptor_bindings = ave::parse_descriptor_bindings(
+            R"([["ubo",0,"vertex"],["sampler",1,"fragment"]])"),
         .constant_attributes = push_layout.attributes
     });
 

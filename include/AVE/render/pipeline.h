@@ -164,6 +164,32 @@ namespace ave {
         inline void bind(VkCommandBuffer command_buffer) const noexcept {
             vkCmdBindPipeline(command_buffer, bind_point, pipeline);
         }
+
+        /// @brief 绑定一个 descriptor set（默认 set 0）；与 bind() 的先后顺序不影响结果。
+        inline void bind_descriptor_set(
+            VkCommandBuffer command_buffer,
+            VkDescriptorSet set,
+            ave::u32 set_index = 0
+        ) const noexcept {
+            if(command_buffer == VK_NULL_HANDLE || set == VK_NULL_HANDLE) return;
+            vkCmdBindDescriptorSets(command_buffer, bind_point,
+                get_layout(), set_index, 1, &set, 0, nullptr);
+        }
+
+        /// @brief 上传 push constant；stages 为 0 时使用管线布局记录的全部 stage。
+        /// @note 布局含多个 stage 不同的 range 时，请显式传入目标 range 的 stage，避免 stage 组合越界。
+        template<typename T>
+        inline void push_constant(
+            VkCommandBuffer command_buffer,
+            const T& data,
+            VkShaderStageFlags stages = 0,
+            ave::u32 offset = 0
+        ) const noexcept {
+            const VkShaderStageFlags flags = stages == 0 ? push_constant_stage_flags : stages;
+            if(command_buffer == VK_NULL_HANDLE || flags == 0) return;
+            vkCmdPushConstants(command_buffer, get_layout(), flags, offset,
+                static_cast<ave::u32>(sizeof(T)), std::addressof(data));
+        }
     };
 
     class AVE_API ComputePipeline final : public Pipeline {
@@ -197,6 +223,22 @@ namespace ave {
             ave::u32 group_count_z = 1
         ) const noexcept {
             bind(command_buffer);
+            vkCmdDispatch(command_buffer, group_count_x, group_count_y, group_count_z);
+        }
+
+        /// @brief 绑定管线、descriptor set 与 push constant 后 dispatch；绑定顺序由 AVE 保证。
+        template<typename T>
+        inline void dispatch(
+            VkCommandBuffer command_buffer,
+            VkDescriptorSet set,
+            const T& push,
+            ave::u32 group_count_x,
+            ave::u32 group_count_y = 1,
+            ave::u32 group_count_z = 1
+        ) const noexcept {
+            bind(command_buffer);
+            bind_descriptor_set(command_buffer, set);
+            push_constant(command_buffer, push);
             vkCmdDispatch(command_buffer, group_count_x, group_count_y, group_count_z);
         }
     };

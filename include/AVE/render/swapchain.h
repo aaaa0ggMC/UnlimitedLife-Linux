@@ -55,11 +55,13 @@ namespace ave {
         mutable ave::ErrorWrapper ew {};
     };
 
+    /// @param requested_extent currentExtent 未定义时使用的期望尺寸（由窗口/平台层提供）。
     [[nodiscard]] AVE_API std::optional<WithSwapchain>
     query_swapchain_support(
         const std::shared_ptr<Device>& device,
         const std::shared_ptr<Surface>& surface,
-        ave::ErrorWrapper ew = {}
+        ave::ErrorWrapper ew = {},
+        std::optional<VkExtent2D> requested_extent = std::nullopt
     );
 
     /// LearnVulkan2 风格的完整默认配置；自定义回调可先调用它再覆盖字段。

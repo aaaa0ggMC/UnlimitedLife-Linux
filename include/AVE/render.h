@@ -14,7 +14,9 @@
 #include <AVE/render/legacy_render.h>
 #include <AVE/render/dynamic_render.h>
 #include <AVE/render/pipeline.h>
+#include <AVE/render/descriptor_config.h>
 #include <AVE/render/command.h>
+#include <AVE/render/query_pool.h>
 #include <AVE/render/descriptor_pool.h>
 #include <AVE/render/sampler.h>
 #include <AVE/render/upload_context.h>
