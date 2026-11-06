@@ -1,0 +1,125 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1800' height='840' viewBox='0 0 1800 840' font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC',SimSun,serif">
+  <rect x='60' y='78' width='22' height='22' rx='4' fill='#E0A05C'/>
+  <text x='94' y='97' font-size='19' fill='#607788'>需要精修</text>
+  <rect x='196' y='78' width='22' height='22' rx='4' fill='#9FC3DA'/>
+  <text x='230' y='97' font-size='19' fill='#607788'>不需要</text>
+  <text x='336' y='97' font-size='19' fill='#8A99A4'>1 个 warp = 32 条 lane</text>
+  <text x='60' y='272' font-size='30' font-weight='600' fill='#253642'>分歧</text>
+  <rect x='200' y='210' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='236' y='210' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='272' y='210' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='308' y='210' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='344' y='210' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='380' y='210' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='416' y='210' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='452' y='210' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='200' y='246' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='236' y='246' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='272' y='246' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='308' y='246' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='344' y='246' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='380' y='246' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='416' y='246' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='452' y='246' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='200' y='282' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='236' y='282' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='272' y='282' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='308' y='282' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='344' y='282' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='380' y='282' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='416' y='282' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='452' y='282' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='200' y='318' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='236' y='318' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='272' y='318' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='308' y='318' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='344' y='318' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='380' y='318' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='416' y='318' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='452' y='318' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='566' y='254' width='300' height='48' rx='5' fill='#8FB8D4'/>
+  <text x='716' y='284' font-size='18' fill='#FFFFFF' text-anchor='middle'>合成</text>
+  <rect x='876' y='254' width='520' height='48' rx='5' fill='#E0A05C'/>
+  <text x='1136' y='284' font-size='18' fill='#FFFFFF' text-anchor='middle'>精修</text>
+  <text x='888' y='328' font-size='17' fill='#607788'>掩码 6 / 32，其余空转</text>
+  <text x='60' y='462' font-size='30' font-weight='600' fill='#253642'>全开</text>
+  <rect x='200' y='400' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='236' y='400' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='272' y='400' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='308' y='400' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='344' y='400' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='380' y='400' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='416' y='400' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='452' y='400' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='200' y='436' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='236' y='436' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='272' y='436' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='308' y='436' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='344' y='436' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='380' y='436' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='416' y='436' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='452' y='436' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='200' y='472' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='236' y='472' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='272' y='472' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='308' y='472' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='344' y='472' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='380' y='472' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='416' y='472' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='452' y='472' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='200' y='508' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='236' y='508' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='272' y='508' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='308' y='508' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='344' y='508' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='380' y='508' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='416' y='508' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='452' y='508' width='30' height='30' rx='4' fill='#E0A05C'/>
+  <rect x='566' y='444' width='300' height='48' rx='5' fill='#8FB8D4'/>
+  <text x='716' y='474' font-size='18' fill='#FFFFFF' text-anchor='middle'>合成</text>
+  <rect x='876' y='444' width='520' height='48' rx='5' fill='#E0A05C'/>
+  <text x='1136' y='474' font-size='18' fill='#FFFFFF' text-anchor='middle'>精修</text>
+  <text x='888' y='518' font-size='17' fill='#607788'>掩码 32 / 32</text>
+  <text x='60' y='652' font-size='30' font-weight='600' fill='#253642'>全关</text>
+  <rect x='200' y='590' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='236' y='590' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='272' y='590' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='308' y='590' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='344' y='590' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='380' y='590' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='416' y='590' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='452' y='590' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='200' y='626' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='236' y='626' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='272' y='626' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='308' y='626' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='344' y='626' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='380' y='626' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='416' y='626' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='452' y='626' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='200' y='662' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='236' y='662' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='272' y='662' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='308' y='662' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='344' y='662' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='380' y='662' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='416' y='662' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='452' y='662' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='200' y='698' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='236' y='698' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='272' y='698' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='308' y='698' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='344' y='698' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='380' y='698' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='416' y='698' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='452' y='698' width='30' height='30' rx='4' fill='#9FC3DA'/>
+  <rect x='566' y='634' width='300' height='48' rx='5' fill='#8FB8D4'/>
+  <text x='716' y='664' font-size='18' fill='#FFFFFF' text-anchor='middle'>合成</text>
+  <rect x='876' y='634' width='520' height='48' rx='5' fill='none' stroke='#E0A05C' stroke-width='2' stroke-dasharray='8 7'/>
+  <text x='1136' y='670' font-size='26' fill='#E0A05C' text-anchor='middle'>？</text>
+  <text x='888' y='708' font-size='17' fill='#E0A05C'>理论上跳过，可能仍要执行</text>
+  <text x='566' y='192' font-size='17' fill='#8A99A4'>时间 →</text>
+  <path d='M1396 236V500' stroke='#8A99A4' stroke-width='1.4' stroke-dasharray='6 6'/>
+  <text x='1410' y='374' font-size='19' fill='#607788'>耗时相同</text>
+  <text x='60' y='800' font-size='26' font-weight='600' fill='#253642'>贵的那段按 warp 计费：一条 lane 触发，整组陪跑。</text>
+</svg>

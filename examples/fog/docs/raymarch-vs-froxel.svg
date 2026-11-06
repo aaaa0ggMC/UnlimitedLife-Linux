@@ -1,0 +1,167 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1800' height='840' viewBox='0 0 1800 840' font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC',SimSun,serif">
+  <defs>
+    <radialGradient id='sunGlow'>
+      <stop offset='0' stop-color='#FFD79A' stop-opacity='0.7'/>
+      <stop offset='0.55' stop-color='#FFD79A' stop-opacity='0.2'/>
+      <stop offset='1' stop-color='#FFD79A' stop-opacity='0'/>
+    </radialGradient>
+    <linearGradient id='wallGrad' x1='0' y1='0' x2='0' y2='1'>
+      <stop offset='0' stop-color='#F8B75F'/>
+      <stop offset='1' stop-color='#DE8A2E'/>
+    </linearGradient>
+    <linearGradient id='beamFade' gradientUnits='userSpaceOnUse' x1='0' y1='168' x2='0' y2='380'>
+      <stop offset='0' stop-color='#F3A958' stop-opacity='0.8'/>
+      <stop offset='1' stop-color='#F3A958' stop-opacity='0'/>
+    </linearGradient>
+    <linearGradient id='fogGrad' x1='0' y1='0' x2='0.2' y2='1'>
+      <stop offset='0' stop-color='#E4F2FB' stop-opacity='0.9'/>
+      <stop offset='0.55' stop-color='#C4DFF0' stop-opacity='0.82'/>
+      <stop offset='1' stop-color='#9FC9E3' stop-opacity='0.72'/>
+    </linearGradient>
+    <linearGradient id='rayGrad' gradientUnits='userSpaceOnUse' x1='810' y1='0' x2='140' y2='0'>
+      <stop offset='0' stop-color='#E9893C' stop-opacity='0.9'/>
+      <stop offset='0.5' stop-color='#C08A5F' stop-opacity='0.7'/>
+      <stop offset='1' stop-color='#C9BA9C' stop-opacity='0.8'/>
+    </linearGradient>
+    <filter id='fogBlur' x='-25%' y='-25%' width='150%' height='150%'><feGaussianBlur stdDeviation='15'/></filter>
+    <filter id='puffBlur' x='-40%' y='-40%' width='180%' height='180%'><feGaussianBlur stdDeviation='12'/></filter>
+    <filter id='soft' x='-60%' y='-60%' width='220%' height='220%'><feGaussianBlur stdDeviation='7'/></filter>
+  </defs>
+  <text x='40' y='78' font-size='46' fill='#1F2C36' font-weight='600'>Ray Marching</text>
+  <text x='42' y='114' font-size='21' fill='#5C6E7A'>逐像素沿视线步进积分</text>
+  <text x='940' y='78' font-size='46' fill='#1F2C36' font-weight='600'>Froxel</text>
+  <text x='942' y='114' font-size='21' fill='#5C6E7A'>把视锥体切成 3D 网格，每格只算一次光照</text>
+  <line x1='900' y1='56' x2='900' y2='812' stroke='#D5DFE6' stroke-width='1.5' stroke-linecap='round' opacity='0.9' stroke-dasharray='8 10'/>
+  <!-- ============ Ray Marching ============ -->
+  <rect x='806' y='248' width='46' height='306' rx='9' fill='url(#wallGrad)' stroke='#D8873A' stroke-width='1.5'/>
+  <path d='M 816 248 L 816 554' stroke='#FFD79A' stroke-width='4' opacity='0.45'/>
+  <g>
+    <path d='M 336 412 C 334 320 420 262 520 254 C 610 228 720 240 790 262 C 836 278 846 332 838 398 C 830 462 790 518 716 542 C 640 568 520 558 450 534 C 380 510 338 474 336 412 Z' fill='url(#fogGrad)' filter='url(#fogBlur)'/>
+    <ellipse cx='520' cy='400' rx='120' ry='70' fill='#FFFFFF' opacity='0.28' filter='url(#puffBlur)'/>
+    <ellipse cx='680' cy='470' rx='110' ry='60' fill='#FFFFFF' opacity='0.22' filter='url(#puffBlur)'/>
+    <ellipse cx='690' cy='330' rx='100' ry='55' fill='#FFFFFF' opacity='0.25' filter='url(#puffBlur)'/>
+  </g>
+  <circle cx='585' cy='158' r='95' fill='url(#sunGlow)'/>
+  <circle cx='585' cy='158' r='22.5' fill='#FFD07A' stroke='none' stroke-width='1' opacity='0.45'/>
+  <circle cx='585' cy='158' r='15' fill='#FFC96F' stroke='none' stroke-width='1' opacity='1'/>
+  <circle cx='581.25' cy='154.25' r='5.7' fill='#FFF3D2' stroke='none' stroke-width='1' opacity='0.9'/>
+  <line x1='575' y1='175' x2='512' y2='300' stroke='url(#beamFade)' stroke-width='2.2' stroke-linecap='round' opacity='1.0'/>
+  <line x1='590' y1='178' x2='552' y2='330' stroke='url(#beamFade)' stroke-width='2.2' stroke-linecap='round' opacity='1.0'/>
+  <line x1='603' y1='180' x2='588' y2='336' stroke='url(#beamFade)' stroke-width='2.2' stroke-linecap='round' opacity='1.0'/>
+  <line x1='136' y1='402' x2='806.0' y2='283.9' stroke='url(#rayGrad)' stroke-width='2.2' stroke-linecap='round' opacity='0.62'/>
+  <line x1='136' y1='402' x2='806.0' y2='402.0' stroke='url(#rayGrad)' stroke-width='3.4' stroke-linecap='round' opacity='1.0'/>
+  <circle cx='352' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='1.0'/>
+  <circle cx='407' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='0.95'/>
+  <circle cx='462' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='0.9'/>
+  <circle cx='517' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='0.85'/>
+  <circle cx='572' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='0.8'/>
+  <circle cx='627' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='0.75'/>
+  <circle cx='682' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='0.7'/>
+  <circle cx='737' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='0.6499999999999999'/>
+  <circle cx='792' cy='402' r='4.6' fill='#FFFFFF' stroke='#5E93B4' stroke-width='1.6' opacity='0.6'/>
+  <line x1='136' y1='402' x2='806.0' y2='520.1' stroke='url(#rayGrad)' stroke-width='2.2' stroke-linecap='round' opacity='0.62'/>
+  <text x='354' y='428' font-size='19' fill='#5C6E7A' text-anchor='middle' paint-order='stroke' stroke='#FFFFFF' stroke-width='4' stroke-linejoin='round'><tspan dy='0.0' font-size='19.0' font-style='italic'>s</tspan><tspan dy='4.0' font-size='13.7'>0</tspan></text>
+  <text x='790' y='428' font-size='19' fill='#5C6E7A' text-anchor='middle' paint-order='stroke' stroke='#FFFFFF' stroke-width='4' stroke-linejoin='round'><tspan dy='0.0' font-size='19.0' font-style='italic'>s</tspan><tspan dy='4.0' font-size='13.7'>N</tspan></text>
+  <path d='M 572 420 L 599.5 426 L 627 420' stroke='#5C6E7A' stroke-width='1.6' fill='none'/>
+  <text x='599.5' y='452' font-size='19' fill='#5C6E7A' text-anchor='middle'><tspan dy='0.0' font-size='19.0' font-style='italic'>Δs</tspan></text>
+  <line x1='576' y1='434' x2='576' y2='420' stroke='#8FA3AF' stroke-width='1.2' stroke-linecap='round' opacity='0.8'/>
+  <line x1='623' y1='434' x2='623' y2='420' stroke='#8FA3AF' stroke-width='1.2' stroke-linecap='round' opacity='0.8'/>
+  <g>
+    <path d='M 91.5 397.5 C 57.0 396.0 21.0 373.5 33.0 357.0' stroke='#2A3C48' stroke-width='4.8' fill='none' stroke-linecap='round'/>
+  <circle cx='91.5' cy='397.5' r='3.9000000000000004' fill='#2A3C48' stroke='none' stroke-width='1' opacity='1'/>
+  <circle cx='108' cy='402' r='30' fill='#EAF7FE' stroke='#243541' stroke-width='4.5' opacity='1'/>
+  <circle cx='108' cy='402' r='21.599999999999998' fill='none' stroke='#7FA8BE' stroke-width='1.3' opacity='0.4'/>
+  <circle cx='108' cy='402' r='9.9' fill='#2C4351' stroke='none' stroke-width='1' opacity='0.82'/>
+  <circle cx='103.2' cy='396.0' r='3.0' fill='#FFFFFF' stroke='none' stroke-width='1' opacity='0.8'/>
+    <path d='M 83.4 378.0 A 25.5 25.5 0 0 1 105.0 370.5' stroke='#FFFFFF' stroke-width='3.3' fill='none' opacity='0.85' stroke-linecap='round'/>
+  </g>
+  <text x='48' y='556' font-size='19' fill='#8A99A4' font-weight='600'>每一步</text>
+  <text x='48' y='592' font-size='20' fill='#1F2C36'>T ← T · exp(−<tspan dy='0.0' font-size='20.0' font-style='italic'>σ</tspan><tspan dy='4.0' font-size='14.4'>t</tspan> Δs)</text>
+  <text x='48' y='628' font-size='20' fill='#1F2C36'>S ← S + T · <tspan dy='0.0' font-size='20.0' font-style='italic'>σ</tspan><tspan dy='4.0' font-size='14.4'>s</tspan> · <tspan dy='0.0' font-size='20.0' font-style='italic'>L</tspan><tspan dy='4.0' font-size='14.4'>in</tspan> · Δs</text>
+  <text x='48' y='664' font-size='19' fill='#5C6E7A'>→ 沿视线重复 N 次</text>
+  <!-- ============ Froxel ============ -->
+  <g stroke='#FFFFFF' stroke-opacity='0.55' stroke-width='1.1' stroke-linejoin='round'>
+  <polygon points='1122.0,338.0 1122.0,363.6 1188.0,354.0 1188.0,321.9' fill='#B8D5E5'/>
+  <polygon points='1122.0,363.6 1122.0,389.2 1188.0,386.0 1188.0,354.0' fill='#B9D5E4'/>
+  <polygon points='1122.0,389.2 1122.0,414.8 1188.0,418.0 1188.0,386.0' fill='#B9D5E4'/>
+  <polygon points='1122.0,414.8 1122.0,440.4 1188.0,450.0 1188.0,418.0' fill='#BAD5E3'/>
+  <polygon points='1122.0,440.4 1122.0,466.0 1188.0,482.1 1188.0,450.0' fill='#BBD5E2'/>
+  <polygon points='1188.0,321.9 1188.0,354.0 1261.0,343.3 1261.0,304.2' fill='#BBD5E2'/>
+  <polygon points='1188.0,354.0 1188.0,386.0 1261.0,382.4 1261.0,343.3' fill='#BDD5E0'/>
+  <polygon points='1188.0,386.0 1188.0,418.0 1261.0,421.6 1261.0,382.4' fill='#BFD5DE'/>
+  <polygon points='1188.0,418.0 1188.0,450.0 1261.0,460.7 1261.0,421.6' fill='#C1D5DB'/>
+  <polygon points='1188.0,450.0 1188.0,482.1 1261.0,499.8 1261.0,460.7' fill='#C5D5D8'/>
+  <polygon points='1261.0,304.2 1261.0,343.3 1343.0,331.3 1343.0,284.2' fill='#C5D5D8'/>
+  <polygon points='1261.0,343.3 1261.0,382.4 1343.0,378.4 1343.0,331.3' fill='#CAD6D3'/>
+  <polygon points='1261.0,382.4 1261.0,421.6 1343.0,425.6 1343.0,378.4' fill='#D0D6CC'/>
+  <polygon points='1261.0,421.6 1261.0,460.7 1343.0,472.7 1343.0,425.6' fill='#D7D6C5'/>
+  <polygon points='1261.0,460.7 1261.0,499.8 1343.0,519.8 1343.0,472.7' fill='#E0D6BC'/>
+  <polygon points='1343.0,284.2 1343.0,331.3 1435.0,317.9 1435.0,261.8' fill='#DDD6BF'/>
+  <polygon points='1343.0,331.3 1343.0,378.4 1435.0,374.0 1435.0,317.9' fill='#E7D6B4'/>
+  <polygon points='1343.0,378.4 1343.0,425.6 1435.0,430.0 1435.0,374.0' fill='#F2D7A9'/>
+  <polygon points='1343.0,425.6 1343.0,472.7 1435.0,486.1 1435.0,430.0' fill='#FBD7A0'/>
+  <polygon points='1343.0,472.7 1343.0,519.8 1435.0,542.2 1435.0,486.1' fill='#FFD79C'/>
+  <polygon points='1435.0,261.8 1435.0,317.9 1538.0,302.9 1538.0,236.8' fill='#FED79D'/>
+  <polygon points='1435.0,317.9 1435.0,374.0 1538.0,369.0 1538.0,302.9' fill='#FFD79C'/>
+  <polygon points='1435.0,374.0 1435.0,430.0 1538.0,435.0 1538.0,369.0' fill='#FFD79C'/>
+  <polygon points='1435.0,430.0 1435.0,486.1 1538.0,501.1 1538.0,435.0' fill='#FED79D'/>
+  <polygon points='1435.0,486.1 1435.0,542.2 1538.0,567.2 1538.0,501.1' fill='#F3D7A8'/>
+  <polygon points='1538.0,236.8 1538.0,302.9 1652.0,286.2 1652.0,209.0' fill='#FBD7A0'/>
+  <polygon points='1538.0,302.9 1538.0,369.0 1652.0,363.4 1652.0,286.2' fill='#EFD7AD'/>
+  <polygon points='1538.0,369.0 1538.0,435.0 1652.0,440.6 1652.0,363.4' fill='#E0D6BC'/>
+  <polygon points='1538.0,435.0 1538.0,501.1 1652.0,517.8 1652.0,440.6' fill='#D2D6CA'/>
+  <polygon points='1538.0,501.1 1538.0,567.2 1652.0,595.0 1652.0,517.8' fill='#C8D6D5'/>
+  <polygon points='1652.0,209.0 1652.0,286.2 1722.0,276.0 1722.0,192.0' fill='#DBD6C1'/>
+  <polygon points='1652.0,286.2 1652.0,363.4 1722.0,360.0 1722.0,276.0' fill='#CDD6CF'/>
+  <polygon points='1652.0,363.4 1652.0,440.6 1722.0,444.0 1722.0,360.0' fill='#C3D5D9'/>
+  <polygon points='1652.0,440.6 1652.0,517.8 1722.0,528.0 1722.0,444.0' fill='#BDD5DF'/>
+  <polygon points='1652.0,517.8 1652.0,595.0 1722.0,612.0 1722.0,528.0' fill='#BAD5E3'/>
+  </g>
+  <g filter='url(#soft)'>
+    <polygon points='1552,180 1592,190 1400,600 1340,590' fill='#FFE0AE' opacity='0.4'/>
+  </g>
+  <g stroke='#7FA8BE' stroke-width='2' fill='none' stroke-linejoin='round'>
+    <polygon points='1004.0,402.0 1122.0,338.0 1122.0,466.0 1004.0,402.0' fill='#DCEDF8' fill-opacity='0.4' stroke='none'/>
+    <line x1='1004.0' y1='402.0' x2='1722.0' y2='192.0'/>
+    <line x1='1004.0' y1='402.0' x2='1722.0' y2='612.0'/>
+    <line x1='1122.0' y1='338' x2='1122.0' y2='466' stroke-dasharray='7 7' opacity='0.8'/>
+    <line x1='1722.0' y1='192' x2='1722.0' y2='612'/>
+  </g>
+  <polygon points='1261.0,304.2 1261.0,343.3 1343.0,331.3 1343.0,284.2' fill='none' stroke='#FFFFFF' stroke-width='5.5' stroke-linejoin='round'/>
+  <polygon points='1261.0,304.2 1261.0,343.3 1343.0,331.3 1343.0,284.2' fill='none' stroke='#1F2C36' stroke-width='2.4' stroke-linejoin='round'/>
+  <line x1='1302.0' y1='268' x2='1302.0' y2='300.1766666666667' stroke='#5C6E7A' stroke-width='1.4' stroke-linecap='round' opacity='0.9' stroke-dasharray='4 4'/>
+  <text x='1292.0' y='258' font-size='20' fill='#1F2C36' font-weight='600' text-anchor='end'>一个 froxel</text>
+  <text x='1292.0' y='282' font-size='19' fill='#5C6E7A' text-anchor='end'>每格：<tspan dy='0.0' font-size='19.0' font-style='italic'>S</tspan><tspan dy='0.0' font-size='19.0'>、</tspan><tspan dy='0.0' font-size='19.0' font-style='italic'>T</tspan></text>
+  <line x1='1030' y1='402' x2='1722.0' y2='470' stroke='#FFFFFF' stroke-width='6.5' stroke-linecap='round' opacity='0.5'/>
+  <line x1='1030' y1='402' x2='1722.0' y2='470' stroke='#C9762A' stroke-width='2.8' stroke-linecap='round' opacity='1.0'/>
+  <circle cx='1122' cy='411.0' r='3.6' fill='#FFFFFF' stroke='#C9762A' stroke-width='1.6' opacity='1'/>
+  <circle cx='1188' cy='417.5' r='3.6' fill='#FFFFFF' stroke='#C9762A' stroke-width='1.6' opacity='1'/>
+  <circle cx='1261' cy='424.7' r='3.6' fill='#FFFFFF' stroke='#C9762A' stroke-width='1.6' opacity='1'/>
+  <circle cx='1343' cy='432.8' r='3.6' fill='#FFFFFF' stroke='#C9762A' stroke-width='1.6' opacity='1'/>
+  <circle cx='1435' cy='441.8' r='3.6' fill='#FFFFFF' stroke='#C9762A' stroke-width='1.6' opacity='1'/>
+  <circle cx='1538' cy='451.9' r='3.6' fill='#FFFFFF' stroke='#C9762A' stroke-width='1.6' opacity='1'/>
+  <circle cx='1652' cy='463.1' r='3.6' fill='#FFFFFF' stroke='#C9762A' stroke-width='1.6' opacity='1'/>
+  <circle cx='1722' cy='470.0' r='3.6' fill='#FFFFFF' stroke='#C9762A' stroke-width='1.6' opacity='1'/>
+  <g>
+    <path d='M 987.5 397.5 C 953.0 396.0 917.0 373.5 929.0 357.0' stroke='#2A3C48' stroke-width='4.8' fill='none' stroke-linecap='round'/>
+  <circle cx='987.5' cy='397.5' r='3.9000000000000004' fill='#2A3C48' stroke='none' stroke-width='1' opacity='1'/>
+  <circle cx='1004' cy='402' r='30' fill='#EAF7FE' stroke='#243541' stroke-width='4.5' opacity='1'/>
+  <circle cx='1004' cy='402' r='21.599999999999998' fill='none' stroke='#7FA8BE' stroke-width='1.3' opacity='0.4'/>
+  <circle cx='1004' cy='402' r='9.9' fill='#2C4351' stroke='none' stroke-width='1' opacity='0.82'/>
+  <circle cx='999.2' cy='396.0' r='3.0' fill='#FFFFFF' stroke='none' stroke-width='1' opacity='0.8'/>
+    <path d='M 979.4 378.0 A 25.5 25.5 0 0 1 1001.0 370.5' stroke='#FFFFFF' stroke-width='3.3' fill='none' opacity='0.85' stroke-linecap='round'/>
+  </g>
+  <circle cx='1572' cy='152' r='92' fill='url(#sunGlow)'/>
+  <circle cx='1572' cy='152' r='22.5' fill='#FFD07A' stroke='none' stroke-width='1' opacity='0.45'/>
+  <circle cx='1572' cy='152' r='15' fill='#FFC96F' stroke='none' stroke-width='1' opacity='1'/>
+  <circle cx='1568.25' cy='148.25' r='5.7' fill='#FFF3D2' stroke='none' stroke-width='1' opacity='0.9'/>
+  <line x1='1558' y1='170' x2='1500' y2='300' stroke='url(#beamFade)' stroke-width='2.2' stroke-linecap='round' opacity='1.0'/>
+  <line x1='1574' y1='172' x2='1530' y2='330' stroke='url(#beamFade)' stroke-width='2.2' stroke-linecap='round' opacity='1.0'/>
+  <line x1='1588' y1='174' x2='1560' y2='336' stroke='url(#beamFade)' stroke-width='2.2' stroke-linecap='round' opacity='1.0'/>
+  <text x='40' y='722' font-size='22' fill='#1F2C36'>① 每个像素独立发射一条视线，按固定步长 Δs 采样 N 次。</text>
+  <text x='40' y='758' font-size='22' fill='#5C6E7A'>② 每步先按 exp(−σ<tspan dy='4.0' font-size='15.8'>t</tspan>Δs) 衰减，再累加 σ<tspan dy='4.0' font-size='15.8'>s</tspan>·L<tspan dy='4.0' font-size='15.8'>in</tspan> 的散射。</text>
+  <text x='40' y='806' font-size='20' fill='#8A99A4' font-weight='600'>代价 ∝ 像素数 × 步数</text>
+  <text x='940' y='722' font-size='22' fill='#1F2C36'>① 先用 compute 把视锥切成 froxel，每格独立积分一次。</text>
+  <text x='940' y='758' font-size='22' fill='#5C6E7A'>② fragment 中每个像素沿深度，把经过的 froxel 依次混合。</text>
+  <text x='940' y='806' font-size='20' fill='#8A99A4' font-weight='600'>代价 ∝ froxel 数 + 像素数 × 切片数</text>
+</svg>

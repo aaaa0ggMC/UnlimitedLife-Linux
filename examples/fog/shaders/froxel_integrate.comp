@@ -1,0 +1,43 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#include "fog_common.glsl"
+#include "lighting.glsl"
+#include "fog_surface.glsl"
+
+layout(local_size_x = 8, local_size_y = 8) in;
+layout(std430, set = 0, binding = 8) readonly buffer Filtered { vec4 cells[]; } filtered;
+layout(std430, set = 0, binding = 3) writeonly buffer Integrated { vec4 cells[]; } volume;
+
+void main() {
+    uvec2 xy = gl_GlobalInvocationID.xy;
+    uvec3 grid = uvec3(ubo.froxel_grid.xyz);
+    if(any(greaterThanEqual(xy, grid.xy))) return;
+    vec3 ray = froxel_ray((vec2(xy) + 0.5) / vec2(grid.xy));
+    float cosine = max(-(ubo.view * vec4(ray, 0.0)).z, 1e-4);
+    uint stride = grid.x * grid.y;
+    uint column = xy.y * grid.x + xy.x;
+    float start = fog_view_integration_start();
+    vec3 scattering = vec3(0.0);
+    float transmittance = 1.0;
+    volume.cells[column] = vec4(scattering, transmittance);
+    float previous = 0.0;
+    for(uint z = 0; z < grid.z; ++z) {
+        float next = froxel_depth_at(float(z + 1u)) / cosine;
+        // z is view depth, while extinction is per world-ray length. No radial end clip.
+        float span = max(max(next, start) - max(previous, start), 0.0);
+        vec4 coefficients = filtered.cells[z * stride + column];
+        float sigma = max(coefficients.a, 0.0);
+        float tau = min(sigma * span, 80.0);
+        float segment_t = exp(-tau);
+        // Stable analytic integral of constant source within one cell, including sigma -> 0.
+        float integral = tau < 0.001 ? span * (1.0 - 0.5 * tau)
+                                     : (1.0 - segment_t) / max(sigma, 1e-8);
+        scattering += transmittance * max(coefficients.rgb, vec3(0.0)) * integral;
+        transmittance *= segment_t;
+        volume.cells[(z + 1u) * stride + column] = vec4(scattering, transmittance);
+        previous = next;
+    }
+    vec4 tail = transmittance > 1e-6 ? fog_integrate_sky(ray, previous) : vec4(0.0, 0.0, 0.0, 1.0);
+    volume.cells[(grid.z + 1u) * stride + column] =
+        vec4(scattering + transmittance * tail.rgb, transmittance * tail.a);
+}

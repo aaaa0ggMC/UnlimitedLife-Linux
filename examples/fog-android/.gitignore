@@ -1,0 +1,8 @@
+local.properties
+.deps/
+.gradle/
+build/
+app/build/
+*.iml
+.idea/
+app/src/main/cpp/out/

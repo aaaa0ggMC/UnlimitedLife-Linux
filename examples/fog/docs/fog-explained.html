@@ -1,0 +1,2574 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fog 体积雾原理：从 Beer–Lambert 到 Froxel</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0f15'/%3E%3Cpath d='M6 19h20M6 23h20M9 27h14' stroke='%235fd6c4' stroke-width='2'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0a0f15; --panel:#101826; --panel2:#0d1420; --line:#1d2b3c;
+  --text:#dbe6f0; --muted:#93a7ba; --accent:#5fd6c4; --accent2:#f3b56b;
+  --accent3:#8aa8ff; --bad:#ff8f8f; --good:#8fe3b0;
+  --mono:ui-monospace,SFMono-Regular,"JetBrains Mono",Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{
+  margin:0;color:var(--text);background:
+    radial-gradient(1100px 520px at 72% -12%, #16293b 0%, rgba(10,15,21,0) 62%),
+    radial-gradient(700px 400px at 8% 4%, #101d22 0%, rgba(10,15,21,0) 60%),
+    var(--bg);
+  font-family:"Noto Sans SC",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  font-size:15.5px;line-height:1.78;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.hero{padding:54px 24px 30px;border-bottom:1px solid var(--line)}
+.hero .wrap{max-width:1280px;margin:0 auto}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.hero h1{font-size:clamp(28px,4.2vw,46px);line-height:1.18;margin:0 0 14px;letter-spacing:-.025em;font-weight:700}
+.hero h1 em{font-style:normal;color:var(--accent2)}
+.hero .sub{max-width:850px;color:#a9bccd;font-size:16px;margin:0}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
+.pill{font-family:var(--mono);font-size:11.5px;padding:5px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:#0d1520}
+.pill b{color:var(--accent);font-weight:600}
+.layout{display:grid;grid-template-columns:238px minmax(0,1fr);gap:40px;max-width:1280px;margin:0 auto;padding:32px 24px 90px}
+nav.toc{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;font-size:13px}
+nav.toc .t{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:#5f7c92;padding:0 10px 8px}
+nav.toc a{display:block;padding:6px 10px;color:var(--muted);border-left:2px solid transparent;border-radius:0 6px 6px 0;text-decoration:none}
+nav.toc a:hover{color:var(--text);background:#101a27}
+nav.toc a.active{color:var(--accent);border-left-color:var(--accent);background:#0e1a22}
+main{min-width:0}
+section{margin:0 0 54px;scroll-margin-top:20px}
+h2{font-size:26px;margin:0 0 8px;letter-spacing:-.01em;display:flex;align-items:center;gap:11px;line-height:1.3}
+h2 .num{font-family:var(--mono);font-size:12.5px;color:#062019;background:var(--accent);padding:3px 8px;border-radius:6px;flex:none}
+h2 .tag{font-family:var(--mono);font-size:10.5px;color:#7f95a8;border:1px solid var(--line);padding:2px 7px;border-radius:999px;font-weight:400}
+h3{font-size:18px;margin:30px 0 6px;color:#eaf3fb;line-height:1.5}
+h4{font-size:15px;margin:22px 0 4px;color:#dceaf6}
+p{margin:10px 0;color:#c6d4e1}
+ul,ol{color:#c6d4e1;padding-left:22px;margin:10px 0}
+li{margin:5px 0}
+strong{color:#eef6fd;font-weight:600}
+em{color:#e4d2b4;font-style:normal}
+code{font-family:var(--mono);font-size:.87em;background:#0c1520;border:1px solid #1b2a3a;padding:1px 5px;border-radius:4px;color:#a8e6dc;white-space:normal;overflow-wrap:anywhere}
+pre{font-family:var(--mono);font-size:12.4px;line-height:1.68;background:#09121c;border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;color:#b9cbd9;margin:14px 0}
+pre code{background:none;border:0;padding:0;white-space:pre;color:inherit;font-size:1em}
+.math{background:linear-gradient(90deg,#0c1622,#0a131d);border:1px solid #16273a;border-left:3px solid var(--accent);border-radius:0 9px 9px 0;padding:12px 18px;margin:16px 0;overflow-x:auto}
+.math .lbl{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:#5f8296;margin-bottom:6px}
+.math .f{font-family:"Cambria","Times New Roman",Georgia,serif;font-size:19px;line-height:1.9;color:#e8f3fa;white-space:nowrap}
+.math .f.small{font-size:16.5px;white-space:normal}
+.math .f b{color:var(--accent2);font-weight:600}
+.math .f i{font-style:italic;color:#cfe1ee}
+.math .f .dim{color:#7f97aa;font-size:.8em}
+.card{background:linear-gradient(180deg,#111a27,#0e1621);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:18px 0}
+.demo{background:linear-gradient(180deg,#101a26,#0c141e);border:1px solid #1b2c3e;border-radius:14px;padding:16px 18px 18px;margin:22px 0}
+.demo .head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:2px}
+.demo h4{margin:0;font-size:14px;color:var(--accent2);font-family:var(--mono);letter-spacing:.02em}
+.demo .hint{color:#8ba0b3;font-size:12.8px;margin:4px 0 12px;line-height:1.6}
+.ctrls{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:11px 18px;margin:12px 0 6px}
+.ctrl{font-size:12.4px;color:var(--muted);min-width:0}
+.ctrl .row{display:flex;justify-content:space-between;gap:8px;margin-bottom:1px}
+.ctrl output{font-family:var(--mono);color:var(--accent);font-size:12px}
+input[type=range]{width:100%;accent-color:var(--accent);height:20px;margin:0}
+select,button{font-family:inherit;font-size:12.5px;color:var(--text);background:#101c29;border:1px solid #22364a;border-radius:7px;padding:5px 9px;cursor:pointer}
+select:focus,button:focus{outline:2px solid #2b6d70;outline-offset:1px}
+button:hover,select:hover{background:#162535}
+button.primary{border-color:#2d7f77;background:#102724;color:#bff2e9}
+button.primary[aria-pressed="true"]{background:#17403a;border-color:var(--accent)}
+.readout{display:flex;flex-wrap:wrap;gap:8px 20px;font-family:var(--mono);font-size:12.3px;color:#8ba1b4;margin-top:10px;line-height:1.7}
+.readout b{color:#eaf4fb;font-weight:500}
+canvas{display:block;width:100%;height:auto;border-radius:10px;background:#070c12;border:1px solid #16222f}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.row2{grid-template-columns:1fr}}
+.note{border-left:3px solid var(--accent2);background:#171208;padding:10px 15px;border-radius:0 9px 9px 0;color:#eadcc4;font-size:14px;margin:16px 0}
+.note b{color:var(--accent2)}
+.warn{border-left-color:var(--bad);background:#1b0f13;color:#f0cccc}
+.warn b{color:var(--bad)}
+.ok{border-left-color:var(--accent);background:#0a1a18;color:#c6ebe4}
+.ok b{color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:13.2px;margin:14px 0}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid #182535;vertical-align:top}
+th{color:#8fa4b6;font-weight:500;font-family:var(--mono);font-size:11px;letter-spacing:.06em}
+td{color:#c3d2df}
+td code{white-space:normal;overflow-wrap:anywhere}
+tr:hover td{background:#0d1722}
+.flow{display:flex;flex-wrap:wrap;gap:9px;align-items:stretch;margin:18px 0}
+.step{flex:1 1 148px;min-width:0;background:#0e1722;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12.3px;line-height:1.55}
+.step b{display:block;color:var(--accent);font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;margin-bottom:4px}
+.step span{color:#91a6b8}
+.arrow{align-self:center;color:#33506a;font-size:17px}
+.swatches{display:flex;gap:6px;margin-top:12px}
+.swatch{flex:1;height:44px;border-radius:7px;position:relative;border:1px solid #1c2a38;min-width:0}
+.swatch span{position:absolute;left:6px;bottom:3px;font-family:var(--mono);font-size:10px;color:#fff;text-shadow:0 1px 3px #000}
+kbd{font-family:var(--mono);font-size:11.5px;border:1px solid #2a3b4d;border-bottom-width:2px;background:#111c28;border-radius:5px;padding:1px 5px;color:#cfe0ee}
+.lead{font-size:16px;color:#b9cbd9}
+.small{font-size:12.8px;color:#8ba0b3}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.pillrow{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.pillrow button{font-family:var(--mono);font-size:11.5px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:#8199ad;margin-top:8px}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.footnote{color:#7d93a6;font-size:12.5px;border-top:1px solid var(--line);padding-top:16px;margin-top:28px}
+figure{margin:16px 0}
+figcaption{font-size:12.4px;color:#8298ab;margin-top:7px;text-align:center}
+svg.diagram{width:100%;height:auto;display:block;background:#080e15;border:1px solid #14202d;border-radius:12px}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;gap:18px;padding:22px 18px 70px}
+  nav.toc{position:static;max-height:none;display:flex;flex-wrap:wrap;gap:3px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  nav.toc .t{display:none}
+  nav.toc a{border-left:0;border-radius:6px;padding:4px 8px}
+  nav.toc a.active{background:#10222a}
+  .hero{padding:36px 18px 24px}
+  section{margin-bottom:40px}
+}
+@media(max-width:430px){
+  .hero h1{font-size:25px}
+  .math .f{font-size:17px;white-space:normal;line-height:1.85}
+  .hero .sub{font-size:15px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">examples/fog · volume rendering notes</div>
+    <h1>从一束光到一片雾<br><em>Froxel 体积雾的完整数学链路</em></h1>
+    <p class="sub">
+      这份讲解对照 <code>examples/fog</code> 的真实实现：先把辐射传输方程拆成可计算的量，
+      再把视锥切成网格，逐格注入密度与光照，沿每条屏幕列做透过率前缀积分，
+      最后在片元里重建光线、合成并映射到 SDR。每一节都给出公式、默认参数、对应文件，以及可以拖动的演示。
+    </p>
+    <div class="pills">
+      <span class="pill"><b>3</b> 个 compute pass</span>
+      <span class="pill"><b>192×128×64</b> froxel 上限</span>
+      <span class="pill"><b>1</b> 次散射 + HG</span>
+      <span class="pill"><b>对数</b>深度切片</span>
+      <span class="pill"><b>5</b> 个交互演示</span>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="toc" aria-label="目录">
+    <div class="t">CONTENTS</div>
+    <a href="#s0">00 · 一页速览</a>
+    <a href="#s1">01 · 辐射传输与 Beer–Lambert</a>
+    <a href="#s2">02 · Froxel：视锥网格</a>
+    <a href="#s3">03 · 密度场与动画</a>
+    <a href="#s4">04 · 光照、相函数与阴影</a>
+    <a href="#s5">05 · 三阶段 compute</a>
+    <a href="#s6">06 · 片元采样与显示</a>
+    <a href="#s7">07 · 局部雾与控制点</a>
+    <a href="#s8">08 · 旧解析模型对照</a>
+    <a href="#s9">09 · 边界、参数与代码地图</a>
+  </nav>
+
+  <main>
+<section id="s0">
+  <h2><span class="num">00</span>一页速览<span class="tag">先建立骨架</span></h2>
+  <p class="lead">
+    每条相机射线穿过介质时，背景光按 <strong>Beer–Lambert</strong> 指数衰减，同时介质把太阳、天空和灯的光
+    <strong>散射进这条射线</strong>。Froxel 体积雾不是“在画面上刷一层灰色”，而是把这条连续积分拆成：
+    <em>空间离散（注入系数）</em> → <em>时间去噪（历史复用）</em> → <em>沿深度前缀积分（integrate）</em>，
+    片元阶段只重建射线位置并查表。
+  </p>
+
+  <div class="flow" aria-label="每帧数据流">
+    <div class="step"><b>1 · SHADOW</b><span>太阳 2048² 正交图 + 最近 5 盏点光 6×512² cube 图</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>2 · INJECT</b><span>每个 froxel 求 σ<sub>t</sub>、σ<sub>s</sub>·L<sub>in</sub>，写 4 个 float</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>3 · TEMPORAL</b><span>重投影上一帧、邻域裁剪、按年龄/距离/转角衰减</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>4 · INTEGRATE</b><span>每列从相机向前累积 S 与 T，额外写一层天空收敛结果</span></div>
+    <div class="arrow">→</div>
+    <div class="step"><b>5 · COMPOSITE</b><span>片元三线性查表 → 局部段解析重建 → 曝光/映射</span></div>
+  </div>
+
+  <div class="math">
+    <span class="lbl">整条链路只有一个目标：算出这条射线的 S 和 T</span>
+    <div class="f">
+      τ = ∫ σ<sub>t</sub>(p) ds &nbsp;&nbsp;·&nbsp;&nbsp; T = e<sup>−τ</sup> &nbsp;&nbsp;·&nbsp;&nbsp;
+      S = ∫ T(s) · σ<sub>s</sub>(p) · L<sub>in</sub>(p, ω) ds
+    </div>
+    <div class="f small" style="margin-top:6px">
+      最终像素 = <b>background · T + S</b>（背景先被吸收，再叠加上沿途散射进来的光）
+    </div>
+  </div>
+
+  <p>
+    代码里把 <code>σ<sub>s</sub>·L<sub>in</sub></code> 合称“源项”，存进 froxel 的 RGB；
+    把 <code>σ<sub>t</sub></code> 存在 A 通道。于是每个格子就是一个 <code>vec4(scatter.rgb, extinction)</code>。
+    integrate 阶段沿列做的是<strong>前缀积分</strong>：第 z 层存的是“从相机到第 z 个边界”的累积 S/T，
+    所以片元只要按自己的深度插值一次，就能得到“到它为止”的雾。
+  </p>
+
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin-top:0">默认数字（桌面档）</h4>
+      <table>
+        <tr><th>项</th><th>值</th><th>来源</th></tr>
+        <tr><td>屏幕像素 / 列</td><td>8×8（可 4–32）</td><td><code>volume.pixel_size</code></td></tr>
+        <tr><td>XY 网格</td><td>≤ 192×128</td><td><code>app_setup.cpp</code></td></tr>
+        <tr><td>深度切片 Z</td><td>64（16–96）</td><td><code>depth_slices</code></td></tr>
+        <tr><td>HG 各向异性 g</td><td>0.45</td><td><code>anisotropy</code></td></tr>
+        <tr><td>散射反照率</td><td>0.90</td><td><code>scattering_albedo</code></td></tr>
+        <tr><td>历史权重</td><td>0.90 / 帧</td><td><code>history_weight</code></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">三个必须记住的近似</h4>
+      <ul style="margin:6px 0">
+        <li><strong>每格常系数</strong>：一个体元内 σ、源项视为常数，用中点采样代表；误差靠抖动、4 层采样和历史来压。</li>
+        <li><strong>单次散射</strong>：光只从光源直接进入介质，没有“雾被别处雾照亮”的多次散射。</li>
+        <li><strong>XY 分辨率有限</strong>：相邻像素共享一列，薄物体边缘、细光束会被体元 footprint 抹宽。</li>
+      </ul>
+      <p class="small" style="margin-bottom:0">这三点决定了所有“看起来不对”的现象该往哪里查：格子走样、缺多次散射、还是时域拖影。</p>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>阅读建议：</b>如果只想抓主线，读 01 的公式 → 02 的对数切片 → 05 的三阶段 → 06 的部分段重建。
+    07–08 是实现细节和历史对照，第一次可以跳过。
+  </div>
+</section>
+<section id="s1">
+  <h2><span class="num">01</span>辐射传输与 Beer–Lambert<span class="tag">物理层</span></h2>
+  <p class="lead">
+    先把“雾”翻译成两个可测的量：<strong>消光系数 σ<sub>t</sub></strong>（每走一米，光被吸收/散射掉多少比例）和
+    <strong>源项 q</strong>（每走一米，有多少光被散射进这条视线）。之后所有 GPU 代码都只是在求这两个量的积分。
+  </p>
+
+  <h3>1.1 从吸光度到光学厚度</h3>
+  <p>
+    均匀介质的实验规律是吸光度 <code>A</code> 与浓度、光程成正比：
+  </p>
+  <div class="math">
+    <span class="lbl">Beer–Lambert 定律</span>
+    <div class="f">
+      A = log<sub>10</sub>(I<sub>0</sub>/I) = ε · c · l
+      &nbsp;&nbsp;⟹&nbsp;&nbsp;
+      I/I<sub>0</sub> = 10<sup>−A</sup> = e<sup>−A ln 10</sup>
+    </div>
+    <div class="f small" style="margin-top:4px">
+      令 <b>σ ≡ ε c ln 10</b>（单位 1/长度），就得到 <b>T = e<sup>−σ l</sup></b>；σ 就是代码里的“密度”。
+    </div>
+  </div>
+  <p>
+    介质不均匀时，把路径切成无穷小段：每段的透过率相乘，取极限就变成指数相加。定义无量纲的
+    <strong>光学厚度 τ</strong>：
+  </p>
+  <div class="math">
+    <span class="lbl">沿一条世界空间射线的积分</span>
+    <div class="f">τ = ∫<sub>0</sub><sup>d</sup> σ<sub>t</sub>(p(s)) ds &nbsp;&nbsp;,&nbsp;&nbsp; T = e<sup>−τ</sup> ∈ (0, 1]</div>
+  </div>
+  <p>
+    σ<sub>t</sub> 同时包含吸收和外散射（光被弹到别的方向，离开这条视线）。代码把它存成 RGB 系数里的 A 通道；
+    RGB 三个通道则存<strong>散射</strong>系数乘上光照后的源项，因此可以做带颜色的雾，而消光仍是标量。
+  </p>
+
+  <h3>1.2 体积渲染方程：光如何被“加”回来</h3>
+  <p>
+    只看一条射线时，辐射亮度 L 沿路径的变化是“损失 − 新增”：
+  </p>
+  <div class="math">
+    <span class="lbl">Radiative Transfer Equation（单次散射形式）</span>
+    <div class="f small">
+      dL(p, ω)/ds = −σ<sub>t</sub>(p) L(p, ω)
+      + σ<sub>s</sub>(p) ∫<sub>S²</sub> p(ω·ω′) L<sub>i</sub>(p, ω′) dω′
+      + L<sub>e</sub>
+    </div>
+  </div>
+  <p>
+    这个例子里没有自发光介质，也没有多次散射。光源只有太阳（方向光）和有限的点光，所以积分项被压成
+    “相函数 × 入射光”的求和：
+  </p>
+  <div class="math">
+    <span class="lbl">代码里实际求的源项</span>
+    <div class="f">
+      q(p, ω) = σ<sub>s</sub>(p) · [ L<sub>ambient</sub> + p<sub>HG</sub>(ω·ω<sub>sun</sub>) · E<sub>sun</sub> · V<sub>sun</sub>
+      + Σ<sub>lights</sub> L<sub>emitter</sub> · P<sub>cap</sub> ]
+    </div>
+  </div>
+  <p>
+    其中 <code>σ<sub>s</sub> = σ<sub>t</sub> · albedo · fog_color</code>（代码里 <code>medium.rgb</code>），
+    <code>V</code> 是阴影与介质衰减，<code>P<sub>cap</sub></code> 是相函数在有限发射体立体角上的积分（第 04 节）。
+    环境光被当作各向同性的常量，所以不乘相函数——这是一项刻意的近似。
+  </p>
+
+  <table>
+    <tr><th>记号</th><th>含义</th><th>本实现中的位置</th></tr>
+    <tr><td><code>σ<sub>t</sub></code></td><td>消光系数，单位 1/世界单位</td><td><code>coefficients.a</code> / <code>fog_global_density()</code></td></tr>
+    <tr><td><code>σ<sub>s</sub></code></td><td>散射系数（RGB）</td><td><code>fog_color * albedo * σ<sub>t</sub></code></td></tr>
+    <tr><td><code>albedo</code></td><td>单次散射反照率，0 = 纯吸收</td><td><code>volume_params.y</code>，默认 0.9</td></tr>
+    <tr><td><code>q</code></td><td>每单位长度的内散射源项</td><td><code>coefficients.rgb</code></td></tr>
+    <tr><td><code>τ, T</code></td><td>光学厚度、透过率</td><td><code>froxel_integrate.comp</code></td></tr>
+    <tr><td><code>p(μ)</code></td><td>相函数，单位 1/sr，球面积分 = 1</td><td><code>phase_hg()</code></td></tr>
+  </table>
+
+  <h3>1.3 一格常数：解析解而不是“乘个 exp”</h3>
+  <p>
+    注入阶段把每个体元内的 σ 和 q 当成常数。对长度 Δ 的一小段，从 a 到 b 的解可以直接积出来：
+  </p>
+  <div class="math">
+    <span class="lbl">常系数段的解析积分</span>
+    <div class="f">
+      L(b) = L(a) · e<sup>−σ<sub>t</sub>Δ</sup>
+      + q · (1 − e<sup>−σ<sub>t</sub>Δ</sup>) / σ<sub>t</sub>
+    </div>
+    <div class="f small" style="margin-top:4px">
+      记 T<sub>seg</sub> = e<sup>−τ</sup>，τ = σ<sub>t</sub>Δ，则新增项 = <b>q · (1 − T<sub>seg</sub>) / σ<sub>t</sub></b>
+    </div>
+  </div>
+  <p>
+    推导：把 q 当常数，<code>∫<sub>0</sub><sup>Δ</sup> e<sup>−σ(Δ−s)</sup> q ds
+    = q e<sup>−σΔ</sup>(e<sup>σΔ</sup>−1)/σ = q(1−e<sup>−σΔ</sup>)/σ</code>。
+    注意 <code>(1−T)/σ</code> 是“这段的等效长度”，不是 Δ——浓雾里只有靠近相机的一小截真正可见。
+  </p>
+  <p>
+    σ → 0 时这个式子会 0/0。代码用一阶展开兜底：当 <code>τ &lt; 0.001</code> 时取
+    <code>Δ·(1 − τ/2)</code>；一般项则直接把 τ 截到 80（<code>e<sup>−80</sup> ≈ 1.8×10<sup>−35</sup></code>，
+    再大对 32 位浮点已无意义，也避免 <code>exp</code> 溢出）。这套写法在
+    <code>froxel_integrate.comp</code>、<code>fog_integrate_interval()</code> 和 CPU 回归里是同一份。
+  </p>
+  <div class="math">
+    <span class="lbl">沿一列的前缀递推（integrate pass 的核心）</span>
+    <div class="f small">
+      S<sub>i+1</sub> = S<sub>i</sub> + T<sub>i</sub> · q<sub>i</sub> · (1 − T<sub>seg,i</sub>)/σ<sub>i</sub>
+      &nbsp;&nbsp;;&nbsp;&nbsp;
+      T<sub>i+1</sub> = T<sub>i</sub> · T<sub>seg,i</sub>
+    </div>
+    <div class="f small" style="margin-top:4px">
+      顺序很重要：新增项要用<b>这一格之前</b>的 T<sub>i</sub> 加权，之后才更新 T。
+    </div>
+  </div>
+
+  <p>
+    最后把背景（几何着色结果或天空）和被积出来的 S 合成。背景不参与“雾色平均”，它只是被 T 衰减：
+  </p>
+  <div class="math">
+    <span class="lbl">最终合成</span>
+    <div class="f">C<sub>out</sub> = C<sub>background</sub> · T + S</div>
+  </div>
+  <p>
+    这解释了一个常见直觉错误：加雾不一定是“变暗”。雾会把光散射进暗背景，S 可以大于
+    <code>C<sub>background</sub>(1−T)</code>，所以浓雾中的灯周围会变亮。
+  </p>
+
+  <div class="demo" id="demoBeer">
+    <div class="head">
+      <h4>DEMO 01 · 透过率曲线与合成</h4>
+      <span class="small">背景深蓝 → 雾色浅灰蓝</span>
+    </div>
+    <p class="hint">
+      拖动 σ 和 d。曲线是 <code>T(d)=e<sup>−σd</sup></code>；下方色块是同一背景下
+      不同距离的合成结果 <code>C·T + C<sub>fog</sub>(1−T)</code>，可以看到“远处趋近雾色，但永远不会超过它”。
+    </p>
+    <canvas id="beerCanvas" height="236" aria-label="透过率随距离变化曲线"></canvas>
+    <div class="ctrls">
+      <div class="ctrl">
+        <div class="row"><span>消光系数 σ<sub>t</sub></span><output id="beerSigmaVal"></output></div>
+        <input id="beerSigma" type="range" min="0.002" max="0.4" step="0.002" value="0.05">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>光程 d</span><output id="beerDistVal"></output></div>
+        <input id="beerDist" type="range" min="0" max="120" step="0.5" value="55">
+      </div>
+    </div>
+    <div class="readout">
+      <span>τ = <b id="beerTau">—</b></span>
+      <span>T = <b id="beerT">—</b></span>
+      <span>1−T = <b id="beerOneMinus">—</b></span>
+      <span>等效可见长度 (1−T)/σ = <b id="beerEff">—</b></span>
+    </div>
+    <div class="swatches" id="beerSwatches"></div>
+  </div>
+
+  <div class="note">
+    <b>为什么不是“乘以雾色再 lerp”？</b> 因为 S 是沿途累积的，不是终点的一个常数。同一段雾，从相机看过去和从背后看过去
+    T 相同，但相函数项不同（前向散射峰在“看向太阳”时最亮）。先积 S 再合成，才能同时表达颜色、方向和遮挡。
+  </div>
+</section>
+<section id="s2">
+  <h2><span class="num">02</span>Froxel：把视锥切成立体网格<span class="tag">空间离散</span></h2>
+  <p class="lead">
+    “Froxel” = frustum + voxel。它不是世界空间的三维纹理，而是<strong>贴着相机视锥</strong>的一叠格子：
+    屏幕每 8×8 像素共用一列，深度方向再切 64 层。这样相邻像素共享密度和光照计算，
+    成本从“像素 × 步数 × 光源”降到“格子数 × 光源”，而代价是空间分辨率有限。
+  </p>
+
+  <h3>2.1 为什么不用逐像素步进</h3>
+  <table>
+    <tr><th>方案</th><th>优点</th><th>在本场景的代价</th></tr>
+    <tr><td>解析高度雾（旧版）</td><td>闭式解，几乎零成本</td><td>只有高度分层，做不出三维雾团、局部灯光束和遮挡</td></tr>
+    <tr><td>逐像素 raymarch</td><td>直观、可精确停在表面</td><td>1080p × 48 步 × 每步光照 ≈ 每帧上亿次采样，且相邻像素重复算同一段空气</td></tr>
+    <tr><td><strong>Froxel</strong></td><td>多像素共享；空间/深度分辨率可独立调；可做时域复用</td><td>额外显存；边缘与近场有体元走样</td></tr>
+    <tr><td>光追体积</td><td>遮挡、多次散射更完整</td><td>采样与去噪成本高，不适合这个桌面示例</td></tr>
+  </table>
+  <p>
+    关键洞察是：<strong>空气的密度和光照在屏幕空间上是低频的</strong>。同一面墙上的 8×8 个像素，
+    它们前方几米内的雾几乎一样，没必要各算一遍。真正需要高分辨率的是几何边缘，
+    而那是深度测试和表面积分要解决的问题，不是体积网格。
+  </p>
+
+  <h3>2.2 网格尺寸与上限</h3>
+  <p>
+    CPU 每帧按窗口大小算一次网格（<code>app_setup.cpp</code>）：
+  </p>
+  <pre><code>grid_x = clamp(ceil(width  / pixel_size), 1, 192)
+grid_y = clamp(ceil(height / pixel_size), 1, 128)
+froxel_depth = clamp(depth_slices, 16, 96)   // 默认 64</code></pre>
+  <p>
+    192×128 是硬上限，目的是把最坏情况的显存与 compute 时间钉住。1280×720、8 像素一格时是 160×90；
+    1920×1080 想要 240×135，会被截到 192×128——此时一格实际覆盖约 10×8.4 个屏幕像素，
+    而不是配置里的 8×8。这是“上限”而不是“会自动加密”。
+  </p>
+  <p>
+    每个格子存一个 <code>vec4</code>：RGB = 已乘光照的散射源项，A = 消光。每个交换链图像独占
+    原始注入、双缓冲历史、积分结果，逻辑大小是：
+  </p>
+  <div class="math">
+    <span class="lbl">每张交换链图像的体积显存（不含分配粒度）</span>
+    <div class="f small">
+      16 · X · Y · (4Z + 2) 字节
+      &nbsp;=&nbsp; injection(Z) + history(2Z) + integrated(Z+2)
+    </div>
+    <div class="f small" style="margin-top:4px">
+      192×128×64 → 16·192·128·258 ≈ <b>96.75 MiB</b>；160×90×64 → 约 56.7 MiB
+    </div>
+  </div>
+
+  <h3>2.3 深度切片：为什么是对数</h3>
+  <p>
+    如果深度均匀切 64 层、far = 300，那么每层厚 4.7 米。可相机前方 0–5 米内集中了大部分可见细节、
+    灯核和表面边界，4.7 米的格子会把整盏灯抹成一团；而 100 米外每层 4.7 米又完全够用。
+    所以网格在<strong>视深度 z</strong> 上按几何级数分布：
+  </p>
+  <div class="math">
+    <span class="lbl">切片边界（fog_common.glsl · froxel_depth_at）</span>
+    <div class="f">
+      d(z) = W · ( e<sup>ln(1 + far/W) · z/Z</sup> − 1 ), &nbsp; z ∈ [0, Z]
+    </div>
+    <div class="f small" style="margin-top:4px">
+      等价地：<b>d(z) + W = W · r<sup>z</sup></b>，相邻边界比 r = (1 + far/W)<sup>1/Z</sup>
+    </div>
+  </div>
+  <p>
+    推导很直接：希望 <code>(d+W)</code> 每层乘同一个比例 r，且第 Z 层正好到 far。
+    于是 <code>r<sup>Z</sup> = 1 + far/W</code>，解出 r，再反解 d(z)。加 W 是为了让 z=0 时 d=0，
+    同时避免 ln(0)。本实现取 <code>W = 1</code>（UBO 里 <code>froxel_grid.w</code>）。
+    默认 far=300、Z=64 时 r ≈ 1.0932：<strong>第 1 层厚约 0.093 米，最后一层厚约 25.7 米</strong>，
+    相邻层厚度之比恒为 1.0932。近处极细、远处按比例变粗，正好匹配透视。
+  </p>
+  <p>
+    采样时用的是反函数（<code>froxel_sample.glsl</code>）：
+    <code>z = Z · ln(1 + d/W) / ln(1 + far/W)</code>。注意这里的 d 是<strong>视深度</strong>
+    （相机空间 −Z），不是沿射线的距离。
+  </p>
+
+  <div class="math">
+    <span class="lbl">斜射线修正（很关键，漏了就会出现屏幕边缘变清）</span>
+    <div class="f small">
+      cos θ = max(−(view · ray).z, 10<sup>−4</sup>) &nbsp;&nbsp;,&nbsp;&nbsp;
+      世界光程 = 视深度 / cos θ
+    </div>
+  </div>
+  <p>
+    一个体元的厚度是“沿相机 Z 轴”量的，但光线以角度 θ 穿过它时，实际走的世界距离是
+    <code>Δz / cos θ</code>。integrate 里用
+    <code>span = d(z+1)/cos − d(z)/cos</code> 才是真正的光程。
+    如果错误地直接用 Δz，画面四角的光学厚度会少一个 cosθ 因子，表现为“中间雾浓、边缘雾薄”。
+  </p>
+
+  <h3>2.4 网格长什么样</h3>
+  <figure>
+    <svg class="diagram" viewBox="0 0 760 320" role="img" aria-label="Froxel 视锥网格示意图">
+      <defs>
+        <linearGradient id="frustumFill" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#0e2530" stop-opacity=".25"/>
+          <stop offset="1" stop-color="#1b4a54" stop-opacity=".55"/>
+        </linearGradient>
+        <linearGradient id="beamFill" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#5fd6c4" stop-opacity=".05"/>
+          <stop offset="1" stop-color="#5fd6c4" stop-opacity=".32"/>
+        </linearGradient>
+      </defs>
+      <polygon points="58,160 610,58 708,88 708,226 610,252" fill="url(#frustumFill)" stroke="#2b4d5b" stroke-width="1.2"/>
+      <!-- columns on the far plane -->
+      <g stroke="#2f6a70" stroke-opacity=".45" stroke-width=".8">
+        <line x1="58" y1="160" x2="610" y2="58"/><line x1="58" y1="160" x2="610" y2="252"/>
+        <line x1="58" y1="160" x2="708" y2="88"/><line x1="58" y1="160" x2="708" y2="226"/>
+      </g>
+      <g stroke="#356f76" stroke-opacity=".5" stroke-width=".7">
+        <line x1="610" y1="58" x2="708" y2="88"/><line x1="610" y1="252" x2="708" y2="226"/>
+        <line x1="610" y1="58" x2="610" y2="252"/><line x1="708" y1="88" x2="708" y2="226"/>
+      </g>
+      <!-- highlighted column wedge -->
+      <polygon points="58,160 646,115 646,196" fill="url(#beamFill)" stroke="#5fd6c4" stroke-opacity=".55" stroke-width="1"/>
+      <!-- slice planes, log spacing -->
+      <g stroke="#4f8ea0" stroke-width=".9" fill="none" stroke-opacity=".75">
+        <polygon points="138,150 147,148 147,168 138,169"/>
+        <polygon points="214,140 227,137 227,177 214,180"/>
+        <polygon points="318,121 340,116 340,193 318,198"/>
+        <polygon points="452,99 466,94 466,211 452,216"/>
+        <polygon points="570,76 582,72 582,232 570,236"/>
+      </g>
+      <!-- labels -->
+      <g font-family="ui-monospace,monospace" font-size="11" fill="#8fa9bc">
+        <text x="30" y="150">相机</text>
+        <text x="154" y="296" fill="#5fd6c4">近：切片极薄</text>
+        <text x="470" y="296" fill="#f3b56b">远：切片按比例变厚</text>
+        <text x="620" y="276">far 平面（Z=64）</text>
+        <text x="597" y="44">一列 = 8×8 屏幕像素</text>
+        <text x="30" y="190" fill="#6d879b">z=0</text>
+      </g>
+      <g stroke="#f3b56b" stroke-width="1" stroke-dasharray="3 3" opacity=".7">
+        <line x1="58" y1="160" x2="646" y2="155"/>
+      </g>
+    </svg>
+    <figcaption>每个“列”是一个从相机出发的四棱锥；深度切片把列切成格子。切片在视深度上按几何级数分布，图中刻意画成近密远疏。</figcaption>
+  </figure>
+
+  <h3>2.5 成本：分辨率的三次方很贵</h3>
+  <p>
+    compute 的线程数是 <code>X·Y·Z</code>。默认 192×128×64 = 157 万个格子，注入阶段每格至少 1 次密度与光照采样；
+    局部雾或近灯格子会用 4 个分层样本。相比之下 integrate 只有 <code>X·Y</code> = 2.46 万列，
+    每列 64 步主要是算术（只有天空延拓会再采样密度）。注入的线程数和光照采样更多，通常更重；
+    实际占比要看统计面板的分段 GPU timestamp，不能只按线程数断言。
+  </p>
+  <p>
+    质量档位（性能/均衡/精细）就是把这几个数一起改：像素步长 <code>16/8/4</code>、切片 <code>32/64/96</code>、
+    入射光步数 <code>2/4/8</code>。注意改网格会<strong>等待 GPU 空闲并重建资源</strong>，
+    不是每帧都能改的滑杆；而改密度、光照参数只是更新 UBO。
+  </p>
+
+  <div class="demo" id="demoFroxel">
+    <div class="head">
+      <h4>DEMO 02 · 深度切片与网格上限</h4>
+      <span class="small">改 Z / far，观察近远厚度差</span>
+    </div>
+    <p class="hint">
+      上条是线性深度轴：近处所有边界几乎重叠；中条是 <code>ln(1+d/W)</code> 轴，切片严格等距；
+      下图是 <code>d(z)</code> 曲线。把鼠标移到下图可读出第 z 层边界的深度。
+    </p>
+    <canvas id="froxelCanvas" height="340" aria-label="Froxel 深度切片分布"></canvas>
+    <div class="ctrls">
+      <div class="ctrl">
+        <div class="row"><span>分辨率</span></div>
+        <select id="froxelRes">
+          <option value="1280x720">1280 × 720</option>
+          <option value="1920x1080" selected>1920 × 1080</option>
+          <option value="2560x1440">2560 × 1440</option>
+          <option value="3840x2160">3840 × 2160</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>像素步长</span><output id="froxelStepVal"></output></div>
+        <input id="froxelStep" type="range" min="4" max="32" step="4" value="8">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>深度切片 Z</span><output id="froxelZVal"></output></div>
+        <input id="froxelZ" type="range" min="16" max="96" step="1" value="64">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>far</span><output id="froxelFarVal"></output></div>
+        <input id="froxelFar" type="range" min="50" max="600" step="10" value="300">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>对数尺度 W</span><output id="froxelWVal"></output></div>
+        <input id="froxelW" type="range" min="0.25" max="8" step="0.25" value="1">
+      </div>
+    </div>
+    <div class="readout">
+      <span>期望网格 <b id="froxelDesired">—</b></span>
+      <span>实际上限后 <b id="froxelActual">—</b></span>
+      <span>实际格子覆盖 <b id="froxelCover">—</b></span>
+      <span>第一层厚 <b id="froxelNear">—</b></span>
+      <span>最后一层厚 <b id="froxelFarGap">—</b></span>
+      <span>相邻比 r <b id="froxelRatio">—</b></span>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>W = 1 的取舍：</b>它让第 0 层边界紧贴相机，近场分辨率极高（0.093 米），代价是最前面十几层只覆盖几米。
+    对这个场景是合理的——灯核半径 0.11 米、表面常在 1–10 米内，近场误差最刺眼；而 100 米外 25 米一层，
+    在透视下只占几个像素。改 W 会整体平移“近处有多细”，但代码里固定为 1，避免配置漂移。
+  </div>
+</section>
+<section id="s3">
+  <h2><span class="num">03</span>密度场：天气、噪声与呼吸<span class="tag">介质定义</span></h2>
+  <p class="lead">
+    密度不是一个全局常量，而是世界坐标的三维函数。它由三层叠成：<strong>全空间基础密度</strong> +
+    <strong>贴地指数雾</strong> + <strong>三维值噪声</strong>，再乘一个随时间缓慢起伏的
+    <strong>呼吸/行波</strong>因子。天气预设只是把这几个数换一组。
+  </p>
+
+  <h3>3.1 逐点密度函数</h3>
+  <div class="math">
+    <span class="lbl">fog_common.glsl · fog_global_density</span>
+    <div class="f small">
+      σ<sub>mist</sub>(p) = σ<sub>mist0</sub> · exp(−k · max(p<sub>y</sub> − ground, 0)) · N(p)
+      <br>
+      σ(p) = max( [ σ<sub>base</sub> + σ<sub>mist</sub>(p) ] · anim(p, φ), 0 )
+    </div>
+  </div>
+  <p>
+    注意 <code>max(p.y − ground, 0)</code>：参考面以下不继续增大，雾在海平面以下是“满”的，
+    不会随着往下走指数爆炸。指数项的 e 折高度是 <code>1/k</code> 个世界单位——
+    k=0.25 时大约每升高 4 米衰减到 37%。<code>σ<sub>base</sub></code> 则与高度无关，
+    所以站到高空仍然会按距离吃雾。
+  </p>
+  <p>天气编号会改写这个式子（<code>weather</code> 存在 <code>fog_shape.x</code>）：</p>
+  <table>
+    <tr><th>weather</th><th>行为</th><th>公式变化</th></tr>
+    <tr><td><code>1</code> 浓雾</td><td>基础项主导，噪声弱，缓慢呼吸</td><td>原式；σ<sub>base</sub>=0.10、σ<sub>mist</sub>=0.035、k=0.25</td></tr>
+    <tr><td><code>2</code> 团雾</td><td>噪声调制整个介质，形成明暗斑块</td><td><code>σ *= smoothstep(0.30, 1.20, N) * 2</code></td></tr>
+    <tr><td><code>3</code> 高空层雾</td><td>围绕某一高度的薄层，像云海</td><td><code>σ = (σ<sub>base</sub>+σ<sub>mist</sub>) · exp(−½h²) · N</code>，<code>h=(y−center)/thickness</code></td></tr>
+    <tr><td><code>0</code> 自定义</td><td>保留当前所有参数</td><td>不做任何覆盖</td></tr>
+  </table>
+  <p>
+    团雾那一行值得注意：<code>σ<sub>mist</sub></code> 里已经乘过一次 N，外面又乘
+    <code>smoothstep(0.3,1.2,N)·2</code>，所以低噪声区被压到接近 0、高噪声区被放大，
+    斑块对比比“单纯把噪声幅度调大”更强。高空层则完全替换原式，连基础项也限制在薄层里。
+  </p>
+
+  <h3>3.2 三维噪声是怎么省出来的</h3>
+  <p>
+    这里没有 3D 噪声纹理，而是用<strong>两层 2D 值噪声按 z 混合</strong>，再叠一层交叉采样：
+  </p>
+  <pre><code>vec3 q = p * noise_scale + vec3(0.8, 0.1, 0.35) * phi * wind_speed;
+float z = floor(q.z), f = smooth(fract(q.z));
+float n = mix( valueNoise2(q.xy + z * vec2(19.1, 7.7)),
+               valueNoise2(q.xy + (z+1) * vec2(19.1, 7.7)), f );
+n = 0.7 * n + 0.3 * valueNoise2(q.xz * 2.7 + q.y * 0.3 + 13.1);
+return mix(1.0, n * 2.0, noise_amount);</code></pre>
+  <ul>
+    <li><strong>值噪声</strong>：格点哈希 → 双三次平滑插值。两层 2D 采样等价于一个轴向切片的三维场，成本只有 2 次 2D 噪声。</li>
+    <li><strong>0.7 / 0.3 交叉项</strong>：第二层用 xz 平面并混入 y，打破第一层在 z 方向的层状感。</li>
+    <li><strong>mix(1, 2n, amount)</strong>：n 的均值约 0.5，所以 <code>2n</code> 均值约 1。amount=0 时完全关闭噪声，amount=1 时密度在 0–2 倍之间起伏。</li>
+    <li><strong>世界空间平铺</strong>：坐标直接取世界位置，不随相机移动，所以雾团是“钉在岛上”的，相机穿过去不会像贴屏后处理一样跟着滑。</li>
+  </ul>
+  <p>
+    <code>vec3(0.8, 0.1, 0.35) * phi * wind_speed</code> 是平流项：噪声场随相位缓慢漂移。
+    它<strong>不是</strong>流体模拟，没有速度场、涡量或质量守恒；只是让同一块噪声平移，
+    再靠呼吸项改变整体浓度。
+  </p>
+
+  <h3>3.3 时间项：为什么用三个无理频率</h3>
+  <div class="math">
+    <span class="lbl">fog_anim_factor（φ 由 CPU 按周期累加）</span>
+    <div class="f small">
+      breath(φ) = 0.50 sin(φ) + 0.30 sin(1.2720196 φ + 1.7) + 0.20 sin(1.6180340 φ + 0.4)
+      <br>
+      wave(p,φ) = sin( k·p<sub>xz</sub> · 2πf − 1.2720196 φ
+      + 0.45 sin( k<sub>yx</sub>·p<sub>xz</sub> · 2πf · 0.59 + 1.09 φ ) )
+      <br>
+      anim = max(0, 1 + amp · [ 0.55 · breath + 0.45 · wave ])
+    </div>
+  </div>
+  <p>
+    频率比取 <strong>1 : √φ : φ ≈ 1 : 1.2720 : 1.6180</strong>（φ 是黄金比例）。
+    这三个频率彼此接近、又不是整数比，所以：
+  </p>
+  <ul>
+    <li>没有短的公共周期，肉眼很难抓到“又循环了”；拍频在分钟量级。默认周期 60 秒时，三个分量约 60 / 47.2 / 37.1 秒，两两拍频约 3–5 分钟。</li>
+    <li>三个振幅 0.5 / 0.3 / 0.2 刻意接近，避免被单一低频主导成明显的“呼吸节拍”。</li>
+    <li>行波只在 xz 平面传播（雾团水平翻滚），相位里再套一层慢波，让波峰波谷自己被调制。</li>
+  </ul>
+  <p>
+    相位 φ 是 CPU 每帧按 <code>2π / 周期</code> 累加后写进 UBO 的，所以运行中改周期不会跳变。
+    <span class="small">（<code>app_systems.cpp</code> 里 <code>fog_phase</code>；行波频率取 <code>anim_frequency</code>。）</span>
+  </p>
+
+  <div class="demo" id="demoDensity">
+    <div class="head">
+      <h4>DEMO 03 · 密度场侧视图</h4>
+      <span class="small">x ∈ [−28, 28]，y ∈ [−1, 24]</span>
+    </div>
+    <p class="hint">
+      这是 x–y 平面（z=0）上的 σ 热图（初值为团雾，便于看清结构）。切换天气会套用与 App 相同的一组预设；
+      打开“显示视线”可以看到相机射线如何斜穿雾层。亮度按 <code>σ_base+σ_mist</code> 归一化，读数给出绝对值。
+    </p>
+    <canvas id="densityCanvas" height="270" aria-label="密度场侧视图"></canvas>
+    <div class="ctrls">
+      <div class="ctrl">
+        <div class="row"><span>天气</span></div>
+        <select id="densityWeather">
+          <option value="0">0 · 自定义</option>
+          <option value="1">1 · 浓雾</option>
+          <option value="2" selected>2 · 团雾</option>
+          <option value="3">3 · 高空层雾</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>σ<sub>base</sub></span><output id="dBaseVal"></output></div>
+        <input id="dBase" type="range" min="0" max="0.2" step="0.001" value="0.05">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>σ<sub>mist</sub></span><output id="dMistVal"></output></div>
+        <input id="dMist" type="range" min="0" max="0.4" step="0.002" value="0.02">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>高度衰减 k</span><output id="dKVal"></output></div>
+        <input id="dK" type="range" min="0.02" max="1.2" step="0.01" value="0.35">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>参考面 ground</span><output id="dGroundVal"></output></div>
+        <input id="dGround" type="range" min="-2" max="2" step="0.1" value="-0.5">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>噪声频率</span><output id="dNoiseScaleVal"></output></div>
+        <input id="dNoiseScale" type="range" min="0.02" max="0.3" step="0.005" value="0.09">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>噪声强度</span><output id="dNoiseAmtVal"></output></div>
+        <input id="dNoiseAmt" type="range" min="0" max="1" step="0.01" value="0.5">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>动画幅度</span><output id="dAmpVal"></output></div>
+        <input id="dAmp" type="range" min="0" max="0.9" step="0.01" value="0.2">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>行波频率 f</span><output id="dFreqVal"></output></div>
+        <input id="dFreq" type="range" min="0.01" max="0.2" step="0.005" value="0.05">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>相位 φ</span><output id="dPhaseVal"></output></div>
+        <input id="dPhase" type="range" min="0" max="62.8" step="0.05" value="0">
+      </div>
+      <div class="ctrl" style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap">
+        <button id="densityPlay" class="primary" aria-pressed="false">▶ 播放</button>
+        <button id="densityRays" aria-pressed="false">显示视线</button>
+      </div>
+    </div>
+    <div class="readout">
+      <span>σ(x=0,y=0) <b id="dSigma0">—</b></span>
+      <span>σ(x=0,y=1/k) <b id="dSigmaE">—</b></span>
+      <span>竖直光学厚度 ∫₀²⁴ <b id="dTau">—</b></span>
+      <span>当前 anim <b id="dAnim">—</b></span>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>“团雾”和“浓雾”的差别不只是密度大小：</b>浓雾把噪声限制在贴地层，背景是一个均匀的灰；
+    团雾让噪声调制整个介质，且用 smoothstep 拉开对比，所以会出现成块的云团和空隙。
+    这也是为什么调 <code>sigma_base</code> 无法把浓雾变成团雾。
+  </div>
+</section>
+<section id="s4">
+  <h2><span class="num">04</span>光照、相函数与阴影<span class="tag">源项从哪来</span></h2>
+  <p class="lead">
+    密度只决定“有多少介质”，真正让雾可见的是<strong>被散射进视线的光</strong>。这一节把太阳、天空环境光和
+    火把/灯笼点光变成注入阶段的 RGB 源项，并解释相函数、有限发射体和阴影的近似。
+  </p>
+
+  <h3>4.1 源项：反照率与相函数</h3>
+  <div class="math">
+    <span class="lbl">注入阶段每个采样点的源项</span>
+    <div class="f small">
+      q(p, ω) = σ<sub>t</sub>(p) · albedo · C<sub>fog</sub> ·
+      [ L<sub>amb</sub> + p<sub>HG</sub>(μ<sub>sun</sub>) E<sub>sun</sub> V<sub>sun</sub>
+      + Σ<sub>i</sub> L<sub>i</sub> P<sub>cap,i</sub> ]
+    </div>
+  </div>
+  <p>
+    <code>albedo</code>（默认 0.9）是“被消的光里有多少被散射而不是被吸收”。它只影响散射颜色，
+    不影响透过率——把 albedo 调到 0，雾仍然会挡住背景，只是不会把光加回来，画面会变暗。
+    <code>C<sub>fog</sub></code> 是雾色，乘在 RGB 上，因此雾可以有颜色而消光保持标量。
+  </p>
+
+  <h3>4.2 Henyey–Greenstein 相函数</h3>
+  <div class="math">
+    <span class="lbl">finite_light.glsl · phase_hg</span>
+    <div class="f">
+      p(μ) = (1 − g²) / ( 4π (1 + g² − 2gμ)<sup>3/2</sup> ), &nbsp; μ = cos θ
+      &nbsp;&nbsp;⟹&nbsp;&nbsp; ∮ p dω = 1
+    </div>
+  </div>
+  <p>
+    μ 是“视线方向”与“指向光源方向”的夹角的余弦。g &gt; 0 表示<strong>前向散射</strong>：
+    光更容易继续沿原方向传播，所以<strong>看向太阳时</strong>雾最亮（μ→1），背对太阳时暗。
+    这是雾中太阳周围出现光晕、而背光方向发灰的原因。g = 0 退化为各向同性 <code>1/4π</code>；
+    |g| 越接近 1，峰越窄。代码把它夹在 ±0.85，默认 0.45。
+  </p>
+  <p>
+    归一化很重要：p 在整个球面上的积分是 1，所以它有“概率密度”的量纲（1/sr）。
+    若忘了 <code>1/4π</code>，光源亮度会整体放大 4π 倍；若把一条 delta 方向上的 p 峰值直接当成
+    近场半球的光照，近距离会亮得离谱——这正是 4.4 要解决的。
+  </p>
+
+  <div class="demo" id="demoHG">
+    <div class="head">
+      <h4>DEMO 04 · HG 相函数</h4>
+      <span class="small">左：极坐标 · 右：p(θ) 对数曲线</span>
+    </div>
+    <p class="hint">
+      半径按 √(p/p<sub>max</sub>) 压缩（否则 g=0.8 时前向峰会把其余方向压成一条线）。
+      灰色圆是各向同性 <code>p=1/4π</code> 在同样压缩下的位置，随 g 变化：g=0 时它与曲线重合。
+      数值读出给出未归一化的真实 p。
+    </p>
+    <canvas id="hgCanvas" height="330" aria-label="Henyey-Greenstein 相函数极坐标图"></canvas>
+    <div class="ctrls">
+      <div class="ctrl">
+        <div class="row"><span>各向异性 g</span><output id="hgGVal"></output></div>
+        <input id="hgG" type="range" min="-0.8" max="0.8" step="0.01" value="0.45">
+      </div>
+    </div>
+    <div class="readout">
+      <span>p(0°) 前向 <b id="hgFwd">—</b></span>
+      <span>p(90°) <b id="hgSide">—</b></span>
+      <span>p(180°) 背向 <b id="hgBack">—</b></span>
+      <span>前/背比 <b id="hgRatio">—</b></span>
+      <span>归一化积分 <b>1.000</b>（解析）</span>
+    </div>
+  </div>
+
+  <h3>4.3 太阳：方向光 + 阴影 + 介质衰减</h3>
+  <div class="math">
+    <span class="lbl">volume_illumination_masked</span>
+    <div class="f small">
+      E<sub>sun</sub> = C<sub>sun</sub> · p<sub>HG</sub>(μ) · V<sub>shadow</sub>(p) ·
+      exp(−τ<sub>medium</sub>(p → sun)) · π
+    </div>
+    <div class="f small" style="margin-top:4px">
+      L<sub>in</sub> = max(ambient, 0) + E<sub>sun</sub>；最后整体 clamp ≥ 0
+    </div>
+  </div>
+  <p>
+    末尾那个 π 是历史约定：太阳色在表面着色器里按“漫反射辐照度 / π”使用，注入介质前乘回 π
+    才能得到真正的辐照度。环境光 <code>light_direction.w</code> 直接加，当作各向同性天光。
+  </p>
+  <p>
+    介质衰减 <code>medium_visibility</code> 沿“采样点 → 光源”再走 0–8 步（默认 4），
+    累加密度后取 <code>exp(−min(τ,80))</code>，光程默认封顶 40 个世界单位。
+    它让灯在浓雾里的光晕被周围介质削弱，但<strong>不包含多次散射</strong>，也不是无限大气积分。
+  </p>
+  <p>太阳阴影的工程细节：</p>
+  <ul>
+    <li>2048² 正交深度图，中心固定在岛屿 <code>(0, 8, 0)</code>、覆盖半径 <code>sun_extent = 48</code>。不跟随相机，避免相机移动导致投影抖动。</li>
+    <li>方向或几何变化时才重绘；每张交换链图像各缓存一份，避免多帧同时读写。</li>
+    <li>覆盖区外按“可见”处理——它不是无限世界阴影，远处地形没有太阳阴影是预期行为。</li>
+    <li>PCF：体积里 3×3，表面 5×5；<code>bias=0.001</code>，表面另加 <code>normal_bias=0.035</code> 的沿法线偏移。</li>
+    <li>水面是独立半透明批次，不写深度、不进入 shadow pass；自发光灯核也不投影，避免灯被自己挡住。</li>
+  </ul>
+
+  <h3>4.4 点光：有限半径发射体，而不是数学点</h3>
+  <p>
+    火把和灯笼是半径 <code>R ≈ 0.11</code> 的球形发光体，强度 I 对应表面辐射亮度
+    <code>L = I / (πR²)</code>。这个式子来自朗伯圆盘/球体的投影面积 πR²：总光通量与亮度、
+    投影面积成正比。把它放到距离 d 的采样点，立体角约 <code>Ω ≈ πR²/d²</code>，于是单次散射项：
+  </p>
+  <div class="math">
+    <span class="lbl">有限发射体的内散射（远场极限）</span>
+    <div class="f small">
+      q<sub>light</sub> ≈ σ<sub>s</sub> · L · p(μ) · Ω
+      = σ<sub>s</sub> · [I/(πR²)] · p(μ) · [πR²/d²]
+      = <b>σ<sub>s</sub> · I · p(μ) / d²</b>
+    </div>
+  </div>
+  <p>
+    这正好是“平方反比 × 相函数”，不需要额外的 <code>1/d²</code> 手工项。代码保留 R 是为了两件事：
+    近场（d 与 R 同量级）时不能用远场极限，以及可见灯体的亮度要与照明一致。
+  </p>
+  <h4>近场为什么不能直接用 p(μ)</h4>
+  <p>
+    d 很小时，发射体张开的立体角很大，p(μ) 在球面上变化剧烈；用中心方向的一个采样会高估或低估，
+    甚至在灯附近产生“白球”。<code>finite_light.glsl</code> 改为对<strong>发射体覆盖的球冠</strong>积分：
+  </p>
+  <ul>
+    <li>把 p(μ) 转成 HG 的 CDF 坐标，先算出球冠对应的 CDF 区间 <code>[lo, hi]</code>；</li>
+    <li>在区间内用 8 点 Gauss–Legendre 求积，再乘上方位角占比；</li>
+    <li>结果被 clamp 到 [0,1]，表示“这颗灯打到这个方向的概率”，因此不会超过灯的辐射亮度；</li>
+    <li>球冠极小时退回点源极限 <code>p(μ)·2π(1−cosθ)</code>，数值稳定。</li>
+  </ul>
+  <p>
+    另外，体元横向尺寸 <code>footprint</code> 会合并进有效半径：
+    <code>R<sub>eff</sub>² = R² + footprint²</code>，同时亮度改成 <code>I/(πR<sub>eff</sub>²)</code>，
+    保持总强度 I 不变。这样远处粗格子里的灯不会变成一个闪烁的单像素白点，而是被正确地“抹宽变暗”。
+  </p>
+  <h4>距离窗、阴影与光源裁剪</h4>
+  <ul>
+    <li>距离窗 <code>w = clamp(1 − (d/range)<sup>4</sup>, 0, 1)²</code>，在 range 处平滑归零；衰减用 <code>w / max(d², R²)</code>，避免 d→0 的奇点。</li>
+    <li>点光 cube shadow：6 个 90° 面写入 512² 深度图集，每帧只取离相机最近的 5 盏；面方向与 <code>CUBE_DIR/CUBE_UP</code> 表一一对应。</li>
+    <li>深度比较是手写的：把距离重建成与渲染时相同的 RH_ZO NDC，再和存储深度比较（不使用硬件 cube compare sampler）。</li>
+    <li><code>light_cull.comp</code> 为每个 froxel 生成 8 位掩码：只有范围球与格子相交的灯才进入注入循环。灯多时省的是“每格 × 全部灯”的无效遍历。</li>
+    <li>灯核是均匀自发光（材质 <code>voxel=−1</code>），不接受自身点光或太阳的表面照明；可见亮度只由 I/R 与显示算子决定，不会被自己照亮成黑球或叠加额外高光。</li>
+  </ul>
+
+  <div class="note">
+    <b>能量约定：</b>I 和 R 同时决定“看起来多亮”“照亮表面多强”“雾里散射多强”，三者不再各用一个魔法常数。
+    这些仍是相对场景单位，不是标定过的流明/瓦特。灯核在显示阶段还有单独的自发光算子，见 06 节。
+  </div>
+
+  <div class="warn note">
+    <b>没有做的事：</b>多次散射、CSM（级联阴影）、水下折射、透明材质投阴影、面积光软阴影积分、逐体积独立相函数。
+    “雾里所有东西都亮了一点”是单次散射 + 环境光的近似结果，不是全局光照。
+  </div>
+</section>
+<section id="s5">
+  <h2><span class="num">05</span>三阶段 compute：注入 → 时域 → 积分<span class="tag">GPU 实现</span></h2>
+  <p class="lead">
+    每帧在渲染作用域之外录三段 compute。它们的分工不是“各算一部分”，而是
+    <strong>先把介质属性写进格子，再把格子沿深度积成前缀</strong>。顺序不能换：积分结果依赖过滤后的系数，
+    过滤后的系数依赖本帧注入，注入依赖本帧阴影。
+  </p>
+
+  <pre><code>injection  (Z × XY × vec4)   σ_s·L_in.rgb , σ_t
+      │  compute write → compute read barrier
+temporal   (Z × XY × vec4)   与历史重投影混合、邻域裁剪
+      │  compute write → compute read barrier
+integrate  (Z+2 × XY × vec4) 每列前缀 S/T + 天空收敛层
+      │  compute write → fragment read barrier
+scene / sky fragment         三线性查表 + 局部段重建</code></pre>
+
+  <h3>5.1 注入：每个格子采样一次介质</h3>
+  <p>
+    <code>froxel.comp</code> 用 4×4×4 的 workgroup，一个 invocation 对应一个格子。它先由格子中心的 uv
+    反投影出一条世界射线，再算出这一格的起止径向距离：
+  </p>
+  <pre><code>vec3  ray   = froxel_ray((vec2(p.xy) + 0.5) / grid.xy);
+float cosθ  = max(-(view * vec4(ray, 0)).z, 1e-4);
+float a     = froxel_depth_at(p.z)     / cosθ;
+float b     = froxel_depth_at(p.z + 1) / cosθ;
+vec3  mid   = camera + ray * (a + b) * 0.5;
+float footprint = center_depth * length(1.0 / (grid.xy * vec2(proj[0][0], proj[1][1])));</code></pre>
+  <p>
+    <code>footprint</code> 是该深度上一个体元的横向尺寸（用于光源过滤和抗锯齿，不是格子体积）。
+    然后决定这一格要采几个点：
+  </p>
+  <ul>
+    <li>默认 <strong>1 个</strong>样本，取分层随机位置 <code>t = (0 + jitter)/1</code>；</li>
+    <li>如果格子落在某盏点光的近场、与局部雾包围球相交、或跨过可选的全局近端裁剪面，就升到 <strong>4 个</strong>分层样本，避免近场的陡梯度被一格平均掉；</li>
+    <li>抖动值 <code>fract(frame·0.618 + hash(cell))</code> 是黄金比例序列 + 空间哈希，低差异且相邻帧不相关；时域无效时强制取 0.5，保证没有历史时也不会满屏噪点。</li>
+  </ul>
+  <p>
+    每个样本调用 <code>fog_medium(world)</code> 得到 <code>vec4(σ_s.rgb, σ_t)</code>，再乘
+    <code>volume_illumination_masked()</code> 得到源项。如果 RGB 全为 0（纯吸收介质），就跳过阴影采样、
+    光路步进和相函数积分，只保留消光项——这是很实用的一处提前退出。最后 4 个样本取平均写入 injection。
+  </p>
+
+  <h3>5.2 时域：复用“系数”，不是复用“积分结果”</h3>
+  <p>
+    抖动采样会带来噪点。最直接的去噪是时间累积：把当前格子和历史帧里对应位置混合。
+    但这里累积的是<strong>局部散射系数和消光</strong>，不是已经沿相机射线积好的 S/T。原因是：
+  </p>
+  <ul>
+    <li>S/T 依赖相机位置、方向和相函数；相机一转，旧射线的积分就不代表新射线。</li>
+    <li>系数是介质本身的局部属性，只要世界位置对上，换视角仍然有效；积分留到本帧重新做。</li>
+  </ul>
+  <p>CPU 每帧先判断历史能不能用（<code>app_systems.cpp</code>）：</p>
+  <pre><code>年龄 ≤ 1.0 s  &&  相机位移 &lt; 5 世界单位  &&  朝向点积 &gt; 0.85
+&& UBO 关键状态完全一致（网格、雾参数、光照、体积参数……）</code></pre>
+  <p>
+    通过后历史权重为
+    <code>w = 0.9<sup>age</sup> · e<sup>−0.4·距离</sup> · alignment<sup>8</sup></code>，
+    并夹到 0.97 以下。也就是说：停着不动时几乎全用历史；快速平移或转头时迅速退回本帧。
+    <code>history_epoch</code> 一旦因天气、光源、局部雾或资源重建而改变，整份历史立即作废。
+  </p>
+  <p>GPU 侧的重投影与拒绝（<code>froxel_temporal.comp</code>）：</p>
+  <ol>
+    <li>用不抖动的格心世界位置，乘<strong>上一帧</strong>的 view-projection，得到上一帧 uv 与视深度；</li>
+    <li>在相机后、视锥外、深度超过 far 的格子直接放弃历史；</li>
+    <li>把旧位置换算成历史网格坐标，手动三线性读取 8 个邻居；</li>
+    <li>取当前格子 + 6 个面邻居的 min / max / 均值 / 二阶矩，得到局部标准差 σ<sub>n</sub>；</li>
+    <li>若历史与局部均值的差超过 2σ<sub>n</sub>，按超出量算出 <code>response</code> 降低权重——
+        这样“抖动导致的光束边缘一亮一暗”不会被误判成光源突变；</li>
+    <li>把历史夹到 <code>[max(lo, mean−2σ), min(hi, mean+2σ)]</code> 后再混合。</li>
+  </ol>
+  <div class="math">
+    <span class="lbl">最终过滤</span>
+    <div class="f small">
+      filtered = mix(current, clamp(old), clamp(w · response, 0, 0.97))
+    </div>
+  </div>
+  <p>
+    一个容易忽略的点：历史按<strong>交换链图像</strong>维护，所以“上一帧”通常不是紧邻帧（三缓冲时可能隔 2–3 帧）。
+    权重按实际帧龄指数衰减，避免低帧率下历史刚写入就过期。没有运动矢量、没有深度历史，
+    因此快速移动的薄遮挡仍可能闪烁或漏光；这不是通用 TAA。
+  </p>
+
+  <h3>5.3 积分：每一列做一次前缀和</h3>
+  <p>
+    <code>froxel_integrate.comp</code> 的线程数只有 XY（8×8 workgroup），每个线程负责一条屏幕列：
+  </p>
+  <pre><code>S = 0; T = 1;                        // 相机处
+volume[column] = vec4(S, T);        // 第 0 个边界
+for z in 0..Z-1:
+    next = froxel_depth_at(z+1) / cosθ
+    span = max(next, start) - max(prev, start)
+    σ    = filtered[z, column].a
+    τ    = min(σ · span, 80)
+    Tseg = exp(-τ)
+    integral = τ &lt; 0.001 ? span·(1-τ/2) : (1-Tseg)/σ
+    S += T · filtered[z, column].rgb · integral
+    T *= Tseg
+    volume[z+1, column] = vec4(S, T)</code></pre>
+  <p>
+    <code>start</code> 默认是 0（物理模式），只有显式勾选“全局近端裁剪”才从 <code>fog.start</code> 起算。
+    有局部雾时积分仍从 0 开始，只在注入时对<strong>全局分量</strong>做门控，局部雾永远保留近场。
+    循环结束后还有一层“天空层”：
+  </p>
+  <div class="math">
+    <span class="lbl">天空没有有限表面，不能让网格终点冒充无限远</span>
+    <div class="f small">
+      从 far 之后继续以 Δ = max(far/8, 1) 起步、每段翻倍，最多 24 段，直到 T &lt; 10<sup>−6</sup>；
+      仍未收敛则用末点的常系数解析延拓到无穷。
+    </div>
+  </div>
+  <p>
+    这一层每列只算一次，存到 <code>volume[Z+1]</code>。天空片元只做双线性采样，不逐像素做长距离步进。
+    对于“高空层雾”这种有限厚度介质，积分还会在若干高度事件处切段，避免倍增区间直接跨过薄层。
+  </p>
+
+  <h3>5.4 资源与同步</h3>
+  <table>
+    <tr><th>资源</th><th>大小 / 数量</th><th>说明</th></tr>
+    <tr><td>injection SSBO</td><td>16·X·Y·Z B / 图像</td><td>本帧原始系数</td></tr>
+    <tr><td>history[2]</td><td>2 × 16·X·Y·Z B / 图像</td><td>双缓冲，读写分离</td></tr>
+    <tr><td>integrated</td><td>16·X·Y·(Z+2) B / 图像</td><td>前缀 S/T + 天空层</td></tr>
+    <tr><td>light mask</td><td>4·X·Y·Z B / 图像</td><td>每格 8 位点光掩码</td></tr>
+    <tr><td>sun shadow</td><td>2048² D32（或 D16）/ 图像</td><td>固定岛屿中心</td></tr>
+    <tr><td>point shadow</td><td>6×512² × 5 层 / 图像</td><td>2D array 深度图集</td></tr>
+  </table>
+  <p>
+    三个 pass 之间用显式内存屏障（compute write → compute/fragment read）。所有体积与阴影资源<strong>按交换链图像独立</strong>，
+    这样 GPU 还在读第 N-2 帧的历史时，CPU 不会覆写它。改网格尺寸、深度切片或窗口大小会等待设备空闲并重建全部资源；
+    只改密度/光照参数则只更新 UBO，不重建。
+  </p>
+  <p class="small">
+    统计面板里的 <code>shadow</code> / <code>density+inject</code> / <code>temporal</code> / <code>integrate</code> / <code>scene+UI</code>
+    是分阶段 GPU timestamp，不是把 CPU 帧率当成 GPU 耗时；也不含 present 与合成器延迟。
+  </p>
+</section>
+<section id="s6">
+  <h2><span class="num">06</span>片元采样、合成与显示<span class="tag">最后一步</span></h2>
+  <p class="lead">
+    片元拿到世界坐标后，要回答三个问题：<strong>我的位置落在哪个格子？</strong>
+    <strong>我和格子边界之间还有多少介质？</strong> <strong>结果怎么映射到屏幕？</strong>
+    前两个问题决定了雾在物体表面、灯核附近是否“贴得住”。
+  </p>
+
+  <h3>6.1 先定位：uv → 列，深度 → 切片</h3>
+  <pre><code>clip  = proj * view * vec4(world, 1);
+uv    = clip.xy / clip.w * 0.5 + 0.5;
+depth = max(-(view * vec4(world, 1)).z, 0);      // 视深度
+slice = log(1 + min(depth, far)/W) / log(1 + far/W) * Z;
+slice = clamp(slice, 0, Z - 0.0001);
+
+vec3 cell = vec3(uv * grid.xy - 0.5, slice);      // 格子索引空间
+ivec3 b = ivec3(floor(cell));  vec3 f = fract(cell);
+lower = bilinear(b.xy,   b.z);                    // 第 b.z 个边界
+upper = bilinear(b.xy,   b.z + 1);                // 第 b.z+1 个边界</code></pre>
+  <p>
+    注意 <code>uv * grid - 0.5</code>：格子中心在 <code>(i+0.5)/X</code>，减 0.5 后才能用
+    <code>floor</code>/<code>fract</code> 做标准的双线性权重。XY 是双线性（4 次 fetch），
+    深度方向不是简单 lerp 两个已积分值——那是下一节的关键。
+  </p>
+
+  <h3>6.2 部分段重建：S 不能线性插值</h3>
+  <p>
+    integrate 只在边界存了 <code>(S, T)</code>。如果表面落在第 z 和 z+1 个边界之间，直接
+    <code>mix(S<sub>z</sub>, S<sub>z+1</sub>, f)</code> 是错的：S 随距离是指数收敛的，不是直线。
+    正确做法是<strong>只用这两个边界反推出这一格的常系数</strong>，再对表面之前的局部段单独积分。
+  </p>
+  <div class="math">
+    <span class="lbl">从两个边界反推</span>
+    <div class="f small">
+      step_T = T<sub>z+1</sub> / T<sub>z</sub> = e<sup>−τ</sup>
+      &nbsp;&nbsp;⟹&nbsp;&nbsp; τ = −ln(step_T)
+      <br>
+      partial_T = e<sup>−τ·f</sup>，&nbsp;
+      f = clamp( (d<sub>surface</sub> − a) / (b − a), 0, 1 )
+    </div>
+    <div class="f small" style="margin-top:5px">
+      局部新增 = q·(1 − e<sup>−τf</sup>)/σ
+      &nbsp;&nbsp;⟹&nbsp;&nbsp;
+      scatter_fraction = (1 − partial_T) / (1 − step_T)
+    </div>
+  </div>
+  <p>
+    最后一行是两段积分的比值：整格的新增是 <code>(1−step_T)/σ</code>，前 f 段是
+    <code>(1−partial_T)/σ</code>，相除就得到“这一格的新增量里，前 f 段占多少”。
+    于是 <code>S = lower.S + lower.T · q<sub>cell</sub> · fraction</code>，而代码用
+    <code>mix(lower.rgb, upper.rgb, fraction)</code> 等价地插值前缀——因为
+    <code>upper.S = lower.S + lower.T·q·(1−step_T)/σ</code>，线性插值这两个端点正好等于局部段。
+  </p>
+  <p>
+    <strong>距离必须重新算</strong>：<code>f</code> 用的是
+    <code>d<sub>surface</sub> = |world − camera|</code>，两个边界则用
+    <code>depth<sub>a</sub>/cosθ</code> 换算成径向距离，并且都要被可选的 <code>start</code> 裁剪。
+    用切片的对数比例当 f 会得到系统性偏差——这正是 CPU 回归
+    <code>test_partial_cell_matches_actual_path_not_log_slice_fraction</code> 守住的东西。
+  </p>
+  <p>
+    τ 很小时 <code>1−step_T → 0</code>，比值退化；代码在 <code>τ &lt; 0.001</code> 时直接用
+    <code>f</code>，与一阶展开一致。
+  </p>
+
+  <h3>6.3 近灯/局部雾的边界纠偏</h3>
+  <p>
+    常系数重建仍有一个盲点：<strong>格子不知道雾是从格子内部的哪里开始的</strong>。
+    如果一块高密度局部雾只覆盖格子的后半段，而表面在格子前半段，整格平均会把后面的雾“泄漏”到表面前面。
+    灯核贴着一团雾时，这会表现为灯周围多出一圈不属于它的蓝雾。
+  </p>
+  <p>
+    默认开启的“近灯表面精细积分”只在同时满足以下条件时介入：存在局部雾、存在启用的点光、
+    片元到灯中心的距离在 <code>max(1, R)</code> 的 1–2 倍之间（权重 <code>1−smoothstep(1,4,d²/R²)</code>），
+    且末格与局部雾的扩展包围球相交。
+    它保留 Froxel 前缀，只对<strong>最后一格</strong>用 2 段 × 4 次基础采样重新积分到表面，并按
+    局部雾的盒/椭球边界、灯的有限核心、全局 start 切段；接近末格末端时再平滑回缓存值，避免跨格跳变。
+  </p>
+  <p class="small">
+    成本计入统计面板的 <code>scene+UI</code>；仍是数值积分，不解决全场景的 XY 走样，也不支持无限薄的雾层。
+    可以关掉做同视角 A/B。
+  </p>
+
+  <h3>6.4 合成与调试视图</h3>
+  <div class="math">
+    <span class="lbl">froxel_sample.glsl</span>
+    <div class="f small">
+      表面：C = scene · fog.a + fog.rgb
+      <br>
+      天空：C = atmosphere(dir) · T<sub>sky</sub> + S<sub>sky</sub>
+    </div>
+  </div>
+  <p>
+    天空走单独的一层：它在 <code>froxel_sky_sample()</code> 里按方向做双线性，读取“已经收敛到无限远”的 S/T。
+    太阳圆盘仍然加在背景色里，再整体被 T 衰减。调试编号
+    <code>0=完整 / 1=透过率 / 2=散射 / 3=表面太阳阴影</code> 直接替换合成结果，方便判断
+    “是介质太浓”还是“灯核自发光太亮”。
+  </p>
+
+  <h3>6.5 显示：线性 HDR 只在这之后才被压扁</h3>
+  <p>
+    密度、源项、积分全程保留线性高动态范围，没有在中途截到 1。片元最后统一做：
+  </p>
+  <div class="math">
+    <span class="lbl">display.glsl</span>
+    <div class="f small">
+      L<sub>exp</sub> = max(L, 0) · 2<sup>EV</sup>
+      <br>
+      Y = 0.2126 R + 0.7152 G + 0.0722 B
+      &nbsp;;&nbsp;
+      C' = L<sub>exp</sub> / (1 + Y) &nbsp;（亮度 Reinhard）
+      <br>
+      超出色域时朝中性轴压缩，再 clamp 到 [0,1]，最后 sRGB 编码
+    </div>
+  </div>
+  <p>
+    自发光（灯核、火把焰、灯笼玻璃）另走一个显示算子。若直接算
+    <code>map((R+E)·T + S)</code>，E 是几千倍 HDR 峰值时，T 再小也会饱和成白点，“透过率衰减”在屏幕上根本看不出来。
+    代码改成<strong>先压缩发光增量，再乘 T</strong>：
+  </p>
+  <div class="math">
+    <span class="lbl">display_emissive_surface</span>
+    <div class="f small">
+      base = m(R·T + S)
+      <br>
+      glow = m(R + E) − m(R) &nbsp;<span class="dim">（m 为带曝光的线性显示映射）</span>
+      <br>
+      display = clamp(base + T · glow, 0, 1)
+    </div>
+  </div>
+  <p>
+    纯灯核 R=0，普通材质的 emission 也走同一算子。无雾时 T=1，结果仍是原来的
+    <code>m(R+E)</code>；浓雾时发光增量按 T 淡出，而不是靠 HDR 饱和维持白点。
+    这是有意的<strong>显示取舍</strong>，不改变照明强度 I/R，也不改变体积积分出的 S/T。
+    它不是物理 HDR 合成，也不等价于 bloom；当前管线是 SDR sRGB 输出，不是 PQ/HLG。
+  </p>
+
+  <div class="demo" id="demoRender">
+    <div class="head">
+      <h4>DEMO 05 · 把整条链跑一遍</h4>
+      <span class="small">纯 JS 逐像素 raymarch · 不是 App 的 Froxel 路径</span>
+    </div>
+    <p class="hint">
+      这个演示用和 01–04 节相同的公式，在低分辨率下逐像素积分：密度场 → 太阳/点光 → HG →
+      分段 Beer–Lambert → 合成 → 曝光与映射。它没有阴影图、历史累积和 Froxel 网格，
+      所以近灯边界会比 App 更“准”，但性能差得多。调试视图对应 App 的 0/1/2 号。
+      为了让雾在低分辨率下仍有结构，预设的密度比 App 天气档略低；公式与参数含义不变。
+    </p>
+    <canvas id="renderCanvas" height="380" style="aspect-ratio:16/9" aria-label="体积雾光线步进演示"></canvas>
+    <div class="ctrls">
+      <div class="ctrl" style="grid-column:1/-1">
+        <div class="row"><span>天气预设</span></div>
+        <div class="pillrow">
+          <button data-preset="0" aria-pressed="true">自定义</button>
+          <button data-preset="1">浓雾</button>
+          <button data-preset="2">团雾</button>
+          <button data-preset="3">高空层</button>
+          <button id="renderPlay" class="primary" aria-pressed="false">▶ 动画</button>
+          <button id="renderGrid" aria-pressed="false">Froxel 网格示意</button>
+        </div>
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>σ<sub>base</sub></span><output id="rBaseVal"></output></div>
+        <input id="rBase" type="range" min="0" max="0.16" step="0.002" value="0.03">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>σ<sub>mist</sub></span><output id="rMistVal"></output></div>
+        <input id="rMist" type="range" min="0" max="0.35" step="0.002" value="0.025">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>高度衰减 k</span><output id="rKVal"></output></div>
+        <input id="rK" type="range" min="0.02" max="1.0" step="0.01" value="0.35">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>HG g</span><output id="rGVal"></output></div>
+        <input id="rG" type="range" min="-0.6" max="0.8" step="0.01" value="0.45">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>太阳高度角</span><output id="rSunVal"></output></div>
+        <input id="rSun" type="range" min="2" max="60" step="1" value="16">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>曝光 EV</span><output id="rEvVal"></output></div>
+        <input id="rEv" type="range" min="-2" max="2" step="0.1" value="0">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>点光强度 I</span><output id="rLightVal"></output></div>
+        <input id="rLight" type="range" min="0" max="24" step="0.5" value="10">
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>调试视图</span></div>
+        <select id="rDebug">
+          <option value="0" selected>0 · 完整合成</option>
+          <option value="1">1 · 透过率 T</option>
+          <option value="2">2 · 散射 S</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <div class="row"><span>步进质量</span></div>
+        <select id="rQuality">
+          <option value="288,162,24" selected>标准 · 288×162 / 24 步</option>
+          <option value="384,216,40">精细 · 384×216 / 40 步</option>
+          <option value="512,288,64">很高 · 512×288 / 64 步</option>
+        </select>
+      </div>
+    </div>
+    <div class="readout">
+      <span>渲染耗时 <b id="rTime">—</b></span>
+      <span>像素数 <b id="rPixels">—</b></span>
+      <span>第一格密度 <b id="rSigma">—</b></span>
+      <span>说明 <b>无阴影/无历史</b></span>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>为什么要故意保留“低分辨率 + 高成本”的对比：</b>它说明 Froxel 的价值不是“更精确”，而是
+    <strong>把可见的积分摊到多个像素共享</strong>。这个演示每像素 40 步，1080p 全屏约 8000 万次采样；
+    App 的注入只有 157 万格 × 1–4 次，积分 2.5 万列 × 64 步。
+  </div>
+</section>
+<section id="s7">
+  <h2><span class="num">07</span>局部雾与控制点<span class="tag">叠加介质</span></h2>
+  <p class="lead">
+    全局雾是“整片空气”，局部雾是<strong>可摆放在场景里的另一团介质</strong>：盒形或椭球形，
+    可以有边缘淡出、3D 密度纹理，或者由若干控制点程序化生成。它不是透明几何，不写深度、不投几何阴影，
+    只在注入/积分时增加消光与散射。
+  </p>
+
+  <h3>7.1 一个 ECS 实体</h3>
+  <pre><code>Transform  +  FogVolume  [+ FogDensityTexture]  [+ FogControlField]</code></pre>
+  <p>
+    <code>Transform.scale</code> 是<strong>完整尺寸/直径</strong>，不是半径；局部坐标范围是
+    <code>[−0.5, 0.5]³</code>。判断一个世界点是否在雾体内：
+  </p>
+  <pre><code>local = world_to_local * p;
+q     = abs(local) * 2.0;                    // 映射到 [0,1]
+r     = shape == box ? max(q.x, max(q.y, q.z)) : length(q);
+if (r >= 1) return 0;
+fade  = 1 - smoothstep(1 - edge_fade, 1, r);
+σ     = density * fade * modulation;</code></pre>
+  <p>
+    盒形用切比雪夫范数 <code>max|q|</code>，椭球用欧氏范数 <code>|q|</code>；两者在边界都是 1。
+    <code>edge_fade</code> 是相对半径的过渡宽度，<code>smoothstep</code> 让边缘没有硬壳。
+    外面还有一层<strong>包围球</strong>提前退出：<code>|p − center| &gt; bounds.w</code> 时直接返回 0，
+    避免对每个雾体都做完整变换。
+  </p>
+
+  <h3>7.2 密度来源：均匀 / 3D 纹理 / 控制点</h3>
+  <table>
+    <tr><th>来源</th><th>调制方式</th><th>备注</th></tr>
+    <tr><td>均匀</td><td>modulation = 1</td><td>只有形状和边缘淡出</td></tr>
+    <tr><td>3D 纹理</td><td><code>mix(1, tex, strength)</code></td><td>R8 raw 或 <code>builtin:cloud</code>；最多 4 种，32³ 重采样，支持 tiling/offset/repeat</td></tr>
+    <tr><td>控制点场</td><td>点核求和 → <code>1−exp(−Σ)</code> → 梯度噪声</td><td>启用时覆盖纹理来源；最多 32 点</td></tr>
+  </table>
+  <p>
+    纹理不是直接乘到全局雾上，而是作为<strong>这个雾体内部</strong>的密度调制。多个雾体的消光相加：
+  </p>
+  <div class="math">
+    <span class="lbl">fog_medium</span>
+    <div class="f small">
+      σ<sub>t,total</sub> = σ<sub>global</sub> + Σ<sub>i</sub> σ<sub>i</sub>
+      <br>
+      σ<sub>s,total</sub>(RGB) = σ<sub>global</sub>·C<sub>global</sub>·albedo
+      + Σ<sub>i</sub> σ<sub>i</sub>·C<sub>i</sub>·albedo<sub>i</sub>
+    </div>
+  </div>
+  <p>
+    相加而不是平均，所以两团雾重叠的地方更浓、颜色也按各自的散射系数叠加；不会出现“后一个雾体把前一个的颜色覆盖掉”。
+    所有雾体共用全局的 HG g，没有逐体积相函数，也没有 RGB 吸收（消光仍是标量）。
+  </p>
+
+  <h3>7.3 控制点：用几个球核“捏”出云</h3>
+  <p>
+    每个控制点有局部 <code>[0,1]³</code> 位置、半径、密度、柔和度。GPU 先生成 64³ 的密度网格，再在采样时三线性查询：
+  </p>
+  <div class="math">
+    <span class="lbl">control_density.comp</span>
+    <div class="f small">
+      d(p) = Σ<sub>i</sub> ρ<sub>i</sub> · [ 1 − smoothstep(1 − soft<sub>i</sub>, 1, |p − c<sub>i</sub>|/r<sub>i</sub>) ]
+      <br>
+      d ← 1 − exp(−d) &nbsp;<span class="dim">（平滑有界并集，重叠变浓但不会无限叠加）</span>
+      <br>
+      d ← d · mix(1, smoothstep(0.2, 0.8, noise), noise_strength)
+    </div>
+  </div>
+  <p>
+    噪声是 1–5 层梯度噪声，每层频率翻倍、振幅减半；超过网格 Nyquist 的 octave 会被
+    <code>1 − smoothstep(16, 32, frequency)</code> 衰减掉，避免把走样烘进缓存。
+    64³ 的网格每槽 1 MiB，预留 16 槽共 16 MiB，按交换链图像独立；静态场生成一次后复用，
+    动画只重生成发生变化的槽位。
+  </p>
+  <p>
+    点的动画用每场独立的归一化周期，只由世界 tick 推进：频率取 1–8 的整数，轨道幅度按初始位置到边界的余量收紧，
+    噪声位移也沿闭合轨道。所以一个周期后密度场回到原始相位——这是<strong>程序化循环</strong>，
+    不是流体或湍流输运。暂停/单步沿用全局动画控制。
+  </p>
+
+  <h3>7.4 和全局雾的交互</h3>
+  <ul>
+    <li>局部雾的近端<strong>不受全局 <code>start</code> 裁剪</strong>；<code>start</code> 只门控全局介质的注入，避免在相机附近挖出一个只属于全局雾的空洞。</li>
+    <li>太阳/点光阴影同样影响局部雾里的散射；灯核附近还会触发 6.3 的末格精细积分。</li>
+    <li>雾体不进入实例绘制、不投几何阴影、不写深度；水面也不进入 shadow pass，所以透明物体不会在雾里切出阴影。</li>
+    <li>最多 16 个活动雾体和 4 种纹理；超过上限会明确报错，不静默截断。小于体元的薄雾仍可能欠采样。</li>
+    <li>变换动画每帧改矩阵时没有运动矢量补偿，快速移动的雾团可能有时域拖影；优先正确性。</li>
+  </ul>
+
+  <div class="note">
+    <b>为什么灯靠近雾团时是“蓝晕”而不是白球：</b>先看调试视图 2（散射）确认介质贡献；再看 1（透过率）。
+    可能是旧 <code>start</code> 挖掉了近场、真实可见光程变短、或者灯核在显示阶段趋白。三者不是同一个 bug，
+    不能只凭一张截图归因。
+  </div>
+</section>
+
+<section id="s8">
+  <h2><span class="num">08</span>旧解析模型对照<span class="tag">历史归档</span></h2>
+  <p class="lead">
+    在换成 Froxel 之前，这个示例用<strong>世界坐标的解析密度 + 闭式高度积分</strong>做雾。它已经不再参与渲染，
+    但推导很干净，而且解释了“为什么天空和地面在水平线处能无缝接上”。理解它也有助于看清当前实现多付了什么成本、换来了什么。
+  </p>
+
+  <h3>8.1 密度与闭式积分</h3>
+  <div class="math">
+    <span class="lbl">旧模型的密度</span>
+    <div class="f small">
+      σ(p) = anim(p, φ) · [ σ<sub>base</sub>
+      + σ<sub>mist</sub> · e<sup>−k·max(p<sub>y</sub>−ground, 0)</sup> · N(p<sub>xz</sub>) ]
+    </div>
+  </div>
+  <p>
+    基础项是常数，沿射线直接是 <code>σ<sub>base</sub> · span</code>。高度项要算
+    <code>∫ e<sup>−k(y(s)−ground)</sup> ds</code>。令 <code>y(s) = y<sub>0</sub> + d<sub>y</sub>s</code>，
+    当整段都在参考面以上时：
+  </p>
+  <div class="math">
+    <span class="lbl">高度项闭式</span>
+    <div class="f">
+      ∫<sub>a</sub><sup>b</sup> e<sup>−k(y<sub>0</sub>+d<sub>y</sub>s)</sup> ds
+      = e<sup>−k y<sub>0</sub></sup> · (1 − e<sup>−k d<sub>y</sub>(b−a)</sup>) / (k d<sub>y</sub>)
+    </div>
+    <div class="f small" style="margin-top:4px">
+      d<sub>y</sub> → 0 时退化为 e<sup>−k y<sub>0</sub></sup> · (b−a)；
+      y(s)=ground 处切成两段（下段密度取满）。
+    </div>
+  </div>
+  <p>
+    交点是 <code>t<sub>cross</sub> = −(o<sub>y</sub> − ground)/d<sub>y</sub></code>：落在区间内就切段，
+    否则整段同侧。噪声没有闭式，旧实现取射线中点采样，再按
+    <code>w = 1/(1 + span·noise_scale)</code> 向均值 1 收敛——长射线趋于噪声平均，
+    远处不会出现格子斑块。这是近似，不是精确积分。
+  </p>
+  <div class="math">
+    <span class="lbl">合成</span>
+    <div class="f small">
+      T = e<sup>−τ</sup> &nbsp;;&nbsp;
+      C = background · T + atmosphere(dir) · (1 − T)
+    </div>
+  </div>
+
+  <h3>8.2 地平线为什么没有接缝</h3>
+  <p>
+    关键在于：天空 pass 直接输出 <code>atmosphere(dir)</code>，而地面几何的 in-scatter 用的是
+    <strong>同一个函数、同一个方向</strong>。于是远处的几何被雾完全遮住时，极限颜色正好等于该方向的背景色，
+    在构造上连续。而 <code>atmosphere</code> 的两个分支在地平线处取值相同：
+  </p>
+  <ul>
+    <li><code>dir.y &gt; 0</code>：天空渐变，从地平线色到天顶深蓝；</li>
+    <li><code>dir.y &lt; 0</code>：雾海渐变，从同一个地平线色出发，向下收敛到 <code>fog_color</code>；</li>
+    <li>两者在 <code>dir.y = 0</code> 都等于 horizon 色，所以没有硬边。</li>
+  </ul>
+  <p>
+    旧 README 特别强调过：天空<strong>不能</strong>再被本地高度雾洗一遍，否则天空浓淡会随相机高度变化，
+    而且和地面雾的极限色对不上，水平线必然出现一条硬边。这是“背景色与散射色必须是同一函数”的经典约束。
+  </p>
+
+  <h3>8.3 为什么换成 Froxel</h3>
+  <table>
+    <tr><th>能力</th><th>解析高度雾</th><th>Froxel</th></tr>
+    <tr><td>分层大气/高度雾</td><td>闭式、极便宜、无噪声</td><td>可以，但比闭式贵</td></tr>
+    <tr><td>三维雾团 / 局部体积</td><td>做不到</td><td>原生支持，可叠加 16 个</td></tr>
+    <tr><td>火把/灯笼的光晕与被遮挡</td><td>只能加一个屏幕空间近似</td><td>逐格注入 + cube shadow + 光路衰减</td></tr>
+    <tr><td>相机穿入雾团</td><td>全局函数，没有“进入/离开”事件</td><td>密度场自然表达</td></tr>
+    <tr><td>远处噪声</td><td>长射线趋于均值，细节消失</td><td>保留三维结构，但受 XY 分辨率限制</td></tr>
+    <tr><td>可调空间质量</td><td>基本没有</td><td>像素步长/切片/采样数可调</td></tr>
+  </table>
+  <p>
+    旧实现还有两个工程问题：<code>end</code> 把所有表面的积分截断在固定距离，物体拉远后不再继续淡化；
+    <code>start</code> 又在相机附近挖掉一段，近距离灯晕会突然消失。新实现取消了介质终点，
+    <code>start</code> 只作为可选的艺术裁剪，天空则单独向无穷远收敛。
+  </p>
+</section>
+
+<section id="s9">
+  <h2><span class="num">09</span>边界、参数与代码地图<span class="tag">收尾</span></h2>
+
+  <h3>9.1 已知限制（不要误读为 bug）</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4 style="margin-top:0">物理近似</h4>
+      <ul style="margin:6px 0">
+        <li>只有单次散射：厚雾里缺少多次散射的“补光”，可能偏暗、偏平。</li>
+        <li>没有 CSM；太阳阴影覆盖 48 单位，区域外按可见处理。</li>
+        <li>水面与自发光体不投阴影；薄小遮挡可能闪烁或漏光。</li>
+        <li>相函数全局共享一个 g，不支持逐体积；消光是标量，没有 RGB 吸收。</li>
+        <li>点光阴影最多 5 盏，UBO 最多 8 盏。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="margin-top:0">离散化近似</h4>
+      <ul style="margin:6px 0">
+        <li>XY 一格 8×8 像素（或被 192×128 上限放大），细光束/薄边缘会被抹宽。</li>
+        <li>薄雾层、高频 3D 纹理可能欠采样，需要加切片或缩小像素步长。</li>
+        <li>时域没有运动矢量与深度历史；快速转头会降低历史权重，薄遮挡可能拖影。</li>
+        <li>近灯边界用末格精细积分缓解，但不是精确面积光软阴影。</li>
+        <li>自发光显示算子是艺术取舍，不是物理 HDR 合成。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>9.2 关键参数速查</h3>
+  <table>
+    <tr><th>参数</th><th>默认</th><th>作用</th></tr>
+    <tr><td><code>fog.density</code> (σ<sub>base</sub>)</td><td>0.05</td><td>全空间基础消光，站多高都按距离吃雾</td></tr>
+    <tr><td><code>fog.mist_density</code></td><td>0.02</td><td>贴地附加消光</td></tr>
+    <tr><td><code>fog.height_falloff</code> (k)</td><td>0.35</td><td>e 折高度约 1/k ≈ 2.9 单位</td></tr>
+    <tr><td><code>fog.ground_y</code></td><td>−0.5</td><td>贴地项的参考面</td></tr>
+    <tr><td><code>fog.noise_scale / amount</code></td><td>0.09 / 0.5</td><td>世界空间噪声频率 / 强度</td></tr>
+    <tr><td><code>fog.anim_period / amplitude / frequency</code></td><td>60 s / 0.35 / 0.06</td><td>呼吸周期、幅度、行波频率</td></tr>
+    <tr><td><code>volume.pixel_size</code></td><td>8</td><td>每列覆盖的屏幕像素（4–32）</td></tr>
+    <tr><td><code>volume.depth_slices</code></td><td>64</td><td>深度层数（16–96）</td></tr>
+    <tr><td><code>volume.anisotropy</code> (g)</td><td>0.45</td><td>HG 前向散射强度</td></tr>
+    <tr><td><code>volume.scattering_albedo</code></td><td>0.90</td><td>散射/消光比</td></tr>
+    <tr><td><code>volume.light_steps</code></td><td>4</td><td>光源方向介质衰减步数（0–8）</td></tr>
+    <tr><td><code>volume.history_weight</code></td><td>0.90</td><td>时域历史权重上限（按年龄/距离/转角衰减）</td></tr>
+    <tr><td><code>volume.exposure_ev</code></td><td>0.0</td><td>统一曝光，只影响显示</td></tr>
+  </table>
+
+  <h3>9.3 代码地图</h3>
+  <table>
+    <tr><th>文件</th><th>职责</th></tr>
+    <tr><td><code>app.h</code></td><td><code>CameraFogUbo</code> 布局、<code>VolumeSettings</code> 默认值、各种上限常量</td></tr>
+    <tr><td><code>app_setup.cpp</code></td><td>网格尺寸计算、体积/历史/掩码缓冲、描述符与管线创建</td></tr>
+    <tr><td><code>app_volume.cpp</code></td><td>阴影 pass、三阶段 dispatch、分批 GPU timestamp</td></tr>
+    <tr><td><code>app_systems.cpp</code></td><td>每帧填 UBO、历史有效性判断与权重、上传</td></tr>
+    <tr><td><code>shaders/froxel.comp</code></td><td>注入：采样密度、光照、4 层近场采样、抖动</td></tr>
+    <tr><td><code>shaders/froxel_temporal.comp</code></td><td>重投影、邻域统计/裁剪、历史混合</td></tr>
+    <tr><td><code>shaders/froxel_integrate.comp</code></td><td>每列前缀积分 + 天空收敛层</td></tr>
+    <tr><td><code>shaders/fog_common.glsl</code></td><td>密度场、噪声、呼吸/行波、对数切片、大气色</td></tr>
+    <tr><td><code>shaders/lighting.glsl</code></td><td>太阳/点光阴影、距离窗、光源掩码遍历、介质衰减</td></tr>
+    <tr><td><code>shaders/finite_light.glsl</code></td><td>HG、球冠相函数积分、有限发射体</td></tr>
+    <tr><td><code>shaders/fog_media.glsl</code></td><td>全局+局部介质、灯核内部跳过、3D 纹理</td></tr>
+    <tr><td><code>shaders/fog_surface.glsl</code></td><td>末格精细积分、局部雾求交、天空延拓</td></tr>
+    <tr><td><code>shaders/froxel_sample.glsl</code></td><td>三线性/双线性采样、部分段重建、合成/调试</td></tr>
+    <tr><td><code>shaders/display.glsl</code></td><td>曝光、Reinhard、色域压缩、sRGB、自发光算子</td></tr>
+    <tr><td><code>shaders/control_density.comp</code></td><td>控制点密度场生成（64³ SSBO）</td></tr>
+    <tr><td><code>app_local_fog.cpp</code></td><td>局部雾 ECS 快照、资源槽、存档/载入</td></tr>
+    <tr><td><code>tests/</code></td><td>CPU 数值镜像、相机/ECS、显示公式回归</td></tr>
+  </table>
+
+  <h3>9.4 自己验证</h3>
+  <pre><code># 纯 CPU 公式回归（不编译、不开窗口）
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s examples/fog/tests -p 'test_*.py' -v
+
+# CPU/GLSL 声明、偏移、绑定的一致性检查
+python3 examples/fog/tools/check_volume_sources.py
+
+# 构建并运行（需要 Vulkan 环境）
+xmake build fog
+xmake run fog
+
+# 无窗口 GPU 回归（在 assets 目录）
+../build/linux/x86_64/debug/fog radiance-check</code></pre>
+  <p class="small">
+    这个页面本身是静态 HTML + 原生 Canvas，没有构建步骤；所有演示都是对上述公式的 JS 复算，
+    用于建立直觉，不替代 <code>radiance-check</code> 或实际画面验收。数值默认值取自
+    <code>app.h</code> 与 <code>README.md</code>；如果代码参数变了，以代码为准。
+  </p>
+
+  <div class="footnote">
+    生成依据：<code>examples/fog</code> 当前工作树中的 <code>app_volume.cpp</code>、<code>app_systems.cpp</code>、
+    <code>app_setup.cpp</code>、<code>shaders/*.glsl</code>、<code>shaders/*.comp</code>、<code>README.md</code>、
+    <code>VOLUME.md</code> 与 <code>tests/</code>。<br>
+    公式中的符号与代码字段一一对应；演示里的相机、场景与数值是为讲解重建的简化版本，不代表 App 的固定视角或预设。
+  </div>
+</section>
+  </main>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, root = document) => root.querySelector(s);
+const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+const clamp = (x, a, b) => x < a ? a : x > b ? b : x;
+const mix = (a, b, t) => a + (b - a) * t;
+const smoothstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const f3 = x => x.toFixed(3);
+const f2 = x => x.toFixed(2);
+const f1 = x => x.toFixed(1);
+const PI = Math.PI, TAU = Math.PI * 2;
+
+/* ------------------------------------------------------------------ *
+ * 画布工具：按 CSS 宽度和指定高度设置像素缓冲，绘制坐标用 CSS px。
+ * ------------------------------------------------------------------ */
+function setupCanvas(canvas, cssHeight, aspect) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.max(canvas.clientWidth || 720, 320);
+  const h = aspect ? w * aspect : (cssHeight || 240);
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  canvas.style.height = 'auto';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w, h, dpr };
+}
+function line(ctx, x1, y1, x2, y2) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); }
+function rgb(r, g, b) { return `rgb(${r | 0},${g | 0},${b | 0})`; }
+
+/* ------------------------------------------------------------------ *
+ * 与 shader 对应的噪声 / 密度 / 动画
+ * ------------------------------------------------------------------ */
+function hash21(x, y) {
+  // 与 shader 的 sin-hash 同类的确定性值噪声；这里用整数哈希换取 JS 演示的速度。
+  let h = (Math.imul(x | 0, 374761393) + Math.imul(y | 0, 668265263)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+function valueNoise2(x, y) {
+  const ix = Math.floor(x), iy = Math.floor(y);
+  let fx = x - ix, fy = y - iy;
+  fx = fx * fx * (3 - 2 * fx);
+  fy = fy * fy * (3 - 2 * fy);
+  const a = hash21(ix, iy), b = hash21(ix + 1, iy);
+  const c = hash21(ix, iy + 1), d = hash21(ix + 1, iy + 1);
+  return mix(mix(a, b, fx), mix(c, d, fx), fy);
+}
+function noiseFactor(x, y, z, st) {
+  const s = Math.max(st.noiseScale, 1e-4);
+  const qx = x * s + 0.8 * st.phase * st.wind;
+  const qy = y * s + 0.1 * st.phase * st.wind;
+  const qz = z * s + 0.35 * st.phase * st.wind;
+  const zi = Math.floor(qz);
+  let fz = qz - zi; fz = fz * fz * (3 - 2 * fz);
+  const n1 = mix(
+    valueNoise2(qx + zi * 19.1, qy + zi * 7.7),
+    valueNoise2(qx + (zi + 1) * 19.1, qy + (zi + 1) * 7.7), fz);
+  const n2 = valueNoise2(qx * 2.7 + qy * 0.3 + 13.1, qz * 2.7 + qy * 0.3 + 13.1);
+  const n = n1 * 0.7 + n2 * 0.3;
+  return mix(1, n * 2, clamp(st.noiseAmt, 0, 1));
+}
+function animFactor(x, y, z, st) {
+  const phi = st.phase, amp = clamp(st.amp, 0, 0.9);
+  if (amp <= 1e-5) return 1;
+  const breath = 0.50 * Math.sin(phi)
+    + 0.30 * Math.sin(1.2720196 * phi + 1.7)
+    + 0.20 * Math.sin(1.6180340 * phi + 0.4);
+  const twoPiF = TAU * Math.max(st.freq, 1e-4);
+  const phase = (x * 0.83 + z * 0.55) * twoPiF - 1.2720196 * phi;
+  const warp = 0.45 * Math.sin((x * 0.55 + z * 0.83) * twoPiF * 0.59 + 1.09 * phi);
+  return Math.max(0, 1 + amp * (0.55 * breath + 0.45 * Math.sin(phase + warp)));
+}
+function densityAt(x, y, z, st) {
+  const nf = noiseFactor(x, y, z, st);
+  const base = Math.max(st.base, 0);
+  const mist0 = Math.max(st.mist, 0);
+  let d;
+  if (st.shape >= 3) {
+    const h = (y - st.center) / Math.max(st.thick, 0.1);
+    d = (base + mist0) * Math.exp(-0.5 * h * h) * nf;
+  } else {
+    const mist = mist0 * Math.exp(-Math.max(y - st.ground, 0) * Math.max(st.k, 0)) * nf;
+    d = base + mist;
+    if (st.shape >= 2) d *= smoothstep(0.30, 1.20, nf) * 2;
+  }
+  return Math.max(d * animFactor(x, y, z, st), 0);
+}
+function makeFogState() {
+  return {
+    shape: 0, base: 0.05, mist: 0.02, k: 0.35, ground: -0.5,
+    noiseScale: 0.09, noiseAmt: 0.5, amp: 0.35, freq: 0.06,
+    phase: 0, wind: 0.35, center: 18, thick: 5
+  };
+}
+
+/* ------------------------------------------------------------------ *
+ * TOC 高亮
+ * ------------------------------------------------------------------ */
+(function toc() {
+  const links = $$('nav.toc a');
+  const secs = links.map(a => $(a.getAttribute('href'))).filter(Boolean);
+  let queued = false;
+  const update = () => {
+    queued = false;
+    let active = 0;
+    for (let i = 0; i < secs.length; i++) {
+      if (secs[i].getBoundingClientRect().top <= 140) active = i;
+    }
+    links.forEach((a, i) => a.classList.toggle('active', i === active));
+  };
+  addEventListener('scroll', () => {
+    if (!queued) { queued = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  update();
+})();
+
+/* ------------------------------------------------------------------ *
+ * DEMO 01 · Beer–Lambert
+ * ------------------------------------------------------------------ */
+(function demoBeer() {
+  const canvas = $('#beerCanvas');
+  if (!canvas) return;
+  const bg = [26, 56, 86], fogCol = [190, 205, 216];
+  const sigmaEl = $('#beerSigma'), distEl = $('#beerDist');
+  const outSigma = $('#beerSigmaVal'), outDist = $('#beerDistVal');
+  const swatches = $('#beerSwatches');
+  const state = { sigma: 0.05, dist: 55 };
+
+  function draw() {
+    const { ctx, w, h } = setupCanvas(canvas, 236);
+    const L = 58, R = 18, T = 20, B = 40;
+    const pw = Math.max(w - L - R, 10), ph = Math.max(h - T - B, 10);
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.font = '11px ui-monospace, monospace';
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#14212e';
+    for (let i = 0; i <= 5; i++) {
+      const y = T + ph * i / 5;
+      line(ctx, L, y, L + pw, y);
+      ctx.fillStyle = '#71889b';
+      ctx.fillText((1 - i / 5).toFixed(1), L - 34, y + 4);
+    }
+    for (let d = 0; d <= 120; d += 20) {
+      const x = L + pw * d / 120;
+      line(ctx, x, T, x, T + ph);
+      ctx.fillStyle = '#71889b';
+      ctx.fillText(String(d), x - 7, T + ph + 17);
+    }
+    ctx.fillStyle = '#5f7c92';
+    ctx.fillText('透过率 T', L, 10);
+    ctx.fillText('光程 d', L + pw / 2 - 18, T + ph + 34);
+
+    // 曲线
+    ctx.strokeStyle = '#5fd6c4';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= 260; i++) {
+      const d = 120 * i / 260;
+      const x = L + pw * i / 260;
+      const y = T + ph * (1 - Math.exp(-state.sigma * d));
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+
+    // 标记
+    const mx = L + pw * state.dist / 120;
+    const my = T + ph * (1 - Math.exp(-state.sigma * state.dist));
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = 'rgba(243,181,107,.7)';
+    line(ctx, mx, my, L + pw, my);
+    line(ctx, mx, my, mx, T + ph);
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#f3b56b';
+    ctx.beginPath(); ctx.arc(mx, my, 4, 0, TAU); ctx.fill();
+  }
+
+  function update() {
+    const tau = state.sigma * state.dist;
+    const T = Math.exp(-tau);
+    $('#beerTau').textContent = f3(tau);
+    $('#beerT').textContent = f3(T);
+    $('#beerOneMinus').textContent = f3(1 - T);
+    $('#beerEff').textContent = state.sigma > 0 ? f2((1 - T) / state.sigma) : '∞';
+    outSigma.textContent = f3(state.sigma) + ' /单位';
+    outDist.textContent = f1(state.dist) + ' 单位';
+    swatches.innerHTML = '';
+    for (let i = 0; i <= 4; i++) {
+      const d = state.dist * i / 4;
+      const t = Math.exp(-state.sigma * d);
+      const r = bg[0] * t + fogCol[0] * (1 - t);
+      const g = bg[1] * t + fogCol[1] * (1 - t);
+      const b = bg[2] * t + fogCol[2] * (1 - t);
+      const el = document.createElement('div');
+      el.className = 'swatch';
+      el.style.background = rgb(r, g, b);
+      el.innerHTML = `<span>d=${f1(d)} · T=${t.toFixed(2)}</span>`;
+      swatches.appendChild(el);
+    }
+    draw();
+  }
+
+  sigmaEl.addEventListener('input', () => { state.sigma = +sigmaEl.value; update(); });
+  distEl.addEventListener('input', () => { state.dist = +distEl.value; update(); });
+  addEventListener('resize', draw);
+  update();
+})();
+
+/* ------------------------------------------------------------------ *
+ * DEMO 02 · Froxel 深度切片
+ * ------------------------------------------------------------------ */
+(function demoFroxel() {
+  const canvas = $('#froxelCanvas');
+  if (!canvas) return;
+  const resEl = $('#froxelRes'), stepEl = $('#froxelStep'), zEl = $('#froxelZ');
+  const farEl = $('#froxelFar'), wEl = $('#froxelW');
+  const st = { res: resEl.value, step: 8, Z: 64, far: 300, W: 1, hover: -1 };
+  const bound = z => st.W * (Math.exp(Math.log1p(st.far / st.W) * z / st.Z) - 1);
+  const fmtD = d => d < 10 ? d.toFixed(2) : d < 100 ? d.toFixed(1) : d.toFixed(0);
+
+  function draw() {
+    const { ctx, w, h } = setupCanvas(canvas, 340);
+    const x0 = 72, x1 = Math.max(w - 22, x0 + 40);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace, monospace';
+
+    const zoom = x => x0 + (x1 - x0) * x;
+
+    // 上：线性深度轴
+    ctx.fillStyle = '#5f7c92';
+    ctx.fillText('线性深度轴', 12, 32);
+    ctx.fillText('0', x0 - 4, 66);
+    ctx.fillText(String(st.far), x1 - 16, 66);
+    const grd = ctx.createLinearGradient(x0, 0, x1, 0);
+    grd.addColorStop(0, '#123039'); grd.addColorStop(1, '#0c1a22');
+    ctx.fillStyle = grd;
+    ctx.fillRect(x0, 24, x1 - x0, 26);
+    ctx.strokeStyle = 'rgba(95,214,196,.38)';
+    ctx.lineWidth = 1;
+    for (let z = 0; z <= st.Z; z++) {
+      const x = zoom(bound(z) / st.far);
+      line(ctx, x, 24, x, 50);
+    }
+    ctx.strokeStyle = '#2c4c5a';
+    ctx.strokeRect(x0, 24, x1 - x0, 26);
+    ctx.fillStyle = '#f3b56b';
+    ctx.fillText(`近处 ${st.Z} 个边界挤在左边 → 信息密度高`, x0 + 8, 86);
+
+    // 中：对数轴
+    ctx.fillStyle = '#5f7c92';
+    ctx.fillText('ln(1+d/W)', 12, 112);
+    ctx.fillStyle = '#0f2930';
+    ctx.fillRect(x0, 100, x1 - x0, 26);
+    ctx.strokeStyle = 'rgba(138,168,255,.55)';
+    const logMax = Math.log1p(st.far / st.W);
+    for (let z = 0; z <= st.Z; z++) {
+      const x = x0 + (x1 - x0) * z / st.Z;
+      line(ctx, x, 100, x, 126);
+    }
+    ctx.strokeStyle = '#2c4c5a';
+    ctx.strokeRect(x0, 100, x1 - x0, 26);
+    ctx.fillStyle = '#8aa8ff';
+    ctx.fillText('同一组切片在这个轴上严格等距', x0 + 8, 142);
+
+    // 下：d(z) 曲线
+    const px0 = 72, px1 = x1, py0 = 178, py1 = 300;
+    ctx.strokeStyle = '#14212e';
+    ctx.fillStyle = '#71889b';
+    for (let i = 0; i <= 4; i++) {
+      const y = py0 + (py1 - py0) * i / 4;
+      line(ctx, px0, y, px1, y);
+      ctx.fillText(fmtD(st.far * (1 - i / 4)), px0 - 40, y + 4);
+    }
+    for (let i = 0; i <= 4; i++) {
+      const x = px0 + (px1 - px0) * i / 4;
+      line(ctx, x, py0, x, py1);
+      ctx.fillText(String(Math.round(st.Z * i / 4)), x - 5, py1 + 16);
+    }
+    ctx.fillStyle = '#5f7c92';
+    ctx.fillText('深度', px0 - 46, py0 - 8);
+    ctx.fillText('层号 z', px0 + (px1 - px0) / 2 - 20, py1 + 30);
+
+    ctx.strokeStyle = '#5fd6c4';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let i = 0; i <= 200; i++) {
+      const z = st.Z * i / 200;
+      const x = px0 + (px1 - px0) * i / 200;
+      const y = py1 - (py1 - py0) * bound(z) / st.far;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.stroke();
+
+    if (st.hover >= 0) {
+      const z = clamp(st.hover, 0, st.Z);
+      const x = px0 + (px1 - px0) * z / st.Z;
+      const d = bound(z);
+      const y = py1 - (py1 - py0) * d / st.far;
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = 'rgba(243,181,107,.8)';
+      line(ctx, x, py0, x, py1);
+      line(ctx, px0, y, px1, y);
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#f3b56b';
+      ctx.beginPath(); ctx.arc(x, y, 3.5, 0, TAU); ctx.fill();
+      const label = `z=${z.toFixed(1)}  d=${fmtD(d)}`;
+      ctx.font = '12px ui-monospace, monospace';
+      const tw = ctx.measureText(label).width;
+      ctx.fillStyle = 'rgba(8,14,20,.88)';
+      ctx.fillRect(px1 - tw - 16, py0 + 6, tw + 12, 22);
+      ctx.fillStyle = '#f3b56b';
+      ctx.fillText(label, px1 - tw - 10, py0 + 21);
+    }
+  }
+
+  function readouts() {
+    const [rw, rh] = st.res.split('x').map(Number);
+    const wantX = Math.ceil(rw / st.step), wantY = Math.ceil(rh / st.step);
+    const gx = clamp(wantX, 1, 192), gy = clamp(wantY, 1, 128);
+    const first = bound(1) - bound(0), last = bound(st.Z) - bound(st.Z - 1);
+    $('#froxelDesired').textContent = `${wantX} × ${wantY}`;
+    $('#froxelActual').textContent = `${gx} × ${gy} × ${st.Z}`;
+    $('#froxelCover').textContent = wantX > 192 || wantY > 128
+      ? `${f1(rw / gx)} × ${f1(rh / gy)} px（被上限放大）`
+      : `${st.step} × ${st.step} px`;
+    $('#froxelNear').textContent = fmtD(first);
+    $('#froxelFarGap').textContent = fmtD(last);
+    $('#froxelRatio').textContent = Math.pow(1 + st.far / st.W, 1 / st.Z).toFixed(4);
+    $('#froxelStepVal').textContent = st.step + ' px';
+    $('#froxelZVal').textContent = st.Z + ' 层';
+    $('#froxelFarVal').textContent = st.far.toFixed(0);
+    $('#froxelWVal').textContent = st.W.toFixed(2);
+    draw();
+  }
+
+  resEl.addEventListener('change', () => { st.res = resEl.value; readouts(); });
+  stepEl.addEventListener('input', () => { st.step = +stepEl.value; readouts(); });
+  zEl.addEventListener('input', () => { st.Z = +zEl.value; readouts(); });
+  farEl.addEventListener('input', () => { st.far = +farEl.value; readouts(); });
+  wEl.addEventListener('input', () => { st.W = +wEl.value; readouts(); });
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left) * (canvas.clientWidth / rect.width);
+    const px0 = 72, px1 = Math.max(canvas.clientWidth - 22, 112);
+    st.hover = (x - px0) / (px1 - px0) * st.Z;
+    draw();
+  });
+  canvas.addEventListener('mouseleave', () => { st.hover = -1; draw(); });
+  addEventListener('resize', draw);
+  readouts();
+})();
+
+/* ------------------------------------------------------------------ *
+ * DEMO 03 · 密度场侧视图
+ * ------------------------------------------------------------------ */
+(function demoDensity() {
+  const canvas = $('#densityCanvas');
+  if (!canvas) return;
+  const state = makeFogState();
+  Object.assign(state, { shape: 2, base: 0.035, mist: 0.16, k: 0.25, noiseScale: 0.14, noiseAmt: 1.0, amp: 0.45 });
+  const ids = ['dBase', 'dMist', 'dK', 'dGround', 'dNoiseScale', 'dNoiseAmt', 'dAmp', 'dFreq', 'dPhase'];
+  const map = { dBase: 'base', dMist: 'mist', dK: 'k', dGround: 'ground',
+    dNoiseScale: 'noiseScale', dNoiseAmt: 'noiseAmt', dAmp: 'amp', dFreq: 'freq', dPhase: 'phase' };
+  const outs = { dBase: 'dBaseVal', dMist: 'dMistVal', dK: 'dKVal', dGround: 'dGroundVal',
+    dNoiseScale: 'dNoiseScaleVal', dNoiseAmt: 'dNoiseAmtVal', dAmp: 'dAmpVal', dFreq: 'dFreqVal', dPhase: 'dPhaseVal' };
+  const weatherEl = $('#densityWeather'), playEl = $('#densityPlay'), raysEl = $('#densityRays');
+  let showRays = false, playing = false, last = 0, raf = 0;
+  const off = document.createElement('canvas');
+  const OW = 480, OH = 268;
+  off.width = OW; off.height = OH;
+  const offCtx = off.getContext('2d');
+  const img = offCtx.createImageData(OW, OH);
+  const palette = [
+    [6, 10, 14], [12, 40, 52], [28, 104, 112], [96, 190, 178], [170, 242, 230]
+  ];
+  function ramp(v) {
+    v = clamp(v, 0, 1) * (palette.length - 1);
+    const i = Math.floor(v), t = v - i;
+    const a = palette[i], b = palette[Math.min(i + 1, palette.length - 1)];
+    return [mix(a[0], b[0], t), mix(a[1], b[1], t), mix(a[2], b[2], t)];
+  }
+
+  const XMIN = -28, XMAX = 28, YMIN = -1, YMAX = 24;
+  const sx = (x, w) => (x - XMIN) / (XMAX - XMIN) * w;
+  const sy = (y, h) => (YMAX - y) / (YMAX - YMIN) * h;
+  function label(ctx, text, x, y, align) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,.9)';
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = 'rgba(214,236,246,.85)';
+    ctx.textAlign = align || 'left';
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  function draw() {
+    const { ctx, w, h } = setupCanvas(canvas, 270);
+    const denom = Math.max(state.base + state.mist, 0.008);
+    const data = img.data;
+    for (let j = 0; j < OH; j++) {
+      const y = YMAX - (j + 0.5) / OH * (YMAX - YMIN);
+      for (let i = 0; i < OW; i++) {
+        const x = XMIN + (i + 0.5) / OW * (XMAX - XMIN);
+        const sig = densityAt(x, y, 0, state);
+        const c = ramp(Math.pow(clamp(sig / denom, 0, 1), 2.2));
+        const k = (j * OW + i) * 4;
+        data[k] = c[0]; data[k + 1] = c[1]; data[k + 2] = c[2]; data[k + 3] = 255;
+      }
+    }
+    offCtx.putImageData(img, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(off, 0, 0, OW, OH, 0, 0, w, h);
+
+    // 网格与坐标
+    ctx.font = '11px ui-monospace, monospace';
+    ctx.strokeStyle = 'rgba(120,170,190,.18)';
+    ctx.lineWidth = 1;
+    for (let y = 0; y <= 20; y += 5) {
+      const py = sy(y, h);
+      line(ctx, 0, py, w, py);
+      label(ctx, String(y), 5, py - 3);
+    }
+    for (let x = -20; x <= 20; x += 20) {
+      const px = sx(x, w);
+      line(ctx, px, 0, px, h);
+      label(ctx, String(x), px + 4, h - 6);
+    }
+    label(ctx, '亮度 ∝ σ / (σ_base + σ_mist)', w - 8, 16, 'right');
+    ctx.strokeStyle = 'rgba(243,181,107,.55)';
+    ctx.setLineDash([5, 4]);
+    line(ctx, 0, sy(0, h), w, sy(0, h));
+    ctx.setLineDash([]);
+
+    if (showRays) {
+      const camX = sx(0, w), camY = sy(2.2, h);
+      ctx.strokeStyle = 'rgba(255,255,255,.28)';
+      ctx.lineWidth = 1;
+      for (const yy of [1.0, 5, 9, 13, 17, 21]) {
+        line(ctx, camX, camY, w, sy(yy, h));
+      }
+      ctx.fillStyle = '#eaf4fb';
+      ctx.beginPath(); ctx.arc(camX, camY, 4, 0, TAU); ctx.fill();
+      label(ctx, '相机', camX + 7, camY - 6);
+    }
+
+    // 读数
+    const tau = (() => {
+      let sum = 0; const n = 240;
+      for (let i = 0; i < n; i++) {
+        const y = (i + 0.5) / n * 24;
+        sum += densityAt(0, y, 0, state) * (24 / n);
+      }
+      return sum;
+    })();
+    $('#dSigma0').textContent = f4(densityAt(0, 0, 0, state));
+    $('#dSigmaE').textContent = f4(densityAt(0, 1 / Math.max(state.k, 0.01), 0, state));
+    $('#dTau').textContent = f3(tau);
+    $('#dAnim').textContent = f3(animFactor(0, 0, 0, state));
+  }
+  function f4(x) { return x.toFixed(4); }
+
+  function syncSliders() {
+    for (const id of ids) {
+      const el = $('#' + id);
+      el.value = state[map[id]];
+      $('#' + outs[id]).textContent = Number(state[map[id]]).toFixed(id === 'dPhase' ? 2 : 3);
+    }
+  }
+  function bind() {
+    for (const id of ids) {
+      const el = $('#' + id);
+      el.addEventListener('input', () => {
+        state[map[id]] = +el.value;
+        $('#' + outs[id]).textContent = (+el.value).toFixed(id === 'dPhase' ? 2 : 3);
+        if (id === 'dPhase') state.phase = +el.value;
+        draw();
+      });
+    }
+  }
+  weatherEl.addEventListener('change', () => {
+    state.shape = +weatherEl.value;
+    if (state.shape === 1) Object.assign(state, { base: 0.10, mist: 0.035, k: 0.25, ground: -0.5, noiseScale: 0.06, noiseAmt: 0.15, amp: 0.12, freq: 0.05 });
+    else if (state.shape === 2) Object.assign(state, { base: 0.035, mist: 0.16, k: 0.25, ground: -0.5, noiseScale: 0.14, noiseAmt: 1.0, amp: 0.45, freq: 0.05 });
+    else if (state.shape === 3) Object.assign(state, { base: 0.008, mist: 0.035, k: 0.25, ground: -0.5, noiseScale: 0.08, noiseAmt: 0.55, amp: 0.20, freq: 0.05, center: 18, thick: 5 });
+    syncSliders(); draw();
+  });
+  raysEl.addEventListener('click', () => {
+    showRays = !showRays;
+    raysEl.setAttribute('aria-pressed', String(showRays));
+    draw();
+  });
+  playEl.addEventListener('click', () => {
+    playing = !playing;
+    playEl.setAttribute('aria-pressed', String(playing));
+    playEl.textContent = playing ? '❚❚ 暂停' : '▶ 播放';
+    if (playing) { last = performance.now(); raf = requestAnimationFrame(tick); }
+    else cancelAnimationFrame(raf);
+  });
+  function tick(now) {
+    if (!playing) return;
+    const dt = Math.min((now - last) / 1000, 0.08);
+    last = now;
+    state.phase = (state.phase + dt * 0.55) % TAU;
+    $('#dPhase').value = state.phase;
+    $('#dPhaseVal').textContent = state.phase.toFixed(2);
+    draw();
+    raf = requestAnimationFrame(tick);
+  }
+  bind(); syncSliders(); draw();
+  addEventListener('resize', draw);
+})();
+
+/* ------------------------------------------------------------------ *
+ * DEMO 04 · HG 相函数
+ * ------------------------------------------------------------------ */
+(function demoHG() {
+  const canvas = $('#hgCanvas');
+  if (!canvas) return;
+  const gEl = $('#hgG'), gOut = $('#hgGVal');
+  let g = 0.45;
+  const phase = (mu, gg) => (1 - gg * gg) / (4 * PI * Math.pow(Math.max(1 + gg * gg - 2 * gg * mu, 0.001), 1.5));
+
+  function draw() {
+    const { ctx, w, h } = setupCanvas(canvas, 330);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace, monospace';
+    const pFwd = phase(1, g), pSide = phase(0, g), pBack = phase(-1, g);
+    const pMax = Math.max(pFwd, pBack, 1e-6);
+    const iso = 1 / (4 * PI);
+
+    /* ---------- 左：极坐标 ---------- */
+    const cx = w * 0.26, cy = h * 0.52, rmax = Math.min(h * 0.40, w * 0.17);
+    ctx.strokeStyle = '#1e3344';
+    ctx.lineWidth = 1;
+    for (let i = 1; i <= 4; i++) {
+      ctx.beginPath(); ctx.arc(cx, cy, rmax * i / 4, 0, TAU); ctx.stroke();
+    }
+    ctx.setLineDash([4, 5]);
+    ctx.strokeStyle = 'rgba(95,214,196,.35)';
+    ctx.beginPath(); ctx.arc(cx, cy, rmax, 0, TAU); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 各向同性参考
+    const rIso = rmax * Math.sqrt(clamp(iso / pMax, 0, 1));
+    ctx.strokeStyle = 'rgba(180,200,215,.45)';
+    ctx.beginPath(); ctx.arc(cx, cy, rIso, 0, TAU); ctx.stroke();
+
+    ctx.strokeStyle = '#23394a';
+    line(ctx, cx - rmax, cy, cx + rmax, cy);
+    line(ctx, cx, cy - rmax, cx, cy + rmax);
+
+    ctx.beginPath();
+    for (let i = 0; i <= 360; i++) {
+      const th = i / 360 * TAU;
+      const r = rmax * Math.sqrt(clamp(phase(Math.cos(th), g) / pMax, 0, 1));
+      const x = cx + Math.cos(th) * r;
+      const y = cy - Math.sin(th) * r;
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(95,214,196,.14)';
+    ctx.fill();
+    ctx.strokeStyle = '#5fd6c4';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#f3b56b';
+    ctx.fillText('看向太阳 μ=1', cx + rmax - 78, cy - 10);
+    ctx.fillStyle = '#8098ab';
+    ctx.fillText('背向 μ=−1', cx - rmax + 2, cy - 10);
+    ctx.fillText('90°', cx - 12, cy - rmax + 13);
+    ctx.fillText('极坐标 · 半径 ∝ √(p/p_max)', cx - rmax, 20);
+
+    /* ---------- 右：p(θ) 对数曲线 ---------- */
+    const px0 = Math.max(w * 0.54, cx + rmax + 40), px1 = w - 28;
+    const py0 = 44, py1 = h - 50;
+    const lo = -3, hi = 1;
+    const yOf = p => py1 - (clamp(Math.log10(Math.max(p, 1e-9)), lo, hi) - lo) / (hi - lo) * (py1 - py0);
+    const xOf = th => px0 + th / 180 * (px1 - px0);
+
+    ctx.strokeStyle = '#14212e';
+    ctx.fillStyle = '#71889b';
+    for (let e = lo; e <= hi; e++) {
+      const y = yOf(Math.pow(10, e));
+      line(ctx, px0, y, px1, y);
+      ctx.fillText('1e' + e, px0 - 26, y + 4);
+    }
+    for (let th = 0; th <= 180; th += 45) {
+      const x = xOf(th);
+      line(ctx, x, py0, x, py1);
+      ctx.fillText(th + '°', x - 8, py1 + 16);
+    }
+    ctx.fillStyle = '#5f7c92';
+    ctx.fillText('p(θ)', px0, py0 - 14);
+    ctx.fillText('θ（与太阳方向夹角）', px0 + (px1 - px0) / 2 - 54, py1 + 32);
+
+    ctx.beginPath();
+    for (let i = 0; i <= 180; i++) {
+      const x = xOf(i);
+      const y = yOf(phase(Math.cos(i * PI / 180), g));
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.lineTo(px1, py1);
+    ctx.lineTo(px0, py1);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(95,214,196,.08)';
+    ctx.fill();
+
+    ctx.beginPath();
+    for (let i = 0; i <= 180; i++) {
+      const x = xOf(i);
+      const y = yOf(phase(Math.cos(i * PI / 180), g));
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.strokeStyle = '#5fd6c4';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    for (const th of [0, 90, 180]) {
+      const x = xOf(th), y = yOf(phase(Math.cos(th * PI / 180), g));
+      ctx.fillStyle = '#f3b56b';
+      ctx.beginPath(); ctx.arc(x, y, 3, 0, TAU); ctx.fill();
+    }
+
+    $('#hgFwd').textContent = pFwd.toFixed(4);
+    $('#hgSide').textContent = pSide.toFixed(4);
+    $('#hgBack').textContent = pBack.toFixed(4);
+    $('#hgRatio').textContent = (pFwd / Math.max(pBack, 1e-9)).toFixed(1) + '×';
+    gOut.textContent = g.toFixed(2);
+  }
+
+  gEl.addEventListener('input', () => { g = +gEl.value; draw(); });
+  addEventListener('resize', draw);
+  draw();
+})();
+
+/* ------------------------------------------------------------------ *
+ * DEMO 05 · 逐像素 raymarch（JS 复算，不是 App 的 Froxel 路径）
+ * ------------------------------------------------------------------ */
+(function demoRender() {
+  const canvas = $('#renderCanvas');
+  if (!canvas) return;
+  const st = makeFogState();
+  Object.assign(st, { base: 0.03, mist: 0.025 });
+  const view = { quality: [288, 162, 24], debug: 0, sunElev: 16, g: 0.45, ev: 0, lightI: 10, grid: false, play: false };
+
+  const CAM = [0, 3.6, 13.5], TARGET = [0, 2.2, -1.0], FOV = 45;
+  const AMB = [0.24, 0.28, 0.34];
+  const SUNCOL = [1.0, 0.87, 0.72], E_SUN = 2.4;
+  const FOGCOL = [0.76, 0.81, 0.87], ALBEDO = 0.9;
+
+  const boxes = [
+    { min: [-7.2, 0, -9.2], max: [-3.2, 3.6, -5.0], color: [0.52, 0.43, 0.34] },
+    { min: [-7.9, 3.5, -9.8], max: [-2.5, 4.6, -4.4], color: [0.35, 0.17, 0.14] },
+    { min: [2.0, 0, -6.2], max: [2.6, 2.8, -5.6], color: [0.31, 0.21, 0.13] },
+    { min: [1.0, 2.4, -7.0], max: [3.6, 5.2, -4.8], color: [0.16, 0.36, 0.19] },
+    { min: [-1.2, 0, 1.6], max: [2.8, 0.7, -0.6], color: [0.34, 0.33, 0.32] },
+    { min: [-10.2, -0.1, -3.4], max: [-9.2, 1.3, -1.2], color: [0.38, 0.38, 0.40] },
+    { min: [6.0, 0, -12.0], max: [9.0, 2.4, -9.0], color: [0.24, 0.31, 0.22] },
+    { min: [-2.95, 2.35, -4.95], max: [-2.65, 2.75, -4.65], color: [0, 0, 0], emission: [6.0, 3.6, 1.4] },
+    { min: [2.45, 3.05, -4.90], max: [2.75, 3.40, -4.60], color: [0, 0, 0], emission: [1.4, 4.2, 4.8] }
+  ];
+  const lights = [
+    { pos: [-2.8, 2.55, -4.8], color: [1.0, 0.62, 0.26], range: 9 },
+    { pos: [2.6, 3.20, -4.75], color: [0.35, 0.85, 0.95], range: 7 }
+  ];
+  const RADIUS = 0.11;
+
+  const norm = v => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const add3 = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+  const mul3 = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
+
+  const FORWARD = norm([TARGET[0] - CAM[0], TARGET[1] - CAM[1], TARGET[2] - CAM[2]]);
+  const RIGHT = norm(cross(FORWARD, [0, 1, 0]));
+  const UP = cross(RIGHT, FORWARD);
+
+  let sunDir = [0, 1, 0];
+
+  function phaseHG(mu, g) {
+    g = clamp(g, -0.85, 0.85);
+    const s = Math.max(1 + g * g - 2 * g * clamp(mu, -1, 1), 0.001);
+    return (1 - g * g) / (4 * PI * s * Math.sqrt(s));
+  }
+
+  function hitBox(ro, rd, b) {
+    let tmin = -1e9, tmax = 1e9, axis = 0, sign = -1;
+    for (let k = 0; k < 3; k++) {
+      const inv = 1 / (rd[k] || 1e-12);
+      let t1 = (b.min[k] - ro[k]) * inv;
+      let t2 = (b.max[k] - ro[k]) * inv;
+      let s = -1;
+      if (t1 > t2) { const tmp = t1; t1 = t2; t2 = tmp; s = 1; }
+      if (t1 > tmin) { tmin = t1; axis = k; sign = s; }
+      if (t2 < tmax) tmax = t2;
+    }
+    if (tmax < tmin || tmax < 0) return null;
+    const t = tmin > 1e-3 ? tmin : tmax;
+    if (t < 1e-3) return null;
+    const n = [0, 0, 0];
+    n[axis] = sign;
+    return { t, n, color: b.color, emission: b.emission || null };
+  }
+
+  function sceneHit(ro, rd) {
+    let best = null;
+    if (rd[1] < -1e-6) {
+      const t = -ro[1] / rd[1];
+      if (t > 1e-3) {
+        const p = [ro[0] + rd[0] * t, 0, ro[2] + rd[2] * t];
+        const even = ((Math.floor(p[0] * 0.5) + Math.floor(p[2] * 0.5)) & 1) === 0;
+        best = { t, n: [0, 1, 0], color: even ? [0.24, 0.38, 0.19] : [0.19, 0.32, 0.16], emission: null };
+      }
+    }
+    for (const b of boxes) {
+      const h = hitBox(ro, rd, b);
+      if (h && (!best || h.t < best.t)) best = h;
+    }
+    return best;
+  }
+
+  function skyColor(rd) {
+    const up = clamp(rd[1], -1, 1);
+    const horizon = [0.72, 0.82, 0.92], zenith = [0.12, 0.32, 0.68], sea = [0.60, 0.69, 0.78];
+    let c;
+    if (up >= 0) {
+      const t = smoothstep(0, 1, up);
+      c = [mix(horizon[0], zenith[0], t), mix(horizon[1], zenith[1], t), mix(horizon[2], zenith[2], t)];
+    } else {
+      const t = smoothstep(0, 0.35, -up);
+      c = [mix(horizon[0], sea[0], t), mix(horizon[1], sea[1], t), mix(horizon[2], sea[2], t)];
+    }
+    const sun = smoothstep(Math.cos(0.09), Math.cos(0.035), dot(rd, sunDir));
+    return [c[0] + SUNCOL[0] * 2.2 * sun, c[1] + SUNCOL[1] * 2.2 * sun, c[2] + SUNCOL[2] * 2.2 * sun];
+  }
+
+  // 返回 [q.r, q.g, q.b, sigma]，q = sigma_s * L_in
+  function fogSource(p, rd) {
+    const sigma = densityAt(p[0], p[1], p[2], st);
+    if (sigma <= 1e-6) return [0, 0, 0, 0];
+    const mu = dot(rd, sunDir);
+    const ph = phaseHG(mu, view.g);
+    const illum = [
+      AMB[0] + SUNCOL[0] * E_SUN * ph,
+      AMB[1] + SUNCOL[1] * E_SUN * ph,
+      AMB[2] + SUNCOL[2] * E_SUN * ph
+    ];
+    for (const L of lights) {
+      if (view.lightI <= 0) break;
+      const dx = L.pos[0] - p[0], dy = L.pos[1] - p[1], dz = L.pos[2] - p[2];
+      const d2 = dx * dx + dy * dy + dz * dz;
+      const dist = Math.sqrt(d2);
+      if (dist >= L.range) continue;
+      const wind = Math.pow(clamp(1 - Math.pow(dist / L.range, 4), 0, 1), 2);
+      const muL = (dx * rd[0] + dy * rd[1] + dz * rd[2]) / Math.max(dist, 1e-4);
+      const pL = phaseHG(muL, view.g);
+      const contrib = view.lightI * pL * wind / Math.max(d2, RADIUS * RADIUS);
+      illum[0] += L.color[0] * contrib;
+      illum[1] += L.color[1] * contrib;
+      illum[2] += L.color[2] * contrib;
+    }
+    return [
+      sigma * ALBEDO * FOGCOL[0] * illum[0],
+      sigma * ALBEDO * FOGCOL[1] * illum[1],
+      sigma * ALBEDO * FOGCOL[2] * illum[2],
+      sigma
+    ];
+  }
+
+  function shadeSurface(hit, p) {
+    if (hit.emission) return { refl: [0, 0, 0], emission: hit.emission };
+    const n = hit.n, a = hit.color;
+    const nd = Math.max(dot(n, sunDir), 0);
+    const sun = (E_SUN / PI) * nd;
+    const r = [
+      a[0] * (AMB[0] + SUNCOL[0] * sun),
+      a[1] * (AMB[1] + SUNCOL[1] * sun),
+      a[2] * (AMB[2] + SUNCOL[2] * sun)
+    ];
+    for (const L of lights) {
+      if (view.lightI <= 0) break;
+      const dx = L.pos[0] - p[0], dy = L.pos[1] - p[1], dz = L.pos[2] - p[2];
+      const d2 = dx * dx + dy * dy + dz * dz;
+      const dist = Math.sqrt(d2);
+      if (dist >= L.range) continue;
+      const ndl = Math.max((dx * n[0] + dy * n[1] + dz * n[2]) / Math.max(dist, 1e-4), 0);
+      const wind = Math.pow(clamp(1 - Math.pow(dist / L.range, 4), 0, 1), 2);
+      const att = wind / Math.max(d2, RADIUS * RADIUS) * view.lightI / PI;
+      r[0] += a[0] * ndl * L.color[0] * att;
+      r[1] += a[1] * ndl * L.color[1] * att;
+      r[2] += a[2] * ndl * L.color[2] * att;
+    }
+    return { refl: r, emission: null };
+  }
+
+  function integrate(ro, rd, maxDist, steps, allowTail) {
+    let T = 1, S0 = 0, S1 = 0, S2 = 0;
+    let lastP = null, lastSig = 0;
+    for (let i = 0; i < steps; i++) {
+      const u0 = i / steps, u1 = (i + 1) / steps;
+      const t0 = maxDist * u0 * u0, t1 = maxDist * u1 * u1;
+      const dt = t1 - t0;
+      if (dt <= 0) continue;
+      const tm = (t0 + t1) * 0.5;
+      const p = [ro[0] + rd[0] * tm, ro[1] + rd[1] * tm, ro[2] + rd[2] * tm];
+      const q = fogSource(p, rd);
+      const sig = q[3];
+      if (sig <= 1e-6) continue;
+      const tau = Math.min(sig * dt, 80);
+      const Ts = Math.exp(-tau);
+      const integral = tau < 1e-3 ? dt * (1 - 0.5 * tau) : (1 - Ts) / Math.max(sig, 1e-8);
+      S0 += T * q[0] * integral;
+      S1 += T * q[1] * integral;
+      S2 += T * q[2] * integral;
+      T *= Ts;
+      lastP = p; lastSig = sig;
+      if (T < 1e-4) break;
+    }
+    if (allowTail && lastP && lastSig > 1e-6 && T > 1e-4) {
+      const far = [lastP[0] + rd[0] * 120, lastP[1] + rd[1] * 120, lastP[2] + rd[2] * 120];
+      const q = fogSource(far, rd);
+      if (q[3] > 1e-6) {
+        S0 += T * q[0] / q[3];
+        S1 += T * q[1] / q[3];
+        S2 += T * q[2] / q[3];
+        T = 0;
+      }
+    }
+    return [S0, S1, S2, T];
+  }
+
+  const enc = x => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055;
+
+  function mapRadiance(c) {
+    const e = Math.pow(2, view.ev);
+    let r = Math.max(c[0], 0) * e, g = Math.max(c[1], 0) * e, b = Math.max(c[2], 0) * e;
+    const Y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    const my = Y / (1 + Y);
+    let m = [r / (1 + Y), g / (1 + Y), b / (1 + Y)];
+    const peak = Math.max(m[0], m[1], m[2]);
+    if (peak > 1) {
+      const s = (1 - my) / Math.max(peak - my, 1e-6);
+      m = [my + (m[0] - my) * s, my + (m[1] - my) * s, my + (m[2] - my) * s];
+    }
+    return [clamp(m[0], 0, 1), clamp(m[1], 0, 1), clamp(m[2], 0, 1)];
+  }
+
+  const off = document.createElement('canvas');
+  const octx = off.getContext('2d');
+  let imageData = null;
+
+  function render() {
+    const t0 = performance.now();
+    const [IW, IH, STEPS] = view.quality;
+    if (off.width !== IW || off.height !== IH) {
+      off.width = IW; off.height = IH;
+      imageData = octx.createImageData(IW, IH);
+    }
+    const { ctx, w, h } = setupCanvas(canvas, 0, 9 / 16);
+
+    const el = view.sunElev * PI / 180;
+    sunDir = norm([0.5 * Math.cos(el), Math.sin(el), -0.866 * Math.cos(el)]);
+
+    const aspect = IW / IH;
+    const tanHalf = Math.tan(FOV * PI / 360);
+    const data = imageData.data;
+    let px = 0;
+
+    for (let j = 0; j < IH; j++) {
+      const v = (1 - (j + 0.5) / IH * 2) * tanHalf;
+      for (let i = 0; i < IW; i++) {
+        const u = ((i + 0.5) / IW * 2 - 1) * tanHalf * aspect;
+        const rd = norm([
+          FORWARD[0] + RIGHT[0] * u + UP[0] * v,
+          FORWARD[1] + RIGHT[1] * u + UP[1] * v,
+          FORWARD[2] + RIGHT[2] * u + UP[2] * v
+        ]);
+        const hit = sceneHit(CAM, rd);
+        const maxD = hit ? hit.t : 160;
+        const fog = integrate(CAM, rd, maxD, STEPS, !hit);
+        const T = fog[3];
+        let c;
+        if (view.debug === 1) {
+          const g = enc(clamp(T, 0, 1));
+          c = [g, g, g];
+        } else if (view.debug === 2) {
+          c = mapRadiance([fog[0], fog[1], fog[2]]).map(enc);
+        } else if (hit) {
+          const sh = shadeSurface(hit, [CAM[0] + rd[0] * hit.t, CAM[1] + rd[1] * hit.t, CAM[2] + rd[2] * hit.t]);
+          if (hit.emission) {
+            const base = mapRadiance([fog[0], fog[1], fog[2]]);
+            const em = mapRadiance(sh.emission);
+            c = [0, 1, 2].map(k => enc(clamp(base[k] + T * em[k], 0, 1)));
+          } else {
+            c = mapRadiance([
+              sh.refl[0] * T + fog[0],
+              sh.refl[1] * T + fog[1],
+              sh.refl[2] * T + fog[2]
+            ]).map(enc);
+          }
+        } else {
+          const bg = skyColor(rd);
+          c = mapRadiance([
+            bg[0] * T + fog[0],
+            bg[1] * T + fog[1],
+            bg[2] * T + fog[2]
+          ]).map(enc);
+        }
+        data[px++] = c[0] * 255;
+        data[px++] = c[1] * 255;
+        data[px++] = c[2] * 255;
+        data[px++] = 255;
+      }
+    }
+    octx.putImageData(imageData, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(off, 0, 0, IW, IH, 0, 0, w, h);
+
+    if (view.grid) {
+      ctx.lineWidth = 1;
+      const stepX = w * 8 / IW, stepY = h * 8 / IH;
+      ctx.strokeStyle = 'rgba(255,255,255,.085)';
+      for (let x = 0; x < w; x += stepX) line(ctx, x, 0, x, h);
+      ctx.strokeStyle = 'rgba(255,255,255,.030)';
+      for (let y = 0; y < h; y += stepY) line(ctx, 0, y, w, y);
+      ctx.fillStyle = 'rgba(255,255,255,.55)';
+      ctx.font = '11px ui-monospace, monospace';
+      ctx.fillText('示意：每 8 个内部像素一列（深度层未画出）', 12, 20);
+    }
+
+    const ms = performance.now() - t0;
+    $('#rTime').textContent = ms.toFixed(0) + ' ms';
+    $('#rPixels').textContent = `${IW} × ${IH} × ${STEPS}` + (view.play ? '（动画降档）' : '');
+    $('#rSigma').textContent = densityAt(0, 1.5, 8, st).toFixed(4);
+  }
+
+  let timer = 0;
+  function schedule() {
+    clearTimeout(timer);
+    timer = setTimeout(render, 50);
+  }
+
+  // ---- 控件 ----
+  const bindings = [
+    ['rBase', 'base', 'rBaseVal', 3], ['rMist', 'mist', 'rMistVal', 3],
+    ['rK', 'k', 'rKVal', 2], ['rG', 'g', 'rGVal', 2],
+    ['rSun', 'sunElev', 'rSunVal', 0], ['rEv', 'ev', 'rEvVal', 1],
+    ['rLight', 'lightI', 'rLightVal', 1]
+  ];
+  for (const [id, key, outId, digits] of bindings) {
+    const el = $('#' + id);
+    el.addEventListener('input', () => {
+      const v = +el.value;
+      if (key in st) st[key] = v; else view[key] = v;
+      $('#' + outId).textContent = v.toFixed(digits);
+      schedule();
+    });
+  }
+  $('#rDebug').addEventListener('change', e => { view.debug = +e.target.value; schedule(); });
+  $('#rQuality').addEventListener('change', e => {
+    view.quality = e.target.value.split(',').map(Number);
+    schedule();
+  });
+  $('#renderGrid').addEventListener('click', e => {
+    view.grid = !view.grid;
+    e.currentTarget.setAttribute('aria-pressed', String(view.grid));
+    schedule();
+  });
+  const playEl = $('#renderPlay');
+  let raf = 0, lastT = 0, savedQuality = null;
+  function loop(now) {
+    if (!view.play) return;
+    const dt = Math.min((now - lastT) / 1000, 0.1);
+    lastT = now;
+    st.phase = (st.phase + dt * 0.55) % TAU;
+    render();
+    raf = requestAnimationFrame(loop);
+  }
+  playEl.addEventListener('click', () => {
+    view.play = !view.play;
+    playEl.setAttribute('aria-pressed', String(view.play));
+    playEl.textContent = view.play ? '❚❚ 暂停' : '▶ 动画';
+    if (view.play) {
+      savedQuality = view.quality;
+      view.quality = [224, 126, 18];
+      $('#rQuality').disabled = true;
+      lastT = performance.now();
+      raf = requestAnimationFrame(loop);
+    } else {
+      cancelAnimationFrame(raf);
+      if (savedQuality) { view.quality = savedQuality; savedQuality = null; }
+      $('#rQuality').disabled = false;
+      render();
+    }
+  });
+
+  const presets = {
+    1: { base: 0.06, mist: 0.03, k: 0.25, noiseScale: 0.06, noiseAmt: 0.15, amp: 0.12 },
+    2: { base: 0.025, mist: 0.09, k: 0.25, noiseScale: 0.14, noiseAmt: 1.0, amp: 0.45 },
+    3: { base: 0.004, mist: 0.02, k: 0.25, noiseScale: 0.08, noiseAmt: 0.55, amp: 0.20, center: 15, thick: 4 }
+  };
+  $$('[data-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = +btn.dataset.preset;
+      st.shape = p;
+      if (presets[p]) Object.assign(st, presets[p]);
+      $$('[data-preset]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      // 同步滑杆
+      const sync = [['rBase', 'base'], ['rMist', 'mist'], ['rK', 'k']];
+      for (const [id, key] of sync) {
+        $('#' + id).value = st[key];
+      }
+      $('#rBaseVal').textContent = st.base.toFixed(3);
+      $('#rMistVal').textContent = st.mist.toFixed(3);
+      $('#rKVal').textContent = st.k.toFixed(2);
+      schedule();
+    });
+  });
+
+  // 初始读数
+  $('#rBaseVal').textContent = st.base.toFixed(3);
+  $('#rMistVal').textContent = st.mist.toFixed(3);
+  $('#rKVal').textContent = st.k.toFixed(2);
+  $('#rGVal').textContent = view.g.toFixed(2);
+  $('#rSunVal').textContent = view.sunElev.toFixed(0);
+  $('#rEvVal').textContent = view.ev.toFixed(1);
+  $('#rLightVal').textContent = view.lightI.toFixed(1);
+
+  addEventListener('resize', schedule);
+  schedule();
+})();
+
+})();
+
+
+</script>
+</body>
+</html>

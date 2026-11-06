@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="840" viewBox="0 0 1800 840"
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC',SimSun,serif">
+  <title>表面精细积分：格子均值与表面之前的残段</title>
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F8B75F"/><stop offset="1" stop-color="#DE8A2E"/>
+    </linearGradient>
+    <radialGradient id="lamp">
+      <stop offset="0" stop-color="#FFD79A" stop-opacity="0.8"/>
+      <stop offset="0.5" stop-color="#FFD79A" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFD79A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ================= 左：表面切在格子中间 ================= -->
+  <g>
+    <rect x="260" y="350" width="110" height="160" fill="#E9F3FA" stroke="#B7D2E4" stroke-width="1.5"/>
+    <rect x="370" y="322" width="130" height="216" fill="#E9F3FA" stroke="#B7D2E4" stroke-width="1.5"/>
+    <rect x="500" y="300" width="260" height="260" fill="#FCEFE0" stroke="#D8B58A" stroke-width="1.5"/>
+  </g>
+
+  <circle cx="742" cy="460" r="58" fill="url(#lamp)"/>
+  <circle cx="742" cy="460" r="10" fill="#FFC96F"/>
+  <rect x="658" y="240" width="32" height="380" rx="6" fill="url(#wall)" stroke="#D8873A" stroke-width="1.4"/>
+
+  <path d="M111 430H656" stroke="#D9843A" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M692 430H760" stroke="#D9843A" stroke-width="3.2" stroke-dasharray="7 7" opacity="0.5"/>
+
+  <g stroke="#9FB4C2" stroke-width="1.2" stroke-dasharray="6 7">
+    <path d="M500 272V590"/><path d="M760 272V590"/>
+  </g>
+
+  <g>
+    <path d="M66 428 C 40 424 24 410 16 392" fill="none" stroke="#2A3C48" stroke-width="6.5" stroke-linecap="round"/>
+    <circle cx="85" cy="430" r="26" fill="#EAF7FE" stroke="#243541" stroke-width="6"/>
+    <circle cx="85" cy="430" r="17.5" fill="none" stroke="#7FA8BE" stroke-width="1.2" opacity="0.45"/>
+    <circle cx="85" cy="430" r="8" fill="#2C4351" opacity="0.82"/>
+    <circle cx="81" cy="426" r="2.5" fill="#FFFFFF" opacity="0.8"/>
+  </g>
+
+  <g stroke="#8FA6B4" stroke-width="1.5" fill="none">
+    <path d="M504 588H652"/><path d="M696 588H756"/>
+    <path d="M504 580V596"/><path d="M652 580V596"/><path d="M696 580V596"/><path d="M756 580V596"/>
+  </g>
+  <g font-size="18" fill="#607788" text-anchor="middle">
+    <text x="578" y="622">表面之前</text>
+    <text x="726" y="622" fill="#A9762F">被挡住</text>
+    <text x="545" y="286">整格一个均值</text>
+    <text x="674" y="222" fill="#486172">表面</text>
+  </g>
+
+  <text x="60" y="712" font-size="26" font-weight="600" fill="#253642">表面切在格子中间</text>
+  <text x="60" y="750" font-size="19" fill="#607788">均值的区间跨过了表面，后面的雾也被带了进来</text>
+
+  <!-- ================= 右：每个像素的代价 ================= -->
+  <line x1="920" y1="120" x2="920" y2="780" stroke="#CFDAE2" stroke-width="1.5" stroke-dasharray="7 10"/>
+
+  <g font-size="20" fill="#607788" text-anchor="end">
+    <text x="1090" y="412">合成</text><text x="1090" y="502">精修</text>
+  </g>
+
+  <rect x="1112" y="380" width="24" height="34" rx="4" fill="#8FB8D4"/>
+  <text x="1150" y="406" font-size="19" fill="#607788">≈ 8 次查表</text>
+
+  <rect x="1112" y="470" width="470" height="34" rx="4" fill="#E0A05C"/>
+  <g stroke="#FFFFFF" stroke-width="2" opacity="0.55">
+    <path d="M1151 470V504"/><path d="M1191 470V504"/><path d="M1231 470V504"/><path d="M1271 470V504"/>
+    <path d="M1311 470V504"/><path d="M1351 470V504"/><path d="M1391 470V504"/><path d="M1431 470V504"/>
+    <path d="M1471 470V504"/><path d="M1511 470V504"/><path d="M1541 470V504"/>
+  </g>
+  <text x="1600" y="496" font-size="19" fill="#607788">≤ 160 步</text>
+
+  <text x="1112" y="590" font-size="19" fill="#607788">只在局部灯附近触发</text>
+
+  <text x="960" y="712" font-size="26" font-weight="600" fill="#253642">残段很短，却按像素计</text>
+  <text x="960" y="750" font-size="19" fill="#607788">精修走一次区间步进，最多 160 步</text>
+</svg>

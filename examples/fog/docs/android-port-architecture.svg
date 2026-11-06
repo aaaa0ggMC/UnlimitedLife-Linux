@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="840" viewBox="0 0 1800 840"
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC',SimSun,serif">
+  <title>同一份 fog 源码到 Android APK 的迁移架构</title>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10" fill="#8FB8D4"/>
+    </marker>
+    <marker id="arrD" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10" fill="#A9BCC9"/>
+    </marker>
+  </defs>
+
+  <!-- ============ 第一行：迁移流水线 ============ -->
+  <g>
+    <rect x="60" y="120" width="300" height="160" rx="12" fill="#EAF3FA" stroke="#B7D2E4" stroke-width="1.6"/>
+    <text x="210" y="176" font-size="27" font-weight="600" fill="#253642" text-anchor="middle">fog 源码</text>
+    <text x="210" y="216" font-size="19" fill="#607788" text-anchor="middle">同一份，不分支</text>
+    <text x="210" y="248" font-size="19" fill="#607788" text-anchor="middle">app*.cpp · shaders · config</text>
+  </g>
+  <g>
+    <rect x="405" y="120" width="300" height="160" rx="12" fill="#EAF3FA" stroke="#B7D2E4" stroke-width="1.6"/>
+    <text x="555" y="176" font-size="27" font-weight="600" fill="#253642" text-anchor="middle">平台包装</text>
+    <text x="555" y="216" font-size="19" fill="#607788" text-anchor="middle">宏 + 后端抽象</text>
+    <text x="555" y="248" font-size="19" fill="#607788" text-anchor="middle">#ifdef __ANDROID__</text>
+  </g>
+  <g>
+    <rect x="750" y="120" width="300" height="160" rx="12" fill="#EAF3FA" stroke="#B7D2E4" stroke-width="1.6"/>
+    <text x="900" y="176" font-size="27" font-weight="600" fill="#253642" text-anchor="middle">android-gcc-cross</text>
+    <text x="900" y="216" font-size="19" fill="#607788" text-anchor="middle">GCC-16 · C++26</text>
+    <text x="900" y="248" font-size="19" fill="#607788" text-anchor="middle">每个 ABI 各编一份</text>
+  </g>
+  <g>
+    <rect x="1095" y="120" width="300" height="160" rx="12" fill="#EAF3FA" stroke="#B7D2E4" stroke-width="1.6"/>
+    <text x="1245" y="176" font-size="27" font-weight="600" fill="#253642" text-anchor="middle">libfogandroid.so</text>
+    <text x="1245" y="216" font-size="19" fill="#607788" text-anchor="middle">JNI 桥接</text>
+    <text x="1245" y="248" font-size="19" fill="#607788" text-anchor="middle">输入 · 表面 · 资源</text>
+  </g>
+  <g>
+    <rect x="1440" y="120" width="300" height="160" rx="12" fill="#EAF3FA" stroke="#B7D2E4" stroke-width="1.6"/>
+    <text x="1590" y="176" font-size="27" font-weight="600" fill="#253642" text-anchor="middle">Gradle 打包</text>
+    <text x="1590" y="216" font-size="19" fill="#607788" text-anchor="middle">进 APK</text>
+    <text x="1590" y="248" font-size="19" fill="#607788" text-anchor="middle">装到手机跑</text>
+  </g>
+  <g stroke="#8FB8D4" stroke-width="3" marker-end="url(#arr)">
+    <path d="M360 200H398"/><path d="M705 200H743"/><path d="M1050 200H1088"/><path d="M1395 200H1433"/>
+  </g>
+
+  <!-- ============ 第二行：同一份源码的两个后端 ============ -->
+  <path d="M555 280V350H900V410" fill="none" stroke="#A9BCC9" stroke-width="1.6" stroke-dasharray="7 7" marker-end="url(#arrD)"/>
+
+  <!-- PC 后端 -->
+  <g>
+    <rect x="60" y="390" width="680" height="170" rx="12" fill="#F1F6FA" stroke="#C6D9E6" stroke-width="1.4"/>
+    <text x="240" y="452" font-size="27" font-weight="600" fill="#253642">PC · GLFWWindow</text>
+    <text x="240" y="492" font-size="20" fill="#607788">IMR：逐物体立即提交</text>
+    <text x="240" y="528" font-size="20" fill="#607788">桌面基准，同源码同算法</text>
+  </g>
+
+  <!-- 抽象层 -->
+  <g>
+    <rect x="790" y="420" width="220" height="110" rx="12" fill="#EAF3FA" stroke="#B7D2E4" stroke-width="1.6"/>
+    <text x="900" y="466" font-size="24" font-weight="600" fill="#253642" text-anchor="middle">WindowBase</text>
+    <text x="900" y="500" font-size="18" fill="#607788" text-anchor="middle">同一套接口</text>
+  </g>
+  <g stroke="#8FB8D4" stroke-width="2.6" marker-end="url(#arr)">
+    <path d="M783 475H748"/><path d="M1017 475H1052"/>
+  </g>
+
+  <!-- Android 后端 -->
+  <g>
+    <rect x="1060" y="390" width="680" height="170" rx="12" fill="#F1F6FA" stroke="#C6D9E6" stroke-width="1.4"/>
+    <text x="1240" y="452" font-size="27" font-weight="600" fill="#253642">Android · AndroidWindow</text>
+    <text x="1240" y="492" font-size="20" fill="#607788">TBDR：分块延迟渲染</text>
+    <text x="1240" y="528" font-size="20" fill="#607788">ANativeWindow · arm64-v8a / armeabi-v7a / x86_64</text>
+  </g>
+
+  <!-- ============ 第三行：真实编译命令 ============ -->
+  <g>
+    <rect x="60" y="640" width="1680" height="140" rx="12" fill="#F4F7FA" stroke="#DCE5EB" stroke-width="1.4"/>
+    <text x="92" y="678" font-size="18" fill="#8A99A4">build-native.sh</text>
+    <text x="92" y="718" font-size="21" fill="#3D5766" font-family="'DejaVu Sans Mono',monospace">aarch64-unknown-linux-android24-g++ -std=c++26 -freflection -DVK_USE_PLATFORM_ANDROID_KHR</text>
+    <text x="92" y="756" font-size="21" fill="#3D5766" font-family="'DejaVu Sans Mono',monospace">    -shared -pthread -landroid -lvulkan -llog -o libfogandroid.so</text>
+  </g>
+</svg>

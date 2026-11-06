@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="580" viewBox="0 0 1700 580"
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC',SimSun,serif">
+  <title>Beer–Lambert 雾中的像素颜色形成过程</title>
+  <desc>眼镜相机、光源与雾团组成的视线几何，以及 background·T 与沿途散射 S 相加得到最终像素的颜色流水线。</desc>
+
+  <defs>
+    <!-- 颜色 -->
+    <linearGradient id="lensGrad" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#FAFEFF"/>
+      <stop offset="1" stop-color="#CBE6F4"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F8B75F"/>
+      <stop offset="1" stop-color="#DE8A2E"/>
+    </linearGradient>
+
+    <!-- 雾体 -->
+    <linearGradient id="fogFill" x1="0" y1="0" x2="0.15" y2="1">
+      <stop offset="0" stop-color="#E6F3FB" stop-opacity="0.92"/>
+      <stop offset="0.55" stop-color="#C6E1F1" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#9CC7E2" stop-opacity="0.76"/>
+    </linearGradient>
+    <radialGradient id="sunGlow">
+      <stop offset="0" stop-color="#FFD79A" stop-opacity="0.75"/>
+      <stop offset="0.55" stop-color="#FFD79A" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFD79A" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 视线：背景分量（越靠近相机越弱） -->
+    <linearGradient id="rayWarm" gradientUnits="userSpaceOnUse" x1="1462" y1="0" x2="162" y2="0">
+      <stop offset="0" stop-color="#F09A3E" stop-opacity="0.95"/>
+      <stop offset="0.28" stop-color="#CF8442" stop-opacity="0.80"/>
+      <stop offset="0.58" stop-color="#8E7358" stop-opacity="0.55"/>
+      <stop offset="0.82" stop-color="#A2938A" stop-opacity="0.34"/>
+      <stop offset="1" stop-color="#C3B7AC" stop-opacity="0.26"/>
+    </linearGradient>
+    <!-- 视线：沿途散射累积（越靠近相机越强，颜色收敛到最终像素色） -->
+    <linearGradient id="rayScatter" gradientUnits="userSpaceOnUse" x1="1462" y1="0" x2="162" y2="0">
+      <stop offset="0" stop-color="#9FD3EE" stop-opacity="0.06"/>
+      <stop offset="0.42" stop-color="#A6D5EC" stop-opacity="0.30"/>
+      <stop offset="0.72" stop-color="#BCCFCB" stop-opacity="0.70"/>
+      <stop offset="0.9" stop-color="#C9BA9C" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#C9BA9C" stop-opacity="0.98"/>
+    </linearGradient>
+
+    <!-- 光源的光线 -->
+    <linearGradient id="beam" gradientUnits="userSpaceOnUse" x1="0" y1="96" x2="0" y2="356">
+      <stop offset="0" stop-color="#FFC774" stop-opacity="0.95"/>
+      <stop offset="0.65" stop-color="#F3A958" stop-opacity="0.60"/>
+      <stop offset="1" stop-color="#E29A55" stop-opacity="0.15"/>
+    </linearGradient>
+
+    <filter id="fogBlur" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="13"/>
+    </filter>
+    <filter id="puffBlur" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="11"/>
+    </filter>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+    <filter id="glowWide" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+
+    <marker id="beamHead" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6"
+            orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#E5A055"/>
+    </marker>
+  </defs>
+
+  <!-- ================= 场景 ================= -->
+
+  <!-- 背景表面 -->
+  <g>
+    <rect x="1464" y="112" width="66" height="252" rx="9" fill="url(#bgGrad)" stroke="#D8873A" stroke-width="1.5"/>
+    <path d="M 1478 112 L 1478 364" stroke="#FFD79A" stroke-width="4" opacity="0.45"/>
+  </g>
+
+  <!-- 雾团 -->
+  <g>
+    <path d="M 436 238
+             C 434 156 520 100 640 96
+             C 730 74 860 92 960 86
+             C 1090 74 1250 96 1340 130
+             C 1420 158 1442 210 1434 252
+             C 1426 302 1380 332 1300 342
+             C 1180 358 1040 344 920 350
+             C 790 358 660 350 560 334
+             C 480 320 438 296 436 238 Z"
+          fill="url(#fogFill)" filter="url(#fogBlur)"/>
+    <!-- 内部翻滚的棉絮感 -->
+    <ellipse cx="640" cy="250" rx="150" ry="82" fill="#FFFFFF" opacity="0.30" filter="url(#puffBlur)"/>
+    <ellipse cx="900" cy="290" rx="170" ry="70" fill="#FFFFFF" opacity="0.22" filter="url(#puffBlur)"/>
+    <ellipse cx="1180" cy="230" rx="150" ry="76" fill="#FFFFFF" opacity="0.26" filter="url(#puffBlur)"/>
+    <ellipse cx="770" cy="150" rx="120" ry="52" fill="#FFFFFF" opacity="0.30" filter="url(#puffBlur)"/>
+  </g>
+
+  <!-- 太阳光晕 + 光源 -->
+  <g>
+    <circle cx="905" cy="80" r="118" fill="url(#sunGlow)"/>
+    <circle cx="905" cy="80" r="30" fill="#FFD07A" opacity="0.55" filter="url(#glow)"/>
+    <circle cx="905" cy="80" r="22" fill="#FFC96F"/>
+    <circle cx="898" cy="73" r="8" fill="#FFF3D2" opacity="0.9"/>
+  </g>
+
+  <!-- 射入雾中的光 -->
+  <g fill="none" stroke="url(#beam)" stroke-width="2.6" stroke-linecap="round" marker-end="url(#beamHead)">
+    <path d="M 875 103 L 744 322"/>
+    <path d="M 889 108 L 798 340"/>
+    <path d="M 900 110 L 846 348"/>
+    <path d="M 913 110 L 898 354"/>
+  </g>
+
+  <!-- 视线 -->
+  <g stroke-linecap="round">
+    <!-- 背景光的衰减 -->
+    <path d="M 1462 238 L 162 238" stroke="url(#rayWarm)" stroke-width="9" fill="none"/>
+    <!-- 散射光的累积：先光晕再实芯 -->
+    <path d="M 1462 238 L 162 238" stroke="url(#rayScatter)" stroke-width="17" fill="none"
+          filter="url(#glowWide)" opacity="0.85"/>
+    <path d="M 1462 238 L 162 238" stroke="url(#rayScatter)" stroke-width="6" fill="none"/>
+  </g>
+
+  <!-- 相机（眼镜） -->
+  <g>
+    <path d="M 78 228 C 50 224 26 210 14 190 C 8 179 8 166 15 156" stroke="#2A3C48" stroke-width="7.5" fill="none" stroke-linecap="round"/>
+    <circle cx="79" cy="228" r="6" fill="#2A3C48"/>
+    <circle cx="120" cy="238" r="42" fill="url(#lensGrad)" stroke="#243541" stroke-width="7"/>
+    <circle cx="120" cy="238" r="30" fill="none" stroke="#7FA8BE" stroke-width="1.4" opacity="0.45"/>
+    <circle cx="120" cy="238" r="13.5" fill="#2C4351" opacity="0.82"/>
+    <circle cx="114" cy="231" r="4" fill="#FFFFFF" opacity="0.78"/>
+    <path d="M 94 213 A 36 36 0 0 1 118 200" stroke="#FFFFFF" stroke-width="4.5" fill="none"
+          opacity="0.85" stroke-linecap="round"/>
+  </g>
+
+  <!-- ================= 场景标注 ================= -->
+
+  <g fill="#5C6E7A" font-size="18">
+    <text x="462" y="124" fill="#26343E" font-size="22" font-weight="600">雾团 σ<tspan font-style="italic" font-size="15" dy="5">t</tspan><tspan dy="-5">、σ</tspan><tspan font-style="italic" font-size="15" dy="5">s</tspan><tspan dy="-5"></tspan></text>
+    <text x="462" y="150">均匀介质：吸收 + 散射</text>
+
+    <text x="958" y="70" fill="#26343E" font-size="22" font-weight="600">光源 <tspan font-style="italic">L</tspan><tspan font-size="14" dy="6">in</tspan></text>
+
+    <text x="1497" y="98" text-anchor="middle" fill="#26343E" font-size="22" font-weight="600">background</text>
+    <text x="1497" y="390" text-anchor="middle" font-size="18">背景表面</text>
+
+    <text x="120" y="336" text-anchor="middle" fill="#26343E" font-size="22" font-weight="600">camera</text>
+    <text x="120" y="362" text-anchor="middle" font-size="18">眼镜（观察者）</text>
+  </g>
+
+  <!-- 视线上的两段处理 -->
+  <g>
+    <text x="300" y="182" text-anchor="middle" fill="#26343E" font-size="22" font-weight="600">
+      ＋ <tspan font-style="italic">S</tspan>　散射累积
+    </text>
+    <text x="300" y="207" text-anchor="middle" fill="#5C6E7A" font-size="18">
+      <tspan font-style="italic">S</tspan> = ∫ <tspan font-style="italic">T</tspan>(s)·σ<tspan font-style="italic" font-size="13" dy="4">s</tspan><tspan dy="-4">·</tspan><tspan font-style="italic">L</tspan><tspan font-size="13" dy="4">in</tspan><tspan dy="-4"> d</tspan><tspan font-style="italic">s</tspan>
+    </text>
+    <path d="M 300 216 L 300 236" stroke="#8FA3AF" stroke-width="1.4" fill="none"/>
+
+    <text x="1268" y="182" text-anchor="middle" fill="#26343E" font-size="22" font-weight="600">
+      background × <tspan font-style="italic">T</tspan>　被吸收
+    </text>
+    <text x="1268" y="207" text-anchor="middle" fill="#5C6E7A" font-size="18">
+      <tspan font-style="italic">T</tspan> = e<tspan font-size="14" dy="-8">−τ</tspan><tspan dy="8">，越远越暗</tspan>
+    </text>
+    <path d="M 1268 216 L 1268 236" stroke="#8FA3AF" stroke-width="1.4" fill="none"/>
+  </g>
+
+  <!-- 光学厚度标注 -->
+  <g>
+    <line x1="188" y1="308" x2="1452" y2="308" stroke="#9FB0BA" stroke-width="1.2"
+          stroke-dasharray="6 8" opacity="0.45"/>
+    <line x1="188" y1="300" x2="188" y2="316" stroke="#9FB0BA" stroke-width="1.2" opacity="0.45"/>
+    <line x1="1452" y1="300" x2="1452" y2="316" stroke="#9FB0BA" stroke-width="1.2" opacity="0.45"/>
+    <text x="565" y="288" text-anchor="middle" fill="#5C6E7A" font-size="19">
+      τ = ∫ σ<tspan font-style="italic" font-size="14" dy="4">t</tspan><tspan dy="-4">(p) d</tspan><tspan font-style="italic">s</tspan>：沿视线累积的光学厚度
+    </text>
+  </g>
+
+  <!-- ================= 颜色流水线 ================= -->
+  <g>
+    <!-- 1. 背景原色 -->
+    <rect x="355" y="428" width="150" height="86" rx="10" fill="#F2A143"/>
+    <text x="430" y="542" text-anchor="middle" fill="#26343E" font-size="22" font-weight="600">background</text>
+    <text x="430" y="566" text-anchor="middle" fill="#6A7B86" font-size="18">背景原色</text>
+
+    <!-- 2. 被吸收 -->
+    <rect x="635" y="428" width="150" height="86" rx="10" fill="#6D4820"/>
+    <text x="710" y="542" text-anchor="middle" fill="#26343E" font-size="22" font-weight="600">background · <tspan font-style="italic">T</tspan></text>
+    <text x="710" y="566" text-anchor="middle" fill="#6A7B86" font-size="18">被雾吸收</text>
+
+    <!-- 3. 散射项 -->
+    <rect x="915" y="428" width="150" height="86" rx="10" fill="#A8D2E6"/>
+    <text x="990" y="542" text-anchor="middle" fill="#26343E" font-size="22" font-weight="600"><tspan font-style="italic">S</tspan></text>
+    <text x="990" y="566" text-anchor="middle" fill="#6A7B86" font-size="18">沿途散射进来</text>
+
+    <!-- 4. 最终像素 -->
+    <rect x="1195" y="428" width="150" height="86" rx="10" fill="#C9BA9C"/>
+    <text x="1270" y="542" text-anchor="middle" fill="#26343E" font-size="22" font-weight="600">最终像素</text>
+    <text x="1270" y="566" text-anchor="middle" fill="#6A7B86" font-size="18">眼睛看到的颜色</text>
+  </g>
+
+  <!-- 运算符 -->
+  <g fill="#26343E" font-size="26" font-weight="600" text-anchor="middle">
+    <text x="570" y="460">× <tspan font-style="italic">T</tspan></text>
+    <text x="850" y="460">+ <tspan font-style="italic">S</tspan></text>
+    <text x="1130" y="460">=</text>
+  </g>
+  <g stroke="#4A5B68" stroke-width="2.4" fill="none" stroke-linecap="round">
+    <path d="M 520 471 L 610 471"/>
+    <path d="M 800 471 L 890 471"/>
+    <path d="M 1080 471 L 1170 471"/>
+  </g>
+  <g fill="#4A5B68">
+    <path d="M 610 465 L 618 471 L 610 477 Z"/>
+    <path d="M 890 465 L 898 471 L 890 477 Z"/>
+    <path d="M 1170 465 L 1178 471 L 1170 477 Z"/>
+  </g>
+</svg>

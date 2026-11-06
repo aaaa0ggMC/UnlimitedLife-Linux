@@ -1,0 +1,40 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#include "fog_common.glsl"
+
+// Spatial light partitioning: each froxel cell stores a bitmask of local lights
+// whose range sphere intersects that cell. The injection pass then walks only
+// the lights that can actually contribute, instead of all N lights per cell.
+layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+layout(std430, set = 0, binding = 12) writeonly buffer LightMask { uint masks[]; } light_mask;
+
+void main() {
+    uvec3 grid = uvec3(ubo.froxel_grid.xyz);
+    uvec3 p = gl_GlobalInvocationID.xyz;
+    if(any(greaterThanEqual(p, grid))) return;
+    uint index = (p.z * grid.y + p.y) * grid.x + p.x;
+    if(ubo.local_light_info.z < 0.5) {
+        light_mask.masks[index] = 0u;
+        return;
+    }
+    vec3 center = froxel_center(ivec3(p));
+    vec3 ray = froxel_ray((vec2(p.xy) + 0.5) / vec2(grid.xy));
+    float cosine = max(-(ubo.view * vec4(ray, 0.0)).z, 1e-4);
+    float a = froxel_depth_at(float(p.z)) / cosine;
+    float b = froxel_depth_at(float(p.z + 1u)) / cosine;
+    float half_span = max((b - a) * 0.5, 0.001);
+    float center_depth = dot(center - ubo.camera_position.xyz, ray);
+    float footprint = center_depth * length(1.0 / (vec2(grid.xy)
+        * vec2(ubo.proj[0][0], ubo.proj[1][1])));
+    // Conservative cell sphere: depth half-span plus the lateral cell size.
+    float cell_radius = half_span + footprint;
+    uint mask = 0u;
+    uint count = min(uint(ubo.local_light_info.x), 8u);
+    for(uint i = 0; i < count; ++i) {
+        if(ubo.local_light_color_intensity[i].w <= 0.0) continue;
+        vec4 light_range = ubo.local_light_position_range[i];
+        float reach = light_range.w + cell_radius + ubo.local_light_params[i].x;
+        if(distance(center, light_range.xyz) <= reach) mask |= (1u << i);
+    }
+    light_mask.masks[index] = mask;
+}

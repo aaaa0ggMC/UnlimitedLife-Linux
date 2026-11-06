@@ -1,0 +1,74 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#include "fog_common.glsl"
+
+layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+layout(std430, set = 0, binding = 6) readonly buffer Injection { vec4 cells[]; } injection;
+layout(std430, set = 0, binding = 7) readonly buffer History { vec4 cells[]; } history;
+layout(std430, set = 0, binding = 8) writeonly buffer Filtered { vec4 cells[]; } filtered;
+
+uint index_of(ivec3 p) {
+    ivec3 grid = ivec3(ubo.froxel_grid.xyz);
+    p = clamp(p, ivec3(0), grid - 1);
+    return uint((p.z * grid.y + p.y) * grid.x + p.x);
+}
+
+vec4 history_sample(vec3 p) {
+    ivec3 b = ivec3(floor(p));
+    vec3 f = fract(p);
+    vec4 result = vec4(0.0);
+    for(int z = 0; z < 2; ++z) for(int y = 0; y < 2; ++y) for(int x = 0; x < 2; ++x) {
+        vec3 w = mix(1.0 - f, f, vec3(x, y, z));
+        result += history.cells[index_of(b + ivec3(x, y, z))] * w.x * w.y * w.z;
+    }
+    return result;
+}
+
+void main() {
+    ivec3 p = ivec3(gl_GlobalInvocationID.xyz);
+    ivec3 grid = ivec3(ubo.froxel_grid.xyz);
+    if(any(greaterThanEqual(p, grid))) return;
+    uint index = index_of(p);
+    vec4 current = injection.cells[index];
+    // Do not read uninitialized history on the first frame or after invalidation.
+    if(ubo.temporal.y < 0.5) { filtered.cells[index] = current; return; }
+    vec3 world = froxel_center(p);
+    vec4 clip = ubo.previous_view_proj * vec4(world, 1.0);
+    float depth = -(ubo.previous_view * vec4(world, 1.0)).z;
+    vec2 uv = clip.xy / max(clip.w, 1e-5) * 0.5 + 0.5;
+    float end = max(ubo.fog_params.y, 0.001);
+    if(clip.w <= 0.0 || depth <= 0.0 || depth > end
+        || any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) {
+        filtered.cells[index] = current; return;
+    }
+    vec3 old_position = vec3(uv * vec2(grid.xy) - 0.5,
+        log(1.0 + depth / ubo.froxel_grid.w) / log(1.0 + end / ubo.froxel_grid.w)
+        * float(grid.z) - 0.5);
+    vec4 old = history_sample(old_position);
+    vec4 lo = current;
+    vec4 hi = current;
+    vec4 mean = current;
+    vec4 second_moment = current * current;
+    const ivec3 offsets[6] = ivec3[6](ivec3(1,0,0), ivec3(-1,0,0), ivec3(0,1,0),
+        ivec3(0,-1,0), ivec3(0,0,1), ivec3(0,0,-1));
+    for(int i = 0; i < 6; ++i) {
+        vec4 neighbor = injection.cells[index_of(p + offsets[i])];
+        lo = min(lo, neighbor); hi = max(hi, neighbor);
+        mean += neighbor;
+        second_moment += neighbor * neighbor;
+    }
+    mean /= 7.0;
+    mean = clamp(mean, lo, hi);
+    vec4 deviation = sqrt(max(second_moment / 7.0 - mean * mean, vec4(0.0)));
+    // A jittered edge legitimately alternates lit/unlit. Reject only disagreement
+    // outside local variation, not a raw current-vs-history difference of 100%.
+    vec4 excess = max(abs(old - mean) - 2.0 * deviation, vec4(0.0));
+    float density_change = excess.a / max(max(old.a, mean.a), 0.001);
+    float lighting_change = length(excess.rgb) / max(max(length(old.rgb), length(mean.rgb)), 0.001);
+    float response = 1.0 - smoothstep(0.15, 0.65, max(density_change, lighting_change));
+    // Clamp old coefficients, never accumulated camera-ray integrals, to the current neighborhood.
+    lo = max(lo, mean - 2.0 * deviation);
+    hi = min(hi, mean + 2.0 * deviation);
+    old = clamp(old, lo, hi);
+    filtered.cells[index] = mix(current, old, clamp(ubo.temporal.x * response, 0.0, 0.97));
+}

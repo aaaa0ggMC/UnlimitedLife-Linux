@@ -1,4 +1,4 @@
--- 示例目录可能缺失（例如暂不公开、独立仓库的 fog），缺失时静默跳过对应 target。
+-- 示例目录可能缺失（例如裁剪过的检出），缺失时静默跳过对应 target。
 local function example_exists(name)
     return os.isdir(path.join(os.scriptdir(), "..", "examples", name))
 end

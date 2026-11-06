@@ -1,0 +1,51 @@
+{
+    "version": 1,
+    "fog_volumes": [
+        {
+            "tag": "control-cloud",
+            "pos": [0.0, 3.0, 0.0],
+            "scale": [8.0, 4.0, 8.0],
+            "density": 0.6,
+            "color": [0.75, 0.82, 0.9],
+            "edge_fade": 0.15,
+            "control_field": {
+                "enabled": true,
+                "animated": true,
+                "period": 12.0,
+                "noise_scale": 6.0,
+                "noise_strength": 0.65,
+                "octaves": 3,
+                "seed": 17,
+                "points": [
+                    {
+                        "position": [0.3, 0.45, 0.4],
+                        "radius": 0.28,
+                        "density": 1.5,
+                        "softness": 0.75,
+                        "amplitude": [0.08, 0.04, 0.06],
+                        "phase": 0.0,
+                        "frequency": 1
+                    },
+                    {
+                        "position": [0.55, 0.55, 0.5],
+                        "radius": 0.25,
+                        "density": 1.2,
+                        "softness": 0.85,
+                        "amplitude": [0.06, 0.08, 0.04],
+                        "phase": 2.0,
+                        "frequency": 2
+                    },
+                    {
+                        "position": [0.7, 0.4, 0.65],
+                        "radius": 0.24,
+                        "density": 1.0,
+                        "softness": 0.8,
+                        "amplitude": [0.05, 0.04, 0.08],
+                        "phase": 4.0,
+                        "frequency": 1
+                    }
+                ]
+            }
+        }
+    ]
+}

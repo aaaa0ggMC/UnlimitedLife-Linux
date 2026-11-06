@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="850" viewBox="0 0 1800 850"
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC',SimSun,serif">
+  <title>线性雾与解析高度雾</title>
+  <defs>
+    <linearGradient id="mist" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#c9e3f1" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#a5cde3" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="distance" gradientUnits="userSpaceOnUse" x1="142" y1="358" x2="812" y2="358">
+      <stop stop-color="#efa44c"/>
+      <stop offset="1" stop-color="#bed7e5"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 10 5 0 10" fill="#586f80"/>
+    </marker>
+    <g id="eye">
+      <path d="M-28 -5 Q-67 -10 -76 -39" fill="none" stroke="#263c49" stroke-width="6" stroke-linecap="round"/>
+      <circle r="28" fill="#e9f5fc" stroke="#263c49" stroke-width="6"/>
+      <circle r="19" fill="none" stroke="#a5cadd"/>
+      <circle r="9" fill="#425f70"/>
+      <circle cx="-4" cy="-5" r="3" fill="#fff"/>
+    </g>
+  </defs>
+
+  <!-- ================= 左：线性雾 ================= -->
+  <text x="52" y="66" font-size="42" font-weight="600" fill="#253642">线性雾 · Linear Fog</text>
+  <text x="54" y="106" font-size="22" fill="#607788">只看距离</text>
+
+  <path d="M184 245H818V425H184Z" fill="url(#mist)" opacity="0.5"/>
+  <path d="M142 358H812" stroke="url(#distance)" stroke-width="7"/>
+  <use href="#eye" x="112" y="358"/>
+  <g stroke="#9bb1bf" stroke-dasharray="5 6"><path d="M306 236V423"/><path d="M756 236V423"/></g>
+  <g stroke="#819caa" stroke-width="1.3">
+    <rect x="285" y="288" width="42" height="69" rx="4" fill="#eda34e"/>
+    <rect x="510" y="288" width="42" height="69" rx="4" fill="#d6bda0"/>
+    <rect x="735" y="288" width="42" height="69" rx="4" fill="#bed7e5"/>
+  </g>
+  <g font-size="19" fill="#607788" text-anchor="middle">
+    <text x="112" y="419">camera</text><text x="306" y="224">start</text><text x="756" y="224">end</text>
+    <text x="306" y="272">原色</text><text x="531" y="272">混色</text><text x="756" y="272">雾色</text>
+  </g>
+
+  <g fill="none" stroke="#8aa0ae" stroke-width="1.5">
+    <path d="M156 656V500M156 656H406" marker-end="url(#arrow)"/>
+    <path d="M156 650V672H214L350 520V672" stroke="#d59142" stroke-width="4"/>
+    <path d="M214 640V662M350 520V662" stroke-dasharray="4 6"/>
+  </g>
+  <g font-size="17" fill="#607788">
+    <text x="121" y="514">f</text><text x="414" y="661">d</text>
+    <text x="126" y="652">0</text><text x="126" y="524">1</text>
+  </g>
+
+  <g font-size="24" fill="#253642">
+    <text x="428" y="556" font-size="23">f = clamp((d − start) / (end − start), 0, 1)</text>
+    <text x="428" y="614">C = (1 − f) C<tspan font-size="17" dy="6" baseline-shift="sub">scene</tspan><tspan dy="-6"> + f C</tspan><tspan font-size="17" dy="6" baseline-shift="sub">fog</tspan></text>
+  </g>
+  <text x="52" y="806" font-size="26" fill="#253642">同距离，雾量相同</text>
+
+  <!-- ================= 右：解析高度雾 ================= -->
+  <text x="944" y="66" font-size="42" font-weight="600" fill="#253642">解析高度雾 · Analytic Fog</text>
+  <text x="946" y="106" font-size="22" fill="#607788">密度 × 距离</text>
+
+  <path d="M900 32V820" stroke="#cfdae2" stroke-width="1.5" stroke-dasharray="7 10"/>
+  <path d="M1070 170H1756V431H1070Z" fill="url(#mist)"/>
+  <path d="M1055 431H1762" stroke="#9ab0bd" stroke-width="2"/>
+  <text x="1700" y="462" font-size="19" fill="#607788">地面</text>
+  <use href="#eye" x="1012" y="325"/>
+  <g stroke="#738c9d" stroke-width="2"><path d="M1043 320L1618 207"/><path d="M1043 330L1618 411"/></g>
+  <path d="M1090 337L1580 406" stroke="#80b5d2" stroke-width="17" opacity="0.28"/>
+  <g fill="#dba056" stroke="#c48838"><circle cx="1618" cy="207" r="7"/><circle cx="1618" cy="411" r="7"/></g>
+  <g font-size="21" fill="#486172">
+    <text x="1205" y="190">高处 → 透射率高</text><text x="1210" y="392">近地 → 透射率低</text>
+    <text x="966" y="386">camera</text>
+  </g>
+
+  <g font-size="24" fill="#253642">
+    <text x="946" y="532">τ = ∫₀<tspan font-size="17" dy="-8" baseline-shift="super">d</tspan><tspan dy="8"> σ(h(s)) ds</tspan></text>
+    <text x="946" y="586" font-size="19">= σ<tspan font-size="14" dy="5" baseline-shift="sub">base</tspan><tspan dy="-5"> d + σ</tspan><tspan font-size="14" dy="5" baseline-shift="sub">mist</tspan><tspan dy="-5"> e</tspan><tspan font-size="14" dy="-8" baseline-shift="super">−kh₀</tspan><tspan dy="8"> (1 − e</tspan><tspan font-size="14" dy="-8" baseline-shift="super">−kvᵧd</tspan><tspan dy="8">) / (kvᵧ)</tspan></text>
+    <text x="946" y="650">T = e<tspan font-size="17" dy="-8" baseline-shift="super">−τ</tspan><tspan dy="8"></tspan></text>
+    <text x="1058" y="650">C = T C<tspan font-size="17" dy="6" baseline-shift="sub">scene</tspan><tspan dy="-6"> + (1 − T) C</tspan><tspan font-size="17" dy="6" baseline-shift="sub">fog</tspan></text>
+  </g>
+  <text x="946" y="806" font-size="26" fill="#253642">同距离，雾量不同</text>
+</svg>

@@ -1,0 +1,70 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#include "fog_common.glsl"
+#include "lighting.glsl"
+
+layout(local_size_x = 4, local_size_y = 4, local_size_z = 4) in;
+layout(std430, set = 0, binding = 6) writeonly buffer Injection { vec4 cells[]; } injection;
+layout(std430, set = 0, binding = 12) readonly buffer LightMask { uint masks[]; } light_mask;
+
+void main() {
+    uvec3 p = gl_GlobalInvocationID.xyz;
+    uvec3 grid = uvec3(ubo.froxel_grid.xyz);
+    if(any(greaterThanEqual(p, grid))) return;
+    vec3 ray = froxel_ray((vec2(p.xy) + 0.5) / vec2(grid.xy));
+    float cosine = max(-(ubo.view * vec4(ray, 0.0)).z, 1e-4);
+    float a = froxel_depth_at(float(p.z)) / cosine;
+    float b = froxel_depth_at(float(p.z + 1u)) / cosine;
+    // Resolve emitter peaks along long cells instead of assigning one peak to the whole segment.
+    vec3 center = ubo.camera_position.xyz + ray * (a + b) * 0.5;
+    float center_depth = (a + b) * 0.5 * cosine;
+    float footprint = center_depth * length(1.0 / (ubo.froxel_grid.xy
+        * vec2(ubo.proj[0][0], ubo.proj[1][1])));
+    float cell_span = b - a;
+    uint mask = light_mask.masks[(p.z * grid.y + p.y) * grid.x + p.x];
+    bool near_point = false;
+    if(ubo.local_light_info.z > 0.5) {
+        uint light_count = min(uint(ubo.local_light_info.x), 8u);
+        for(uint i = 0; i < light_count; ++i) {
+            if((mask & (1u << i)) == 0u || ubo.local_light_color_intensity[i].w <= 0.0) continue;
+            vec3 delta = ubo.local_light_position_range[i].xyz - center;
+            float distance = length(delta);
+            if(distance < ubo.local_light_position_range[i].w + cell_span
+                && distance < 4.0 * cell_span + 2.0 * footprint + 2.0) {
+                near_point = true;
+                break;
+            }
+        }
+    }
+    bool local_media = ubo.local_fog_info.x > 0.5;
+    bool intersects_local = false;
+    for(uint i = 0; i < min(local_fog.counts.x, 16u); ++i) {
+        vec4 bounds = local_fog.entries[i].bounds;
+        vec3 delta = bounds.xyz - ubo.camera_position.xyz;
+        vec3 separation = delta - ray * clamp(dot(delta, ray), a, b);
+        float radius = bounds.w + footprint;
+        if(dot(separation, separation) <= radius * radius) { intersects_local = true; break; }
+    }
+    float global_start = fog_global_view_start();
+    bool crosses_start = local_media && a < global_start && b > global_start;
+    // Do not quadruple the entire grid just because a small volume exists somewhere.
+    int samples = near_point || intersects_local || crosses_start ? 4 : 1;
+    // Stratify depth; each random sample represents at most a quarter near-light cell.
+    float jitter = ubo.temporal.z < 0.0 ? 0.5
+        : fract(ubo.temporal.z + fog_hash21(vec2(p.xy) + float(p.z) * 13.7));
+    vec4 coefficients = vec4(0.0);
+    for(int i = 0; i < samples; ++i) {
+        float t = (float(i) + jitter) / float(samples);
+        vec3 world = ubo.camera_position.xyz + ray * mix(a, b, t);
+        // Local media may begin at the camera; start remains a global-medium control.
+        float global_weight = fog_global_injection_weight(mix(a, b, t));
+        vec4 medium = fog_medium(world, global_weight);
+        // No scattering means no shadow taps, light transport march or source-cap integration.
+        // Keep extinction even for absorbing-only media.
+        vec3 scattering = vec3(0.0);
+        if(any(greaterThan(medium.rgb, vec3(0.0))))
+            scattering = medium.rgb * volume_illumination_masked(world, ray, footprint, mask);
+        coefficients += vec4(scattering, medium.a);
+    }
+    injection.cells[(p.z * grid.y + p.y) * grid.x + p.x] = coefficients / float(samples);
+}

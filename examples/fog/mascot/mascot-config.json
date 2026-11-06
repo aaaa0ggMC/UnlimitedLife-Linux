@@ -1,0 +1,29 @@
+{
+  "fog": {
+    "r": 0.55,
+    "g": 0.68,
+    "b": 0.78,
+    "start": 0.0,
+    "end": 55.0,
+    "density": 0.035,
+    "mist_density": 0.0,
+    "height_falloff": 0.35,
+    "ground_y": -0.5,
+    "noise_scale": 0.09,
+    "noise_amount": 0.5,
+    "anim_amplitude": 0.35,
+    "anim_frequency": 0.06,
+    "anim_period": 60.0
+  },
+  "window": {
+    "width": 1200,
+    "height": 1200
+  },
+  "shape": {
+    "path": "test_data/dragon.obj"
+  },
+  "lighting": {
+    "ambient": 0.2,
+    "specular": true
+  }
+}

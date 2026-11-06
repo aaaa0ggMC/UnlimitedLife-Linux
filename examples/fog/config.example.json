@@ -1,0 +1,36 @@
+{
+    "window": {
+        "width": 1024,
+        "height": 768
+    },
+    "fog": {
+        "r": 0.55,
+        "g": 0.68,
+        "b": 0.78,
+        "start": 8.0,
+        "density": 0.05,
+        "mist_density": 0.02,
+        "height_falloff": 0.35,
+        "ground_y": -0.5,
+        "noise_scale": 0.09,
+        "noise_amount": 0.5,
+        "anim_amplitude": 0.35,
+        "anim_frequency": 0.06,
+        "anim_period": 60.0
+    },
+    "shape": {
+        "path": "test_data/dragon.obj"
+    },
+    "sky": {
+        "texture": "",
+        "exposure": 1.0
+    },
+    "lighting": {
+        "ambient": 0.24,
+        "specular": true
+    },
+    "ui": {
+        "font": "test_data/wqy-microhei.ttf",
+        "scale": 1.25
+    }
+}

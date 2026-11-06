@@ -1,0 +1,6 @@
+{
+    "window": { "width": 1280, "height": 720 },
+    "shape": { "path": "test_data/dragon.obj" },
+    "sky": { "texture": "", "exposure": 1.0 },
+    "ui": { "font": "test_data/wqy-microhei.ttf", "scale": 1.25 }
+}
